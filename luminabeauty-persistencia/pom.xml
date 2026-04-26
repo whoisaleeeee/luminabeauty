@@ -31,12 +31,6 @@
             <artifactId>luminabeauty-dbmanager</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>pe.edu.pucp.softprog</groupId>
-            <artifactId>luminabeauty-model</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
     </dependencies>
 
 </project>
