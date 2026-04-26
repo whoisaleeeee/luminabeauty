@@ -9,7 +9,7 @@ public class TestConexion {
             DBManager DBManager = null;
             Connection con = dao.DBManager.getConnection();
             if (con != null) {
-                System.out.println(" ¡CONECTADO! Java ya puede leer tu base de datos lumina_beauty.");
+                System.out.println("¡Holi! Ya estamos CONECTADOS con la base de datos lumina_beauty.");
                 con.close();
             }
         } catch (Exception e) {
