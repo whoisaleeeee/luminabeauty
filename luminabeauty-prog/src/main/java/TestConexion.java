@@ -1,4 +1,4 @@
-import luminabeauty-dbmanager.main.java.dao.DBManager;
+import dao.DBManager;
 import java.sql.Connection;
 
 public class TestConexion {
