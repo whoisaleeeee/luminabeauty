@@ -94,12 +94,13 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
     }
 
     @Override
-    public int eliminar(int idUsuario) {
+    public int eliminar(int idUsuario, boolean logico) {
         int resultado = 0;
-        String sql = "DELETE FROM Empleado WHERE idUsuario = ?";
+        String sqlFisico = "DELETE FROM Empleado WHERE idUsuario = ?";//script elminacion fisica
+        String sqlLogico = "UPDATE Usuario SET estado=0 WHERE id=?";//script elminacion logica
 
         try (Connection con = DBManager.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = logico ? con.prepareStatement(sqlLogico) : con.prepareStatement(sqlFisico)) {
 
             ps.setInt(1, idUsuario);
             resultado = ps.executeUpdate();

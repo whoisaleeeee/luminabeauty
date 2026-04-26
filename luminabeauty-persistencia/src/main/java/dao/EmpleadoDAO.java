@@ -9,5 +9,5 @@ public interface EmpleadoDAO {
     ArrayList<Empleado> listarTodos();
     Empleado buscarPorId(int idUsuario);
     int actualizar(Empleado empleado);
-    int eliminar(int idUsuario);
+    int eliminar(int idUsuario, boolean logico);
 }
