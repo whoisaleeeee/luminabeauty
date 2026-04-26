@@ -1,10 +1,12 @@
 package luminabeauty.model;
 
+import java.math.BigDecimal;
+
 public class DetallePedido {
 	private int id;
 	private int cantidad;
-	private double precioUnitario;
-	private double subtotal;
+	private BigDecimal precioUnitario;
+	private BigDecimal subtotal;
 	private int idPedido; // FK
 	private int idProducto; // FK
 
@@ -21,11 +23,11 @@ public class DetallePedido {
 	public int getCantidad() { return cantidad; }
 	public void setCantidad(int cantidad) { this.cantidad = cantidad; }
 
-	public double getPrecioUnitario() { return precioUnitario; }
-	public void setPrecioUnitario(double precioUnitario) { this.precioUnitario = precioUnitario; }
+	public BigDecimal getPrecioUnitario() { return precioUnitario; }
+	public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
 
-	public double getSubtotal() { return subtotal; }
-	public void setSubtotal(double subtotal) { this.subtotal = subtotal; }
+	public BigDecimal getSubtotal() { return subtotal; }
+	public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
 
 	public int getIdPedido() { return idPedido; }
 	public void setIdPedido(int idPedido) { this.idPedido = idPedido; }

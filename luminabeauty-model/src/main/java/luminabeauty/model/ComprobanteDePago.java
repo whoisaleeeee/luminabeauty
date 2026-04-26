@@ -1,5 +1,6 @@
 package luminabeauty.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class ComprobanteDePago {
@@ -7,7 +8,7 @@ public class ComprobanteDePago {
     private String tipo; // 'BOLETA', 'FACTURA', 'TICKET'
     private String serie;
     private int numero;
-    private Date fechaEmision;
+    private LocalDateTime fechaEmision;
 
     //  (Relación 1 a 1 con Pedido)
     private int idPedido;
@@ -48,11 +49,11 @@ public class ComprobanteDePago {
         this.numero = numero;
     }
 
-    public Date getFechaEmision() {
+    public LocalDateTime getFechaEmision() {
         return fechaEmision;
     }
 
-    public void setFechaEmision(Date fechaEmision) {
+    public void setFechaEmision(LocalDateTime fechaEmision) {
         this.fechaEmision = fechaEmision;
     }
 

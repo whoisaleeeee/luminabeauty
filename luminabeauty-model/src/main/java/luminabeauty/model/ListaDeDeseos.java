@@ -2,12 +2,12 @@ package luminabeauty.model;
 
 import java.util.ArrayList;
 
-public class ListaDeseo {
+public class ListaDeDeseos {
 	private int id;
 	private int idCliente; // La FK obligatoria en el SQL
 	private ArrayList<DetalleLista> detalles;
 
-	public ListaDeseo() {
+	public ListaDeDeseos() {
 		this.detalles = new ArrayList<>();
 	}
 

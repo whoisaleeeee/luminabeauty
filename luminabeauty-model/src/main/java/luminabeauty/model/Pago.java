@@ -1,12 +1,14 @@
 package luminabeauty.model;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class Pago {
 	private int id;
-	private double monto;
+	private BigDecimal monto;
 	private String estado; // ENUM en SQL: 'PENDIENTE', 'COMPLETADO', etc.
-	private Date fechaPago;
+	private LocalDateTime fechaPago;
 
 	// Llaves foráneas para el DAO e INSERT
 	private int idPedido;
@@ -24,11 +26,11 @@ public class Pago {
 		this.id = id;
 	}
 
-	public double getMonto() {
+	public BigDecimal getMonto() {
 		return monto;
 	}
 
-	public void setMonto(double monto) {
+	public void setMonto(BigDecimal monto) {
 		this.monto = monto;
 	}
 
@@ -40,11 +42,11 @@ public class Pago {
 		this.estado = estado;
 	}
 
-	public Date getFechaPago() {
+	public LocalDateTime getFechaPago() {
 		return fechaPago;
 	}
 
-	public void setFechaPago(Date fechaPago) {
+	public void setFechaPago(LocalDateTime fechaPago) {
 		this.fechaPago = fechaPago;
 	}
 

@@ -1,11 +1,13 @@
 package luminabeauty.model;
 
+import java.math.BigDecimal;
+
 public class Producto {
 	private int id;
 	private String nombre;
 	private String slug;
 	private String descripcion;
-	private double precio;
+	private BigDecimal precio;
 	private int stock;
 	private String tipoPiel;
 	private String imagen;
@@ -30,8 +32,8 @@ public class Producto {
 	public String getDescripcion() { return descripcion; }
 	public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-	public double getPrecio() { return precio; }
-	public void setPrecio(double precio) { this.precio = precio; }
+	public BigDecimal getPrecio() { return precio; }
+	public void setPrecio(BigDecimal precio) { this.precio = precio; }
 
 	public int getStock() { return stock; }
 	public void setStock(int stock) { this.stock = stock; }

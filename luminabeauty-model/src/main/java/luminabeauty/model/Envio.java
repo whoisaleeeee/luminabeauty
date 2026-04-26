@@ -1,12 +1,13 @@
 package luminabeauty.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class Envio {
 	private int id;
-	private Date fechaEnvio;
-	private Date fechaEntregaEstimada;
-	private Date fechaEntregaReal;
+	private LocalDateTime fechaEnvio;
+	private LocalDateTime fechaEntregaEstimada;
+	private LocalDateTime fechaEntregaReal;
 	private String estado; // ENUM: 'PREPARANDO', 'DESPACHADO', etc.
 	private String numeroSeguimiento;
 
@@ -21,14 +22,14 @@ public class Envio {
 	public int getId() { return id; }
 	public void setId(int id) { this.id = id; }
 
-	public Date getFechaEnvio() { return fechaEnvio; }
-	public void setFechaEnvio(Date fechaEnvio) { this.fechaEnvio = fechaEnvio; }
+	public LocalDateTime getFechaEnvio() { return fechaEnvio; }
+	public void setFechaEnvio(LocalDateTime fechaEnvio) { this.fechaEnvio = fechaEnvio; }
 
-	public Date getFechaEntregaEstimada() { return fechaEntregaEstimada; }
-	public void setFechaEntregaEstimada(Date fechaEntregaEstimada) { this.fechaEntregaEstimada = fechaEntregaEstimada; }
+	public LocalDateTime getFechaEntregaEstimada() { return fechaEntregaEstimada; }
+	public void setFechaEntregaEstimada(LocalDateTime fechaEntregaEstimada) { this.fechaEntregaEstimada = fechaEntregaEstimada; }
 
-	public Date getFechaEntregaReal() { return fechaEntregaReal; }
-	public void setFechaEntregaReal(Date fechaEntregaReal) { this.fechaEntregaReal = fechaEntregaReal; }
+	public LocalDateTime getFechaEntregaReal() { return fechaEntregaReal; }
+	public void setFechaEntregaReal(LocalDateTime fechaEntregaReal) { this.fechaEntregaReal = fechaEntregaReal; }
 
 	public String getEstado() { return estado; }
 	public void setEstado(String estado) { this.estado = estado; }

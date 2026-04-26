@@ -1,9 +1,11 @@
 package luminabeauty.model;
 
+import java.math.BigDecimal;
+
 public class DetalleCarro {
 	private int id; // El ID auto-incremental de la tabla
 	private int cantidad;
-	private double precioUnitario; // DECIMAL(10,2) en SQL
+	private BigDecimal precioUnitario; // DECIMAL(10,2) en SQL
 	private int idCarro; // FK hacia CarroDeCompras
 	private int idProducto; // FK hacia Producto
 
@@ -20,8 +22,8 @@ public class DetalleCarro {
 	public int getCantidad() { return cantidad; }
 	public void setCantidad(int cantidad) { this.cantidad = cantidad; }
 
-	public double getPrecioUnitario() { return precioUnitario; }
-	public void setPrecioUnitario(double precioUnitario) { this.precioUnitario = precioUnitario; }
+	public BigDecimal getPrecioUnitario() { return precioUnitario; }
+	public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
 
 	public int getIdCarro() { return idCarro; }
 	public void setIdCarro(int idCarro) { this.idCarro = idCarro; }

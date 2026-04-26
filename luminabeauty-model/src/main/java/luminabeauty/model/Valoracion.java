@@ -1,12 +1,13 @@
 package luminabeauty.model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class Valoracion {
 	private int id;
 	private int calificacion; // 1 a 5
 	private String comentario;
-	private Date fecha;
+	private LocalDateTime fecha;
 
 	// Llaves foráneas obligatorias para el DAO
 	private int idCliente;
@@ -29,8 +30,8 @@ public class Valoracion {
 	public String getComentario() { return comentario; }
 	public void setComentario(String comentario) { this.comentario = comentario; }
 
-	public Date getFecha() { return fecha; }
-	public void setFecha(Date fecha) { this.fecha = fecha; }
+	public LocalDateTime getFecha() { return fecha; }
+	public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
 
 	public int getIdCliente() { return idCliente; }
 	public void setIdCliente(int idCliente) { this.idCliente = idCliente; }

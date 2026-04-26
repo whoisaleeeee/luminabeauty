@@ -19,7 +19,7 @@ public class ProductoDAOImpl implements ProductoDAO {
             ps.setString(1, p.getNombre());
             // (ejemplo: "Labial Rojo" -> "labial-rojo")
             ps.setString(2, p.getNombre().toLowerCase().trim().replace(" ", "-"));
-            ps.setDouble(3, p.getPrecio());
+            ps.setBigDecimal(3, p.getPrecio());
             ps.setInt(4, p.getStock());
             ps.setInt(5, 1); // ID de Categoria
             ps.setInt(6, 1); // ID de Marca
@@ -45,7 +45,7 @@ public class ProductoDAOImpl implements ProductoDAO {
                 // Ojo: En tu SQL la columna es 'id', no 'id_producto'
                 p.setId(rs.getInt("id"));
                 p.setNombre(rs.getString("nombre"));
-                p.setPrecio(rs.getDouble("precio"));
+                p.setPrecio(rs.getBigDecimal("precio"));
                 p.setStock(rs.getInt("stock"));
                 lista.add(p);
             }

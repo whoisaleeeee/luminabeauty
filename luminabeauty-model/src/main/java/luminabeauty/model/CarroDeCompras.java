@@ -1,12 +1,13 @@
 package luminabeauty.model;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class CarroDeCompras {
 	private int id;
 	private int idCliente; // Obligatorio para la FK en SQL
-	private Date fechaCreacion;
+	private LocalDateTime fechaCreacion;
 
 	private ArrayList<DetalleCarro> detalles;
 
@@ -31,11 +32,11 @@ public class CarroDeCompras {
 		this.idCliente = idCliente;
 	}
 
-	public Date getFechaCreacion() {
+	public LocalDateTime getFechaCreacion() {
 		return fechaCreacion;
 	}
 
-	public void setFechaCreacion(Date fechaCreacion) {
+	public void setFechaCreacion(LocalDateTime fechaCreacion) {
 		this.fechaCreacion = fechaCreacion;
 	}
 
