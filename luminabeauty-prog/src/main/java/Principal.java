@@ -143,52 +143,75 @@ public class Principal {
         }
     }
 
-    static void probarCliente() {
-        System.out.println("── CLIENTE ──────────────────────────────");
-        ClienteDAOImpl dao = new ClienteDAOImpl();
+//    static void probarCliente() {
+//        System.out.println("── CLIENTE ──────────────────────────────");
+//        ClienteDAOImpl dao = new ClienteDAOImpl();
+//
+//        // INSERT - PRIMERO INGRESAR NUEVO USUARIO O NO FUNCIONA
+//        Cliente c = new Cliente();
+//        c.setId(15);
+//        c.setPuntosFidelidad(100);
+//        c.setNivelCliente("BRONCE");
+//        int res = dao.insertar(c);
+//        System.out.println("Insertar Cliente:   " + (res > 0 ? "LOGRADO" : "FALLO"));
+//
+//        // SELECT por ID
+//        Cliente encontrado = dao.buscarPorId(15); //CAMBIAR ID HERE
+//        System.out.println("Buscar Cliente:     " + (encontrado != null ? "LOGRADO → nivel: " + encontrado.getNivelCliente() : "FALLO"));
+//
+//        // UPDATE
+//        if (encontrado != null) {
+//            encontrado.setPuntosFidelidad(250);
+//            encontrado.setNivelCliente("PLATA");
+//            int upd = dao.actualizar(encontrado);
+//            System.out.println("Actualizar Cliente: " + (upd > 0 ? "LOGRADO" : "FALLO"));
+//        }
+//
+//        // LIST
+//        int total = dao.listarTodos().size();
+//        System.out.println("Listar Clientes:" + total + " registro(s)\n");
+//    }
 
-        // INSERT - PRIMERO INGRESAR NUEVO USUARIO O NO FUNCIONA
-        Cliente c = new Cliente();
-        c.setId(15);
-        c.setPuntosFidelidad(100);
-        c.setNivelCliente("BRONCE");
-        int res = dao.insertar(c);
-        System.out.println("Insertar Cliente:   " + (res > 0 ? "LOGRADO" : "FALLO"));
+//    static void crearDireccion() {
+//        DireccionDAOImpl dao = new DireccionDAOImpl();
+//
+//        Direccion d = new Direccion();
+//        d.setDireccion("Av. Universitaria 1801");
+//        d.setCiudad("Lima");
+//        d.setPais("Peru");
+//        d.setReferencia("Frente al Parque de las Leyendas");
+//        d.setCodigoPostal("15074");
+//        d.setEsPrincipal(true);
+//        d.setIdCliente(15);
+//
+//        int res = dao.insertar(d);
+//        System.out.println("Insertar Direccion: " + (res > 0 ? "YEY!" : "SOS: SUPER MAL") + "\n");
+//    }
 
-        // SELECT por ID
-        Cliente encontrado = dao.buscarPorId(15); //CAMBIAR ID HERE
-        System.out.println("Buscar Cliente:     " + (encontrado != null ? "LOGRADO → nivel: " + encontrado.getNivelCliente() : "FALLO"));
-
-        // UPDATE
-        if (encontrado != null) {
-            encontrado.setPuntosFidelidad(250);
-            encontrado.setNivelCliente("PLATA");
-            int upd = dao.actualizar(encontrado);
-            System.out.println("Actualizar Cliente: " + (upd > 0 ? "LOGRADO" : "FALLO"));
-        }
-
-        // LIST
-        int total = dao.listarTodos().size();
-        System.out.println("Listar Clientes:" + total + " registro(s)\n");
-    }
-
-    static void crearDireccion() {
-        DireccionDAOImpl dao = new DireccionDAOImpl();
-
-        Direccion d = new Direccion();
-        d.setDireccion("Av. Universitaria 1801");
-        d.setCiudad("Lima");
-        d.setPais("Peru");
-        d.setReferencia("Frente al Parque de las Leyendas");
-        d.setCodigoPostal("15074");
-        d.setEsPrincipal(true);
-        d.setIdCliente(15);
-
-        int res = dao.insertar(d);
-        System.out.println("Insertar Direccion: " + (res > 0 ? "YEY!" : "SOS: SUPER MAL") + "\n");
-    }
-
-
+//    static void probarEmpleado() {
+//        System.out.println("── EMPLEADO ─────────────────────────────");
+//        EmpleadoDAOImpl dao = new EmpleadoDAOImpl();
+//
+//        Empleado e = new Empleado();
+//        e.setId(1);
+//        e.setRol("VENDEDOR");
+//        int res = dao.insertar(e);
+//        System.out.println("Insertar Empleado:   " + (res > 0 ? "OK" : "FAIL"));
+//
+//        Empleado encontrado = dao.buscarPorId(1);
+//        System.out.println("Buscar Empleado:     " + (encontrado != null ? "OK → rol: " + encontrado.getRol() : "FAIL"));
+//
+//        if (encontrado != null) {
+//            encontrado.setRol("ADMIN");
+//            int upd = dao.actualizar(encontrado);
+//            System.out.println("Actualizar Empleado: " + (upd > 0 ? "OK" : "FAIL"));
+//        }
+//        int total = dao.listarTodos().size();
+//        System.out.println("Listar Empleados: " + total + " registro(s)");
+//
+//        int del = dao.eliminar(1);
+//        System.out.println("Eliminar Empleado:   " + (del > 0 ? "OK" : "FAIL") + "\n");
+//    }
 
 }
 
