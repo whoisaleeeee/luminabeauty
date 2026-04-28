@@ -52,4 +52,5 @@ public class Producto {
 
 	public int getIdMarca() { return idMarca; }
 	public void setIdMarca(int idMarca) { this.idMarca = idMarca; }
+
 }

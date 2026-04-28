@@ -2,6 +2,8 @@ import dao.*;
 import dao.impl.*;
 import luminabeauty.model.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class Principal {
@@ -129,7 +131,7 @@ public class Principal {
 //            crearDireccion(); /* Direccion */
 //            probarEmpleado(); /* Empleado */
 //            probarCarroDeCompras(); /* CarroDeCompras */
-//            probarDetalleCarro(); /* DetalleCarro */
+            probarDetalleCarro(); /* DetalleCarro */
 //            probarListaDeDeseos(); /* ListaDeDeseos */
 //            probarDetalleLista(); /* DetalleLista */
 //            probarValoracion(); /* Valoracion */
@@ -144,10 +146,9 @@ public class Principal {
     }
 
 //    static void probarCliente() {
-//        System.out.println("── CLIENTE ──────────────────────────────");
 //        ClienteDAOImpl dao = new ClienteDAOImpl();
 //
-//        // INSERT - PRIMERO INGRESAR NUEVO USUARIO O NO FUNCIONA
+//        // INSERT - FIRST INSERT NUEVO USUARIO O IT DOESNT WORK
 //        Cliente c = new Cliente();
 //        c.setId(15);
 //        c.setPuntosFidelidad(100);
@@ -155,7 +156,7 @@ public class Principal {
 //        int res = dao.insertar(c);
 //        System.out.println("Insertar Cliente:   " + (res > 0 ? "LOGRADO" : "FALLO"));
 //
-//        // SELECT por ID
+//        // ID SEARCH
 //        Cliente encontrado = dao.buscarPorId(15); //CAMBIAR ID HERE
 //        System.out.println("Buscar Cliente:     " + (encontrado != null ? "LOGRADO → nivel: " + encontrado.getNivelCliente() : "FALLO"));
 //
@@ -189,29 +190,97 @@ public class Principal {
 //    }
 
 //    static void probarEmpleado() {
-//        System.out.println("── EMPLEADO ─────────────────────────────");
 //        EmpleadoDAOImpl dao = new EmpleadoDAOImpl();
-//
+//        //INSERT - NEED PREVIOUS USER ID
 //        Empleado e = new Empleado();
 //        e.setId(1);
 //        e.setRol("VENDEDOR");
 //        int res = dao.insertar(e);
 //        System.out.println("Insertar Empleado:   " + (res > 0 ? "OK" : "FAIL"));
-//
+//        //ID SEARCH
 //        Empleado encontrado = dao.buscarPorId(1);
 //        System.out.println("Buscar Empleado:     " + (encontrado != null ? "OK → rol: " + encontrado.getRol() : "FAIL"));
-//
+//        //UPDATE
 //        if (encontrado != null) {
 //            encontrado.setRol("ADMIN");
 //            int upd = dao.actualizar(encontrado);
 //            System.out.println("Actualizar Empleado: " + (upd > 0 ? "OK" : "FAIL"));
 //        }
+//        //LIST
 //        int total = dao.listarTodos().size();
 //        System.out.println("Listar Empleados: " + total + " registro(s)");
-//
+//        //DELETE
 //        int del = dao.eliminar(1);
 //        System.out.println("Eliminar Empleado:   " + (del > 0 ? "OK" : "FAIL") + "\n");
 //    }
 
+    static void probarCarroDeCompras() { /* depends on Cliente */
+        CarroDeComprasDAOImpl dao = new CarroDeComprasDAOImpl();
+        //INSERT - NEEDS ID CLIENTE
+        CarroDeCompras carro = new CarroDeCompras();
+        carro.setFechaCreacion(LocalDateTime.now());
+        carro.setIdCliente(15);
+        int res = dao.insertar(carro);
+        System.out.println("Insertar Carro:   " + (res > 0 ? "OK" : "FAIL"));
+        //ID SEARCH
+        CarroDeCompras encontrado = dao.buscarPorId(1);
+        System.out.println("Buscar Carro:     " + (encontrado != null ? "OK → idCliente: " + encontrado.getIdCliente() : "FAIL"));
+        //UPDATE
+        if (encontrado != null) {
+            encontrado.setFechaCreacion(LocalDateTime.now());
+            int upd = dao.actualizar(encontrado);
+            System.out.println("Actualizar Carro: " + (upd > 0 ? "OK" : "FAIL"));
+        }
+        //LIST
+        int total = dao.listarTodos().size();
+        System.out.println("Listar Carros:  " + total + " registro(s)\n");
+
+        // NOT DELETE, because Pedido depends on it.
+    }
+
+    static void probarDetalleCarro() {
+        DetalleCarroDAOImpl dao = new DetalleCarroDAOImpl();
+
+        ProductoDAOImpl productoDAO = new ProductoDAOImpl();
+        int idProduct = 1;
+        Producto producto = productoDAO.buscarPorId(idProduct);
+
+        if (producto == null) {
+            System.out.println("No se encontró el Producto id=" + idProduct);
+            return;
+        }
+
+        // INSERT
+        DetalleCarro det = new DetalleCarro();
+        det.setCantidad(2);
+        det.setPrecioUnitario(producto.getPrecio());
+        det.setIdCarro(1);
+        det.setIdProducto(producto.getId());
+
+        int res = dao.insertar(det);
+        System.out.println("Insertar DetalleCarro:   " + (res > 0 ? "OK" : "FAIL"));
+
+        // SEARCH
+        DetalleCarro encontrado = dao.buscarPorId(1);
+        System.out.println("Buscar DetalleCarro:     " + (encontrado != null
+                ? "OK → cantidad: " + encontrado.getCantidad() + " | precio: " + encontrado.getPrecioUnitario()
+                : "FAIL"));
+
+        // UPDATE
+//        if (encontrado != null) {
+//            encontrado.setCantidad(3);
+//            encontrado.setPrecioUnitario(producto.getPrecio());
+//            int upd = dao.actualizar(encontrado);
+//            System.out.println("Actualizar DetalleCarro: " + (upd > 0 ? "OK" : "FAIL"));
+//        }
+//
+//        // LIST
+//        int total = dao.listarTodos().size();
+//        System.out.println("Listar DetalleCarro:     " + total + " registro(s)");
+//
+//        // DELETE
+//        int del = dao.eliminar(1);
+//        System.out.println("Eliminar DetalleCarro:   " + (del > 0 ? "OK" : "FAIL") + "\n");
+    }
 }
 
