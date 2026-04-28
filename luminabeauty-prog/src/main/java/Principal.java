@@ -131,7 +131,7 @@ public class Principal {
 //            crearDireccion(); /* Direccion */
 //            probarEmpleado(); /* Empleado */
 //            probarCarroDeCompras(); /* CarroDeCompras */
-            probarDetalleCarro(); /* DetalleCarro */
+//            probarDetalleCarro(); /* DetalleCarro */
 //            probarListaDeDeseos(); /* ListaDeDeseos */
 //            probarDetalleLista(); /* DetalleLista */
 //            probarValoracion(); /* Valoracion */
@@ -145,74 +145,74 @@ public class Principal {
         }
     }
 
-//    static void probarCliente() {
-//        ClienteDAOImpl dao = new ClienteDAOImpl();
-//
-//        // INSERT - FIRST INSERT NUEVO USUARIO O IT DOESNT WORK
-//        Cliente c = new Cliente();
-//        c.setId(15);
-//        c.setPuntosFidelidad(100);
-//        c.setNivelCliente("BRONCE");
-//        int res = dao.insertar(c);
-//        System.out.println("Insertar Cliente:   " + (res > 0 ? "LOGRADO" : "FALLO"));
-//
-//        // ID SEARCH
-//        Cliente encontrado = dao.buscarPorId(15); //CAMBIAR ID HERE
-//        System.out.println("Buscar Cliente:     " + (encontrado != null ? "LOGRADO → nivel: " + encontrado.getNivelCliente() : "FALLO"));
-//
-//        // UPDATE
-//        if (encontrado != null) {
-//            encontrado.setPuntosFidelidad(250);
-//            encontrado.setNivelCliente("PLATA");
-//            int upd = dao.actualizar(encontrado);
-//            System.out.println("Actualizar Cliente: " + (upd > 0 ? "LOGRADO" : "FALLO"));
-//        }
-//
-//        // LIST
-//        int total = dao.listarTodos().size();
-//        System.out.println("Listar Clientes:" + total + " registro(s)\n");
-//    }
+    static void probarCliente() {
+        ClienteDAOImpl dao = new ClienteDAOImpl();
 
-//    static void crearDireccion() {
-//        DireccionDAOImpl dao = new DireccionDAOImpl();
-//
-//        Direccion d = new Direccion();
-//        d.setDireccion("Av. Universitaria 1801");
-//        d.setCiudad("Lima");
-//        d.setPais("Peru");
-//        d.setReferencia("Frente al Parque de las Leyendas");
-//        d.setCodigoPostal("15074");
-//        d.setEsPrincipal(true);
-//        d.setIdCliente(15);
-//
-//        int res = dao.insertar(d);
-//        System.out.println("Insertar Direccion: " + (res > 0 ? "YEY!" : "SOS: SUPER MAL") + "\n");
-//    }
+        // INSERT - FIRST INSERT NUEVO USUARIO O IT DOESNT WORK
+        Cliente c = new Cliente();
+        c.setId(15);
+        c.setPuntosFidelidad(100);
+        c.setNivelCliente("BRONCE");
+        int res = dao.insertar(c);
+        System.out.println("Insertar Cliente:   " + (res > 0 ? "LOGRADO" : "FALLO"));
 
-//    static void probarEmpleado() {
-//        EmpleadoDAOImpl dao = new EmpleadoDAOImpl();
-//        //INSERT - NEED PREVIOUS USER ID
-//        Empleado e = new Empleado();
-//        e.setId(1);
-//        e.setRol("VENDEDOR");
-//        int res = dao.insertar(e);
-//        System.out.println("Insertar Empleado:   " + (res > 0 ? "OK" : "FAIL"));
-//        //ID SEARCH
-//        Empleado encontrado = dao.buscarPorId(1);
-//        System.out.println("Buscar Empleado:     " + (encontrado != null ? "OK → rol: " + encontrado.getRol() : "FAIL"));
-//        //UPDATE
-//        if (encontrado != null) {
-//            encontrado.setRol("ADMIN");
-//            int upd = dao.actualizar(encontrado);
-//            System.out.println("Actualizar Empleado: " + (upd > 0 ? "OK" : "FAIL"));
-//        }
-//        //LIST
-//        int total = dao.listarTodos().size();
-//        System.out.println("Listar Empleados: " + total + " registro(s)");
-//        //DELETE
-//        int del = dao.eliminar(1);
-//        System.out.println("Eliminar Empleado:   " + (del > 0 ? "OK" : "FAIL") + "\n");
-//    }
+        // ID SEARCH
+        Cliente encontrado = dao.buscarPorId(15); //CAMBIAR ID HERE
+        System.out.println("Buscar Cliente:     " + (encontrado != null ? "LOGRADO → nivel: " + encontrado.getNivelCliente() : "FALLO"));
+
+        // UPDATE
+        if (encontrado != null) {
+            encontrado.setPuntosFidelidad(250);
+            encontrado.setNivelCliente("PLATA");
+            int upd = dao.actualizar(encontrado);
+            System.out.println("Actualizar Cliente: " + (upd > 0 ? "LOGRADO" : "FALLO"));
+        }
+
+        // LIST
+        int total = dao.listarTodos().size();
+        System.out.println("Listar Clientes:" + total + " registro(s)\n");
+    }
+
+    static void crearDireccion() {
+        DireccionDAOImpl dao = new DireccionDAOImpl();
+
+        Direccion d = new Direccion();
+        d.setDireccion("Av. Universitaria 1801");
+        d.setCiudad("Lima");
+        d.setPais("Peru");
+        d.setReferencia("Frente al Parque de las Leyendas");
+        d.setCodigoPostal("15074");
+        d.setEsPrincipal(true);
+        d.setIdCliente(15);
+
+        int res = dao.insertar(d);
+        System.out.println("Insertar Direccion: " + (res > 0 ? "YEY!" : "SOS: SUPER MAL") + "\n");
+    }
+
+    static void probarEmpleado() {
+        EmpleadoDAOImpl dao = new EmpleadoDAOImpl();
+        //INSERT - NEED PREVIOUS USER ID
+        Empleado e = new Empleado();
+        e.setId(1);
+        e.setRol("VENDEDOR");
+        int res = dao.insertar(e);
+        System.out.println("Insertar Empleado:   " + (res > 0 ? "OK" : "FAIL"));
+        //ID SEARCH
+        Empleado encontrado = dao.buscarPorId(1);
+        System.out.println("Buscar Empleado:     " + (encontrado != null ? "OK → rol: " + encontrado.getRol() : "FAIL"));
+        //UPDATE
+        if (encontrado != null) {
+            encontrado.setRol("ADMIN");
+            int upd = dao.actualizar(encontrado);
+            System.out.println("Actualizar Empleado: " + (upd > 0 ? "OK" : "FAIL"));
+        }
+        //LIST
+        int total = dao.listarTodos().size();
+        System.out.println("Listar Empleados: " + total + " registro(s)");
+        //DELETE
+        int del = dao.eliminar(1, false);
+        System.out.println("Eliminar Empleado:   " + (del > 0 ? "OK" : "FAIL") + "\n");
+    }
 
     static void probarCarroDeCompras() { /* depends on Cliente */
         CarroDeComprasDAOImpl dao = new CarroDeComprasDAOImpl();
@@ -246,7 +246,7 @@ public class Principal {
         Producto producto = productoDAO.buscarPorId(idProduct);
 
         if (producto == null) {
-            System.out.println("No se encontró el Producto id=" + idProduct);
+            System.out.println("No se encuentra el Producto id=" + idProduct+". Exit prueba.\n");
             return;
         }
 
@@ -267,20 +267,52 @@ public class Principal {
                 : "FAIL"));
 
         // UPDATE
-//        if (encontrado != null) {
-//            encontrado.setCantidad(3);
-//            encontrado.setPrecioUnitario(producto.getPrecio());
-//            int upd = dao.actualizar(encontrado);
-//            System.out.println("Actualizar DetalleCarro: " + (upd > 0 ? "OK" : "FAIL"));
-//        }
-//
-//        // LIST
-//        int total = dao.listarTodos().size();
-//        System.out.println("Listar DetalleCarro:     " + total + " registro(s)");
-//
-//        // DELETE
-//        int del = dao.eliminar(1);
-//        System.out.println("Eliminar DetalleCarro:   " + (del > 0 ? "OK" : "FAIL") + "\n");
+        if (encontrado != null) {
+            encontrado.setCantidad(3);
+            encontrado.setPrecioUnitario(producto.getPrecio());
+            int upd = dao.actualizar(encontrado);
+            System.out.println("Actualizar DetalleCarro: " + (upd > 0 ? "OK" : "FAIL"));
+        }
+
+        // LIST
+        int total = dao.listarTodos().size();
+        System.out.println("Listar DetalleCarro:     " + total + " registro(s)");
+
+        // DELETE
+        int del = dao.eliminar(1);
+        System.out.println("Eliminar DetalleCarro:   " + (del > 0 ? "OK" : "FAIL") + "\n");
+    }
+
+    static void probarListaDeDeseos() { /* depends on Cliente*/
+        ListaDeDeseosDAOImpl dao = new ListaDeDeseosDAOImpl();
+        ClienteDAOImpl clienteDAO = new ClienteDAOImpl();
+        int idCliente = 15;
+        Cliente cliente = clienteDAO.buscarPorId(idCliente);
+        if (cliente == null) {
+            System.out.println("No se encuentra el Cliente id="+idCliente+". Exit prueba.\n");
+            return;
+        }
+        //INSERT
+        ListaDeDeseos lista = new ListaDeDeseos();
+        lista.setIdCliente(cliente.getId());
+        lista.setFechaCreacion(LocalDateTime.now());
+        lista.setFechaActualizacion(null);
+        int res = dao.insertar(lista);
+        System.out.println("Insertar Lista:   " + (res > 0 ? "OK" : "FAIL"));
+        //ID SEARCH
+        ListaDeDeseos encontrada = dao.buscarPorId(1);
+        System.out.println("Buscar Lista:     " + (encontrada != null
+                ? "OK -> idCliente: " + encontrada.getIdCliente() : "FAIL"));
+        //UPDATE
+        if (encontrada != null) {
+            encontrada.setFechaActualizacion(LocalDateTime.now());
+            int upd = dao.actualizar(encontrada);
+            System.out.println("Actualizar Lista: " + (upd > 0 ? "OK" : "FAIL"));
+        }
+        //LIST
+        int total = dao.listarTodos().size();
+        System.out.println("Listar Listas:    " + total + " registro(s)\n");
+        // NOT DELETE, because DetalleLista depends on it.
     }
 }
 

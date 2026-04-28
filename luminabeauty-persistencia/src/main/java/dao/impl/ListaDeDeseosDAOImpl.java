@@ -6,23 +6,25 @@ import luminabeauty.model.ListaDeDeseos;
 import dao.DBManager;
 
 // Java standard library imports
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
 
     @Override
     public int insertar(ListaDeDeseos lista) {
         int resultado = 0;
-        String sql = "INSERT INTO ListaDeDeseos(idCliente) VALUES(?)";
+        String sql = "INSERT INTO ListaDeDeseos(idCliente, fechaCreacion, fechaActualizacion) VALUES(?, ?, ?)";
 
         try (Connection con = DBManager.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, lista.getIdCliente());
+            ps.setTimestamp(2, lista.getFechaCreacion() != null
+                    ? Timestamp.valueOf(lista.getFechaCreacion()) : null);
+            ps.setObject(3, lista.getFechaActualizacion() != null  // ✅ null-safe
+                    ? Timestamp.valueOf(lista.getFechaActualizacion()) : null);
             resultado = ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -34,7 +36,7 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public ArrayList<ListaDeDeseos> listarTodos() {
         ArrayList<ListaDeDeseos> listaTotal = new ArrayList<>();
-        String sql = "SELECT id, idCliente FROM ListaDeDeseos";
+        String sql = "SELECT id, idCliente, fechaCreacion, fechaActualizacion FROM ListaDeDeseos"; // ✅
 
         try (Connection con = DBManager.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -53,7 +55,7 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public ListaDeDeseos buscarPorId(int id) {
         ListaDeDeseos lista = null;
-        String sql = "SELECT id, idCliente FROM ListaDeDeseos WHERE id = ?";
+        String sql = "SELECT id, idCliente, fechaCreacion, fechaActualizacion FROM ListaDeDeseos WHERE id = ?"; // ✅
 
         try (Connection con = DBManager.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -75,13 +77,14 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public int actualizar(ListaDeDeseos lista) {
         int resultado = 0;
-        String sql = "UPDATE ListaDeDeseos SET idCliente=? WHERE id=?";
+        String sql = "UPDATE ListaDeDeseos SET idCliente=?, fechaActualizacion=? WHERE id=?";
 
         try (Connection con = DBManager.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, lista.getIdCliente());
-            ps.setInt(2, lista.getId());
+            ps.setTimestamp(2, Timestamp.valueOf(lista.getFechaActualizacion()));
+            ps.setInt(3, lista.getId());
             resultado = ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -111,6 +114,11 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
         ListaDeDeseos l = new ListaDeDeseos();
         l.setId(rs.getInt("id"));
         l.setIdCliente(rs.getInt("idCliente"));
+        l.setFechaCreacion(rs.getTimestamp("fechaCreacion").toLocalDateTime());
+
+        // fechaActualizacion puede ser null si aun no se ha actualizado
+        Timestamp fechaAct = rs.getTimestamp("fechaActualizacion");
+        l.setFechaActualizacion(fechaAct != null ? fechaAct.toLocalDateTime() : null);
         return l;
     }
 }
