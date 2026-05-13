@@ -2,10 +2,8 @@ package pe.edu.pucp.luminaBeauty.Test;
 
 import pe.edu.pucp.luminaBeauty.Business.*;
 import pe.edu.pucp.luminaBeauty.Business.impl.*;
-
 import pe.edu.pucp.luminaBeauty.DAO.*;
 import pe.edu.pucp.luminaBeauty.DAO.impl.*;
-
 import pe.edu.pucp.luminaBeauty.Model.*;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 
@@ -17,7 +15,7 @@ public class MainBusinessTest {
     public static void main(String[] args) {
 
         try {
-            System.out.println("INICIANDO PRUEBAS BUSINESS \n");
+            System.out.println("INICIANDO PRUEBAS BUSINESS\n");
 
             long t = System.currentTimeMillis();
 
@@ -31,14 +29,18 @@ public class MainBusinessTest {
             Cupon cupon = crearCuponBase(t);
 
             probarClienteBL(cliente);
+            probarProductoBL(producto);
+            probarCuponBL(cupon);
             probarCarroBL(carro, producto);
+
             Pedido pedido = probarPedidoBL(carro, producto, cupon);
+
             probarPagoBL(pedido, metodo);
             probarEnvioBL(pedido, direccion);
 
-            System.out.println("");
-            System.out.println("PRUEBAS BUSINESS CORRECTAS");
-            System.out.println("");
+
+            System.out.println("TODOS LOS MÉTODOS BUSINESS FUNCIONARON");
+
 
         } catch (Exception e) {
             System.out.println("\nERROR EN MAIN BUSINESS:");
@@ -46,15 +48,37 @@ public class MainBusinessTest {
         }
     }
 
-
-    // PRUEBAS BUSINESS
-
     static void probarClienteBL(Cliente cliente) throws Exception {
         ClienteBL clienteBL = new ClienteBLImpl();
 
         clienteBL.sumarPuntos(cliente.getId(), 300);
 
-        System.out.println("ClienteBL: puntos sumados correctamente.");
+        System.out.println("ClienteBL.sumarPuntos OK");
+    }
+
+    static void probarProductoBL(Producto producto) throws Exception {
+        ProductoBL productoBL = new ProductoBLImpl();
+
+        productoBL.validarStock(producto.getId(), 2);
+        System.out.println("ProductoBL.validarStock OK");
+
+        Producto productoEncontrado = productoBL.buscarProducto(producto.getId());
+        System.out.println("ProductoBL.buscarProducto OK: " + productoEncontrado.getNombre());
+
+        productoBL.descontarStock(producto.getId(), 1);
+        System.out.println("ProductoBL.descontarStock OK");
+    }
+
+    static void probarCuponBL(Cupon cupon) throws Exception {
+        CuponBL cuponBL = new CuponBLImpl();
+
+        cuponBL.validarCupon(cupon);
+        System.out.println("CuponBL.validarCupon OK");
+
+        BigDecimal totalConDescuento =
+                cuponBL.aplicarDescuento(cupon, new BigDecimal("100.00"));
+
+        System.out.println("CuponBL.aplicarDescuento OK: " + totalConDescuento);
     }
 
     static void probarCarroBL(CarroDeCompras carro, Producto producto) throws Exception {
@@ -62,7 +86,7 @@ public class MainBusinessTest {
 
         carroBL.agregarProducto(carro, producto, 2);
 
-        System.out.println("CarroBL: producto agregado al carro.");
+        System.out.println("CarroBL.agregarProducto OK");
     }
 
     static Pedido probarPedidoBL(CarroDeCompras carro, Producto producto, Cupon cupon) throws Exception {
@@ -79,13 +103,14 @@ public class MainBusinessTest {
         detalle.setCantidad(2);
         detalle.setPrecioUnitario(producto.getPrecio());
         detalle.setSubtotal(producto.getPrecio().multiply(new BigDecimal("2")));
+        detalle.setPedido(pedido);
 
         pedido.getDetalles().add(detalle);
         pedido.setTotal(detalle.getSubtotal());
 
         Pedido pedidoCreado = pedidoBL.crearPedido(pedido);
 
-        System.out.println("PedidoBL: pedido creado ID: " + pedidoCreado.getId());
+        System.out.println("PedidoBL.crearPedido OK: " + pedidoCreado.getId());
 
         return pedidoCreado;
     }
@@ -102,7 +127,7 @@ public class MainBusinessTest {
 
         Pago pagoRegistrado = pagoBL.registrarPago(pago);
 
-        System.out.println("PagoBL: pago registrado ID: " + pagoRegistrado.getId());
+        System.out.println("PagoBL.registrarPago OK: " + pagoRegistrado.getId());
     }
 
     static void probarEnvioBL(Pedido pedido, Direccion direccion) throws Exception {
@@ -120,11 +145,9 @@ public class MainBusinessTest {
 
         envioBL.actualizarEstado(envioCreado.getId(), "DESPACHADO");
 
-        System.out.println("EnvioBL: envío creado y actualizado.");
+        System.out.println("EnvioBL.crearEnvio OK: " + envioCreado.getId());
+        System.out.println("EnvioBL.actualizarEstado OK");
     }
-
-    // DATOS BASE PARA PROBAR BUSINESS
-
 
     static Cliente crearClienteBase(long t) throws Exception {
         ClienteDAO dao = new ClienteDAOImpl();
