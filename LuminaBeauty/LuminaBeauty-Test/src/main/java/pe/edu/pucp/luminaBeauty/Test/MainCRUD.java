@@ -14,29 +14,48 @@ public class MainCRUD {
         try {
             long t = System.currentTimeMillis();
 
-            Cliente cliente = crearCliente(t);
-            Empleado empleado = crearEmpleado(t);
-            Direccion direccion = crearDireccion(cliente);
-            CategoriaProducto categoria = crearCategoria(t);
-            Marca marca = crearMarca(t);
-            Producto producto = crearProducto(categoria, marca, t);
-            CarroDeCompras carro = crearCarro(cliente);
-            DetalleCarro detalleCarro = crearDetalleCarro(carro, producto);
-            ListaDeDeseos lista = crearListaDeseos(cliente);
-            DetalleLista detalleLista = crearDetalleLista(lista, producto);
-            Valoracion valoracion = crearValoracion(cliente, producto);
-            Cupon cupon = crearCupon(t);
-            Pedido pedido = crearPedido(carro, cupon);
-            DetallePedido detallePedido = crearDetallePedido(pedido, producto);
-            MetodoDePago metodo = crearMetodoPago(t);
-            Pago pago = crearPago(pedido, metodo);
-            Envio envio = crearEnvio(pedido, direccion);
-            ComprobanteDePago comprobante = crearComprobante(pedido, t);
+            Cliente cliente = probarCliente(t);
+            Empleado empleado = probarEmpleado(t);
+            Direccion direccion = probarDireccion(cliente);
+            CategoriaProducto categoria = probarCategoria(t);
+            Marca marca = probarMarca(t);
+            Producto producto = probarProducto(categoria, marca, t);
+            CarroDeCompras carro = probarCarro(cliente);
+            DetalleCarro detalleCarro = probarDetalleCarro(carro, producto);
+            ListaDeDeseos lista = probarListaDeseos(cliente);
+            DetalleLista detalleLista = probarDetalleLista(lista, producto);
+            Valoracion valoracion = probarValoracion(cliente, producto);
+            Cupon cupon = probarCupon(t);
+            Pedido pedido = probarPedido(carro, cupon);
+            DetallePedido detallePedido = probarDetallePedido(pedido, producto);
+            MetodoDePago metodo = probarMetodoPago(t);
+            Pago pago = probarPago(pedido, metodo);
+            Envio envio = probarEnvio(pedido, direccion);
+            ComprobanteDePago comprobante = probarComprobante(pedido, t);
+
+            eliminarComprobante(comprobante);
+            eliminarEnvio(envio);
+            eliminarPago(pago);
+            eliminarMetodoPago(metodo);
+            eliminarDetallePedido(detallePedido);
+            eliminarPedido(pedido);
+            eliminarCupon(cupon);
+            eliminarValoracion(valoracion);
+            eliminarDetalleLista(detalleLista);
+            eliminarListaDeseos(lista);
+            eliminarDetalleCarro(detalleCarro);
+            eliminarCarro(carro);
+            eliminarProducto(producto);
+            eliminarMarca(marca);
+            eliminarCategoria(categoria);
+            eliminarDireccion(direccion);
+            eliminarEmpleado(empleado);
+            eliminarCliente(cliente);
 
             TransactionContext.commit();
 
             System.out.println("\n=================================");
-            System.out.println("TODOS LOS CRUDS SE PROBARON BIEN");
+            System.out.println("CRUD COMPLETO PROBADO CORRECTAMENTE");
             System.out.println("=================================");
 
         } catch (Exception e) {
@@ -48,7 +67,8 @@ public class MainCRUD {
         }
     }
 
-    static Cliente crearCliente(long t) throws Exception {
+    static Cliente probarCliente(long t) throws Exception {
+        System.out.println("\n========== CLIENTE ==========");
         ClienteDAO dao = new ClienteDAOImpl();
 
         Cliente c = new Cliente();
@@ -63,17 +83,22 @@ public class MainCRUD {
         c.setNivelCliente("BRONCE");
 
         dao.insertar(c);
-        System.out.println("Cliente insertado ID: " + c.getId());
+        System.out.println("Insertado ID: " + c.getId());
 
-        c.setNivelCliente("PLATA");
-        c.setPuntosFidelidad(250);
-        dao.actualizar(c);
+        Cliente buscado = dao.buscarPorId(c.getId());
+        System.out.println("Buscado: " + buscado.getNombre());
 
-        System.out.println("Clientes registrados: " + dao.listarTodos().size());
-        return c;
+        buscado.setNivelCliente("PLATA");
+        buscado.setPuntosFidelidad(250);
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static Empleado crearEmpleado(long t) throws Exception {
+    static Empleado probarEmpleado(long t) throws Exception {
+        System.out.println("\n========== EMPLEADO ==========");
         EmpleadoDAO dao = new EmpleadoDAOImpl();
 
         Empleado e = new Empleado();
@@ -87,16 +112,21 @@ public class MainCRUD {
         e.setRol("VENDEDOR");
 
         dao.insertar(e);
-        System.out.println("Empleado insertado ID: " + e.getIdEmpleado());
+        System.out.println("Insertado ID: " + e.getIdEmpleado());
 
-        e.setRol("ADMIN");
-        dao.actualizar(e);
+        Empleado buscado = dao.buscarPorId(e.getIdEmpleado());
+        System.out.println("Buscado: " + buscado.getNombre());
 
-        System.out.println("Empleados registrados: " + dao.listarTodos().size());
-        return e;
+        buscado.setRol("ADMIN");
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static Direccion crearDireccion(Cliente cliente) throws Exception {
+    static Direccion probarDireccion(Cliente cliente) throws Exception {
+        System.out.println("\n========== DIRECCION ==========");
         DireccionDAO dao = new DireccionDAOImpl();
 
         Direccion d = new Direccion();
@@ -109,16 +139,21 @@ public class MainCRUD {
         d.setCliente(cliente);
 
         dao.insertar(d);
-        System.out.println("Direccion insertada ID: " + d.getId());
+        System.out.println("Insertada ID: " + d.getId());
 
-        d.setReferencia("Referencia actualizada");
-        dao.actualizar(d);
+        Direccion buscada = dao.buscarPorId(d.getId());
+        System.out.println("Buscada: " + buscada.getDireccion());
 
-        System.out.println("Direcciones registradas: " + dao.listarTodos().size());
-        return d;
+        buscada.setReferencia("Referencia actualizada");
+        dao.actualizar(buscada);
+        System.out.println("Actualizada");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscada;
     }
 
-    static CategoriaProducto crearCategoria(long t) throws Exception {
+    static CategoriaProducto probarCategoria(long t) throws Exception {
+        System.out.println("\n========== CATEGORIA ==========");
         CategoriaProductoDAO dao = new CategoriaProductoDAOImpl();
 
         CategoriaProducto c = new CategoriaProducto();
@@ -127,40 +162,50 @@ public class MainCRUD {
         c.setIdCategoriaPadre(0);
 
         dao.insertar(c);
-        System.out.println("Categoria insertada ID: " + c.getId());
+        System.out.println("Insertada ID: " + c.getId());
 
-        c.setDescripcion("Categoria actualizada");
-        dao.actualizar(c);
+        CategoriaProducto buscada = dao.buscarPorId(c.getId());
+        System.out.println("Buscada: " + buscada.getNombre());
 
-        System.out.println("Categorias registradas: " + dao.listarTodos().size());
-        return c;
+        buscada.setDescripcion("Categoria actualizada");
+        dao.actualizar(buscada);
+        System.out.println("Actualizada");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscada;
     }
 
-    static Marca crearMarca(long t) throws Exception {
+    static Marca probarMarca(long t) throws Exception {
+        System.out.println("\n========== MARCA ==========");
         MarcaDAO dao = new MarcaDAOImpl();
 
         Marca m = new Marca();
         m.setNombre("Lumina Brand " + t);
-        m.setDescripcion("Marca ficticia de belleza");
+        m.setDescripcion("Marca ficticia");
         m.setLogo("logo.png");
 
         dao.insertar(m);
-        System.out.println("Marca insertada ID: " + m.getId());
+        System.out.println("Insertada ID: " + m.getId());
 
-        m.setDescripcion("Descripcion actualizada");
-        dao.actualizar(m);
+        Marca buscada = dao.buscarPorId(m.getId());
+        System.out.println("Buscada: " + buscada.getNombre());
 
-        System.out.println("Marcas registradas: " + dao.listarTodos().size());
-        return m;
+        buscada.setDescripcion("Descripcion actualizada");
+        dao.actualizar(buscada);
+        System.out.println("Actualizada");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscada;
     }
 
-    static Producto crearProducto(CategoriaProducto categoria, Marca marca, long t) throws Exception {
+    static Producto probarProducto(CategoriaProducto categoria, Marca marca, long t) throws Exception {
+        System.out.println("\n========== PRODUCTO ==========");
         ProductoDAO dao = new ProductoDAOImpl();
 
         Producto p = new Producto();
         p.setNombre("Serum Facial");
         p.setSlug("serum-facial-" + t);
-        p.setDescripcion("Serum hidratante de prueba");
+        p.setDescripcion("Serum hidratante");
         p.setPrecio(new BigDecimal("89.90"));
         p.setStock(50);
         p.setTipoPiel("TODOS");
@@ -170,16 +215,21 @@ public class MainCRUD {
         p.setMarca(marca);
 
         dao.insertar(p);
-        System.out.println("Producto insertado ID: " + p.getId());
+        System.out.println("Insertado ID: " + p.getId());
 
-        p.setStock(45);
-        dao.actualizar(p);
+        Producto buscado = dao.buscarPorId(p.getId());
+        System.out.println("Buscado: " + buscado.getNombre());
 
-        System.out.println("Productos registrados: " + dao.listarTodos().size());
-        return p;
+        buscado.setStock(45);
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static CarroDeCompras crearCarro(Cliente cliente) throws Exception {
+    static CarroDeCompras probarCarro(Cliente cliente) throws Exception {
+        System.out.println("\n========== CARRO ==========");
         CarroDeComprasDAO dao = new CarroDeComprasDAOImpl();
 
         CarroDeCompras c = new CarroDeCompras();
@@ -187,13 +237,21 @@ public class MainCRUD {
         c.setCliente(cliente);
 
         dao.insertar(c);
-        System.out.println("Carro insertado ID: " + c.getId());
+        System.out.println("Insertado ID: " + c.getId());
 
-        System.out.println("Carros registrados: " + dao.listarTodos().size());
-        return c;
+        CarroDeCompras buscado = dao.buscarPorId(c.getId());
+        System.out.println("Buscado ID: " + buscado.getId());
+
+        buscado.setFechaCreacion(LocalDateTime.now());
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static DetalleCarro crearDetalleCarro(CarroDeCompras carro, Producto producto) throws Exception {
+    static DetalleCarro probarDetalleCarro(CarroDeCompras carro, Producto producto) throws Exception {
+        System.out.println("\n========== DETALLE CARRO ==========");
         DetalleCarroDAO dao = new DetalleCarroDAOImpl();
 
         DetalleCarro d = new DetalleCarro();
@@ -203,29 +261,41 @@ public class MainCRUD {
         d.setIdProducto(producto);
 
         dao.insertar(d);
-        System.out.println("DetalleCarro insertado ID: " + d.getId());
+        System.out.println("Insertado ID: " + d.getId());
 
-        d.setCantidad(3);
-        dao.actualizar(d);
+        DetalleCarro buscado = dao.buscarPorId(d.getId());
+        System.out.println("Buscado cantidad: " + buscado.getCantidad());
 
-        System.out.println("Detalles carro registrados: " + dao.listarTodos().size());
-        return d;
+        buscado.setCantidad(3);
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static ListaDeDeseos crearListaDeseos(Cliente cliente) throws Exception {
+    static ListaDeDeseos probarListaDeseos(Cliente cliente) throws Exception {
+        System.out.println("\n========== LISTA DE DESEOS ==========");
         ListaDeDeseosDAO dao = new ListaDeDeseosDAOImpl();
 
         ListaDeDeseos l = new ListaDeDeseos();
         l.setCliente(cliente);
 
         dao.insertar(l);
-        System.out.println("Lista deseos insertada ID: " + l.getId());
+        System.out.println("Insertada ID: " + l.getId());
 
-        System.out.println("Listas registradas: " + dao.listarTodos().size());
-        return l;
+        ListaDeDeseos buscada = dao.buscarPorId(l.getId());
+        System.out.println("Buscada ID: " + buscada.getId());
+
+        dao.actualizar(buscada);
+        System.out.println("Actualizada");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscada;
     }
 
-    static DetalleLista crearDetalleLista(ListaDeDeseos lista, Producto producto) throws Exception {
+    static DetalleLista probarDetalleLista(ListaDeDeseos lista, Producto producto) throws Exception {
+        System.out.println("\n========== DETALLE LISTA ==========");
         DetalleListaDAO dao = new DetalleListaDAOImpl();
 
         DetalleLista d = new DetalleLista();
@@ -233,13 +303,20 @@ public class MainCRUD {
         d.setProducto(producto);
 
         dao.insertar(d);
-        System.out.println("DetalleLista insertado ID: " + d.getId());
+        System.out.println("Insertado ID: " + d.getId());
 
-        System.out.println("Detalles lista registrados: " + dao.listarTodos().size());
-        return d;
+        DetalleLista buscado = dao.buscarPorId(d.getId());
+        System.out.println("Buscado ID: " + buscado.getId());
+
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static Valoracion crearValoracion(Cliente cliente, Producto producto) throws Exception {
+    static Valoracion probarValoracion(Cliente cliente, Producto producto) throws Exception {
+        System.out.println("\n========== VALORACION ==========");
         ValoracionDAO dao = new ValoracionDAOImpl();
 
         Valoracion v = new Valoracion();
@@ -250,16 +327,21 @@ public class MainCRUD {
         v.setProducto(producto);
 
         dao.insertar(v);
-        System.out.println("Valoracion insertada ID: " + v.getId());
+        System.out.println("Insertada ID: " + v.getId());
 
-        v.setComentario("Comentario actualizado");
-        dao.actualizar(v);
+        Valoracion buscada = dao.buscarPorId(v.getId());
+        System.out.println("Buscada comentario: " + buscada.getComentario());
 
-        System.out.println("Valoraciones registradas: " + dao.listarTodos().size());
-        return v;
+        buscada.setComentario("Comentario actualizado");
+        dao.actualizar(buscada);
+        System.out.println("Actualizada");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscada;
     }
 
-    static Cupon crearCupon(long t) throws Exception {
+    static Cupon probarCupon(long t) throws Exception {
+        System.out.println("\n========== CUPON ==========");
         CuponDAO dao = new CuponDAOImpl();
 
         Cupon c = new Cupon();
@@ -273,16 +355,21 @@ public class MainCRUD {
         c.setUsosActuales(0);
 
         dao.insertar(c);
-        System.out.println("Cupon insertado ID: " + c.getId());
+        System.out.println("Insertado ID: " + c.getId());
 
-        c.setUsosActuales(1);
-        dao.actualizar(c);
+        Cupon buscado = dao.buscarPorId(c.getId());
+        System.out.println("Buscado codigo: " + buscado.getCodigo());
 
-        System.out.println("Cupones registrados: " + dao.listarTodos().size());
-        return c;
+        buscado.setUsosActuales(1);
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static Pedido crearPedido(CarroDeCompras carro, Cupon cupon) throws Exception {
+    static Pedido probarPedido(CarroDeCompras carro, Cupon cupon) throws Exception {
+        System.out.println("\n========== PEDIDO ==========");
         PedidoDAO dao = new PedidoDAOImpl();
 
         Pedido p = new Pedido();
@@ -293,16 +380,21 @@ public class MainCRUD {
         p.setCupon(cupon);
 
         dao.insertar(p);
-        System.out.println("Pedido insertado ID: " + p.getId());
+        System.out.println("Insertado ID: " + p.getId());
 
-        p.setEstado("CONFIRMADO");
-        dao.actualizar(p);
+        Pedido buscado = dao.buscarPorId(p.getId());
+        System.out.println("Buscado estado: " + buscado.getEstado());
 
-        System.out.println("Pedidos registrados: " + dao.listarTodos().size());
-        return p;
+        buscado.setEstado("CONFIRMADO");
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static DetallePedido crearDetallePedido(Pedido pedido, Producto producto) throws Exception {
+    static DetallePedido probarDetallePedido(Pedido pedido, Producto producto) throws Exception {
+        System.out.println("\n========== DETALLE PEDIDO ==========");
         DetallePedidoDAO dao = new DetallePedidoDAOImpl();
 
         DetallePedido d = new DetallePedido();
@@ -313,17 +405,22 @@ public class MainCRUD {
         d.setProducto(producto);
 
         dao.insertar(d);
-        System.out.println("DetallePedido insertado ID: " + d.getId());
+        System.out.println("Insertado ID: " + d.getId());
 
-        d.setCantidad(3);
-        d.setSubtotal(producto.getPrecio().multiply(new BigDecimal("3")));
-        dao.actualizar(d);
+        DetallePedido buscado = dao.buscarPorId(d.getId());
+        System.out.println("Buscado cantidad: " + buscado.getCantidad());
 
-        System.out.println("Detalles pedido registrados: " + dao.listarTodos().size());
-        return d;
+        buscado.setCantidad(3);
+        buscado.setSubtotal(producto.getPrecio().multiply(new BigDecimal("3")));
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static MetodoDePago crearMetodoPago(long t) throws Exception {
+    static MetodoDePago probarMetodoPago(long t) throws Exception {
+        System.out.println("\n========== METODO DE PAGO ==========");
         MetodoDePagoDAO dao = new MetodoDePagoDAOImpl();
 
         MetodoDePago m = new MetodoDePago();
@@ -332,16 +429,21 @@ public class MainCRUD {
         m.setIcono("yape.png");
 
         dao.insertar(m);
-        System.out.println("MetodoPago insertado ID: " + m.getId());
+        System.out.println("Insertado ID: " + m.getId());
 
-        m.setDescripcion("Descripcion actualizada");
-        dao.actualizar(m);
+        MetodoDePago buscado = dao.buscarPorId(m.getId());
+        System.out.println("Buscado nombre: " + buscado.getNombre());
 
-        System.out.println("Metodos registrados: " + dao.listarTodos().size());
-        return m;
+        buscado.setDescripcion("Descripcion actualizada");
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static Pago crearPago(Pedido pedido, MetodoDePago metodo) throws Exception {
+    static Pago probarPago(Pedido pedido, MetodoDePago metodo) throws Exception {
+        System.out.println("\n========== PAGO ==========");
         PagoDAO dao = new PagoDAOImpl();
 
         Pago p = new Pago();
@@ -352,13 +454,21 @@ public class MainCRUD {
         p.setMetodoDePago(metodo);
 
         dao.insertar(p);
-        System.out.println("Pago insertado ID: " + p.getId());
+        System.out.println("Insertado ID: " + p.getId());
 
-        System.out.println("Pagos registrados: " + dao.listarTodos().size());
-        return p;
+        Pago buscado = dao.buscarPorId(p.getId());
+        System.out.println("Buscado estado: " + buscado.getEstado());
+
+        buscado.setEstado("REEMBOLSADO");
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static Envio crearEnvio(Pedido pedido, Direccion direccion) throws Exception {
+    static Envio probarEnvio(Pedido pedido, Direccion direccion) throws Exception {
+        System.out.println("\n========== ENVIO ==========");
         EnvioDAO dao = new EnvioDAOImpl();
 
         Envio e = new Envio();
@@ -371,16 +481,21 @@ public class MainCRUD {
         e.setDireccion(direccion);
 
         dao.insertar(e);
-        System.out.println("Envio insertado ID: " + e.getId());
+        System.out.println("Insertado ID: " + e.getId());
 
-        e.setEstado("DESPACHADO");
-        dao.actualizar(e);
+        Envio buscado = dao.buscarPorId(e.getId());
+        System.out.println("Buscado estado: " + buscado.getEstado());
 
-        System.out.println("Envios registrados: " + dao.listarTodos().size());
-        return e;
+        buscado.setEstado("DESPACHADO");
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
     }
 
-    static ComprobanteDePago crearComprobante(Pedido pedido, long t) throws Exception {
+    static ComprobanteDePago probarComprobante(Pedido pedido, long t) throws Exception {
+        System.out.println("\n========== COMPROBANTE ==========");
         ComprobanteDePagoDAO dao = new ComprobanteDePagoDAOImpl();
 
         ComprobanteDePago c = new ComprobanteDePago();
@@ -391,9 +506,106 @@ public class MainCRUD {
         c.setPedido(pedido);
 
         dao.insertar(c);
-        System.out.println("Comprobante insertado ID: " + c.getId());
+        System.out.println("Insertado ID: " + c.getId());
 
-        System.out.println("Comprobantes registrados: " + dao.listarTodos().size());
-        return c;
+        ComprobanteDePago buscado = dao.buscarPorId(c.getId());
+        System.out.println("Buscado serie: " + buscado.getSerie());
+
+        buscado.setTipo("TICKET");
+        dao.actualizar(buscado);
+        System.out.println("Actualizado");
+
+        System.out.println("Total: " + dao.listarTodos().size());
+        return buscado;
+    }
+
+    static void eliminarComprobante(ComprobanteDePago c) throws Exception {
+        new ComprobanteDePagoDAOImpl().eliminar(c);
+        System.out.println("Comprobante eliminado");
+    }
+
+    static void eliminarEnvio(Envio e) throws Exception {
+        new EnvioDAOImpl().eliminar(e);
+        System.out.println("Envio eliminado");
+    }
+
+    static void eliminarPago(Pago p) throws Exception {
+        new PagoDAOImpl().eliminar(p);
+        System.out.println("Pago eliminado");
+    }
+
+    static void eliminarMetodoPago(MetodoDePago m) throws Exception {
+        new MetodoDePagoDAOImpl().eliminar(m);
+        System.out.println("MetodoDePago eliminado");
+    }
+
+    static void eliminarDetallePedido(DetallePedido d) throws Exception {
+        new DetallePedidoDAOImpl().eliminar(d);
+        System.out.println("DetallePedido eliminado");
+    }
+
+    static void eliminarPedido(Pedido p) throws Exception {
+        new PedidoDAOImpl().eliminar(p);
+        System.out.println("Pedido eliminado");
+    }
+
+    static void eliminarCupon(Cupon c) throws Exception {
+        new CuponDAOImpl().eliminar(c);
+        System.out.println("Cupon eliminado");
+    }
+
+    static void eliminarValoracion(Valoracion v) throws Exception {
+        new ValoracionDAOImpl().eliminar(v);
+        System.out.println("Valoracion eliminada");
+    }
+
+    static void eliminarDetalleLista(DetalleLista d) throws Exception {
+        new DetalleListaDAOImpl().eliminar(d);
+        System.out.println("DetalleLista eliminado");
+    }
+
+    static void eliminarListaDeseos(ListaDeDeseos l) throws Exception {
+        new ListaDeDeseosDAOImpl().eliminar(l);
+        System.out.println("ListaDeDeseos eliminada");
+    }
+
+    static void eliminarDetalleCarro(DetalleCarro d) throws Exception {
+        new DetalleCarroDAOImpl().eliminar(d);
+        System.out.println("DetalleCarro eliminado");
+    }
+
+    static void eliminarCarro(CarroDeCompras c) throws Exception {
+        new CarroDeComprasDAOImpl().eliminar(c);
+        System.out.println("Carro eliminado");
+    }
+
+    static void eliminarProducto(Producto p) throws Exception {
+        new ProductoDAOImpl().eliminar(p);
+        System.out.println("Producto eliminado");
+    }
+
+    static void eliminarMarca(Marca m) throws Exception {
+        new MarcaDAOImpl().eliminar(m);
+        System.out.println("Marca eliminada");
+    }
+
+    static void eliminarCategoria(CategoriaProducto c) throws Exception {
+        new CategoriaProductoDAOImpl().eliminar(c);
+        System.out.println("Categoria eliminada");
+    }
+
+    static void eliminarDireccion(Direccion d) throws Exception {
+        new DireccionDAOImpl().eliminar(d);
+        System.out.println("Direccion eliminada");
+    }
+
+    static void eliminarEmpleado(Empleado e) throws Exception {
+        new EmpleadoDAOImpl().eliminar(e);
+        System.out.println("Empleado eliminado");
+    }
+
+    static void eliminarCliente(Cliente c) throws Exception {
+        new ClienteDAOImpl().eliminar(c);
+        System.out.println("Cliente eliminado");
     }
 }
