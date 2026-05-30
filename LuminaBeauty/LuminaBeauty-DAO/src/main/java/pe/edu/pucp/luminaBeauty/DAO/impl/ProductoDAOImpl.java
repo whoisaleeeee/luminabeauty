@@ -50,10 +50,15 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public void eliminar(Producto producto) throws Exception {
+//        String sql = """
+//                DELETE FROM Producto
+//                WHERE id = ?
+//                """;
+
         String sql = """
-                DELETE FROM Producto
-                WHERE id = ?
-                """;
+                  UPDATE Producto SET estado = 0
+                  WHERE id = ?
+                  """;
 
         Connection connection = TransactionContext.getConnection();
 

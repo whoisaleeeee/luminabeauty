@@ -56,6 +56,11 @@ public class PagoDAOImpl implements PagoDAO {
                 WHERE id = ?
                 """;
 
+//        String sql = """
+//                  UPDATE Pago SET estado = 'CANCELADO'
+//                  WHERE id = ?
+//                  """;
+
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

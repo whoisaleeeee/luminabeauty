@@ -60,6 +60,11 @@ public class PedidoDAOImpl implements PedidoDAO {
                 WHERE id = ?
                 """;
 
+//        String sql = """
+//                  UPDATE Pedido SET estado = 'CANCELADO'
+//                  WHERE id = ?
+//                  """;
+
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {

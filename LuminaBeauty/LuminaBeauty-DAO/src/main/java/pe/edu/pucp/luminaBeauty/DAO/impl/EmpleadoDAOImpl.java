@@ -56,10 +56,14 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
 
     @Override
     public void eliminar(Empleado empleado) throws Exception {
+//        String sql = """
+//                DELETE FROM Usuario
+//                WHERE id = ?
+//                """;
         String sql = """
-                DELETE FROM Usuario
-                WHERE id = ?
-                """;
+                  UPDATE Usuario SET estado = 0
+                  WHERE id = ?
+                  """;
 
         Connection connection = TransactionContext.getConnection();
 

@@ -67,6 +67,11 @@ public class EnvioDAOImpl implements EnvioDAO {
                 WHERE id = ?
                 """;
 
+//        String sql = """
+//                  UPDATE Envio SET estado = 'CANCELADO'
+//                  WHERE id = ?
+//                  """;
+
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
