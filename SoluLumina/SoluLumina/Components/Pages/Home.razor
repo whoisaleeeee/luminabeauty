@@ -1,0 +1,56 @@
+﻿@page "/"
+
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="w-100 min-vh-100 m-0 p-0" style="background-color: #f7f9fa;">
+
+    <div class="d-flex justify-content-center w-100">
+        <span class="fw-bold text-center select-none"
+              style="color: #d9557b; font-size: 2rem;">
+            Luminabeauty
+        </span>
+    </div>
+
+    <div class="text-center w-100 m-0" style="margin-top: 80px !important; margin-bottom: 2rem !important;">
+        <h1 class="fw-bold text-dark m-0" style="font-size: 2.2rem; letter-spacing: -0.5px;">
+            Portal de Administrador
+        </h1>
+    </div>
+
+    <div class="card border-0 bg-white rounded-4 shadow-sm mx-auto" style="max-width: 400px;">
+        <div class="card-body p-4">
+
+            <div class="mb-3">
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-dark small">Usuario</label>
+                    <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Nombre de usuario">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold text-dark small">Contraseña</label>
+                <input type="password" class="form-control" id="exampleFormControlInput1" placeholder="Contraseña">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold text-dark small">Codigo de seguridad</label>
+                <input type="text" class="form-control" id="exampleFormControlInput1">
+            </div>
+
+            <div class="d-flex justify-content-center w-100 pt-2">
+                <span class="fw-bold text-center select-none"
+                      @onclick='() => Navigation.NavigateTo("/Catalogo")'
+                      style="color: #d9557b; font-size: 1.2rem; cursor: pointer;">
+                    Iniciar sesión
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="position-absolute bottom-0 start-0 w-100 m-0"
+         style="height: 20vh; background-color: #d9557b; z-index: 1;">
+    </div>
+
+</div>

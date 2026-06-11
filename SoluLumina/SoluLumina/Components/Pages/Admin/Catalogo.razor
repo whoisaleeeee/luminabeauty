@@ -1,0 +1,375 @@
+@page "/Catalogo"
+@using SoluLumina.Components.Pages.Shared
+@rendermode InteractiveServer
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header Superior Estándar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+            <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Catálogo</h3>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="input-group" style="width: 280px;">
+                    <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar productos..." style="font-size: 0.9rem;">
+                </div>
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important;">
+                    <div class="text-end d-none d-md-block">
+                        <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
+                        <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                    </div>
+                    <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-box position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <small class="text-muted fw-bold d-block" style="font-size: 0.8rem;">Total Productos</small>
+                        <span class="badge rounded-pill" style="background-color: #e2f3eb; color: #198754; font-size: 0.7rem;"><i class="bi bi-arrow-up"></i> 12</span>
+                    </div>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">248</h2>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-tag position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Marcas Activas</small>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">34</h2>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-layers position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Categorías</small>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">12</h2>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-danger-subtle shadow-sm rounded-4 p-4 h-100 position-relative overflow-hidden" style="background-color: #fdf5f5;">
+                    <i class="bi bi-exclamation-triangle position-absolute opacity-25" style="font-size: 5rem; top: -10px; right: -10px; color: #d9557b;"></i>
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <small class="fw-bold d-block" style="font-size: 0.8rem; color: #d9557b;">Sin Stock</small>
+                        <span class="badge rounded-pill bg-white text-danger border border-danger-subtle" style="font-size: 0.65rem;">¡Alerta!</span>
+                    </div>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #b02a37; line-height: 1;">7</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+            
+            <!-- Filtros y Botón -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: #f7eff1 !important;">
+                <div class="d-flex flex-wrap gap-3">
+                    <div>
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;">
+                            <option selected>Todas las categorías</option>
+                            <option value="1">Facial</option>
+                            <option value="2">Maquillaje</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de Piel</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;">
+                            <option selected>Cualquiera</option>
+                            <option value="1">Seca</option>
+                            <option value="2">Mixta</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;">
+                            <option selected>Todas las marcas</option>
+                            <option value="1">Dior</option>
+                            <option value="2">Clinique</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-auto">
+                    <button class="btn text-white d-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm"
+                            style="background-color: #6a3849; font-size: 0.9rem; font-weight: 500;"
+                            @onclick="OpenAddProductModal">
+                        <i class="bi bi-plus-circle"></i> Nuevo Producto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Productos Mejorada -->
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="py-3 px-4 border-bottom-0">Producto</th>
+                            <th class="py-3 border-bottom-0">Categoría</th>
+                            <th class="py-3 border-bottom-0">Tipo Piel</th>
+                            <th class="py-3 border-bottom-0">Precio</th>
+                            <th class="py-3 border-bottom-0 text-center">Stock</th>
+                            <th class="py-3 px-4 border-bottom-0 text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        <!-- Item 1 -->
+                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                            <td class="py-3 px-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0;">
+                                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                    </div>
+                                    <div>
+                                        <h6 class="m-0 fw-bold text-dark">Luminous Hydrating Serum</h6>
+                                        <small class="text-muted font-monospace" style="font-size: 0.7rem;">GLAM-SR-001</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge rounded-pill fw-medium" style="background-color: #fcf0f4; color: #6a3849; padding: 0.4em 0.8em;">Facial</span></td>
+                            <td class="text-secondary">Todas</td>
+                            <td class="fw-bold text-dark">S/ 124.90</td>
+                            <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">45 uds</span></td>
+                            <td class="py-3 px-4 text-end">
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Item 2 -->
+                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                            <td class="py-3 px-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0;">
+                                        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80" alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                    </div>
+                                    <div>
+                                        <h6 class="m-0 fw-bold text-dark">Crema Hidratante Intensiva</h6>
+                                        <small class="text-muted font-monospace" style="font-size: 0.7rem;">GLAM-CR-042</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge rounded-pill fw-medium" style="background-color: #fcf0f4; color: #6a3849; padding: 0.4em 0.8em;">Facial</span></td>
+                            <td class="text-secondary">Seca</td>
+                            <td class="fw-bold text-dark">S/ 89.00</td>
+                            <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: #fdf5f5; color: #d9557b; padding: 0.4em 0.8em;">0 uds</span></td>
+                            <td class="py-3 px-4 text-end">
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+
+                        <!-- Item 3 -->
+                        <tr>
+                            <td class="py-3 px-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
+                                        <i class="bi bi-image text-muted opacity-50 d-flex justify-content-center align-items-center h-100 fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="m-0 fw-bold text-dark">Paleta de Sombras Nude</h6>
+                                        <small class="text-muted font-monospace" style="font-size: 0.7rem;">GLAM-MK-018</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge rounded-pill fw-medium" style="background-color: #fce4eb; color: #d9557b; padding: 0.4em 0.8em;">Maquillaje</span></td>
+                            <td class="text-secondary">Todas</td>
+                            <td class="fw-bold text-dark">S/ 45.50</td>
+                            <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">112 uds</span></td>
+                            <td class="py-3 px-4 text-end">
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3" style="border-color: #f7eff1 !important;">
+                <small class="text-muted" style="font-size: 0.85rem;">Mostrando 1 a 3 de 248 productos</small>
+                <nav>
+                    <ul class="pagination pagination-sm m-0 gap-1">
+                        <li class="page-item disabled"><a class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm"><i class="bi bi-chevron-left"></i></a></li>
+                        <li class="page-item"><a class="page-link rounded-2 active border-0 text-white shadow-sm" style="background-color: #6a3849;">1</a></li>
+                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">3</a></li>
+                        <li class="page-item disabled"><span class="px-1 text-muted">...</span></li>
+                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">25</a></li>
+                        <li class="page-item"><a class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@if (showAddProductModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                    <div>
+                        <h4 class="modal-title fw-bold" style="color: #6a3849;">Agregar nuevo producto</h4>
+                        <p class="text-muted small m-0">Completa la información técnica y visual del producto.</p>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="CloseAddProductModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <!-- 01 Información Básica -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">01</span>
+                            <h6 class="m-0 fw-semibold text-dark">Información Básica</h6>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nombre del producto</label>
+                                <input type="text" class="form-control bg-light border-1" placeholder="Ej. Crema Hidratante de Rosas">
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">SKU</label>
+                                <input type="text" class="form-control bg-light border-1 font-monospace text-muted" placeholder="GLAM-CR-001">
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Código de barras</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan"></i></span>
+                                    <input type="text" class="form-control bg-light border-start-0" placeholder="789012345678">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
+                                <select class="form-select bg-light border-1 text-secondary">
+                                    <option selected>Seleccionar marca...</option>
+                                    <option value="1">Marca A</option>
+                                    <option value="2">Marca B</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 02 Categorización -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">02</span>
+                            <h6 class="m-0 fw-semibold text-dark">Categorización</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
+                                <select class="form-select bg-light border-1 text-secondary">
+                                    <option selected>Cuidado de la Piel</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Subcategoría</label>
+                                <select class="form-select bg-light border-1 text-secondary">
+                                    <option selected>Hidratantes</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel (Tags)</label>
+                                <div class="form-control bg-light border-1 d-flex flex-wrap gap-1 align-items-center p-1" style="min-height: 38px;">
+                                    <span class="badge d-flex align-items-center gap-1 text-secondary" style="background-color: #fce4eb;">Seca <i class="bi bi-x" style="cursor:pointer"></i></span>
+                                    <span class="badge d-flex align-items-center gap-1 text-secondary" style="background-color: #fce4eb;">Sensible <i class="bi bi-x" style="cursor:pointer"></i></span>
+                                    <input type="text" class="border-0 bg-transparent flex-grow-1 ms-1 text-secondary small" placeholder="Añadir..." style="outline: none; min-width: 50px;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 03 Precios y Stock -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">03</span>
+                            <h6 class="m-0 fw-semibold text-dark">Precios y Stock</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input type="text" class="form-control bg-light border-start-0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Costo</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input type="text" class="form-control bg-light border-start-0" placeholder="0.00">
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stock Actual</label>
+                                <input type="number" class="form-control bg-light border-1" value="0">
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stock Mínimo</label>
+                                <input type="number" class="form-control bg-light border-1" value="5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 04 Imágenes -->
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">04</span>
+                            <h6 class="m-0 fw-semibold text-dark">Imágenes</h6>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <div class="flex-grow-1 border rounded-3 d-flex flex-column align-items-center justify-content-center py-4 bg-light" style="border-color: #e0e0e0 !important; border-style: dashed !important; border-width: 2px !important; cursor: pointer;">
+                                <i class="bi bi-cloud-arrow-up fs-2 text-muted mb-2"></i>
+                                <span class="text-secondary small fw-medium">Arrastra o haz clic para subir</span>
+                                <span class="text-muted" style="font-size: 0.65rem;">(JPEG, PNG MÁX 2MB)</span>
+                            </div>
+                            <div class="rounded-3 overflow-hidden shadow-sm" style="width: 120px; height: 100px; flex-shrink: 0; background-color: #f0e6e8;">
+                                <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Preview" class="w-100 h-100 object-fit-cover" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-2">
+                    <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseAddProductModal">Cancelar</button>
+                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d;">
+                        <i class="bi bi-save"></i> Guardar producto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool showAddProductModal = false;
+
+    private void OpenAddProductModal()
+    {
+        showAddProductModal = true;
+    }
+
+    private void CloseAddProductModal()
+    {
+        showAddProductModal = false;
+    }
+}

@@ -1,0 +1,219 @@
+@page "/Reclamos"
+@using SoluLumina.Components.Pages.Shared
+@rendermode InteractiveServer
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-shrink-0">
+            <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Reclamos</h3>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="input-group" style="width: 280px;">
+                    <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar por código o cliente..." style="font-size: 0.9rem;">
+                </div>
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <span class="visually-hidden">Nuevos reclamos</span>
+                    </span>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important;">
+                    <div class="text-end d-none d-md-block">
+                        <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
+                        <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                    </div>
+                    <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content 2 Columns -->
+        <div class="row g-4 flex-grow-1">
+            
+            <!-- Left Column: Lista de Reclamos -->
+            <div class="col-12 col-lg-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-3 px-1 flex-shrink-0">
+                    <small class="text-muted fw-bold text-uppercase" style="letter-spacing: 0.5px;">42 Reclamos Pendientes</small>
+                    <button class="btn btn-sm text-secondary d-flex align-items-center gap-1 border-0 bg-transparent hover-bg-light rounded-3">
+                        <i class="bi bi-filter"></i> Filtrar
+                    </button>
+                </div>
+
+                <div class="d-flex flex-column gap-3 pe-2 pb-4">
+                    
+                    <!-- Card 1 (Active) -->
+                    <div class="card border-0 shadow-sm rounded-4 p-3 bg-white" style="border: 2px solid #f1aeb5 !important; cursor: pointer;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold font-monospace" style="color: #d9557b; font-size: 0.85rem;">#REC-8842</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">Hace 2h</small>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Producto con envase dañado</h6>
+                        <p class="text-muted mb-3" style="font-size: 0.8rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            El serum hidratante llegó con la tapa rota y hubo derrame de contenido en la caja. Casi la mitad del producto se perdió y manchó los otros artículos de mi pedido.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <span class="badge rounded-pill fw-medium" style="background-color: #fdf5f5; color: #dc3545;">Defectuoso</span>
+                            <span class="badge rounded-pill bg-light text-secondary border fw-medium">Alta Prioridad</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="card border border-light shadow-sm rounded-4 p-3 bg-white" style="cursor: pointer; transition: all 0.2s;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold font-monospace text-secondary" style="font-size: 0.85rem;">#REC-8841</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">Hace 5h</small>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Demora en la entrega</h6>
+                        <p class="text-muted mb-3" style="font-size: 0.8rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            El pedido debió llegar ayer según la fecha estimada. Lo necesito urgente para un evento mañana. ¿Me pueden confirmar si llegará hoy?
+                        </p>
+                        <div class="d-flex gap-2">
+                            <span class="badge rounded-pill fw-medium" style="background-color: #fdf5f5; color: #dc3545;">Tardanza</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="card border border-light shadow-sm rounded-4 p-3 bg-white" style="cursor: pointer; transition: all 0.2s;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold font-monospace text-secondary" style="font-size: 0.85rem;">#REC-8839</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">Ayer</small>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Ítem Faltante</h6>
+                        <p class="text-muted mb-3" style="font-size: 0.8rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            Faltan los labiales matte de la orden 45521. Solo me llegaron las sombras y la base de maquillaje. Revisen el empaque por favor.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <span class="badge rounded-pill fw-medium bg-light text-secondary border">Incompleto</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="card border border-light shadow-sm rounded-4 p-3 bg-white" style="cursor: pointer; transition: all 0.2s;">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold font-monospace text-secondary" style="font-size: 0.85rem;">#REC-8835</span>
+                            <small class="text-muted" style="font-size: 0.75rem;">2 días</small>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-2">Error de facturación</h6>
+                        <p class="text-muted mb-3" style="font-size: 0.8rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            Se me cobró doble el cargo de envío por error en la pasarela de pagos. Solicito el extorno del monto excedente a mi tarjeta.
+                        </p>
+                        <div class="d-flex gap-2">
+                            <span class="badge rounded-pill fw-medium bg-light text-secondary border">Administrativo</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Right Column: Detalle del Reclamo -->
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 bg-white d-flex flex-column h-100">
+                    
+                    <!-- Detail Header -->
+                    <div class="p-4 border-bottom" style="border-color: #f7eff1 !important;">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-3 mb-2">
+                                    <h4 class="fw-bold m-0 text-dark">Producto con envase dañado</h4>
+                                    <span class="badge bg-light text-secondary border rounded-pill font-monospace">#REC-8842</span>
+                                </div>
+                                <div class="d-flex flex-wrap align-items-center gap-4 text-muted" style="font-size: 0.85rem;">
+                                    <span class="d-flex align-items-center gap-2"><i class="bi bi-person"></i> Elena Rodríguez</span>
+                                    <span class="d-flex align-items-center gap-2"><i class="bi bi-calendar3"></i> 24 Oct, 2023 - 10:45 AM</span>
+                                    <span class="d-flex align-items-center gap-2"><i class="bi bi-cart2"></i> Orden #45210</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-light rounded-circle text-secondary border shadow-sm d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-printer"></i></button>
+                                <button class="btn rounded-circle text-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fdf5f5; border: 1px solid #f8d7da;"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conversation / Content -->
+                    <div class="p-4 flex-grow-1" style="background-color: #fcfafb;">
+                        <!-- Client Message -->
+                        <div class="bg-white p-4 rounded-4 shadow-sm mb-3 border" style="border-color: #f0e6e8 !important;">
+                            <p class="text-dark mb-0" style="font-size: 0.95rem; line-height: 1.6;">
+                                Hola equipo de Glam. Recibí mi pedido hoy por la mañana pero lamentablemente el "Luminous Hydrating Serum" llegó con el dosificador roto. Al abrir la caja noté que había líquido derramado y el envase está prácticamente a la mitad. Adjunto fotos del estado en que llegó. ¿Cómo podemos proceder con el cambio o reembolso?
+                            </p>
+                        </div>
+                        
+                        <!-- Attachments -->
+                        <div class="d-flex gap-3 mb-5">
+                            <div class="rounded-3 overflow-hidden border shadow-sm" style="width: 120px; height: 120px; cursor: pointer;">
+                                <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Evidencia 1" class="w-100 h-100 object-fit-cover" />
+                            </div>
+                            <div class="rounded-3 overflow-hidden border shadow-sm" style="width: 120px; height: 120px; cursor: pointer;">
+                                <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Evidencia 2" class="w-100 h-100 object-fit-cover" />
+                            </div>
+                        </div>
+
+                        <!-- Acciones Internas Divider -->
+                        <div class="position-relative text-center mb-4 mt-2">
+                            <hr style="border-color: #e0e0e0;" />
+                            <span class="position-absolute top-50 start-50 translate-middle bg-light px-3 text-muted fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Acciones Internas</span>
+                        </div>
+
+                        <!-- Internal Controls -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Estado del Reclamo</label>
+                                <select class="form-select bg-white border-1 text-secondary shadow-sm">
+                                    <option selected>En Investigación</option>
+                                    <option value="1">Resuelto</option>
+                                    <option value="2">Cerrado</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Empleado Asignado</label>
+                                <select class="form-select bg-white border-1 text-secondary shadow-sm">
+                                    <option selected>Sofía Beltrán (Soporte)</option>
+                                    <option value="1">Admin Glam</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Area -->
+                    <div class="p-4 border-top" style="border-color: #f7eff1 !important; background-color: #fff;">
+                        <div class="border rounded-4 p-2 bg-light shadow-sm" style="border-color: #e0e0e0 !important;">
+                            <textarea class="form-control border-0 bg-light" rows="3" placeholder="Escribe tu respuesta al cliente para resolver el caso..." style="box-shadow: none; resize: none; font-size: 0.9rem;"></textarea>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3 px-2 pb-1">
+                                <button class="btn btn-sm btn-link text-secondary text-decoration-none d-flex align-items-center gap-2 px-0">
+                                    <i class="bi bi-paperclip fs-5"></i> <span class="fw-medium">Adjuntar archivos</span>
+                                </button>
+                                
+                                <div class="d-flex gap-2">
+                                    <!-- Botón 'Guardar Nota Interna' removido según solicitud -->
+                                    <button class="btn text-white px-4 py-2 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d; font-size: 0.9rem; font-weight: 500;">
+                                        <i class="bi bi-send-fill" style="font-size: 0.8rem;"></i> Enviar respuesta
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    .hover-bg-light:hover {
+        background-color: #f8f9fa !important;
+    }
+</style>
+

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "zmN6rFBEaBM=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\coart\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.5\\microsoft.aspnetcore.app.internal.assets.10.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}

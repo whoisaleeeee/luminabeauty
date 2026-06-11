@@ -1,0 +1,250 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\admin\\reportes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\admin\\reportes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\admin\\reclamos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\admin\\reclamos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\admin\\pedidos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\admin\\pedidos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\admin\\configuracion.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\admin\\configuracion.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\admin\\inventario.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\admin\\inventario.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\admin\\catalogo.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\admin\\catalogo.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\routes.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\notfound.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\notfound.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\error.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\error.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|c:\\users\\coart\\desktop\\pucp\\2026-1\\programacion3\\solulumina\\solulumina\\components\\pages\\shared\\navbar.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{2EBE87B2-0ECA-E0BC-747E-21A8106B4F13}|SoluLumina\\SoluLumina.csproj|solutionrelative:solulumina\\components\\pages\\shared\\navbar.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Reclamos.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Reclamos.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Admin\\Reclamos.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Reclamos.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Admin\\Reclamos.razor",
+              "ViewState": "AgIAANsAAAAAAAAAAAAAANsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T23:07:53.512Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Pedidos.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Pedidos.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Admin\\Pedidos.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Pedidos.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Admin\\Pedidos.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T23:07:51.063Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Inventario.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Inventario.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Admin\\Inventario.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Inventario.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Admin\\Inventario.razor",
+              "ViewState": "AgIAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T23:07:48.664Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Catalogo.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Catalogo.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Admin\\Catalogo.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Catalogo.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Admin\\Catalogo.razor",
+              "ViewState": "AgIAAIoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T23:07:33.973Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Reportes.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Reportes.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Admin\\Reportes.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Reportes.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Admin\\Reportes.razor",
+              "ViewState": "AgIAAB0BAAAAAAAAAAAAACUBAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T22:32:07.198Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "NotFound.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\NotFound.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\NotFound.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\NotFound.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\NotFound.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T20:36:50.605Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Configuracion.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Configuracion.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Admin\\Configuracion.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Admin\\Configuracion.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Admin\\Configuracion.razor",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAAAHYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T04:06:34.174Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "App.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\App.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\App.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\App.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\App.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T20:37:01.878Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Routes.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Routes.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Routes.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Routes.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Routes.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T20:37:06.189Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Home.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Home.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Home.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Home.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Home.razor",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T20:36:43.092Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Error.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Error.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Error.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Error.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Error.razor",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T20:36:32.655Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "SoluLumina\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\appsettings.Development.json",
+              "RelativeToolTip": "SoluLumina\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-06-01T20:37:10.714Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Program.cs",
+              "RelativeDocumentMoniker": "SoluLumina\\Program.cs",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Program.cs",
+              "RelativeToolTip": "SoluLumina\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-06-01T20:33:59.538Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "NavBar.razor",
+              "DocumentMoniker": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Shared\\NavBar.razor",
+              "RelativeDocumentMoniker": "SoluLumina\\Components\\Pages\\Shared\\NavBar.razor",
+              "ToolTip": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\Components\\Pages\\Shared\\NavBar.razor",
+              "RelativeToolTip": "SoluLumina\\Components\\Pages\\Shared\\NavBar.razor",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABwAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-06-01T04:11:22.696Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
