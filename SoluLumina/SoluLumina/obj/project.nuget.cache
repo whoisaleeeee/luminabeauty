@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "zmN6rFBEaBM=",
+  "dgSpecHash": "HfeNRsLj3Xc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\coart\\Desktop\\PUCP\\2026-1\\Programacion3\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
+  "projectFilePath": "D:\\Mauri\\Programación\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\coart\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.5\\microsoft.aspnetcore.app.internal.assets.10.0.5.nupkg.sha512"
+    "C:\\Users\\mauri\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.9\\microsoft.aspnetcore.app.internal.assets.10.0.9.nupkg.sha512"
   ],
   "logs": []
 }

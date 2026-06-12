@@ -1,8 +1,8 @@
 wwwroot\app.css
 Components\Layout\ReconnectModal.razor.js
-C:\Users\coart\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.5\build\..\_framework\blazor.web.js
-C:\Users\coart\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.5\build\..\_framework\blazor.server.js
-C:\Users\coart\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.5\_framework\blazor.server.js
-C:\Users\coart\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.5\_framework\blazor.web.js
-C:\Users\coart\Desktop\PUCP\2026-1\Programacion3\SoluLumina\SoluLumina\Components\Layout\ReconnectModal.razor.js
-C:\Users\coart\Desktop\PUCP\2026-1\Programacion3\SoluLumina\SoluLumina\wwwroot\app.css
+C:\Users\mauri\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.9\build\..\_framework\blazor.web.js
+C:\Users\mauri\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.9\build\..\_framework\blazor.server.js
+D:\Mauri\Programación\luminabeauty\SoluLumina\SoluLumina\wwwroot\app.css
+D:\Mauri\Programación\luminabeauty\SoluLumina\SoluLumina\Components\Layout\ReconnectModal.razor.js
+C:\Users\mauri\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.9\_framework\blazor.web.js
+C:\Users\mauri\.nuget\packages\microsoft.aspnetcore.app.internal.assets\10.0.9\_framework\blazor.server.js
