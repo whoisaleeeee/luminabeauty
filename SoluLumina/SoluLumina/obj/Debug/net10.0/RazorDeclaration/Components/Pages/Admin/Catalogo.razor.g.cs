@@ -13,85 +13,85 @@ namespace SoluLumina.Components.Pages.Admin
     using global::System.Threading.Tasks;
     using global::Microsoft.AspNetCore.Components;
 #nullable restore
-#line (1,2)-(1,23) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (1,2)-(1,23) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using System.Net.Http
 
 #nullable disable
     ;
 #nullable restore
-#line (2,2)-(2,28) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (2,2)-(2,28) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using System.Net.Http.Json
 
 #nullable disable
     ;
 #nullable restore
-#line (3,2)-(3,45) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (3,2)-(3,45) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Forms
 
 #nullable disable
     ;
 #nullable restore
-#line (4,2)-(4,47) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (4,2)-(4,47) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Routing
 
 #nullable disable
     ;
 #nullable restore
-#line (5,2)-(5,43) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (5,2)-(5,43) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web
 
 #nullable disable
     ;
 #nullable restore
-#line (6,2)-(6,61) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (6,2)-(6,61) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using static Microsoft.AspNetCore.Components.Web.RenderMode
 
 #nullable disable
     ;
 #nullable restore
-#line (7,2)-(7,58) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (7,2)-(7,58) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web.Virtualization
 
 #nullable disable
     ;
 #nullable restore
-#line (8,2)-(8,27) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (8,2)-(8,27) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.JSInterop
 
 #nullable disable
     ;
 #nullable restore
-#line (9,2)-(9,18) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (9,2)-(9,18) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using SoluLumina
 
 #nullable disable
     ;
 #nullable restore
-#line (10,2)-(10,29) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (10,2)-(10,29) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using SoluLumina.Components
 
 #nullable disable
     ;
 #nullable restore
-#line (11,2)-(11,36) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (11,2)-(11,36) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using SoluLumina.Components.Layout
 
 #nullable disable
     ;
 #nullable restore
-#line (2,2)-(2,42) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
+#line (2,2)-(2,42) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
 using SoluLumina.Components.Pages.Shared
 
 #nullable disable
     ;
 #nullable restore
-#line (3,2)-(3,25) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
+#line (3,2)-(3,25) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
 using SoluLumina.Models
 
 #nullable disable
     ;
 #nullable restore
-#line (4,2)-(4,23) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
+#line (4,2)-(4,23) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
 using SoluLumina.Data
 
 #nullable disable
@@ -101,7 +101,7 @@ using SoluLumina.Data
     [global::Microsoft.AspNetCore.Components.RouteAttribute(
     // language=Route,Component
 #nullable restore
-#line (1,7)-(1,10) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
+#line (1,7)-(1,10) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
 "/"
 
 #line default
@@ -119,25 +119,37 @@ using SoluLumina.Data
         }
         #pragma warning restore 1998
 #nullable restore
-#line (223,8)-(246,1) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
+#line (228,8)-(263,1) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Catalogo.razor"
 
     private bool showAddProductModal = false;
     private bool showProfileDropdown = false;
     private List<Product> Productos = SampleProducts.GetProducts();
+    private List<CategoriaProducto> Categorias = SampleCategories.GetCategories();
+    private int selectedCategoryId = 0;
+    private string searchTerm = string.Empty;
 
     private void ToggleProfileDropdown()
     {
         showProfileDropdown = !showProfileDropdown;
     }
 
-    // searchTerm retained for potential future use
-    private string searchTerm = string.Empty;
+    private void OnCategoryChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedCategoryId = id;
+        }
+    }
+
+    private IEnumerable<Product> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => Categorias.Any(c => c.Id == selectedCategoryId && c.Nombre == p.Categoria));
+
+    // Apply search term filter on top of category filter
+    private IEnumerable<Product> FilteredProducts => FilteredByCategory.Where(p => string.IsNullOrWhiteSpace(searchTerm) || p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
     private void OnProductAdded(Product newProduct)
     {
         // new products are not added to the list; modal only
     }
-
 
     private void OpenAddProductModal()
     {

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Mauri\\Programación\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj": {}
+    "D:\\Mauri\\nube\\OneDrive\\Documentos\\GitHub\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj": {}
   },
   "projects": {
-    "D:\\Mauri\\Programación\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj": {
+    "D:\\Mauri\\nube\\OneDrive\\Documentos\\GitHub\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Mauri\\Programación\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
+        "projectUniqueName": "D:\\Mauri\\nube\\OneDrive\\Documentos\\GitHub\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
         "projectName": "SoluLumina",
-        "projectPath": "D:\\Mauri\\Programación\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
-        "packagesPath": "C:\\Users\\mauri\\.nuget\\packages\\",
-        "outputPath": "D:\\Mauri\\Programación\\luminabeauty\\SoluLumina\\SoluLumina\\obj\\",
+        "projectPath": "D:\\Mauri\\nube\\OneDrive\\Documentos\\GitHub\\luminabeauty\\SoluLumina\\SoluLumina\\SoluLumina.csproj",
+        "packagesPath": "C:\\Users\\MORALES\\.nuget\\packages\\",
+        "outputPath": "D:\\Mauri\\nube\\OneDrive\\Documentos\\GitHub\\luminabeauty\\SoluLumina\\SoluLumina\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\mauri\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\MORALES\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

@@ -67,9 +67,9 @@
                     <i class="bi bi-box position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <small class="text-muted fw-bold d-block" style="font-size: 0.8rem;">Total Productos</small>
-                        <span class="badge rounded-pill" style="background-color: #e2f3eb; color: #198754; font-size: 0.7rem;"><i class="bi bi-arrow-up"></i> 12</span>
+                        <span class="badge rounded-pill" style="background-color: #e2f3eb; color: #198754; font-size: 0.7rem;"><i class="bi bi-arrow-up"></i> @FilteredProducts.Count()</span>
                     </div>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">248</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@FilteredProducts.Count()</h2>
                 </div>
             </div>
             
@@ -77,7 +77,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-tag position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Marcas Activas</small>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">34</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@FilteredProducts.Select(p => p.Marca).Distinct().Count()</h2>
                 </div>
             </div>
             
@@ -85,7 +85,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-layers position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Categorías</small>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">12</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@FilteredProducts.Select(p => p.Categoria).Distinct().Count()</h2>
                 </div>
             </div>
             
@@ -94,9 +94,9 @@
                     <i class="bi bi-exclamation-triangle position-absolute opacity-25" style="font-size: 5rem; top: -10px; right: -10px; color: #d9557b;"></i>
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <small class="fw-bold d-block" style="font-size: 0.8rem; color: #d9557b;">Sin Stock</small>
-                        <span class="badge rounded-pill bg-white text-danger border border-danger-subtle" style="font-size: 0.65rem;">¡Alerta!</span>
+                        <span class="badge rounded-pill bg-white text-danger border border-danger-subtle" style="font-size: 0.65rem;">@ZeroStockCount</span>
                     </div>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #b02a37; line-height: 1;">7</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #b02a37; line-height: 1;">@ZeroStockCount</h2>
                 </div>
             </div>
         </div>
@@ -127,10 +127,12 @@
                     </div>
                     <div>
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
-                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;">
-                            <option selected>Todas las marcas</option>
-                            <option value="1">Dior</option>
-                            <option value="2">Clinique</option>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnBrandChanged">
+                            <option value="0" selected>Todas las marcas</option>
+                            @foreach (var marca in Marcas)
+                            {
+                                <option value="@marca.Id">@marca.Nombre</option>
+                            }
                         </select>
                     </div>
                 </div>
@@ -188,9 +190,9 @@
                                 <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: @p.StockBgColor; color: @p.StockColor; padding: 0.4em 0.8em;">@p.Stock uds</span></td>
                                 <td class="py-3 px-4 text-end">
                                 <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
+                                    <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar" @onclick="() => EditProduct(p)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
                                     <button class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -224,6 +226,7 @@
 </div>
 
 <AddProductModal @bind-IsVisible="showAddProductModal" OnProductAdded="OnProductAdded" />
+<EditProductModal @bind-IsVisible="showEditProductModal" Product="selectedProduct" OnProductUpdated="OnProductUpdated" />
 
 @code {
     private bool showAddProductModal = false;
@@ -231,6 +234,8 @@
     private List<Product> Productos = SampleProducts.GetProducts();
     private List<CategoriaProducto> Categorias = SampleCategories.GetCategories();
     private int selectedCategoryId = 0;
+    private int selectedBrandId = 0;
+    private List<Marca> Marcas = SampleBrands.GetMarcas();
     private string searchTerm = string.Empty;
 
     private void ToggleProfileDropdown()
@@ -246,18 +251,61 @@
         }
     }
 
+    private void OnBrandChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedBrandId = id;
+        }
+    }
+
+    private void OpenAddProductModal()
+    {
+        showAddProductModal = true;
+    }
+
     private IEnumerable<Product> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => Categorias.Any(c => c.Id == selectedCategoryId && c.Nombre == p.Categoria));
 
-    // Apply search term filter on top of category filter
-    private IEnumerable<Product> FilteredProducts => FilteredByCategory.Where(p => string.IsNullOrWhiteSpace(searchTerm) || p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+    // Apply search term and brand filter on top of category filter
+    private IEnumerable<Product> FilteredProducts => FilteredByCategory
+        .Where(p => selectedBrandId == 0 || Marcas.Any(m => m.Id == selectedBrandId && m.Nombre == p.Marca))
+        .Where(p => string.IsNullOrWhiteSpace(searchTerm) || p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
+    // Count of products with zero stock in the filtered list
+    private int ZeroStockCount => FilteredProducts.Count(p => p.Stock == 0);
 
     private void OnProductAdded(Product newProduct)
     {
         // new products are not added to the list; modal only
     }
 
-    private void OpenAddProductModal()
+    private bool showEditProductModal = false;
+    private Product selectedProduct = new Product();
+
+    private void EditProduct(Product product)
     {
-        showAddProductModal = true;
+        selectedProduct = new Product
+        {
+            Id = product.Id,
+            Nombre = product.Nombre,
+            SKU = product.SKU,
+            PrecioVenta = product.PrecioVenta,
+            Stock = product.Stock,
+            StockMinimo = product.StockMinimo,
+            TipoPiel = product.TipoPiel,
+            ImagenUrl = product.ImagenUrl,
+            Marca = product.Marca,
+            Categoria = product.Categoria
+        };
+        showEditProductModal = true;
+    }
+
+    private void OnProductUpdated(Product updatedProduct)
+    {
+        var idx = Productos.FindIndex(p => p.Id == updatedProduct.Id);
+        if (idx != -1)
+        {
+            Productos[idx] = updatedProduct;
+        }
     }
 }

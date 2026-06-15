@@ -13,73 +13,73 @@ namespace SoluLumina.Components.Pages.Admin
     using global::System.Threading.Tasks;
     using global::Microsoft.AspNetCore.Components;
 #nullable restore
-#line (1,2)-(1,23) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (1,2)-(1,23) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using System.Net.Http
 
 #nullable disable
     ;
 #nullable restore
-#line (2,2)-(2,28) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (2,2)-(2,28) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using System.Net.Http.Json
 
 #nullable disable
     ;
 #nullable restore
-#line (3,2)-(3,45) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (3,2)-(3,45) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Forms
 
 #nullable disable
     ;
 #nullable restore
-#line (4,2)-(4,47) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (4,2)-(4,47) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Routing
 
 #nullable disable
     ;
 #nullable restore
-#line (5,2)-(5,43) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (5,2)-(5,43) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web
 
 #nullable disable
     ;
 #nullable restore
-#line (6,2)-(6,61) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (6,2)-(6,61) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using static Microsoft.AspNetCore.Components.Web.RenderMode
 
 #nullable disable
     ;
 #nullable restore
-#line (7,2)-(7,58) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (7,2)-(7,58) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.AspNetCore.Components.Web.Virtualization
 
 #nullable disable
     ;
 #nullable restore
-#line (8,2)-(8,27) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (8,2)-(8,27) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using Microsoft.JSInterop
 
 #nullable disable
     ;
 #nullable restore
-#line (9,2)-(9,18) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (9,2)-(9,18) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using SoluLumina
 
 #nullable disable
     ;
 #nullable restore
-#line (10,2)-(10,29) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (10,2)-(10,29) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using SoluLumina.Components
 
 #nullable disable
     ;
 #nullable restore
-#line (11,2)-(11,36) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
+#line (11,2)-(11,36) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\_Imports.razor"
 using SoluLumina.Components.Layout
 
 #nullable disable
     ;
 #nullable restore
-#line (2,2)-(2,42) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Reclamos.razor"
+#line (2,2)-(2,42) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Reclamos.razor"
 using SoluLumina.Components.Pages.Shared
 
 #nullable disable
@@ -89,7 +89,7 @@ using SoluLumina.Components.Pages.Shared
     [global::Microsoft.AspNetCore.Components.RouteAttribute(
     // language=Route,Component
 #nullable restore
-#line (1,7)-(1,18) "d:\Mauri\Estudios\Informatica\Proyectos\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Reclamos.razor"
+#line (1,7)-(1,18) "d:\Mauri\ArchProgramacion\C#\SoluLumina\SoluLumina\Components\Pages\Admin\Reclamos.razor"
 "/Reclamos"
 
 #line default
