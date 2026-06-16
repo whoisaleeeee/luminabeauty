@@ -37,3 +37,12 @@ build/
 
 ### Mac OS ###
 .DS_Store
+# Visual Studio
+.vs/
+
+# .NET
+bin/
+obj/
+
+# JetBrains
+.idea/
