@@ -91,32 +91,32 @@
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-2">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">ID de Pedido</label>
-                    <input type="text" class="form-control bg-light border-1" placeholder="#ORD-">
+                    <input type="text" class="form-control bg-light border-1" placeholder="#ORD-" @bind="filtroId" @bind:event="oninput" @onkeyup="BuscarAutomatico">
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Cliente</label>
-                    <input type="text" class="form-control bg-light border-1" placeholder="Nombre">
+                    <input type="text" class="form-control bg-light border-1" placeholder="Nombre" @bind="filtroCliente" @bind:event="oninput" @onkeyup="BuscarAutomatico">
                 </div>
                 <div class="col-12 col-md-2">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Estado</label>
-                    <select class="form-select bg-light border-1 text-secondary">
-                        <option selected>Todos</option>
-                        <option value="1">Pendiente</option>
-                        <option value="2">Preparando</option>
-                        <option value="3">En Camino</option>
-                        <option value="4">Entregado</option>
+                    <select class="form-select bg-light border-1 text-secondary" @bind="filtroEstado" @bind:after="Buscar">
+                        <option value="Todos">Todos</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Preparando">Preparando</option>
+                        <option value="En Camino">En Camino</option>
+                        <option value="Entregado">Entregado</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-2">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Fecha</label>
-                    <input type="date" class="form-control bg-light border-1 text-secondary">
+                    <input type="date" class="form-control bg-light border-1 text-secondary" @bind="filtroFecha" @bind:after="Buscar">
                 </div>
                 <div class="col-12 col-md-3 d-flex justify-content-end gap-2">
-                    <button class="btn btn-light px-3 border rounded-3 text-secondary shadow-sm" style="font-size: 0.9rem; font-weight: 500;">
+                    <button class="btn btn-light px-3 border rounded-3 text-secondary shadow-sm" style="font-size: 0.9rem; font-weight: 500;" @onclick="LimpiarFiltros">
                         Limpiar
                     </button>
                     <!-- Improved action button: Replaced Exportar with Buscar -->
-                    <button class="btn text-white px-3 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d; font-size: 0.9rem; font-weight: 500;">
+                    <button class="btn text-white px-3 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d; font-size: 0.9rem; font-weight: 500;" @onclick="Buscar">
                         <i class="bi bi-search"></i> Buscar
                     </button>
                 </div>
@@ -138,104 +138,61 @@
                         </tr>
                     </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
-                        <!-- Fila 1 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 fw-bold text-dark">#ORD-9012</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">VA</div>
-                                    <span class="fw-medium text-dark">Valeria Arias</span>
-                                </div>
-                            </td>
-                            <td>Hoy, 10:45 AM</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">Entregado</span></td>
-                            <td class="fw-bold text-dark">S/ 420.00 <span class="text-muted fw-normal small">(3 prod.)</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-3 px-3"><i class="bi bi-eye"></i> Detalles</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Fila 2 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 fw-bold text-dark">#ORD-9013</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">CM</div>
-                                    <span class="fw-medium text-dark">Camila Mendoza</span>
-                                </div>
-                            </td>
-                            <td>Hoy, 09:20 AM</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #fff3cd; color: #fd7e14; padding: 0.4em 0.8em;">Preparando</span></td>
-                            <td class="fw-bold text-dark">S/ 185.50 <span class="text-muted fw-normal small">(1 prod.)</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-3 px-3"><i class="bi bi-eye"></i> Detalles</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Fila 3 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 fw-bold text-dark">#ORD-9014</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">LR</div>
-                                    <span class="fw-medium text-dark">Luciana Rojas</span>
-                                </div>
-                            </td>
-                            <td>Hoy, 08:15 AM</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #cff4fc; color: #0dcaf0; padding: 0.4em 0.8em;">En Camino</span></td>
-                            <td class="fw-bold text-dark">S/ 290.00 <span class="text-muted fw-normal small">(2 prod.)</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-3 px-3"><i class="bi bi-eye"></i> Detalles</button>
-                            </td>
-                        </tr>
-                        
-                        <!-- Fila 4 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 fw-bold text-dark">#ORD-9005</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">SG</div>
-                                    <span class="fw-medium text-dark">Sofia Galdos</span>
-                                </div>
-                            </td>
-                            <td>Ayer, 07:45 PM</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #f8d7da; color: #dc3545; padding: 0.4em 0.8em;">Pendiente</span></td>
-                            <td class="fw-bold text-dark">S/ 844.00 <span class="text-muted fw-normal small">(5 prod.)</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-3 px-3"><i class="bi bi-eye"></i> Detalles</button>
-                            </td>
-                        </tr>
-
-                        <!-- Fila 5 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 fw-bold text-dark">#ORD-9004</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">DP</div>
-                                    <span class="fw-medium text-dark">Daniela Paz</span>
-                                </div>
-                            </td>
-                            <td>Ayer, 04:30 PM</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">Entregado</span></td>
-                            <td class="fw-bold text-dark">S/ 105.00 <span class="text-muted fw-normal small">(2 prod.)</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-3 px-3"><i class="bi bi-eye"></i> Detalles</button>
-                            </td>
-                        </tr>
+                        @if (PedidosPaginados.Any())
+                        {
+                            @foreach (var pedido in PedidosPaginados)
+                            {
+                                <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                                    <td class="py-3 px-4 fw-bold text-dark">@pedido.IdStr</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">@pedido.Iniciales</div>
+                                            <span class="fw-medium text-dark">@pedido.Cliente</span>
+                                        </div>
+                                    </td>
+                                    <td>@pedido.FechaFormateada</td>
+                                    <td><span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(pedido.Estado); color: @GetEstadoTextColor(pedido.Estado); padding: 0.4em 0.8em;">@pedido.Estado</span></td>
+                                    <td class="fw-bold text-dark">S/ @pedido.Total.ToString("F2") <span class="text-muted fw-normal small">(@pedido.CantidadProductos prod.)</span></td>
+                                    <td class="py-3 px-4 text-end">
+                                        <button class="btn btn-sm btn-light text-secondary rounded-3 px-3" @onclick="() => VerDetalles(pedido)"><i class="bi bi-eye"></i> Detalles</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No se encontraron pedidos con los filtros aplicados.</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
 
             <!-- Paginación -->
             <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: #f7eff1 !important; background-color: #fbf8f9;">
-                <small class="text-muted" style="font-size: 0.85rem;">Mostrando 1-5 de 23 pedidos</small>
+                <small class="text-muted" style="font-size: 0.85rem;">Mostrando @(TotalPedidosFiltrados == 0 ? 0 : (paginaActual - 1) * itemsPorPagina + 1)-@(Math.Min(paginaActual * itemsPorPagina, TotalPedidosFiltrados)) de @TotalPedidosFiltrados pedidos</small>
                 <nav>
                     <ul class="pagination pagination-sm m-0 gap-1">
-                        <li class="page-item disabled"><a class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm"><i class="bi bi-chevron-left"></i></a></li>
-                        <li class="page-item"><a class="page-link rounded-2 active border-0 text-white shadow-sm" style="background-color: #834a5d;">1</a></li>
-                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <button class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual - 1)" disabled="@(paginaActual == 1)"><i class="bi bi-chevron-left"></i></button>
+                        </li>
+                        
+                        @for (int i = 1; i <= TotalPaginas; i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item">
+                                <button class="page-link rounded-2 @(paginaActual == pageNumber ? "active border-0 text-white" : "border text-secondary bg-white") shadow-sm" 
+                                        style="@(paginaActual == pageNumber ? "background-color: #834a5d;" : "")"
+                                        @onclick="() => CambiarPagina(pageNumber)">
+                                    @pageNumber
+                                </button>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == TotalPaginas || TotalPaginas == 0 ? "disabled" : "")">
+                            <button class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual + 1)" disabled="@(paginaActual == TotalPaginas || TotalPaginas == 0)"><i class="bi bi-chevron-right"></i></button>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -245,7 +202,315 @@
 
 </div>
 
-@code {
-    // Aquí puedes añadir la lógica de C# para gestionar el filtrado de pedidos cuando lo necesites.
-}
+    <!-- Modal Detalles -->
+    @if (mostrarModal && pedidoSeleccionado != null)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 rounded-4 shadow">
+                    <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                        <h5 class="modal-title fw-bold" style="color: #6a3849;">Detalles del Pedido @pedidoSeleccionado.IdStr</h5>
+                        <button type="button" class="btn-close" @onclick="CerrarModal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted small fw-bold text-uppercase">Cliente</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;">@pedidoSeleccionado.Iniciales</div>
+                                    <div>
+                                        <p class="m-0 fw-bold text-dark">@pedidoSeleccionado.Cliente</p>
+                                        <small class="text-muted">cliente@ejemplo.com</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                <p class="mb-1 text-muted small fw-bold text-uppercase">Estado actual</p>
+                                <span class="badge rounded-pill fw-medium fs-6" style="background-color: @GetEstadoBgColor(pedidoSeleccionado.Estado); color: @GetEstadoTextColor(pedidoSeleccionado.Estado); padding: 0.5em 1em;">@pedidoSeleccionado.Estado</span>
+                                <p class="mt-2 mb-0 small text-muted">Fecha: @pedidoSeleccionado.FechaFormateada</p>
+                            </div>
+                        </div>
 
+                        <h6 class="fw-bold mb-3" style="color: #4f4f4f;">Productos</h6>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead style="background-color: #fbf8f9; font-size: 0.8rem; color: #6c757d;">
+                                    <tr>
+                                        <th class="border-0 rounded-start">Producto</th>
+                                        <th class="border-0 text-center">Cant.</th>
+                                        <th class="border-0 text-end">Precio Un.</th>
+                                        <th class="border-0 text-end rounded-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var prod in pedidoSeleccionado.Detalles)
+                                    {
+                                        <tr>
+                                            <td class="border-bottom text-dark fw-medium">@prod.Nombre</td>
+                                            <td class="border-bottom text-center">@prod.Cantidad</td>
+                                            <td class="border-bottom text-end">S/ @prod.PrecioUnitario.ToString("F2")</td>
+                                            <td class="border-bottom text-end fw-bold">S/ @prod.Subtotal.ToString("F2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end border-0 pt-3 fw-bold text-muted">Subtotal:</td>
+                                        <td class="text-end border-0 pt-3 fw-bold">S/ @pedidoSeleccionado.Subtotal.ToString("F2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end border-0 pb-3 fw-bold text-muted">Envío:</td>
+                                        <td class="text-end border-0 pb-3 fw-bold">S/ @pedidoSeleccionado.CostoEnvio.ToString("F2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end border-0 pt-2 fw-black fs-5" style="color: #6a3849;">Total:</td>
+                                        <td class="text-end border-0 pt-2 fw-black fs-5" style="color: #6a3849;">S/ @pedidoSeleccionado.Total.ToString("F2")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+                        <button type="button" class="btn btn-light rounded-3 px-4" @onclick="CerrarModal">Cerrar</button>
+                        <button type="button" class="btn text-white rounded-3 px-4 shadow-sm" style="background-color: #834a5d;">Cambiar Estado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+@code {
+    private string filtroId = "";
+    private string filtroCliente = "";
+    private string filtroEstado = "Todos";
+    private DateTime? filtroFecha;
+
+    private int paginaActual = 1;
+    private int itemsPorPagina = 5;
+
+    private bool mostrarModal = false;
+    private Pedido pedidoSeleccionado;
+
+    private List<Pedido> todosLosPedidos = new();
+
+    protected override void OnInitialized()
+    {
+        // Generar datos estáticos basados en el HTML original para demostración
+        var r = new Random(1);
+        todosLosPedidos = new List<Pedido>
+        {
+            new Pedido { Id = 9012, Cliente = "Valeria Arias", Fecha = DateTime.Today.AddHours(10).AddMinutes(45), Estado = "Entregado", CostoEnvio = 15.00m,
+                Detalles = new List<DetallePedido> { 
+                    new DetallePedido { Nombre = "Crema Hidratante Facial", Cantidad = 1, PrecioUnitario = 150.00m },
+                    new DetallePedido { Nombre = "Serum Vitamina C", Cantidad = 2, PrecioUnitario = 127.50m }
+                }
+            },
+            new Pedido { Id = 9013, Cliente = "Camila Mendoza", Fecha = DateTime.Today.AddHours(9).AddMinutes(20), Estado = "Preparando", CostoEnvio = 10.00m,
+                Detalles = new List<DetallePedido> { 
+                    new DetallePedido { Nombre = "Paleta de Sombras Neutras", Cantidad = 1, PrecioUnitario = 175.50m }
+                }
+            },
+            new Pedido { Id = 9014, Cliente = "Luciana Rojas", Fecha = DateTime.Today.AddHours(8).AddMinutes(15), Estado = "En Camino", CostoEnvio = 15.00m,
+                Detalles = new List<DetallePedido> { 
+                    new DetallePedido { Nombre = "Base Liquida Mate", Cantidad = 1, PrecioUnitario = 120.00m },
+                    new DetallePedido { Nombre = "Corrector de Ojeras", Cantidad = 1, PrecioUnitario = 155.00m }
+                }
+            },
+            new Pedido { Id = 9005, Cliente = "Sofia Galdos", Fecha = DateTime.Today.AddDays(-1).AddHours(19).AddMinutes(45), Estado = "Pendiente", CostoEnvio = 0.00m,
+                Detalles = new List<DetallePedido> { 
+                    new DetallePedido { Nombre = "Set Brochas Profesionales", Cantidad = 1, PrecioUnitario = 350.00m },
+                    new DetallePedido { Nombre = "Esponja Maquillaje", Cantidad = 2, PrecioUnitario = 25.00m },
+                    new DetallePedido { Nombre = "Fijador de Maquillaje", Cantidad = 2, PrecioUnitario = 222.00m }
+                }
+            },
+            new Pedido { Id = 9004, Cliente = "Daniela Paz", Fecha = DateTime.Today.AddDays(-1).AddHours(16).AddMinutes(30), Estado = "Entregado", CostoEnvio = 15.00m,
+                Detalles = new List<DetallePedido> { 
+                    new DetallePedido { Nombre = "Labial Liquido Rojo", Cantidad = 1, PrecioUnitario = 45.00m },
+                    new DetallePedido { Nombre = "Delineador en Gel", Cantidad = 1, PrecioUnitario = 45.00m }
+                }
+            }
+        };
+
+        // Agregar más pedidos para demostrar la paginación
+        string[] nombres = { "Maria", "Jose", "Andrea", "Luis", "Ana", "Carlos", "Diana", "Jorge", "Laura", "Pedro" };
+        string[] apellidos = { "Garcia", "Martinez", "Rodriguez", "Lopez", "Gonzalez", "Perez", "Sanchez", "Ramirez", "Torres", "Flores" };
+        string[] estados = { "Pendiente", "Preparando", "En Camino", "Entregado" };
+
+        for (int i = 0; i < 18; i++)
+        {
+            var p = new Pedido
+            {
+                Id = 8900 + i,
+                Cliente = $"{nombres[r.Next(nombres.Length)]} {apellidos[r.Next(apellidos.Length)]}",
+                Fecha = DateTime.Today.AddDays(-r.Next(1, 10)).AddHours(r.Next(8, 20)).AddMinutes(r.Next(0, 60)),
+                Estado = estados[r.Next(estados.Length)],
+                CostoEnvio = r.Next(0, 2) == 0 ? 0 : 15m,
+                Detalles = new List<DetallePedido>()
+            };
+            int numProds = r.Next(1, 4);
+            for (int j = 0; j < numProds; j++)
+            {
+                p.Detalles.Add(new DetallePedido
+                {
+                    Nombre = $"Producto Genérico {r.Next(1, 100)}",
+                    Cantidad = r.Next(1, 3),
+                    PrecioUnitario = r.Next(20, 200) + 0.90m
+                });
+            }
+            todosLosPedidos.Add(p);
+        }
+        
+        todosLosPedidos = todosLosPedidos.OrderByDescending(p => p.Fecha).ToList();
+    }
+
+    private IEnumerable<Pedido> PedidosFiltrados
+    {
+        get
+        {
+            var query = todosLosPedidos.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(filtroId))
+            {
+                var fId = filtroId.Replace("#ORD-", "").Trim();
+                query = query.Where(p => p.Id.ToString().Contains(fId));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtroCliente))
+            {
+                query = query.Where(p => p.Cliente.Contains(filtroCliente, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filtroEstado != "Todos")
+            {
+                query = query.Where(p => p.Estado.Equals(filtroEstado, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filtroFecha.HasValue)
+            {
+                query = query.Where(p => p.Fecha.Date == filtroFecha.Value.Date);
+            }
+
+            return query;
+        }
+    }
+
+    private int TotalPedidosFiltrados => PedidosFiltrados.Count();
+
+    private int TotalPaginas => (int)Math.Ceiling(TotalPedidosFiltrados / (double)itemsPorPagina);
+
+    private IEnumerable<Pedido> PedidosPaginados => PedidosFiltrados.Skip((paginaActual - 1) * itemsPorPagina).Take(itemsPorPagina);
+
+    private void Buscar()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void BuscarAutomatico()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void LimpiarFiltros()
+    {
+        filtroId = "";
+        filtroCliente = "";
+        filtroEstado = "Todos";
+        filtroFecha = null;
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void CambiarPagina(int nuevaPagina)
+    {
+        if (nuevaPagina >= 1 && nuevaPagina <= TotalPaginas)
+        {
+            paginaActual = nuevaPagina;
+            StateHasChanged();
+        }
+    }
+
+    private void VerDetalles(Pedido pedido)
+    {
+        pedidoSeleccionado = pedido;
+        mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+        pedidoSeleccionado = null;
+    }
+
+    private string GetEstadoBgColor(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "#f8d7da",
+            "Preparando" => "#fff3cd",
+            "En Camino" => "#cff4fc",
+            "Entregado" => "#e2f3eb",
+            _ => "#f8f9fa"
+        };
+    }
+
+    private string GetEstadoTextColor(string estado)
+    {
+        return estado switch
+        {
+            "Pendiente" => "#dc3545",
+            "Preparando" => "#fd7e14",
+            "En Camino" => "#0dcaf0",
+            "Entregado" => "#198754",
+            _ => "#6c757d"
+        };
+    }
+
+    public class Pedido
+    {
+        public int Id { get; set; }
+        public string Cliente { get; set; }
+        public DateTime Fecha { get; set; }
+        public string Estado { get; set; }
+        public List<DetallePedido> Detalles { get; set; } = new();
+        public decimal CostoEnvio { get; set; }
+
+        public string IdStr => $"#ORD-{Id}";
+        
+        public string Iniciales
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Cliente)) return "?";
+                var parts = Cliente.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+                return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+            }
+        }
+
+        public string FechaFormateada
+        {
+            get
+            {
+                if (Fecha.Date == DateTime.Today)
+                    return $"Hoy, {Fecha:hh:mm tt}";
+                if (Fecha.Date == DateTime.Today.AddDays(-1))
+                    return $"Ayer, {Fecha:hh:mm tt}";
+                return $"{Fecha:dd/MM/yy}, {Fecha:hh:mm tt}";
+            }
+        }
+
+        public decimal Subtotal => Detalles.Sum(d => d.Subtotal);
+        public decimal Total => Subtotal + CostoEnvio;
+        public int CantidadProductos => Detalles.Sum(d => d.Cantidad);
+    }
+
+    public class DetallePedido
+    {
+        public string Nombre { get; set; }
+        public int Cantidad { get; set; }
+        public decimal PrecioUnitario { get; set; }
+        public decimal Subtotal => Cantidad * PrecioUnitario;
+    }
+}
