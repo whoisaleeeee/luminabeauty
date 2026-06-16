@@ -13,10 +13,6 @@
             <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Pedidos</h3>
             
             <div class="d-flex align-items-center gap-3">
-                <div class="input-group" style="width: 250px;">
-                    <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar pedido..." style="font-size: 0.9rem;">
-                </div>
                 <button class="btn btn-link text-secondary position-relative p-1">
                     <i class="bi bi-bell fs-5"></i>
                 </button>
@@ -91,7 +87,10 @@
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-2">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">ID de Pedido</label>
-                    <input type="text" class="form-control bg-light border-1" placeholder="#ORD-" @bind="filtroId" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                    <div class="input-group shadow-sm rounded-3">
+                        <span class="input-group-text bg-white border-1 text-secondary fw-bold" style="font-size: 0.85rem; border-right: 0;">#ORD-</span>
+                        <input type="text" class="form-control bg-white border-1" style="border-left: 0;" placeholder="Ej: 9012" @bind="filtroId" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                    </div>
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Cliente</label>
@@ -202,6 +201,21 @@
 
 </div>
 
+    <!-- Toast Notification -->
+    @if (!string.IsNullOrEmpty(mensajeExito))
+    {
+        <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1055">
+            <div class="toast show align-items-center text-white border-0 shadow-lg rounded-4" style="background-color: #198754;" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex p-1">
+                    <div class="toast-body d-flex align-items-center fw-medium" style="font-size: 0.95rem;">
+                        <i class="bi bi-check-circle-fill fs-4 me-3"></i> @mensajeExito
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => mensajeExito = string.Empty" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
     <!-- Modal Detalles -->
     @if (mostrarModal && pedidoSeleccionado != null)
     {
@@ -270,9 +284,20 @@
                             </table>
                         </div>
                     </div>
-                    <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light rounded-3 px-4" @onclick="CerrarModal">Cerrar</button>
-                        <button type="button" class="btn text-white rounded-3 px-4 shadow-sm" style="background-color: #834a5d;">Cambiar Estado</button>
+                    <div class="modal-footer border-top-0 pt-0 px-4 pb-4 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3 bg-light p-2 px-3 rounded-4 border">
+                            <label class="fw-bold small text-muted text-uppercase m-0" style="letter-spacing: 0.5px; font-size: 0.75rem;">Cambiar Estado:</label>
+                            <select class="form-select form-select-sm shadow-none border-0 fw-bold text-dark" style="width: 140px; background-color: transparent;" @bind="nuevoEstadoTemp">
+                                <option value="Pendiente">Pendiente</option>
+                                <option value="Preparando">Preparando</option>
+                                <option value="En Camino">En Camino</option>
+                                <option value="Entregado">Entregado</option>
+                            </select>
+                            <button type="button" class="btn text-white rounded-3 px-3 shadow-sm btn-sm fw-medium d-flex align-items-center gap-1" style="background-color: #834a5d;" @onclick="GuardarEstado">
+                                <i class="bi bi-check2-circle"></i> Guardar
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-white border rounded-3 px-4 shadow-sm fw-medium text-secondary" @onclick="CerrarModal">Cerrar</button>
                     </div>
                 </div>
             </div>
@@ -290,6 +315,8 @@
 
     private bool mostrarModal = false;
     private Pedido pedidoSeleccionado;
+    private string nuevoEstadoTemp = "";
+    private string mensajeExito = "";
 
     private List<Pedido> todosLosPedidos = new();
 
@@ -434,6 +461,7 @@
     private void VerDetalles(Pedido pedido)
     {
         pedidoSeleccionado = pedido;
+        nuevoEstadoTemp = pedido.Estado;
         mostrarModal = true;
     }
 
@@ -441,6 +469,23 @@
     {
         mostrarModal = false;
         pedidoSeleccionado = null;
+    }
+
+    private async Task GuardarEstado()
+    {
+        if (pedidoSeleccionado != null && pedidoSeleccionado.Estado != nuevoEstadoTemp)
+        {
+            pedidoSeleccionado.Estado = nuevoEstadoTemp;
+            mensajeExito = $"¡Éxito! El estado del pedido {pedidoSeleccionado.IdStr} ha sido actualizado a '{nuevoEstadoTemp}'.";
+            
+            // Refrescar para asegurar que la UI se actualice
+            StateHasChanged();
+
+            // Ocultar notificación después de 4 segundos
+            await Task.Delay(4000);
+            mensajeExito = string.Empty;
+            StateHasChanged();
+        }
     }
 
     private string GetEstadoBgColor(string estado)
