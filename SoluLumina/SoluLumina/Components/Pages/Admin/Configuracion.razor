@@ -49,21 +49,27 @@
             <div class="border-bottom px-4 pt-3" style="border-color: #f7eff1 !important;">
                 <ul class="nav nav-underline gap-4 border-0" style="font-size: 0.95rem; font-weight: 500;">
                     <li class="nav-item">
-                        <!-- Pestaña Activa -->
-                        <a class="nav-link active pb-3 px-0" style="color: #834a5d; border-bottom: 3px solid #834a5d;" href="#">Empleados</a>
+                        <a class="nav-link @(activeTab == "Empleados" ? "active pb-3 px-0" : "text-muted pb-3 px-0 border-0")" 
+                           style="@(activeTab == "Empleados" ? "color: #834a5d; border-bottom: 3px solid #834a5d; cursor: pointer;" : "cursor: pointer;")" 
+                           @onclick="@(() => activeTab = "Empleados")">Empleados</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-muted pb-3 px-0 border-0" href="#">Cupones</a>
+                        <a class="nav-link @(activeTab == "Cupones" ? "active pb-3 px-0" : "text-muted pb-3 px-0 border-0")" 
+                           style="@(activeTab == "Cupones" ? "color: #834a5d; border-bottom: 3px solid #834a5d; cursor: pointer;" : "cursor: pointer;")" 
+                           @onclick="@(() => activeTab = "Cupones")">Cupones</a>
                     </li>
-                    <!-- Se eliminó 'Banners' a petición -->
                     <li class="nav-item">
-                        <a class="nav-link text-muted pb-3 px-0 border-0" href="#">Pagos</a>
+                        <a class="nav-link @(activeTab == "Pagos" ? "active pb-3 px-0" : "text-muted pb-3 px-0 border-0")" 
+                           style="@(activeTab == "Pagos" ? "color: #834a5d; border-bottom: 3px solid #834a5d; cursor: pointer;" : "cursor: pointer;")" 
+                           @onclick="@(() => activeTab = "Pagos")">Pagos</a>
                     </li>
                 </ul>
             </div>
 
-            <!-- Tab Content: Empleados -->
-            <div class="p-4">
+            @if (activeTab == "Empleados")
+            {
+                <!-- Tab Content: Empleados -->
+                <div class="p-4">
                 
                 <!-- Acciones de Tabla -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -181,7 +187,165 @@
                     </nav>
                 </div>
 
-            </div>
+                </div>
+            }
+
+            @if (activeTab == "Cupones")
+            {
+                <!-- Tab Content: Cupones -->
+                <div class="p-4 bg-light bg-opacity-50">
+                    
+                    <!-- Acciones de Cupones -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="input-group shadow-sm rounded-3" style="width: 350px;">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0" placeholder="Buscar por código de cupón...">
+                        </div>
+                        
+                        <button class="btn text-white px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" 
+                                style="background-color: #6a3849;"
+                                @onclick="OpenAddCouponModal">
+                            <i class="bi bi-ticket-perforated"></i> Nuevo cupón
+                        </button>
+                    </div>
+
+                    <!-- Grid de Cupones -->
+                    <div class="row g-4">
+                        <!-- Cupón 1 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed #f1aeb5 !important;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-dark" style="background-color: #fcf0f4; border: 1px dashed #d9557b; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
+                                            BIENVENIDA20
+                                        </div>
+                                        <span class="badge rounded-pill bg-success bg-opacity-10 text-success fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activo</span>
+                                    </div>
+                                    <h4 class="fw-bold mb-1" style="color: #6a3849;">20% de Descuento</h4>
+                                    <p class="text-muted small mb-3">En la primera compra. Sin mínimo de compra.</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
+                                        <div>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
+                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">145 / <span class="text-muted">Ilimitado</span></span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Vence</small>
+                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">31 Dic 2026</span>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
+                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
+                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pause-circle me-2 text-warning"></i>Desactivar</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Decoración tipo ticket -->
+                                <div class="position-absolute" style="top: -15px; right: -15px; width: 60px; height: 60px; background-color: #f1aeb5; border-radius: 50%; opacity: 0.1;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Cupón 2 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed #e9ecef !important;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-secondary" style="background-color: #f8f9fa; border: 1px dashed #ced4da; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
+                                            FLASH50
+                                        </div>
+                                        <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Inactivo</span>
+                                    </div>
+                                    <h4 class="fw-bold mb-1 text-secondary">S/ 50.00 OFF</h4>
+                                    <p class="text-muted small mb-3">Compras mayores a S/ 200.00 en toda la tienda.</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
+                                        <div>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
+                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">50 / 50</span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Vence</small>
+                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">Expirado</span>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
+                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
+                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-play-circle me-2 text-success"></i>Activar</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Cupón 3 -->
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed #f1aeb5 !important;">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-dark" style="background-color: #fcf0f4; border: 1px dashed #d9557b; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
+                                            GLAMVIP
+                                        </div>
+                                        <span class="badge rounded-pill bg-info bg-opacity-10 text-info fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Programado</span>
+                                    </div>
+                                    <h4 class="fw-bold mb-1" style="color: #6a3849;">Envío Gratis</h4>
+                                    <p class="text-muted small mb-3">Para clientes VIP. Válido solo en productos seleccionados.</p>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
+                                        <div>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
+                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">0 / 100</span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Inicia</small>
+                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">01 Ago 2026</span>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
+                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
+                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pause-circle me-2 text-warning"></i>Cancelar</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="position-absolute" style="top: -15px; right: -15px; width: 60px; height: 60px; background-color: #f1aeb5; border-radius: 50%; opacity: 0.1;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <!-- Paginación Cupones -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color: #f7eff1 !important;">
+                        <small class="text-muted" style="font-size: 0.85rem;">Mostrando 3 de 15 cupones</small>
+                        <nav>
+                            <ul class="pagination pagination-sm m-0 gap-1">
+                                <li class="page-item disabled"><a class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm"><i class="bi bi-chevron-left"></i></a></li>
+                                <li class="page-item"><a class="page-link rounded-2 active border-0 text-white shadow-sm" style="background-color: #f1aeb5;">1</a></li>
+                                <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">3</a></li>
+                                <li class="page-item"><a class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                </div>
+            }
         </div>
 
     </div>
@@ -247,8 +411,87 @@
     </div>
 }
 
+<!-- Modal para Nuevo Cupón (UI/UX Addition) -->
+@if (showAddCouponModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fcf0f4; color: #d9557b;">
+                            <i class="bi bi-ticket-perforated-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold" style="color: #6a3849;">Nuevo Cupón de Descuento</h5>
+                            <p class="text-muted small m-0">Configura las reglas y condiciones de tu nuevo cupón.</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close mb-auto" @onclick="CloseAddCouponModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Código del Cupón</label>
+                            <input type="text" class="form-control bg-light border-1 rounded-3 font-monospace fw-bold" placeholder="EJ: BLACKFRIDAY20" style="text-transform: uppercase;">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de Descuento</label>
+                            <select class="form-select bg-light border-1 text-secondary rounded-3">
+                                <option selected>Porcentaje (%)</option>
+                                <option value="1">Monto Fijo (S/)</option>
+                                <option value="2">Envío Gratis</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Valor del Descuento</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control bg-light border-1 rounded-start-3" placeholder="20">
+                                <span class="input-group-text bg-light border-1 text-muted">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Compra Mínima (Opcional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-1 text-muted">S/</span>
+                                <input type="number" class="form-control bg-light border-1 rounded-end-3" placeholder="100.00">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fecha de Inicio</label>
+                            <input type="date" class="form-control bg-light border-1 rounded-3">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fecha de Fin</label>
+                            <input type="date" class="form-control bg-light border-1 rounded-3">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Límite de Usos (Opcional)</label>
+                            <input type="number" class="form-control bg-light border-1 rounded-3" placeholder="Ej. 100">
+                            <div class="form-text" style="font-size: 0.75rem;">Dejar en blanco para usos ilimitados.</div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseAddCouponModal">Cancelar</button>
+                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #6a3849;">
+                        <i class="bi bi-check-circle"></i> Crear Cupón
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+    private string activeTab = "Empleados";
     private bool showAddEmployeeModal = false;
+    private bool showAddCouponModal = false;
 
     private void OpenAddEmployeeModal()
     {
@@ -258,6 +501,16 @@
     private void CloseAddEmployeeModal()
     {
         showAddEmployeeModal = false;
+    }
+
+    private void OpenAddCouponModal()
+    {
+        showAddCouponModal = true;
+    }
+
+    private void CloseAddCouponModal()
+    {
+        showAddCouponModal = false;
     }
 }
 
