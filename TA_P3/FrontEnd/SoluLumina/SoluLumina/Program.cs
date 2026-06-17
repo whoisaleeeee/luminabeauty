@@ -6,6 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Configurar HttpClient base apuntando al servidor de Java (usualmente 8080)
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:8080/LuminaBeauty-Servicios/webresources/") });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
