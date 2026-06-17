@@ -2,7 +2,7 @@
 @using SoluLumina.Components.Pages.Shared
 @rendermode InteractiveServer
 
-<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light position-relative">
 
     <NavBar />
 
@@ -61,7 +61,7 @@
                 <h2 class="fw-black m-0" style="color: #2d2d2d; font-size: 2.2rem;">Gestión del Sistema</h2>
                 <p class="text-muted m-0 mt-1" style="font-size: 0.95rem;">Configura los parámetros, personal de la tienda y preferencias de pago.</p>
             </div>
-            <button class="btn text-white px-4 py-2 rounded-3 shadow-sm border-0 d-flex align-items-center gap-2 fw-medium" style="background-color: #f1aeb5; color: #834a5d !important;">
+            <button class="btn text-white px-4 py-2 rounded-3 shadow-sm border-0 d-flex align-items-center gap-2 fw-medium" style="background-color: #f1aeb5; color: #834a5d !important;" @onclick="SaveGlobalSettings">
                 Guardar cambios
             </button>
         </div>
@@ -85,145 +85,100 @@
                     <li class="nav-item">
                         <a class="nav-link @(activeTab == "Pagos" ? "active pb-3 px-0" : "text-muted pb-3 px-0 border-0")" 
                            style="@(activeTab == "Pagos" ? "color: #834a5d; border-bottom: 3px solid #834a5d; cursor: pointer;" : "cursor: pointer;")" 
-                           @onclick="@(() => activeTab = "Pagos")">Pagos</a>
+                           @onclick="@(() => activeTab = "Pagos")">Métodos de Pago</a>
                     </li>
                 </ul>
             </div>
 
             @if (activeTab == "Empleados")
             {
-                <!-- Tab Content: Empleados -->
                 <div class="p-4">
-                
-                <!-- Acciones de Tabla -->
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="input-group shadow-sm rounded-3" style="width: 350px;">
-                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" class="form-control border-start-0" placeholder="Buscar por nombre o email...">
+                    <!-- Acciones de Tabla -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="input-group shadow-sm rounded-3" style="width: 350px;">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0" placeholder="Buscar por nombre o email..." @bind="searchTermEmpleado" @bind:event="oninput">
+                        </div>
+                        
+                        <button class="btn text-white px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" 
+                                style="background-color: #6a3849;"
+                                @onclick="OpenAddEmployeeModal">
+                            <i class="bi bi-person-plus-fill"></i> Nuevo empleado
+                        </button>
                     </div>
-                    
-                    <button class="btn text-white px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" 
-                            style="background-color: #6a3849;"
-                            @onclick="OpenAddEmployeeModal">
-                        <i class="bi bi-person-plus-fill"></i> Nuevo empleado
-                    </button>
-                </div>
 
-                <!-- Tabla de Empleados -->
-                <div class="table-responsive">
-                    <table class="table align-middle table-hover m-0">
-                        <thead style="color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f7eff1;">
-                            <tr>
-                                <th class="py-3 px-2 border-top-0">Empleado</th>
-                                <th class="py-3 border-top-0">Rol</th>
-                                <th class="py-3 border-top-0">Estado</th>
-                                <th class="py-3 px-2 border-top-0 text-end">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody style="font-size: 0.85rem; color: #4f4f4f;">
-                            
-                            <!-- Fila 1 -->
-                            <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                                <td class="py-4 px-2">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width: 42px; height: 42px; background-color: #f1aeb5; font-size: 0.85rem;">VS</div>
-                                        <div>
-                                            <h6 class="m-0 fw-bold text-dark">Valentina Sánchez</h6>
-                                            <small class="text-muted font-monospace" style="font-size: 0.75rem;">valentina@glamadmin.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge rounded-pill fw-medium" style="background-color: #fcf0f4; color: #6a3849; padding: 0.4em 0.8em; font-size: 0.7rem;">Admin</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-success" style="width: 8px; height: 8px;"></div>
-                                        <span class="fw-medium text-dark">Activo</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-2 text-end">
-                                    <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;"><i class="bi bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            <!-- Fila 2 -->
-                            <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                                <td class="py-4 px-2">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 42px; height: 42px; background-color: #e9ecef; font-size: 0.85rem;">ML</div>
-                                        <div>
-                                            <h6 class="m-0 fw-bold text-dark">Mateo López</h6>
-                                            <small class="text-muted font-monospace" style="font-size: 0.75rem;">mateo.l@glamadmin.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge rounded-pill fw-medium" style="background-color: #e9ecef; color: #6c757d; padding: 0.4em 0.8em; font-size: 0.7rem;">Almacén</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-success" style="width: 8px; height: 8px;"></div>
-                                        <span class="fw-medium text-dark">Activo</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-2 text-end">
-                                    <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;"><i class="bi bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>
-
-                            <!-- Fila 3 -->
-                            <tr>
-                                <td class="py-4 px-2">
-                                    <div class="d-flex align-items-center gap-3 opacity-75">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 42px; height: 42px; background-color: #e9ecef; font-size: 0.85rem;">IR</div>
-                                        <div>
-                                            <h6 class="m-0 fw-bold text-dark">Isabella Ruiz</h6>
-                                            <small class="text-muted font-monospace" style="font-size: 0.75rem;">isabella.r@glamadmin.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="badge rounded-pill fw-medium opacity-75" style="background-color: #fce4eb; color: #d9557b; padding: 0.4em 0.8em; font-size: 0.7rem;">Vendedor</span></td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2 opacity-75">
-                                        <div class="rounded-circle bg-secondary" style="width: 8px; height: 8px;"></div>
-                                        <span class="fw-medium text-secondary">Inactivo</span>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-2 text-end">
-                                    <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;"><i class="bi bi-pencil"></i></button>
-                                    <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-trash"></i></button>
-                                </td>
-                            </tr>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Paginación -->
-                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color: #f7eff1 !important;">
-                    <small class="text-muted" style="font-size: 0.85rem;">Mostrando 3 de 12 empleados</small>
-                    <nav>
-                        <ul class="pagination pagination-sm m-0 gap-1">
-                            <li class="page-item disabled"><a class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm"><i class="bi bi-chevron-left"></i></a></li>
-                            <li class="page-item"><a class="page-link rounded-2 active border-0 text-white shadow-sm" style="background-color: #f1aeb5;">1</a></li>
-                            <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" href="#"><i class="bi bi-chevron-right"></i></a></li>
-                        </ul>
-                    </nav>
-                </div>
-
+                    <!-- Tabla de Empleados -->
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover m-0">
+                            <thead style="color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f7eff1;">
+                                <tr>
+                                    <th class="py-3 px-2 border-top-0">Empleado</th>
+                                    <th class="py-3 border-top-0">Rol</th>
+                                    <th class="py-3 border-top-0">Estado</th>
+                                    <th class="py-3 px-2 border-top-0 text-end">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                                @if (FilteredEmpleados.Any())
+                                {
+                                    @foreach (var emp in FilteredEmpleados)
+                                    {
+                                        <tr class="border-bottom" style="border-color: #f7eff1 !important; @(emp.Estado == "Inactivo" ? "opacity: 0.7;" : "")">
+                                            <td class="py-4 px-2">
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px; background-color: @emp.BgColor; color: @emp.TextColor; font-size: 0.85rem;">@emp.Iniciales</div>
+                                                    <div>
+                                                        <h6 class="m-0 fw-bold text-dark">@emp.Nombre</h6>
+                                                        <small class="text-muted font-monospace" style="font-size: 0.75rem;">@emp.Email</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge rounded-pill fw-medium" style="background-color: @GetRoleBg(emp.Rol); color: @GetRoleColor(emp.Rol); padding: 0.4em 0.8em; font-size: 0.7rem;">@emp.Rol</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2" style="cursor: pointer;" @onclick="() => ToggleEmployeeStatus(emp)">
+                                                    @if (emp.Estado == "Activo")
+                                                    {
+                                                        <div class="rounded-circle bg-success" style="width: 8px; height: 8px;"></div>
+                                                        <span class="fw-medium text-dark">Activo</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="rounded-circle bg-secondary" style="width: 8px; height: 8px;"></div>
+                                                        <span class="fw-medium text-secondary">Inactivo</span>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td class="py-4 px-2 text-end">
+                                                <button class="btn btn-sm btn-light text-secondary rounded-circle me-1" style="width: 32px; height: 32px;" title="Editar"><i class="bi bi-pencil"></i></button>
+                                                <button class="btn btn-sm btn-light text-danger rounded-circle" style="width: 32px; height: 32px;" title="Eliminar" @onclick="() => DeleteEmployee(emp)"><i class="bi bi-trash"></i></button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            <i class="bi bi-search d-block fs-2 mb-2"></i>
+                                            No se encontraron empleados.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             }
 
             @if (activeTab == "Cupones")
             {
-                <!-- Tab Content: Cupones -->
                 <div class="p-4 bg-light bg-opacity-50">
-                    
-                    <!-- Acciones de Cupones -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div class="input-group shadow-sm rounded-3" style="width: 350px;">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control border-start-0" placeholder="Buscar por código de cupón...">
+                            <input type="text" class="form-control border-start-0" placeholder="Buscar por código de cupón..." @bind="searchTermCupon" @bind:event="oninput">
                         </div>
                         
                         <button class="btn text-white px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" 
@@ -233,153 +188,121 @@
                         </button>
                     </div>
 
-                    <!-- Grid de Cupones -->
                     <div class="row g-4">
-                        <!-- Cupón 1 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed #f1aeb5 !important;">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-dark" style="background-color: #fcf0f4; border: 1px dashed #d9557b; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
-                                            BIENVENIDA20
+                        @if (FilteredCupones.Any())
+                        {
+                            @foreach (var cup in FilteredCupones)
+                            {
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed @GetCouponBorderColor(cup) !important; @(cup.Estado == "Inactivo" ? "opacity: 0.75;" : "")">
+                                        <div class="card-body p-4">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-dark" style="background-color: #fcf0f4; border: 1px dashed #d9557b; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
+                                                    @cup.Codigo
+                                                </div>
+                                                <span class="badge rounded-pill bg-@GetCouponBadgeClass(cup) bg-opacity-10 text-@GetCouponBadgeClass(cup) fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>@cup.Estado</span>
+                                            </div>
+                                            <h4 class="fw-bold mb-1" style="color: @(cup.Estado == "Inactivo" ? "#6c757d" : "#6a3849");">@cup.ValorStr</h4>
+                                            <p class="text-muted small mb-3">@cup.Descripcion</p>
+                                            
+                                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
+                                                <div>
+                                                    <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
+                                                    <span class="fw-medium text-dark" style="font-size: 0.85rem;">@cup.Usos / @(string.IsNullOrEmpty(cup.LimiteUsos) ? "Ilimitado" : cup.LimiteUsos)</span>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Vence</small>
+                                                    <span class="fw-medium text-dark" style="font-size: 0.85rem;">@cup.Vence.ToString("dd MMM yyyy")</span>
+                                                </div>
+                                                <div class="dropdown">
+                                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
+                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
+                                                        <li><a class="dropdown-item py-2" style="cursor:pointer;"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
+                                                        @if (cup.Estado == "Activo" || cup.Estado == "Programado")
+                                                        {
+                                                            <li><a class="dropdown-item py-2" style="cursor:pointer;" @onclick="() => ToggleCouponStatus(cup)"><i class="bi bi-pause-circle me-2 text-warning"></i>Desactivar</a></li>
+                                                        }
+                                                        else
+                                                        {
+                                                            <li><a class="dropdown-item py-2" style="cursor:pointer;" @onclick="() => ToggleCouponStatus(cup)"><i class="bi bi-play-circle me-2 text-success"></i>Activar</a></li>
+                                                        }
+                                                        <li><hr class="dropdown-divider"></li>
+                                                        <li><a class="dropdown-item py-2 text-danger" style="cursor:pointer;" @onclick="() => DeleteCoupon(cup)"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span class="badge rounded-pill bg-success bg-opacity-10 text-success fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Activo</span>
-                                    </div>
-                                    <h4 class="fw-bold mb-1" style="color: #6a3849;">20% de Descuento</h4>
-                                    <p class="text-muted small mb-3">En la primera compra. Sin mínimo de compra.</p>
-                                    
-                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
-                                        <div>
-                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
-                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">145 / <span class="text-muted">Ilimitado</span></span>
-                                        </div>
-                                        <div>
-                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Vence</small>
-                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">31 Dic 2026</span>
-                                        </div>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
-                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
-                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pause-circle me-2 text-warning"></i>Desactivar</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <!-- Decoración tipo ticket -->
-                                <div class="position-absolute" style="top: -15px; right: -15px; width: 60px; height: 60px; background-color: #f1aeb5; border-radius: 50%; opacity: 0.1;"></div>
-                            </div>
-                        </div>
-
-                        <!-- Cupón 2 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed #e9ecef !important;">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-secondary" style="background-color: #f8f9fa; border: 1px dashed #ced4da; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
-                                            FLASH50
-                                        </div>
-                                        <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Inactivo</span>
-                                    </div>
-                                    <h4 class="fw-bold mb-1 text-secondary">S/ 50.00 OFF</h4>
-                                    <p class="text-muted small mb-3">Compras mayores a S/ 200.00 en toda la tienda.</p>
-                                    
-                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
-                                        <div>
-                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
-                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">50 / 50</span>
-                                        </div>
-                                        <div>
-                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Vence</small>
-                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">Expirado</span>
-                                        </div>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
-                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
-                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-play-circle me-2 text-success"></i>Activar</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
-                                            </ul>
-                                        </div>
+                                        <!-- Decoración tipo ticket -->
+                                        <div class="position-absolute" style="top: -15px; right: -15px; width: 60px; height: 60px; background-color: #f1aeb5; border-radius: 50%; opacity: 0.1;"></div>
                                     </div>
                                 </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12 text-center py-5 text-muted">
+                                <i class="bi bi-ticket-detailed d-block fs-2 mb-2"></i>
+                                No se encontraron cupones con ese código.
                             </div>
-                        </div>
-                        
-                        <!-- Cupón 3 -->
-                        <div class="col-md-6 col-lg-4">
-                            <div class="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden" style="background-color: #fff; border-left: 5px dashed #f1aeb5 !important;">
-                                <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-start mb-3">
-                                        <div class="d-inline-block px-3 py-1 rounded-pill fw-bold text-dark" style="background-color: #fcf0f4; border: 1px dashed #d9557b; font-family: monospace; font-size: 1.1rem; letter-spacing: 1px;">
-                                            GLAMVIP
-                                        </div>
-                                        <span class="badge rounded-pill bg-info bg-opacity-10 text-info fw-medium px-2 py-1"><i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i>Programado</span>
-                                    </div>
-                                    <h4 class="fw-bold mb-1" style="color: #6a3849;">Envío Gratis</h4>
-                                    <p class="text-muted small mb-3">Para clientes VIP. Válido solo en productos seleccionados.</p>
-                                    
-                                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top" style="border-color: #f7eff1 !important;">
-                                        <div>
-                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Usos</small>
-                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">0 / 100</span>
-                                        </div>
-                                        <div>
-                                            <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Inicia</small>
-                                            <span class="fw-medium text-dark" style="font-size: 0.85rem;">01 Ago 2026</span>
-                                        </div>
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
-                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
-                                                <li><a class="dropdown-item py-2" href="#"><i class="bi bi-pause-circle me-2 text-warning"></i>Cancelar</a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item py-2 text-danger" href="#"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="position-absolute" style="top: -15px; right: -15px; width: 60px; height: 60px; background-color: #f1aeb5; border-radius: 50%; opacity: 0.1;"></div>
-                            </div>
-                        </div>
-
+                        }
                     </div>
-                    
-                    <!-- Paginación Cupones -->
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" style="border-color: #f7eff1 !important;">
-                        <small class="text-muted" style="font-size: 0.85rem;">Mostrando 3 de 15 cupones</small>
-                        <nav>
-                            <ul class="pagination pagination-sm m-0 gap-1">
-                                <li class="page-item disabled"><a class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm"><i class="bi bi-chevron-left"></i></a></li>
-                                <li class="page-item"><a class="page-link rounded-2 active border-0 text-white shadow-sm" style="background-color: #f1aeb5;">1</a></li>
-                                <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">2</a></li>
-                                <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">3</a></li>
-                                <li class="page-item"><a class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" href="#"><i class="bi bi-chevron-right"></i></a></li>
-                            </ul>
-                        </nav>
+                </div>
+            }
+
+            @if (activeTab == "Pagos")
+            {
+                <div class="p-4 bg-light bg-opacity-50">
+                    <div class="mb-4">
+                        <h4 class="fw-bold text-dark m-0">Pasarelas y Métodos de Pago</h4>
+                        <p class="text-muted small">Configura las opciones de pago que estarán disponibles para tus clientes en el checkout.</p>
                     </div>
 
+                    <div class="row g-4">
+                        @foreach (var pago in metodosPago)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border-0 shadow-sm rounded-4 h-100 position-relative">
+                                    <div class="card-body p-4 d-flex flex-column">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-3 d-flex align-items-center justify-content-center border" style="width: 50px; height: 50px; background-color: #fff;">
+                                                    <img src="@pago.IconoUrl" alt="@pago.Nombre" style="width: 30px; height: 30px; object-fit: contain;">
+                                                </div>
+                                                <div>
+                                                    <h5 class="fw-bold text-dark m-0">@pago.Nombre</h5>
+                                                    <small class="text-muted" style="font-size: 0.75rem;">@pago.Tipo</small>
+                                                </div>
+                                            </div>
+                                            <div class="form-check form-switch fs-5 m-0">
+                                                <input class="form-check-input" type="checkbox" role="switch" style="cursor: pointer;" checked="@pago.IsActivo" @onchange="(e) => TogglePaymentMethod(pago, (bool)e.Value!)">
+                                            </div>
+                                        </div>
+                                        <p class="text-muted small mb-4 flex-grow-1">@pago.Descripcion</p>
+                                        
+                                        <button class="btn btn-sm w-100 fw-medium rounded-3 py-2 text-secondary bg-white border" @onclick="() => OpenConfigPagoModal(pago)" style="transition: 0.2s;">
+                                            <i class="bi bi-gear-fill me-1"></i> Configurar credenciales
+                                        </button>
+                                    </div>
+                                    @if (!pago.IsActivo)
+                                    {
+                                        <div class="position-absolute top-0 start-0 w-100 h-100 rounded-4" style="background-color: rgba(255,255,255,0.4); pointer-events: none;"></div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
                 </div>
             }
         </div>
-
     </div>
-
 </div>
 
-<!-- Modal para Nuevo Empleado (UI/UX Addition) -->
+<!-- Modal para Nuevo Empleado -->
 @if (showAddEmployeeModal)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0 shadow-lg">
                 <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
@@ -395,39 +318,34 @@
                     <button type="button" class="btn-close mb-auto" @onclick="CloseAddEmployeeModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-4">
-                    
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nombre Completo</label>
-                        <input type="text" class="form-control bg-light border-1 rounded-3" placeholder="Ej. Camila Torres">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Nombre Completo</label>
+                        <input type="text" class="form-control bg-light border-1 rounded-3" placeholder="Ej. Camila Torres" @bind="newEmpleado.Nombre">
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Correo Electrónico</label>
-                        <input type="email" class="form-control bg-light border-1 rounded-3" placeholder="camila@glamadmin.com">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Correo Electrónico</label>
+                        <input type="email" class="form-control bg-light border-1 rounded-3" placeholder="camila@glamadmin.com" @bind="newEmpleado.Email">
                     </div>
-
                     <div class="mb-4">
-                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Rol de Acceso</label>
-                        <select class="form-select bg-light border-1 text-secondary rounded-3">
-                            <option selected>Seleccionar rol...</option>
-                            <option value="1">Admin (Acceso total)</option>
-                            <option value="2">Vendedor (Catálogo y Pedidos)</option>
-                            <option value="3">Almacén (Inventario)</option>
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Rol de Acceso</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" @bind="newEmpleado.Rol">
+                            <option value="">Seleccionar rol...</option>
+                            <option value="Admin">Admin (Acceso total)</option>
+                            <option value="Vendedor">Vendedor (Catálogo y Pedidos)</option>
+                            <option value="Almacén">Almacén (Inventario)</option>
                         </select>
                     </div>
-
                     <div class="alert mb-0 border-0 rounded-3 d-flex gap-3 align-items-start" style="background-color: #fcf0f4;">
                         <i class="bi bi-info-circle-fill text-danger mt-1"></i>
                         <p class="mb-0 text-dark" style="font-size: 0.8rem;">
-                            Se enviará un correo electrónico de invitación a este usuario para que configure su contraseña e ingrese al sistema.
+                            Se enviará un correo electrónico de invitación a este usuario.
                         </p>
                     </div>
-
                 </div>
                 <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
                     <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseAddEmployeeModal">Cancelar</button>
-                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #6a3849;">
-                        <i class="bi bi-envelope-paper-heart"></i> Enviar Invitación
+                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #6a3849;" @onclick="SaveEmployee">
+                        <i class="bi bi-envelope-paper-heart"></i> Guardar Empleado
                     </button>
                 </div>
             </div>
@@ -435,10 +353,10 @@
     </div>
 }
 
-<!-- Modal para Nuevo Cupón (UI/UX Addition) -->
+<!-- Modal para Nuevo Cupón -->
 @if (showAddCouponModal)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0 shadow-lg">
                 <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
@@ -448,62 +366,48 @@
                         </div>
                         <div>
                             <h5 class="modal-title fw-bold" style="color: #6a3849;">Nuevo Cupón de Descuento</h5>
-                            <p class="text-muted small m-0">Configura las reglas y condiciones de tu nuevo cupón.</p>
+                            <p class="text-muted small m-0">Configura las reglas y condiciones del cupón.</p>
                         </div>
                     </div>
                     <button type="button" class="btn-close mb-auto" @onclick="CloseAddCouponModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-4">
-                    
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Código del Cupón</label>
-                            <input type="text" class="form-control bg-light border-1 rounded-3 font-monospace fw-bold" placeholder="EJ: BLACKFRIDAY20" style="text-transform: uppercase;">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Código del Cupón</label>
+                            <input type="text" class="form-control bg-light border-1 rounded-3 font-monospace fw-bold" placeholder="EJ: BLACKFRIDAY" style="text-transform: uppercase;" @bind="newCupon.Codigo">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de Descuento</label>
-                            <select class="form-select bg-light border-1 text-secondary rounded-3">
-                                <option selected>Porcentaje (%)</option>
-                                <option value="1">Monto Fijo (S/)</option>
-                                <option value="2">Envío Gratis</option>
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Tipo de Descuento</label>
+                            <select class="form-select bg-light border-1 text-secondary rounded-3" @bind="newCupon.Tipo">
+                                <option value="Porcentaje (%)">Porcentaje (%)</option>
+                                <option value="Monto Fijo (S/)">Monto Fijo (S/)</option>
+                                <option value="Envío Gratis">Envío Gratis</option>
                             </select>
                         </div>
-
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Valor del Descuento</label>
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Valor del Descuento</label>
                             <div class="input-group">
-                                <input type="number" class="form-control bg-light border-1 rounded-start-3" placeholder="20">
-                                <span class="input-group-text bg-light border-1 text-muted">%</span>
+                                <input type="text" class="form-control bg-light border-1 rounded-start-3" placeholder="20" @bind="newCupon.ValorStr">
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Compra Mínima (Opcional)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-1 text-muted">S/</span>
-                                <input type="number" class="form-control bg-light border-1 rounded-end-3" placeholder="100.00">
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fecha de Inicio</label>
-                            <input type="date" class="form-control bg-light border-1 rounded-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Descripción / Condiciones</label>
+                            <input type="text" class="form-control bg-light border-1 rounded-3" placeholder="Ej. Para compras mayores a..." @bind="newCupon.Descripcion">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Fecha de Fin</label>
-                            <input type="date" class="form-control bg-light border-1 rounded-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Fecha de Fin</label>
+                            <input type="date" class="form-control bg-light border-1 rounded-3" @bind="newCupon.Vence">
                         </div>
-
-                        <div class="col-md-12">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Límite de Usos (Opcional)</label>
-                            <input type="number" class="form-control bg-light border-1 rounded-3" placeholder="Ej. 100">
-                            <div class="form-text" style="font-size: 0.75rem;">Dejar en blanco para usos ilimitados.</div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Límite de Usos</label>
+                            <input type="number" class="form-control bg-light border-1 rounded-3" placeholder="Ej. 100" @bind="newCupon.LimiteUsos">
                         </div>
                     </div>
-
                 </div>
                 <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
                     <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseAddCouponModal">Cancelar</button>
-                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #6a3849;">
+                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #6a3849;" @onclick="SaveCoupon">
                         <i class="bi bi-check-circle"></i> Crear Cupón
                     </button>
                 </div>
@@ -512,35 +416,276 @@
     </div>
 }
 
-@code {
-    private bool showProfileDropdown = false;
-    private void ToggleProfileDropdown()
-    {
-        showProfileDropdown = !showProfileDropdown;
-    }
-
-    private string activeTab = "Empleados";
-    private bool showAddEmployeeModal = false;
-    private bool showAddCouponModal = false;
-
-    private void OpenAddEmployeeModal()
-    {
-        showAddEmployeeModal = true;
-    }
-
-    private void CloseAddEmployeeModal()
-    {
-        showAddEmployeeModal = false;
-    }
-
-    private void OpenAddCouponModal()
-    {
-        showAddCouponModal = true;
-    }
-
-    private void CloseAddCouponModal()
-    {
-        showAddCouponModal = false;
-    }
+<!-- Modal Configuración de Pago -->
+@if (showConfigPagoModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center border" style="width: 40px; height: 40px; background-color: #fff;">
+                            <img src="@selectedPago.IconoUrl" alt="@selectedPago.Nombre" style="width: 25px; height: 25px; object-fit: contain;">
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold" style="color: #2d2d2d;">Configurar @selectedPago.Nombre</h5>
+                            <p class="text-muted small m-0">Ingresa tus credenciales de integración.</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close mb-auto" @onclick="CloseConfigPagoModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Public Key / Client ID</label>
+                        <input type="text" class="form-control bg-light border-1 rounded-3" placeholder="APP_USR-...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem;">Access Token / Secret</label>
+                        <input type="password" class="form-control bg-light border-1 rounded-3" placeholder="******************">
+                    </div>
+                    <div class="form-check form-switch mt-4">
+                        <input class="form-check-input" type="checkbox" role="switch" id="sandboxSwitch" checked>
+                        <label class="form-check-label text-dark fw-medium small" for="sandboxSwitch">Modo Pruebas (Sandbox)</label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseConfigPagoModal">Cancelar</button>
+                    <button type="button" class="btn text-white px-4 rounded-3 shadow-sm" style="background-color: #6a3849;" @onclick="SaveConfigPago">
+                        Guardar Configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
+<!-- Sistema de Notificaciones (Toasts) -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+    @foreach (var toast in Toasts)
+    {
+        <div class="toast show align-items-center text-white bg-@toast.Type border-0 shadow-lg mb-2 rounded-3" role="alert" aria-live="assertive" aria-atomic="true" style="opacity: 0.95;">
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2 fw-medium">
+                    <i class="bi @(toast.Type == "success" ? "bi-check-circle-fill" : (toast.Type == "danger" ? "bi-x-circle-fill" : "bi-info-circle-fill")) fs-5"></i>
+                    @toast.Message
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => RemoveToast(toast)" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private bool showProfileDropdown = false;
+    private void ToggleProfileDropdown() => showProfileDropdown = !showProfileDropdown;
+
+    private string activeTab = "Empleados";
+    
+    // Search terms
+    private string searchTermEmpleado = string.Empty;
+    private string searchTermCupon = string.Empty;
+
+    // Modals
+    private bool showAddEmployeeModal = false;
+    private bool showAddCouponModal = false;
+    private bool showConfigPagoModal = false;
+
+    // Models
+    public class Empleado
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Rol { get; set; } = string.Empty;
+        public string Estado { get; set; } = "Activo";
+        public string Iniciales { get; set; } = "US";
+        public string BgColor { get; set; } = "#e9ecef";
+        public string TextColor { get; set; } = "#6c757d";
+    }
+
+    public class Cupon
+    {
+        public int Id { get; set; }
+        public string Codigo { get; set; } = string.Empty;
+        public string Tipo { get; set; } = "Porcentaje (%)";
+        public string ValorStr { get; set; } = string.Empty;
+        public string Descripcion { get; set; } = string.Empty;
+        public string Estado { get; set; } = "Activo";
+        public int Usos { get; set; } = 0;
+        public string LimiteUsos { get; set; } = string.Empty;
+        public DateTime Vence { get; set; } = DateTime.Now.AddDays(30);
+    }
+
+    public class MetodoPago
+    {
+        public int Id { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Tipo { get; set; } = string.Empty;
+        public string Descripcion { get; set; } = string.Empty;
+        public string IconoUrl { get; set; } = string.Empty;
+        public bool IsActivo { get; set; } = false;
+    }
+
+    public class ToastInfo
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string Message { get; set; } = string.Empty;
+        public string Type { get; set; } = "success";
+    }
+
+    // Data
+    private List<Empleado> empleados = new();
+    private List<Cupon> cupones = new();
+    private List<MetodoPago> metodosPago = new();
+    private List<ToastInfo> Toasts = new();
+
+    private Empleado newEmpleado = new();
+    private Cupon newCupon = new();
+    private MetodoPago selectedPago = new();
+
+    protected override void OnInitialized()
+    {
+        empleados = new List<Empleado>
+        {
+            new Empleado { Id = 1, Nombre = "Valentina Sánchez", Email = "valentina@glamadmin.com", Rol = "Admin", Estado = "Activo", Iniciales = "VS", BgColor = "#f1aeb5", TextColor = "#fff" },
+            new Empleado { Id = 2, Nombre = "Mateo López", Email = "mateo.l@glamadmin.com", Rol = "Almacén", Estado = "Activo", Iniciales = "ML", BgColor = "#e9ecef", TextColor = "#6c757d" },
+            new Empleado { Id = 3, Nombre = "Isabella Ruiz", Email = "isabella.r@glamadmin.com", Rol = "Vendedor", Estado = "Inactivo", Iniciales = "IR", BgColor = "#e9ecef", TextColor = "#6c757d" }
+        };
+
+        cupones = new List<Cupon>
+        {
+            new Cupon { Id = 1, Codigo = "BIENVENIDA20", Tipo = "Porcentaje", ValorStr = "20% de Descuento", Descripcion = "En la primera compra.", Estado = "Activo", Usos = 145, LimiteUsos = "", Vence = new DateTime(2026, 12, 31) },
+            new Cupon { Id = 2, Codigo = "FLASH50", Tipo = "Monto Fijo", ValorStr = "S/ 50.00 OFF", Descripcion = "Compras mayores a S/ 200.", Estado = "Inactivo", Usos = 50, LimiteUsos = "50", Vence = DateTime.Now.AddDays(-1) },
+            new Cupon { Id = 3, Codigo = "GLAMVIP", Tipo = "Envio", ValorStr = "Envío Gratis", Descripcion = "Para clientes VIP.", Estado = "Programado", Usos = 0, LimiteUsos = "100", Vence = new DateTime(2026, 8, 1) }
+        };
+
+        metodosPago = new List<MetodoPago>
+        {
+            new MetodoPago { Id = 1, Nombre = "Mercado Pago", Tipo = "Pasarela de Pagos", Descripcion = "Acepta tarjetas de crédito, débito y dinero en cuenta.", IconoUrl = "https://cdn.icon-icons.com/icons2/2699/PNG/512/mercadopago_logo_icon_168260.png", IsActivo = true },
+            new MetodoPago { Id = 2, Nombre = "PayPal", Tipo = "Billetera Global", Descripcion = "Acepta pagos internacionales en dólares y otras monedas.", IconoUrl = "https://cdn-icons-png.flaticon.com/512/174/174861.png", IsActivo = false },
+            new MetodoPago { Id = 3, Nombre = "Yape", Tipo = "Billetera Móvil (PE)", Descripcion = "Transferencias rápidas con QR para clientes en Perú.", IconoUrl = "https://seeklogo.com/images/Y/yape-logo-3E473EE7E5-seeklogo.com.png", IsActivo = true },
+            new MetodoPago { Id = 4, Nombre = "Plin", Tipo = "Billetera Móvil (PE)", Descripcion = "Pagos interbancarios con número de celular en Perú.", IconoUrl = "https://upload.wikimedia.org/wikipedia/commons/4/43/Logo_Plin.png", IsActivo = false },
+            new MetodoPago { Id = 5, Nombre = "Transferencia Bancaria", Tipo = "Offline", Descripcion = "Cuentas BCP, Interbank y BBVA. Requiere validación manual.", IconoUrl = "https://cdn-icons-png.flaticon.com/512/2830/2830284.png", IsActivo = true }
+        };
+    }
+
+    // Filters
+    private IEnumerable<Empleado> FilteredEmpleados => string.IsNullOrWhiteSpace(searchTermEmpleado) 
+        ? empleados 
+        : empleados.Where(e => e.Nombre.Contains(searchTermEmpleado, StringComparison.OrdinalIgnoreCase) || e.Email.Contains(searchTermEmpleado, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Cupon> FilteredCupones => string.IsNullOrWhiteSpace(searchTermCupon) 
+        ? cupones 
+        : cupones.Where(c => c.Codigo.Contains(searchTermCupon, StringComparison.OrdinalIgnoreCase));
+
+    // UI Helpers
+    private string GetRoleBg(string rol) => rol switch { "Admin" => "#fcf0f4", "Almacén" => "#e9ecef", _ => "#fce4eb" };
+    private string GetRoleColor(string rol) => rol switch { "Admin" => "#6a3849", "Almacén" => "#6c757d", _ => "#d9557b" };
+    
+    private string GetCouponBorderColor(Cupon c) => c.Estado switch { "Activo" => "#f1aeb5", "Inactivo" => "#e9ecef", "Programado" => "#b6effb", _ => "#ced4da" };
+    private string GetCouponBadgeClass(Cupon c) => c.Estado switch { "Activo" => "success", "Inactivo" => "secondary", "Programado" => "info", _ => "secondary" };
+
+    // Modals
+    private void OpenAddEmployeeModal() { newEmpleado = new Empleado(); showAddEmployeeModal = true; }
+    private void CloseAddEmployeeModal() => showAddEmployeeModal = false;
+
+    private void OpenAddCouponModal() { newCupon = new Cupon(); showAddCouponModal = true; }
+    private void CloseAddCouponModal() => showAddCouponModal = false;
+
+    private void OpenConfigPagoModal(MetodoPago pago) { selectedPago = pago; showConfigPagoModal = true; }
+    private void CloseConfigPagoModal() => showConfigPagoModal = false;
+
+    // Actions
+    private async Task SaveEmployee()
+    {
+        if (string.IsNullOrWhiteSpace(newEmpleado.Nombre) || string.IsNullOrWhiteSpace(newEmpleado.Rol))
+        {
+            ShowToast("Completa los datos del empleado.", "danger");
+            return;
+        }
+
+        newEmpleado.Id = empleados.Any() ? empleados.Max(e => e.Id) + 1 : 1;
+        newEmpleado.Iniciales = newEmpleado.Nombre.Length > 2 ? newEmpleado.Nombre.Substring(0, 2).ToUpper() : "US";
+        empleados.Add(newEmpleado);
+        CloseAddEmployeeModal();
+        ShowToast($"Empleado {newEmpleado.Nombre} agregado correctamente.", "success");
+        await Task.CompletedTask;
+    }
+
+    private void DeleteEmployee(Empleado emp)
+    {
+        empleados.Remove(emp);
+        ShowToast($"Empleado eliminado.", "secondary");
+    }
+
+    private void ToggleEmployeeStatus(Empleado emp)
+    {
+        emp.Estado = emp.Estado == "Activo" ? "Inactivo" : "Activo";
+        ShowToast($"Estado actualizado a {emp.Estado}.", "success");
+    }
+
+    private async Task SaveCoupon()
+    {
+        if (string.IsNullOrWhiteSpace(newCupon.Codigo))
+        {
+            ShowToast("Ingresa un código para el cupón.", "danger");
+            return;
+        }
+
+        newCupon.Id = cupones.Any() ? cupones.Max(c => c.Id) + 1 : 1;
+        newCupon.Estado = newCupon.Vence > DateTime.Now ? "Activo" : "Inactivo";
+        cupones.Add(newCupon);
+        CloseAddCouponModal();
+        ShowToast($"Cupón {newCupon.Codigo} creado.", "success");
+        await Task.CompletedTask;
+    }
+
+    private void DeleteCoupon(Cupon cup)
+    {
+        cupones.Remove(cup);
+        ShowToast($"Cupón eliminado.", "secondary");
+    }
+
+    private void ToggleCouponStatus(Cupon cup)
+    {
+        cup.Estado = cup.Estado == "Activo" ? "Inactivo" : "Activo";
+        ShowToast($"El cupón ahora está {cup.Estado}.", "success");
+    }
+
+    private void TogglePaymentMethod(MetodoPago pago, bool isChecked)
+    {
+        pago.IsActivo = isChecked;
+        ShowToast($"{pago.Nombre} ha sido {(isChecked ? "activado" : "desactivado")}.", "success");
+    }
+
+    private void SaveConfigPago()
+    {
+        CloseConfigPagoModal();
+        ShowToast($"Configuración de {selectedPago.Nombre} actualizada.", "success");
+    }
+
+    private void SaveGlobalSettings()
+    {
+        ShowToast("Todos los cambios han sido guardados.", "success");
+    }
+
+    // Toasts Logic
+    private async void ShowToast(string message, string type)
+    {
+        var toast = new ToastInfo { Message = message, Type = type };
+        Toasts.Add(toast);
+        StateHasChanged();
+
+        await Task.Delay(4000); // Auto remove after 4s
+        if (Toasts.Contains(toast))
+        {
+            Toasts.Remove(toast);
+            StateHasChanged();
+        }
+    }
+
+    private void RemoveToast(ToastInfo toast)
+    {
+        Toasts.Remove(toast);
+    }
+}
