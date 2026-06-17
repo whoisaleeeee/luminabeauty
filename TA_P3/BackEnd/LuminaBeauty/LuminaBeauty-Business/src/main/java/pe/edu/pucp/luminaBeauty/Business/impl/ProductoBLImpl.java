@@ -66,4 +66,56 @@ public class ProductoBLImpl implements ProductoBL {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public java.util.ArrayList<Producto> listarTodos() throws BLException {
+        try {
+            return productoDAO.listarTodos();
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Producto insertar(Producto p) throws BLException {
+        try {
+            Producto insertado = productoDAO.insertar(p);
+            TransactionContext.commit();
+            return insertado;
+        } catch (Exception ex) {
+            TransactionContext.rollback();
+            throw new RuntimeException(ex);
+        } finally {
+            TransactionContext.close();
+        }
+    }
+
+    @Override
+    public Producto actualizar(Producto p) throws BLException {
+        try {
+            Producto actualizado = productoDAO.actualizar(p);
+            TransactionContext.commit();
+            return actualizado;
+        } catch (Exception ex) {
+            TransactionContext.rollback();
+            throw new RuntimeException(ex);
+        } finally {
+            TransactionContext.close();
+        }
+    }
+
+    @Override
+    public void eliminar(int id) throws BLException {
+        try {
+            Producto p = new Producto();
+            p.setId(id);
+            productoDAO.eliminar(p);
+            TransactionContext.commit();
+        } catch (Exception ex) {
+            TransactionContext.rollback();
+            throw new RuntimeException(ex);
+        } finally {
+            TransactionContext.close();
+        }
+    }
 }

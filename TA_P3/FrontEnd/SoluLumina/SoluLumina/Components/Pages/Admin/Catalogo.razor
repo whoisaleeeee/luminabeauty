@@ -2,6 +2,10 @@
 @using SoluLumina.Components.Pages.Shared
 @using SoluLumina.Models
 @using SoluLumina.Data
+@using SoluLumina.Services
+@inject IProductoService ProductoService
+@inject ICategoriaService CategoriaService
+@inject IMarcaService MarcaService
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -67,9 +71,9 @@
                     <i class="bi bi-box position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <small class="text-muted fw-bold d-block" style="font-size: 0.8rem;">Total Productos</small>
-                        <span class="badge rounded-pill" style="background-color: #e2f3eb; color: #198754; font-size: 0.7rem;"><i class="bi bi-arrow-up"></i> @FilteredProducts.Count()</span>
+                        <span class="badge rounded-pill" style="background-color: #e2f3eb; color: #198754; font-size: 0.7rem;"><i class="bi bi-arrow-up"></i> @Productos.Count</span>
                     </div>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@FilteredProducts.Count()</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Productos.Count</h2>
                 </div>
             </div>
             
@@ -77,7 +81,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-tag position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Marcas Activas</small>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@FilteredProducts.Select(p => p.Marca).Distinct().Count()</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Marcas.Count</h2>
                 </div>
             </div>
             
@@ -85,7 +89,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-layers position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Categorías</small>
-                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@FilteredProducts.Select(p => p.Categoria).Distinct().Count()</h2>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Categorias.Count</h2>
                 </div>
             </div>
             
@@ -169,9 +173,9 @@
                                 <td class="py-3 px-4">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
-                                            @if(!string.IsNullOrEmpty(p.ImagenUrl))
+                                            @if(!string.IsNullOrEmpty(p.Imagen))
                                             {
-                                                <img src="@p.ImagenUrl" alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                                <img src="@p.Imagen" alt="Producto" class="w-100 h-100 object-fit-cover" />
                                             }
                                             else
                                             {
@@ -180,20 +184,20 @@
                                         </div>
                                         <div>
                                             <h6 class="m-0 fw-bold text-dark">@p.Nombre</h6>
-                                            <small class="text-muted font-monospace" style="font-size: 0.7rem;">@p.SKU</small>
+                                            <small class="text-muted font-monospace" style="font-size: 0.7rem;">@p.Slug</small>
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge rounded-pill fw-medium" style="background-color: @p.CatBgColor; color: @p.CatColor; padding: 0.4em 0.8em;">@p.Categoria</span></td>
+                                <td><span class="badge rounded-pill fw-medium" style="background-color: @p.CatBgColor; color: @p.CatColor; padding: 0.4em 0.8em;">@p.Categoria?.Nombre</span></td>
                                 <td class="text-secondary">@p.TipoPiel</td>
-                                <td class="fw-bold text-dark">S/ @p.PrecioVenta.ToString("F2")</td>
+                                <td class="fw-bold text-dark">S/ @p.Precio.ToString("F2")</td>
                                 <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: @p.StockBgColor; color: @p.StockColor; padding: 0.4em 0.8em;">@p.Stock uds</span></td>
                                 <td class="py-3 px-4 text-end">
                                 <div class="d-flex justify-content-end gap-2">
                                     <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar" @onclick="() => EditProduct(p)">
                                 <i class="bi bi-pencil"></i>
                             </button>
-                                    <button class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar">
+                                    <button class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar" @onclick="() => DeleteProduct(p)">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -225,18 +229,38 @@
 
 </div>
 
-<AddProductModal @bind-IsVisible="showAddProductModal" OnProductAdded="OnProductAdded" />
-<EditProductModal @bind-IsVisible="showEditProductModal" Product="selectedProduct" OnProductUpdated="OnProductUpdated" />
+<AddProductModal @bind-IsVisible="showAddProductModal" OnProductAdded="OnProductAdded" Categorias="Categorias" Marcas="Marcas" />
+<EditProductModal @bind-IsVisible="showEditProductModal" Product="selectedProduct" OnProductUpdated="OnProductUpdated" Categorias="Categorias" Marcas="Marcas" />
 
 @code {
     private bool showAddProductModal = false;
     private bool showProfileDropdown = false;
-    private List<Product> Productos = SampleProducts.GetProducts();
-    private List<CategoriaProducto> Categorias = SampleCategories.GetCategories();
+    private List<Producto> Productos = new();
+    private List<CategoriaProducto> Categorias = new();
+    private List<Marca> Marcas = new();
+    
     private int selectedCategoryId = 0;
     private int selectedBrandId = 0;
-    private List<Marca> Marcas = SampleBrands.GetMarcas();
     private string searchTerm = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        Productos = await ProductoService.ListarTodosAsync();
+        Categorias = await CategoriaService.ListarTodosAsync();
+        Marcas = await MarcaService.ListarTodosAsync();
+
+        // Mapear los nombres de categoría y marca a los productos si los traen solo con ID
+        foreach(var p in Productos)
+        {
+            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id == p.Categoria.Id);
+            if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id == p.Marca.Id);
+        }
+    }
 
     private void ToggleProfileDropdown()
     {
@@ -264,48 +288,55 @@
         showAddProductModal = true;
     }
 
-    private IEnumerable<Product> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => Categorias.Any(c => c.Id == selectedCategoryId && c.Nombre == p.Categoria));
+    private IEnumerable<Producto> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => p.Categoria?.Id == selectedCategoryId);
 
-    // Apply search term and brand filter on top of category filter
-    private IEnumerable<Product> FilteredProducts => FilteredByCategory
-        .Where(p => selectedBrandId == 0 || Marcas.Any(m => m.Id == selectedBrandId && m.Nombre == p.Marca))
-        .Where(p => string.IsNullOrWhiteSpace(searchTerm) || p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || p.SKU.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+    private IEnumerable<Producto> FilteredProducts => FilteredByCategory
+        .Where(p => selectedBrandId == 0 || p.Marca?.Id == selectedBrandId)
+        .Where(p => string.IsNullOrWhiteSpace(searchTerm) || (p.Nombre != null && p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) || (p.Slug != null && p.Slug.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
-    // Count of products with zero stock in the filtered list
-    private int ZeroStockCount => FilteredProducts.Count(p => p.Stock == 0);
+    private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
 
-    private void OnProductAdded(Product newProduct)
+    private async Task OnProductAdded(Producto newProduct)
     {
-        // new products are not added to the list; modal only
+        showAddProductModal = false;
+        await CargarDatos();
     }
 
     private bool showEditProductModal = false;
-    private Product selectedProduct = new Product();
+    private Producto selectedProduct = new Producto();
 
-    private void EditProduct(Product product)
+    private void EditProduct(Producto product)
     {
-        selectedProduct = new Product
+        selectedProduct = new Producto
         {
             Id = product.Id,
             Nombre = product.Nombre,
-            SKU = product.SKU,
-            PrecioVenta = product.PrecioVenta,
+            Slug = product.Slug,
+            Precio = product.Precio,
             Stock = product.Stock,
-            StockMinimo = product.StockMinimo,
             TipoPiel = product.TipoPiel,
-            ImagenUrl = product.ImagenUrl,
+            Imagen = product.Imagen,
             Marca = product.Marca,
-            Categoria = product.Categoria
+            Categoria = product.Categoria,
+            Estado = product.Estado
         };
         showEditProductModal = true;
     }
 
-    private void OnProductUpdated(Product updatedProduct)
+    private async Task OnProductUpdated(Producto updatedProduct)
     {
-        var idx = Productos.FindIndex(p => p.Id == updatedProduct.Id);
-        if (idx != -1)
+        showEditProductModal = false;
+        await ProductoService.ActualizarAsync(updatedProduct);
+        await CargarDatos();
+    }
+
+    private async Task DeleteProduct(Producto product)
+    {
+        // En una app real, aquí se pondría un confirm de JS
+        var exito = await ProductoService.EliminarAsync(product.Id);
+        if (exito)
         {
-            Productos[idx] = updatedProduct;
+            await CargarDatos();
         }
     }
 }

@@ -9,10 +9,28 @@
     public EventCallback<bool> IsVisibleChanged { get; set; }
 
     [Parameter]
-    public Product Product { get; set; } = new();
+    public Producto Product { get; set; } = new();
 
     [Parameter]
-    public EventCallback<Product> OnProductUpdated { get; set; }
+    public EventCallback<Producto> OnProductUpdated { get; set; }
+
+    [Parameter]
+    public List<CategoriaProducto> Categorias { get; set; } = new();
+
+    [Parameter]
+    public List<Marca> Marcas { get; set; } = new();
+
+    private int catId = 0;
+    private int marcaId = 0;
+
+    protected override void OnParametersSet()
+    {
+        if (Product != null)
+        {
+            catId = Product.Categoria?.Id ?? 0;
+            marcaId = Product.Marca?.Id ?? 0;
+        }
+    }
 
     private void Close()
     {
@@ -22,6 +40,9 @@
 
     private async Task Save()
     {
+        if (catId != 0) Product.Categoria = new CategoriaProducto { Id = catId };
+        if (marcaId != 0) Product.Marca = new Marca { Id = marcaId };
+        
         await OnProductUpdated.InvokeAsync(Product);
         Close();
     }
@@ -40,12 +61,12 @@
                     <input class="form-control" @bind="Product.Nombre" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">SKU</label>
-                    <input class="form-control" @bind="Product.SKU" />
+                    <label class="form-label">Slug / Código</label>
+                    <input class="form-control" @bind="Product.Slug" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Precio Venta</label>
-                    <input type="number" step="0.01" class="form-control" @bind="Product.PrecioVenta" />
+                    <label class="form-label">Precio</label>
+                    <input type="number" step="0.01" class="form-control" @bind="Product.Precio" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Stock</label>
@@ -57,11 +78,23 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Marca</label>
-                    <input class="form-control" @bind="Product.Marca" />
+                    <select class="form-select" @bind="marcaId">
+                        <option value="0">Seleccionar marca...</option>
+                        @foreach (var m in Marcas)
+                        {
+                            <option value="@m.Id">@m.Nombre</option>
+                        }
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Categoría</label>
-                    <input class="form-control" @bind="Product.Categoria" />
+                    <select class="form-select" @bind="catId">
+                        <option value="0">Seleccionar categoría...</option>
+                        @foreach (var c in Categorias)
+                        {
+                            <option value="@c.Id">@c.Nombre</option>
+                        }
+                    </select>
                 </div>
             </div>
             <div class="modal-footer">

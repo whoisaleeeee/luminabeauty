@@ -24,24 +24,19 @@
                                 <input type="text" class="form-control bg-light border-1" placeholder="Ej. Crema Hidratante de Rosas" @bind="NewProduct.Nombre" />
                             </div>
                             <div class="col-12 col-md-3">
-                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">SKU</label>
-                                <input type="text" class="form-control bg-light border-1 font-monospace text-muted" placeholder="GLAM-CR-001" @bind="NewProduct.SKU" />
-                            </div>
-                            <div class="col-12 col-md-3">
-                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Código de barras</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-upc-scan"></i></span>
-                                    <input type="text" class="form-control bg-light border-start-0" placeholder="789012345678" @bind="NewProduct.CodigoBarras" />
-                                </div>
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Slug / Código</label>
+                                <input type="text" class="form-control bg-light border-1 font-monospace text-muted" placeholder="GLAM-CR-001" @bind="NewProduct.Slug" />
                             </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
-                                <select class="form-select bg-light border-1 text-secondary" @bind="NewProduct.Marca">
-                                    <option value="" selected>Seleccionar marca...</option>
-                                    <option value="Marca A">Marca A</option>
-                                    <option value="Marca B">Marca B</option>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="marcaId">
+                                    <option value="0" selected>Seleccionar marca...</option>
+                                    @foreach (var m in Marcas)
+                                    {
+                                        <option value="@m.Id">@m.Nombre</option>
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -54,16 +49,14 @@
                             <h6 class="m-0 fw-semibold text-dark">Categorización</h6>
                         </div>
                         <div class="row g-3">
-                            <div class="col-12 col-md-4">
+                            <div class="col-12 col-md-6">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
-                                <select class="form-select bg-light border-1 text-secondary">
-                                    <option selected>Cuidado de la Piel</option>
-                                </select>
-                            </div>
-                            <div class="col-12 col-md-4">
-                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Subcategoría</label>
-                                <select class="form-select bg-light border-1 text-secondary">
-                                    <option selected>Hidratantes</option>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="catId">
+                                    <option value="0" selected>Seleccionar categoría...</option>
+                                    @foreach (var c in Categorias)
+                                    {
+                                        <option value="@c.Id">@c.Nombre</option>
+                                    }
                                 </select>
                             </div>
                             <div class="col-12 col-md-4">
@@ -88,23 +81,12 @@
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted">$</span>
-                                    <input type="text" class="form-control bg-light border-start-0" placeholder="0.00" @bind="NewProduct.PrecioVenta" />
-                                </div>
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Costo</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
-                                    <input type="text" class="form-control bg-light border-start-0" placeholder="0.00" @bind="NewProduct.PrecioCosto" />
+                                    <input type="text" class="form-control bg-light border-start-0" placeholder="0.00" @bind="NewProduct.Precio" />
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stock Actual</label>
                                 <input type="number" class="form-control bg-light border-1" @bind="NewProduct.Stock" />
-                            </div>
-                            <div class="col-6 col-md-3">
-                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stock Mínimo</label>
-                                <input type="number" class="form-control bg-light border-1" @bind="NewProduct.StockMinimo" />
                             </div>
                         </div>
                     </div>
@@ -147,9 +129,17 @@
     public EventCallback<bool> IsVisibleChanged { get; set; }
 
     [Parameter]
-    public EventCallback<Product> OnProductAdded { get; set; }
+    public EventCallback<Producto> OnProductAdded { get; set; }
 
-    private Product NewProduct = new Product();
+    [Parameter]
+    public List<CategoriaProducto> Categorias { get; set; } = new();
+
+    [Parameter]
+    public List<Marca> Marcas { get; set; } = new();
+
+    private Producto NewProduct = new Producto();
+    private int catId = 0;
+    private int marcaId = 0;
 
     private async Task CloseModal()
     {
@@ -159,9 +149,13 @@
 
     private async Task SaveProduct()
     {
+        if (catId != 0) NewProduct.Categoria = new CategoriaProducto { Id = catId };
+        if (marcaId != 0) NewProduct.Marca = new Marca { Id = marcaId };
+        
         await OnProductAdded.InvokeAsync(NewProduct);
         // Reset form for next entry
-        NewProduct = new Product();
+        NewProduct = new Producto();
+        catId = 0; marcaId = 0;
         await CloseModal();
     }
 }

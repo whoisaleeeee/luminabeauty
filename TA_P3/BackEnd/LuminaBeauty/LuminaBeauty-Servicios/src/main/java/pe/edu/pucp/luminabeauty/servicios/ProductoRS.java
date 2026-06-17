@@ -3,6 +3,8 @@ package pe.edu.pucp.luminabeauty.servicios;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -59,5 +61,50 @@ public class ProductoRS {
             System.out.println(ex.getMessage());
         }
         return resultado;
+    }
+
+    @GET
+    @Path("listar")
+    public java.util.ArrayList<Producto> listarTodos() {
+        try {
+            return productoBL.listarTodos();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return new java.util.ArrayList<>();
+        }
+    }
+
+    @POST
+    @Path("insertar")
+    public Producto insertar(Producto p) {
+        try {
+            return productoBL.insertar(p);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+    }
+
+    @PUT
+    @Path("actualizar")
+    public Producto actualizar(Producto p) {
+        try {
+            return productoBL.actualizar(p);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return null;
+        }
+    }
+
+    @DELETE
+    @Path("eliminar/{id}")
+    public int eliminar(@PathParam("id") Integer id) {
+        try {
+            productoBL.eliminar(id);
+            return 1;
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+            return 0;
+        }
     }
 }
