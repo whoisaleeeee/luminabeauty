@@ -83,10 +83,9 @@ public class ProductoDAOImpl implements ProductoDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapearProducto(rs);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapearProducto(rs);
             }
 
         } catch (SQLException e) {

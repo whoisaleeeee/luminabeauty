@@ -25,7 +25,7 @@ public class ProductoRS {
 
     @GET
     @Path("validarStock/{idProducto}/{cantidad}")
-    public int validarStock(@PathParam("idProducto") int idProducto, @PathParam("cantidad") int cantidad) {
+    public int validarStock(@PathParam("idProducto") int idProducto, @PathParam("cantidad") int cantidad) throws Exception {
         int resultado = 0;
         try {
             productoBL.validarStock(idProducto, cantidad);
