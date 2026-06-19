@@ -1,0 +1,200 @@
+@page "/login"
+@inject LanguageService LangService
+@inject AuthService Auth
+@inject ToastService Toast
+@inject NavigationManager Navigator
+@implements IDisposable
+
+<PageTitle>Ingresar | Lumina Beauty</PageTitle>
+
+<div id="login-workspace" class="space-y-8 text-left">
+    <!-- Breadcrumbs -->
+    <div id="login-breadcrumbs" class="text-left text-[11px] sm:text-xs font-semibold text-stone-400 uppercase tracking-widest mb-10 flex flex-wrap items-center gap-1.5 leading-none select-none">
+        <span class="hover:text-[#FF76A5] cursor-pointer transition" @onclick='() => NavigateTo("/")'>
+            @LangService.Translate("inicio")
+        </span>
+        <span>/</span>
+        <span class="text-[#FF76A5] font-bold">@LangService.Translate("ingresar")</span>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 bg-white/35 backdrop-blur-xl border border-white/60 rounded-[32px] p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-[#FF76A5]/10 rounded-full filter blur-3xl pointer-events-none" />
+
+        <!-- Left Illustration banner Column -->
+        <div class="lg:col-span-7 rounded-[24px] overflow-hidden relative min-h-[350px] sm:min-h-[500px] flex flex-col justify-between p-8 sm:p-12 text-left bg-gradient-to-br from-[#EAF7FA] to-[#FFF0F3] border border-white/50 shadow-inner group select-none">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_120%,#FF76A5/15,transparent_50%)]" />
+          <div class="absolute top-1/4 right-8 w-16 h-16 rounded-full bg-white/20 backdrop-blur-md border border-white/40 shadow-lg -rotate-12 group-hover:rotate-12 transition duration-700" />
+          <div class="absolute bottom-1/4 left-10 w-24 h-24 rounded-[2rem] bg-pink-100/30 backdrop-blur-sm border border-white/30 shadow-md rotate-45 group-hover:scale-105 transition duration-700 pointer-events-none" />
+
+          <div class="relative z-10">
+            <span class="text-[10px] font-black tracking-[0.25em] text-[#C7346A] uppercase bg-[#FFF0F3] border border-[#FFE3E8]/80 py-1.5 px-3.5 rounded-full select-none inline-block">
+              @LangService.Translate("sculturaTitle")
+            </span>
+          </div>
+
+          <div class="relative z-10 w-full flex items-center justify-center my-6">
+            <div class="relative max-w-[280px] w-full">
+              <div class="absolute -inset-4 bg-white/20 backdrop-blur-md rounded-[2.5rem] border border-white/50 shadow-xl -rotate-3 scale-105 group-hover:rotate-1 group-hover:scale-110 transition duration-700" />
+              <div class="absolute inset-0 bg-gradient-to-tr from-[#FF76A5]/25 to-transparent rounded-[2rem] blur-xl opacity-80" />
+              <div class="relative bg-white/60 backdrop-blur-md rounded-[2rem] border border-white/90 p-3 shadow-xl overflow-hidden aspect-square flex items-center justify-center">
+                <img src="https://images.unsplash.com/photo-1612817288484-6f916006741a?auto=format&fit=crop&w=700&q=80"
+                     alt="Lumina Luxury Skincare Selection"
+                     class="w-full h-full object-cover rounded-[1.5rem] shadow-inner transition duration-500 hover:scale-105 pointer-events-none" />
+                <div class="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-white/10 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          <div class="relative z-10 space-y-2.5 mt-4">
+            <h2 class="font-display font-medium text-2xl sm:text-3xl text-stone-900 tracking-tight leading-tight uppercase font-light">
+              @LangService.Translate("heroHeading")
+            </h2>
+            <p class="text-xs font-semibold text-stone-500 leading-relaxed max-w-sm">
+              @LangService.Translate("heroSubheading")
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Credentials Form Column -->
+        <div class="lg:col-span-5 flex flex-col justify-center text-left py-4 relative z-10">
+          <div class="bg-white/50 backdrop-blur-md hover:bg-white/65 border border-white/80 rounded-[28px] p-6 sm:p-10 shadow-xl space-y-6 transition duration-500">
+            
+            <div class="space-y-1.5 select-none animate-pulse">
+              <h2 class="text-2xl sm:text-3xl font-display font-medium text-stone-900">@LangService.Translate("loginTitle")</h2>
+              <p class="text-xs font-bold text-stone-400 uppercase tracking-widest flex items-center gap-2">
+                <span class="w-1.5 h-1.5 bg-[#FF76A5] rounded-full" />
+                <span>@LangService.Translate("loginSubtitle")</span>
+              </p>
+            </div>
+
+            <!-- Inputs form -->
+            <form @onsubmit="HandleLoginSubmit" @onsubmit:preventDefault class="space-y-6 pt-1">
+              <div class="py-2">
+                <div class="relative border-b border-stone-250/80 focus-within:border-[#FF76A5] transition-all duration-300 py-1">
+                  <input type="email"
+                         required
+                         @bind="_email"
+                         placeholder="Ingresar correo electrónico..."
+                         class="w-full bg-transparent text-xs text-stone-800 font-bold focus:outline-none placeholder-stone-400 py-1" />
+                </div>
+              </div>
+
+              <div class="py-2">
+                <div class="relative border-b border-stone-250/80 focus-within:border-[#FF76A5] transition-all duration-300 py-1">
+                  <input type="password"
+                         required
+                         @bind="_password"
+                         placeholder="Contraseña..."
+                         class="w-full bg-transparent text-xs text-stone-800 font-bold focus:outline-none placeholder-stone-400 py-1" />
+                </div>
+              </div>
+
+              <!-- Options -->
+              <div class="flex items-center justify-between text-[11px] font-semibold text-stone-500 pt-1 pointer-events-auto select-none">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" checked class="rounded text-[#FF76A5] focus:ring-[#FF76A5] border-stone-300 cursor-pointer" />
+                  <span>@LangService.Translate("rememberMe")</span>
+                </label>
+                <button type="button" @onclick="ForgotPasswordClicked" class="text-[#C7346A] hover:underline cursor-pointer">
+                  @LangService.Translate("forgotPassword")
+                </button>
+              </div>
+
+              <!-- Submit -->
+              <button type="submit"
+                      class="w-full bg-[#FFA8BA] hover:bg-[#ff9bb0] active:scale-98 text-[#C7346A] font-bold text-xs tracking-widest uppercase py-4 rounded-xl shadow-lg hover:shadow-xl transition duration-300 select-none cursor-pointer mt-4">
+                @LangService.Translate("loginBtn")
+              </button>
+            </form>
+
+            <!-- Social dividers -->
+            <div class="relative flex py-1 items-center select-none">
+              <div class="grow border-t border-stone-200/50" />
+              <span class="shrink mx-3 text-[10px] font-extrabold uppercase tracking-widest text-stone-400">@LangService.Translate("socialLogin")</span>
+              <div class="grow border-t border-stone-200/50" />
+            </div>
+
+            <!-- Quick login Apple/Google -->
+            <div class="grid grid-cols-2 gap-3.5 select-none">
+              <button type="button" @onclick='() => SocialLogin("Google")' class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white hover:bg-[#FFF0F3] border border-stone-100 hover:border-[#FFE3E8] rounded-xl text-stone-700 text-[10px] font-black tracking-wider uppercase transition shadow-xs cursor-pointer">
+                <span>🌐</span>
+                <span>Google</span>
+              </button>
+
+              <button type="button" @onclick='() => SocialLogin("Apple")' class="flex items-center justify-center gap-2 py-2.5 px-3 bg-white hover:bg-[#FFF0F3] border border-stone-100 hover:border-[#FFE3E8] rounded-xl text-stone-700 text-[10px] font-black tracking-wider uppercase transition shadow-xs cursor-pointer">
+                <span></span>
+                <span>Apple</span>
+              </button>
+            </div>
+
+            <!-- Sign Up redirect line -->
+            <div class="border-t border-stone-100/80 pt-4 text-center select-none">
+              <p class="text-xs font-semibold text-stone-500">
+                <span>@LangService.Translate("noAccount") </span>
+                <button @onclick="NavigateToSignup" class="text-[#FF76A5] hover:text-[#C7346A] font-black hover:underline transition ml-1 cursor-pointer">
+                  @LangService.Translate("signUpNow")
+                </button>
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private string _email = string.Empty;
+    private string _password = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        LangService.OnChange += StateHasChanged;
+    }
+
+    private void NavigateTo(string path) => Navigator.NavigateTo(path);
+
+    private async Task HandleLoginSubmit()
+    {
+        var success = await Auth.LoginAsync(_email, _password);
+        if (!success)
+        {
+            Toast.ShowToast(LangService.CurrentLanguage == "es"
+                ? "No se pudo iniciar sesión. Verifica el backend Java o usa un correo @lumina.com para administrador."
+                : "Could not sign in. Check the Java backend or use an @lumina.com admin email.");
+            return;
+        }
+
+        Toast.ShowToast(LangService.CurrentLanguage == "es" 
+            ? "¡Sesión iniciada correctamente! Bienvenido(a) a Lumina" 
+            : "Successfully signed in! Welcome to Lumina");
+        Navigator.NavigateTo(Auth.IsAdmin ? "/admin" : "/profile");
+    }
+
+    private void ForgotPasswordClicked()
+    {
+        Toast.ShowToast(LangService.CurrentLanguage == "es" 
+            ? "¡Enlace de recuperación enviado!" 
+            : "Recovery connection email sent!");
+    }
+
+    private async Task SocialLogin(string provider)
+    {
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? $"Conectando con {provider}..." : $"Connecting through {provider}...");
+        await Task.Delay(1000);
+        await Auth.LoginAsync($"{provider.ToLowerInvariant()}@lumina.local", provider);
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? $"¡Sesión iniciada con {provider}!" : $"Signed in with {provider}!");
+        Navigator.NavigateTo("/profile");
+    }
+
+    private void NavigateToSignup()
+    {
+        Navigator.NavigateTo("/signup");
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Cargando portal de registro premium..." : "Launching premium registration suite...");
+    }
+
+    public void Dispose()
+    {
+        LangService.OnChange -= StateHasChanged;
+    }
+}

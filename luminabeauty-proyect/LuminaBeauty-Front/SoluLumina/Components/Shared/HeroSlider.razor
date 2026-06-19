@@ -1,0 +1,155 @@
+@inject LanguageService LangService
+@inject NavigationManager Navigator
+@implements IDisposable
+
+<div class="relative w-full h-[380px] md:h-[460px] rounded-3xl overflow-hidden glass-panel shadow-lg flex items-center select-none"
+     id="hero-carousel-container">
+    
+    <!-- Background Gradient Transition -->
+    <div class="absolute inset-0 bg-gradient-to-r @_slides[_currentSlideIndex].ColorTheme transition-colors duration-1000 -z-10" />
+
+    <!-- Decorative pattern overlay -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+
+    <div class="w-full h-full grid grid-cols-1 md:grid-cols-12 items-center relative gap-8 px-6 md:px-12">
+        
+        <!-- Typography description card content -->
+        <div class="md:col-span-7 z-10 flex flex-col justify-center text-left py-4">
+          <div class="inline-flex items-center gap-1.5 bg-white/75 backdrop-blur-md border border-white/80 py-1.5 px-3.5 rounded-full w-fit mb-4 shadow-sm">
+            <span class="text-xs text-[#FF76A5]">✨</span>
+            <span class="text-[10px] font-bold tracking-widest text-[#C7346A] uppercase">
+              @_slides[_currentSlideIndex].HighPromo
+            </span>
+          </div>
+
+          <h2 class="font-serif text-3xl md:text-5xl font-light text-gray-900 tracking-tight leading-[1.1] mb-4">
+            @_slides[_currentSlideIndex].Title
+          </h2>
+
+          <p class="text-xs md:text-sm text-gray-600 max-w-md leading-relaxed mb-6">
+            @_slides[_currentSlideIndex].Subtitle
+          </p>
+
+          <button @onclick="ExploreClicked"
+                  class="w-fit bg-gray-900 hover:bg-[#FF76A5] hover:shadow-lg hover:shadow-pink-100 font-bold uppercase tracking-wider text-[10px] text-white px-7 py-3.5 rounded-xl transition-all duration-300 cursor-pointer hover:-translate-y-0.5">
+            @_slides[_currentSlideIndex].CtaText
+          </button>
+        </div>
+
+        <!-- Render Image -->
+        <div class="hidden md:flex md:col-span-5 h-[340px] md:h-full relative overflow-hidden items-center justify-center">
+          <div class="absolute w-[280px] h-[280px] md:w-[340px] md:h-[340px] rounded-full bg-gradient-to-tr from-[#FFF0F3] to-amber-100/20 opacity-40 filter blur-2xl animate-spin-slow animate-pulse" />
+          
+          <img src="@_slides[_currentSlideIndex].Image"
+               alt="@_slides[_currentSlideIndex].Title"
+               class="relative z-10 max-h-[300px] md:max-h-[360px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 rounded-2xl pointer-events-none" />
+        </div>
+    </div>
+
+    <!-- Manual Arrow buttons -->
+    <div class="absolute bottom-5 right-6 flex gap-2 z-20 select-none">
+        <button @onclick="PrevSlide"
+                class="p-2 w-10 h-10 rounded-full bg-white/65 hover:bg-white text-gray-600 hover:text-[#FF76A5] transition-all flex items-center justify-center shadow cursor-pointer">
+          <span>←</span>
+        </button>
+        <button @onclick="NextSlide"
+                class="p-2 w-10 h-10 rounded-full bg-white/65 hover:bg-white text-gray-600 hover:text-[#FF76A5] transition-all flex items-center justify-center shadow cursor-pointer">
+          <span>➔</span>
+        </button>
+    </div>
+
+    <!-- Dots Indicators -->
+    <div class="absolute bottom-6 left-6 md:left-12 flex gap-1.5 z-20 select-none">
+        @for (int i = 0; i < _slides.Count; i++)
+        {
+          var idx = i;
+          <button @onclick="() => SetSlide(idx)"
+                  class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer @(idx == _currentSlideIndex ? "bg-[#FF76A5] w-6" : "bg-gray-300 hover:bg-gray-400")" />
+        }
+    </div>
+
+</div>
+
+@code {
+    private int _currentSlideIndex;
+    private System.Threading.Timer? _timer;
+
+    public class SlideItem
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Subtitle { get; set; } = string.Empty;
+        public string CtaText { get; set; } = string.Empty;
+        public string Image { get; set; } = string.Empty;
+        public string ColorTheme { get; set; } = string.Empty;
+        public string HighPromo { get; set; } = string.Empty;
+    }
+
+    private readonly List<SlideItem> _slides = new()
+    {
+        new SlideItem
+        {
+            HighPromo = "HASTA 20% EN LABIALES",
+            Title = "Crea Luces Eternas En Tus Labios",
+            Subtitle = "Texturas aterciopeladas y brillos de culto con fórmulas nutritivas hidratantes.",
+            CtaText = "Ver Labiales",
+            Image = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=1500",
+            ColorTheme = "from-[#ffe8eb] via-[#fffbfb] to-[#fec8d1]/30"
+        },
+        new SlideItem
+        {
+            HighPromo = "K-BEAUTY RADIANCE SECRETS",
+            Title = "Descubre El Secreto del Efecto Glass",
+            Subtitle = "La rutina viral de extractos botánicos puros que calma, regenera y da brillo absoluto.",
+            CtaText = "Explorar K-Beauty",
+            Image = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=1500",
+            ColorTheme = "from-[#fdf8f5] via-[#ffe8eb] to-[#fcf5f0]"
+        },
+        new SlideItem
+        {
+            HighPromo = "LÉ GRANDE PARFUM LUXURY",
+            Title = "Sensualidad Floral y Oud Misterioso",
+            Subtitle = "Las esencias olfativas premium creadas por los perfumistas franceses más distinguidos.",
+            CtaText = "Ver Fragancias",
+            Image = "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=1500",
+            ColorTheme = "from-[#ffe8eb] via-[#fffbfb] to-[#fec8d1]/20"
+        }
+    };
+
+    protected override void OnInitialized()
+    {
+        LangService.OnChange += StateHasChanged;
+        
+        // Setup slider autoplay
+        _timer = new System.Threading.Timer((_) =>
+        {
+            InvokeAsync(() =>
+            {
+                _currentSlideIndex = (_currentSlideIndex + 1) % _slides.Count;
+                StateHasChanged();
+            });
+        }, null, 6000, 6000);
+    }
+
+    private void PrevSlide()
+    {
+        _currentSlideIndex = (_currentSlideIndex - 1 + _slides.Count) % _slides.Count;
+    }
+
+    private void NextSlide()
+    {
+        _currentSlideIndex = (_currentSlideIndex + 1) % _slides.Count;
+    }
+
+    private void SetSlide(int index) => _currentSlideIndex = index;
+
+    private void ExploreClicked()
+    {
+        Navigator.NavigateTo($"/category/{Uri.EscapeDataString("Makeup")}");
+    }
+
+    public void Dispose()
+    {
+        LangService.OnChange -= StateHasChanged;
+        _timer?.Dispose();
+    }
+}

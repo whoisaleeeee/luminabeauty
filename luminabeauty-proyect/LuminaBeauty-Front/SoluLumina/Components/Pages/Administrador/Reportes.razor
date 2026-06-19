@@ -1,0 +1,334 @@
+﻿@page "/Reportes"
+@using LuminaBeauty.Components.Shared.Admin
+@rendermode InteractiveServer
+@layout AdminLayout
+
+<div class="flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <Navbar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header Superior Estándar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+            <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Reportes</h3>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="input-group" style="width: 280px;">
+                    <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar reportes o métricas..." style="font-size: 0.9rem;">
+                </div>
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                <div class="position-relative">
+                    <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                        <div class="text-end d-none d-md-block">
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                        </div>
+                        <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                    </div>
+
+                    @if (showProfileDropdown)
+                    {
+                        <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                                <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                                <div class="overflow-hidden">
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">Juan Perez</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">juan.perez@luminabeauty.com</small>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-person fs-5"></i> Ver Perfil
+                                </NavLink>
+                                <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                                <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Subheader Reportes -->
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-1" style="font-size: 0.8rem; font-weight: 500;">
+                        <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" style="color: #834a5d;">Reportes</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-black m-0" style="color: #2d2d2d; font-size: 2rem;">Reportes y Métricas</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn bg-white border border-danger text-danger px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" style="font-size: 0.9rem;">
+                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                </button>
+                <button class="btn bg-white border border-success text-success px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" style="font-size: 0.9rem;">
+                    <i class="bi bi-file-earmark-excel"></i> Excel
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-3">
+                    <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Desde</label>
+                    <input type="date" class="form-control border-1 text-secondary" value="2023-10-01">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Hasta</label>
+                    <input type="date" class="form-control border-1 text-secondary" value="2023-10-31">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Tipo de Reporte</label>
+                    <select class="form-select border-1 text-secondary">
+                        <option selected>Ventas Consolidadas</option>
+                        <option value="1">Inventario General</option>
+                        <option value="2">Rendimiento por Marca</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-3">
+                    <button class="btn w-100 text-white rounded-3 shadow-sm fw-medium d-flex justify-content-center align-items-center gap-2" style="background-color: #f1aeb5; padding: 0.55rem; color: #834a5d !important;">
+                        <i class="bi bi-bar-chart-steps"></i> Generar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-cash-stack position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ventas totales</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ 28,450</h2>
+                    <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +12.5% vs mes ant.</small>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-cart3 position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Pedidos</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">312</h2>
+                    <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +5.2% vs mes ant.</small>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-ticket-detailed position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ticket promedio</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ 91.20</h2>
+                    <small class="fw-semibold text-secondary d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-dash"></i> Estable</small>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-person-plus position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Clientes nuevos</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">87</h2>
+                    <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +22.1% vs mes ant.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            
+            <!-- Pseudo Chart: Ventas por categoría -->
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0 text-dark">Ventas por categoría</h5>
+                            <small class="text-muted">Distribución de ingresos mensual</small>
+                        </div>
+                        <button class="btn btn-sm text-secondary bg-transparent border-0"><i class="bi bi-three-dots-vertical fs-5"></i></button>
+                    </div>
+                    
+                    <!-- CSS Bar Chart Simulation -->
+                    <div class="d-flex align-items-end justify-content-around mt-auto pt-4" style="height: 200px;">
+                        <!-- Bar 1 -->
+                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 85%; background-color: #834a5d; transition: all 0.3s; cursor: pointer;"></div>
+                            <small class="text-muted" style="font-size: 0.7rem;">Maquillaje</small>
+                        </div>
+                        <!-- Bar 2 -->
+                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 65%; background-color: #d9557b; transition: all 0.3s; cursor: pointer;"></div>
+                            <small class="text-muted" style="font-size: 0.7rem;">Skincare</small>
+                        </div>
+                        <!-- Bar 3 -->
+                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 45%; background-color: #f1aeb5; transition: all 0.3s; cursor: pointer;"></div>
+                            <small class="text-muted" style="font-size: 0.7rem;">Fragancias</small>
+                        </div>
+                        <!-- Bar 4 -->
+                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 30%; background-color: #f8d7da; transition: all 0.3s; cursor: pointer;"></div>
+                            <small class="text-muted" style="font-size: 0.7rem;">Cabello</small>
+                        </div>
+                        <!-- Bar 5 -->
+                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 15%; background-color: #e2e3e5; transition: all 0.3s; cursor: pointer;"></div>
+                            <small class="text-muted" style="font-size: 0.7rem;">Accesorios</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Horizontal Bars: Top Marcas -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0 text-dark">Top marcas por ventas</h5>
+                            <small class="text-muted">Marcas con mayor rotación</small>
+                        </div>
+                        <i class="bi bi-graph-up text-secondary fs-5"></i>
+                    </div>
+
+                    <div class="d-flex flex-column justify-content-between flex-grow-1">
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Chanel Beauty</span>
+                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 8,240</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                <div class="progress-bar" role="progressbar" style="width: 90%; background-color: #6a3849;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Dior Addict</span>
+                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 6,120</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                <div class="progress-bar" role="progressbar" style="width: 75%; background-color: #834a5d;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Lancôme Paris</span>
+                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 4,500</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                <div class="progress-bar" role="progressbar" style="width: 55%; background-color: #c98c9f;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Estée Lauder</span>
+                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 3,900</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                <div class="progress-bar" role="progressbar" style="width: 45%; background-color: #d9acb9;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Clinique</span>
+                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 2,400</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                <div class="progress-bar" role="progressbar" style="width: 30%; background-color: #e5cacc;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tabla: Detalle de Ventas Recientes -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: #f7eff1 !important;">
+                <h5 class="fw-bold m-0 text-dark">Detalle de Ventas Recientes</h5>
+                <a href="/Pedidos" class="text-decoration-none fw-medium" style="color: #834a5d; font-size: 0.9rem;">Ver todo</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="py-3 px-4 border-bottom-0">ID Transacción</th>
+                            <th class="py-3 border-bottom-0">Cliente</th>
+                            <th class="py-3 border-bottom-0">Monto</th>
+                            <th class="py-3 border-bottom-0">Estado</th>
+                            <th class="py-3 px-4 border-bottom-0 text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        <!-- Fila 1 -->
+                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                            <td class="py-3 px-4 font-monospace text-muted">#ORD-2023-901</td>
+                            <td class="fw-medium text-dark">Lucía Fernández</td>
+                            <td class="fw-bold text-dark">S/ 245.00</td>
+                            <td><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">Completado</span></td>
+                            <td class="py-3 px-4 text-end">
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></button>
+                            </td>
+                        </tr>
+                        <!-- Fila 2 -->
+                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                            <td class="py-3 px-4 font-monospace text-muted">#ORD-2023-902</td>
+                            <td class="fw-medium text-dark">Mateo Rossi</td>
+                            <td class="fw-bold text-dark">S/ 120.50</td>
+                            <td><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">Completado</span></td>
+                            <td class="py-3 px-4 text-end">
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></button>
+                            </td>
+                        </tr>
+                        <!-- Fila 3 -->
+                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                            <td class="py-3 px-4 font-monospace text-muted">#ORD-2023-903</td>
+                            <td class="fw-medium text-dark">Valentina Soto</td>
+                            <td class="fw-bold text-dark">S/ 430.00</td>
+                            <td><span class="badge rounded-pill fw-medium" style="background-color: #fdf5f5; color: #d9557b; padding: 0.4em 0.8em;">Procesando</span></td>
+                            <td class="py-3 px-4 text-end">
+                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+    .chart-bar:hover {
+        opacity: 0.8;
+        transform: scaleY(1.02);
+        transform-origin: bottom;
+    }
+</style>
+
+@code {
+    private bool showProfileDropdown = false;
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+}
+
+

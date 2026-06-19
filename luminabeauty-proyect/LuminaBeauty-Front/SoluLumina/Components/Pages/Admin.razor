@@ -1,0 +1,50 @@
+@page "/admin"
+@inject AuthService Auth
+@inject NavigationManager Navigator
+
+<PageTitle>Administrador | Lumina Beauty</PageTitle>
+
+@if (Auth.IsAdmin)
+{
+    <div class="space-y-8 text-left">
+        <nav class="text-xs font-semibold text-stone-400 mb-8 flex items-center gap-2 select-none">
+            <span class="hover:text-[#FF76A5] cursor-pointer transition" @onclick='() => Navigator.NavigateTo("")'>
+            Inicio
+        </span>
+        <span class="text-stone-300">/</span>
+        <span class="text-stone-600 font-bold">Administrador</span>
+    </nav>
+
+    <section class="bg-white/70 backdrop-blur-md rounded-3xl border border-stone-100 p-6 sm:p-8 shadow-md">
+        <span class="text-[10px] font-black tracking-[0.25em] text-[#C7346A] uppercase bg-[#FFF0F3] border border-[#FFE3E8]/80 py-1.5 px-3.5 rounded-full select-none inline-block">
+            Acceso corporativo
+        </span>
+        <h1 class="font-serif text-3xl sm:text-4xl font-medium text-stone-900 mt-4 mb-3">
+            Panel administrativo LuminaBeauty
+        </h1>
+        <p class="text-xs font-semibold text-stone-500 leading-relaxed max-w-2xl">
+            Sesion iniciada como @Auth.Email. Puedes acceder a la administración de los servicios (Catálogo, Inventario, Pedidos y Reportes) en la parte superior.
+        </p>
+    </section>
+</div>
+}
+
+@code {
+    private bool _checkedAccess;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_checkedAccess)
+        {
+            _checkedAccess = true;
+            await Auth.InitializeAsync();
+
+            if (!Auth.IsAdmin)
+            {
+                Navigator.NavigateTo("login", replace: true);
+            }
+
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,375 @@
+@page "/"
+@page "/home"
+@inject LanguageService LangService
+@inject LayoutStateService LayoutState
+@inject WishlistService Wishlist
+@inject CartService Cart
+@inject ProductService ProductCache
+@inject NavigationManager Navigator
+@implements IDisposable
+
+<PageTitle>Lumina Beauty | Haute Cosmétique & Skincare</PageTitle>
+
+<div class="flex flex-col gap-16 text-left">
+    
+    <!-- Mobile Search Bar (as in React app) -->
+    <div class="md:hidden relative select-none">
+        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-300 w-4 h-4">🔍</span>
+        <input type="text"
+               placeholder="¿Qué estás buscando?"
+               value="@LayoutState.SearchQuery"
+               @oninput="OnMobileSearch"
+               class="w-full bg-white border border-stone-200 rounded-full py-2.5 pl-11 pr-4 text-xs outline-none focus:border-[#FF76A5] transition shadow-sm" />
+    </div>
+
+    <!-- Hero Carousel Slider -->
+    <HeroSlider />
+
+    <!-- Flash Sales Section with standard Countdown Timer -->
+    <section>
+        <div class="flex items-center justify-between mb-8 pb-5 border-b border-stone-100 select-none">
+          <div class="text-left">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">
+              Tiempo Limitado
+            </span>
+            <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">
+              Ofertas relámpago
+            </h2>
+          </div>
+
+          <!-- Countdown timer grid -->
+          <div class="hidden sm:flex items-center gap-1.5 font-mono">
+            <div class="flex flex-col items-center">
+              <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FF76A5] text-white shadow-sm">
+                @_timeLeft.Days.ToString("00")
+              </div>
+              <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Días</span>
+            </div>
+            <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
+
+            <div class="flex flex-col items-center">
+              <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
+                @_timeLeft.Hours.ToString("00")
+              </div>
+              <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Horas</span>
+            </div>
+            <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
+
+            <div class="flex flex-col items-center">
+              <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
+                @_timeLeft.Minutes.ToString("00")
+              </div>
+              <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Min</span>
+            </div>
+            <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
+
+            <div class="flex flex-col items-center">
+              <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
+                @_timeLeft.Seconds.ToString("00")
+              </div>
+              <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Seg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flash sales grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          @foreach (var p in ProductCache.GetFlashSaleProducts())
+          {
+            <ProductCard Product="@p" />
+          }
+        </div>
+    </section>
+
+    <!-- Luxury Brands strip row -->
+    <section class="py-6 select-none border-y border-stone-250/30">
+        <p class="text-[10px] text-center font-bold uppercase tracking-[0.2em] text-[#c5a880] mb-8">
+          Las mejores marcas a tu alcance
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 md:justify-between px-6">
+          @foreach (var b in ProductCache.GetBrands())
+          {
+            <button @onclick="() => FilterByBrand(b.Name)"
+                    class="font-serif text-base md:text-xl font-bold tracking-[0.3em] text-stone-300 hover:text-[#FF76A5] transition-colors duration-300 uppercase shrink-0 cursor-pointer">
+              @b.Name
+            </button>
+          }
+        </div>
+    </section>
+
+    <!-- Interactive Catalogue Filter Grid -->
+    <section id="catalog" class="scroll-mt-24">
+        <div class="flex items-end justify-between mb-8 pb-5 border-b border-stone-100 select-none">
+          <div class="text-left">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">
+              Este Mes
+            </span>
+            <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">
+              @(!string.IsNullOrEmpty(_activeCategory) ? $"Colección: {_activeCategory}" : "Productos más vendidos")
+            </h2>
+          </div>
+
+          <button @onclick="ResetCatalogue" 
+                  class="text-xs font-bold text-[#FF76A5] hover:text-[#C7346A] hover:underline flex items-center gap-1 cursor-pointer">
+            Ver todo <span>➔</span>
+          </button>
+        </div>
+
+        <!-- Categories Pill Filters -->
+        <div class="flex flex-wrap gap-2 mb-8 select-none">
+          @foreach (var cat in ProductCache.GetCategories())
+          {
+            var isSelected = _activeCategory == cat.Name;
+            <button @onclick="() => SelectCategory(cat.Name)"
+                    class="px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold border transition cursor-pointer @(isSelected ? "bg-[#FF76A5] text-white border-[#FF76A5]" : "bg-white/70 text-stone-500 border-[#FFE3E8]/70 hover:text-[#C7346A]")">
+              @cat.Name
+            </button>
+          }
+        </div>
+
+        <!-- Catalogue list -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          @if (GetFilteredCatalogue().Count > 0)
+          {
+            @foreach (var p in GetFilteredCatalogue())
+            {
+               <ProductCard Product="@p" />
+            }
+          }
+          else
+          {
+            <div class="col-span-full py-16 bg-white/40 border border-stone-100 rounded-3xl text-center px-4 select-none">
+              <p class="text-sm text-stone-400 font-medium max-w-sm mx-auto mb-2">
+                No se encontraron productos coincidentes.
+              </p>
+              <button @onclick="ResetCatalogue" class="text-xs font-bold text-[#FF76A5] hover:underline cursor-pointer">
+                Restaurar Filtros
+              </button>
+            </div>
+          }
+        </div>
+    </section>
+
+    <!-- Promotional Brand block (SHEGLAM & Korean K-Beauty callout) -->
+    <section class="grid grid-cols-1 md:grid-cols-12 rounded-3xl overflow-hidden shadow-md border border-white/60">
+        <div class="md:col-span-5 bg-gradient-to-br from-[#faf6f7] via-[#fffbfd] to-[#fff3f5] p-10 md:p-14 flex flex-col justify-center text-left">
+          <span class="text-[10px] font-bold uppercase tracking-widest text-[#FF76A5] mb-2 font-sans select-none">
+            CATEGORÍAS
+          </span>
+
+          <h2 class="font-serif text-3xl md:text-4xl font-light tracking-tight text-stone-900 leading-tight mb-4">
+            Descubre lo último en <strong class="font-bold text-[#C7346A]">K-Beauty</strong>
+          </h2>
+
+          <p class="text-xs text-stone-500 leading-relaxed mb-8 max-w-sm font-semibold">
+            Las icónicas marcas de Seúl: centella asiática, tónicos Anua 77 y sueros fermentados que transforman tu piel.
+          </p>
+
+          <button @onclick='() => SelectCategory("Skincare")'
+                  class="w-fit bg-[#FF76A5] hover:bg-[#C7346A] font-bold uppercase tracking-wider text-[10px] text-white px-8 py-3.5 rounded-xl transition shadow-md cursor-pointer select-none">
+            ¡Comprar ahora!
+          </button>
+        </div>
+
+        <div class="md:col-span-7 h-[280px] md:h-auto min-h-[300px] relative overflow-hidden group select-none">
+          <div class="absolute inset-0 bg-black/5 z-10" />
+          <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=1500"
+               alt="K-Beauty"
+               class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 pointer-events-none" />
+        </div>
+    </section>
+
+    <!-- Elegant New Arrivals / Side collection Highlights -->
+    <section class="bg-white/30 border border-white/60 p-6 md:p-8 rounded-3xl backdrop-blur-md">
+        <div class="mb-8 pb-5 border-b border-stone-100 select-none">
+          <span class="text-xs font-bold uppercase tracking-widest text-[#FF76A5] block mb-1">
+            Novedades
+          </span>
+          <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">
+            Novedades
+          </h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Valentino special box -->
+          <div class="lg:col-span-6 bg-gradient-to-br from-[#FFF0F3]/20 via-white to-white border border-stone-100 rounded-3xl p-6 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 min-h-[460px] relative group">
+            <div class="absolute top-6 left-6 z-10 select-none">
+              <span class="text-[10px] font-bold uppercase text-white bg-[#FF76A5] px-3 py-1 rounded-full shadow tracking-wider">
+                Exclusivo
+              </span>
+            </div>
+
+            <div class="relative z-10 text-left">
+              <h3 class="font-serif text-3xl font-semibold text-stone-900 tracking-tight mb-1">
+                Valentino
+              </h3>
+              <p class="text-xs text-stone-500 max-w-sm mb-4 leading-relaxed font-semibold">
+                Born in Roma Intense – minitallas estelares de alta costura romana.
+              </p>
+              <div class="flex items-baseline gap-2 mb-4 font-mono select-none">
+                <span class="text-lg font-bold text-[#C7346A]">S/ 399.00</span>
+                <span class="text-xs text-stone-400 line-through">S/ 480.00</span>
+              </div>
+            </div>
+
+            <div class="relative h-60 w-full flex items-center justify-center select-none">
+              <img src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=600"
+                   alt="Valentino"
+                   class="max-h-56 object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-700 pointer-events-none" />
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-stone-100 flex items-center justify-between select-none">
+              <button @onclick="OpenConsultation"
+                      class="text-xs font-bold uppercase tracking-wider text-stone-900 hover:text-[#C7346A] transition flex items-center gap-1 cursor-pointer">
+                Comprar ahora <span>➔</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Side promo rows and lists -->
+          <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            
+            <!-- SHEGLAM promo box -->
+            <div class="col-span-1 sm:col-span-2 bg-[#FFF0F3]/50 border border-[#FFE3E8]/30 rounded-3xl p-6 flex flex-col justify-between overflow-hidden relative group min-h-[200px] text-left">
+              <div class="absolute right-6 top-6 w-32 h-32 opacity-20 transform scale-150 rotate-12 bg-[#FF76A5] rounded-full blur-2xl group-hover:opacity-30 transition-opacity" />
+
+              <div>
+                <span class="text-[9px] font-bold tracking-widest text-[#c5a880] uppercase block mb-1">
+                  EDICIÓN EN ROSA
+                </span>
+                <h3 class="font-serif text-xl font-semibold text-stone-900 leading-snug max-w-xs mb-2">
+                  Infaltables de SHEGLAM
+                </h3>
+                <p class="text-[10px] text-stone-500 max-w-xs mb-4 leading-relaxed font-semibold">
+                  Polvos minerales y blushes virales para un contorno impecable con luz satinada.
+                </p>
+              </div>
+
+              <button @onclick='() => FilterByBrand("Sheglam")'
+                      class="bg-[#FF76A5] hover:bg-[#C7346A] text-white font-bold uppercase tracking-wider text-[9px] px-4 py-2.5 rounded-xl transition w-fit cursor-pointer select-none">
+                ¡Quiero TODO! ➔
+              </button>
+            </div>
+
+            <!-- New arrivals product cards split -->
+            @foreach (var p in ProductCache.GetBestSellers().Take(2))
+            {
+              <div class="bg-white border border-stone-100 rounded-3xl p-5 flex flex-col justify-between hover:shadow-sm transition-all duration-300 text-left">
+                <div @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
+                     class="aspect-square bg-stone-50 rounded-xl flex items-center justify-center p-3 mb-4 overflow-hidden group cursor-pointer select-none">
+                  <img src="@p.Image" alt="@p.Name" class="max-h-24 object-contain group-hover:scale-105 transition-transform pointer-events-none" />
+                </div>
+
+                <div>
+                  <span class="text-[8px] font-black text-[#c5a880] uppercase tracking-wider block">
+                    @p.Brand
+                  </span>
+                  <h4 @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
+                      class="text-xs font-bold text-stone-800 line-clamp-2 mt-1 hover:text-[#C7346A] cursor-pointer transition-colors">
+                    @p.Name
+                  </h4>
+                  <div class="flex items-center justify-between mt-3 font-mono">
+                    <span class="text-xs font-bold text-[#C7346A]">S/ @p.Price.ToString("0.00")</span>
+                    <button @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
+                            class="text-[9px] font-bold uppercase tracking-wider text-stone-400 hover:text-[#FF76A5] cursor-pointer">
+                      Ver
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+<!-- Floating Skincare Advisor Button (Standard bottom right) -->
+@if (string.IsNullOrEmpty(LayoutState.SearchQuery))
+{
+    <button @onclick="OpenConsultation"
+            class="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-[#FF76A5] to-[#FFA8BA] hover:from-[#E6558A] hover:to-[#FF76A5] text-white p-3.5 sm:p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 flex items-center gap-2 group cursor-pointer border border-white/20 select-none"
+            title="Consultar Asesor">
+      <span class="text-lg">✨</span>
+      <span class="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-700 ease-out text-xs font-extrabold uppercase tracking-widest whitespace-nowrap">
+        @(LangService.CurrentLanguage == "es" ? "Asesor de Piel" : "Skincare Advisor")
+      </span>
+    </button>
+}
+
+@code {
+    private string _activeCategory = string.Empty;
+    private TimeSpan _timeLeft = new TimeSpan(3, 23, 19, 56);
+    private System.Threading.Timer? _countdownTimer;
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += StateHasChanged;
+        LangService.OnChange += StateHasChanged;
+        
+        // Start countdown timer ticks every 1 second
+        _countdownTimer = new System.Threading.Timer((_) =>
+        {
+            InvokeAsync(() =>
+            {
+                if (_timeLeft.TotalSeconds > 0)
+                {
+                    _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
+                    StateHasChanged();
+                }
+            });
+        }, null, 1000, 1000);
+    }
+
+    private void OnMobileSearch(ChangeEventArgs e)
+    {
+        LayoutState.SetSearchQuery(e.Value?.ToString() ?? string.Empty);
+    }
+
+    private void SelectCategory(string category)
+    {
+        _activeCategory = _activeCategory == category ? string.Empty : category;
+    }
+
+    private void FilterByBrand(string brand)
+    {
+        LayoutState.SetSearchQuery(brand);
+        // Scroll to catalog section easily
+    }
+
+    private void ResetCatalogue()
+    {
+        _activeCategory = string.Empty;
+        LayoutState.SetSearchQuery(string.Empty);
+    }
+
+    private void OpenConsultation()
+    {
+        LayoutState.SetAdvisorOpen(true);
+    }
+
+    private List<Product> GetFilteredCatalogue()
+    {
+        var all = ProductCache.GetAllProducts();
+        var q = LayoutState.SearchQuery?.Trim().ToLower() ?? string.Empty;
+
+        return all.Where(p => 
+            (string.IsNullOrEmpty(q) 
+             || p.Name.ToLower().Contains(q) 
+             || p.Brand.ToLower().Contains(q) 
+             || p.Category.ToLower().Contains(q))
+            && (string.IsNullOrEmpty(_activeCategory) 
+                || p.Category.Equals(_activeCategory, StringComparison.OrdinalIgnoreCase))
+        ).ToList();
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+        LangService.OnChange -= StateHasChanged;
+        _countdownTimer?.Dispose();
+    }
+}

@@ -1,0 +1,139 @@
+﻿@page "/NavBar"
+@rendermode InteractiveServer
+
+<!-- Desktop Sidebar -->
+<div class="d-none d-lg-flex flex-column vh-100 position-sticky top-0 bg-white border-end flex-shrink-0 overflow-auto" style="width: 280px; min-width: 280px; border-color: #f0e6e8 !important;">
+    <div class="p-4">
+        <h4 class="fw-bold m-0" style="color: #6a3849;">Lumina Beauty</h4>
+        <small class="text-muted">Portal Administrativo</small>
+    </div>
+
+    <ul class="nav nav-pills flex-column mb-auto px-3 gap-1">
+        <li class="nav-item">
+            <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Catalogo" Match="NavLinkMatch.All">
+                <i class="bi bi-grid-1x2-fill"></i> Catálogo
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Inventario">
+                <i class="bi bi-box-seam"></i> Inventario
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Pedidos">
+                <i class="bi bi-bag"></i> Pedidos
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Reclamos">
+                <i class="bi bi-phone"></i> Reclamos
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Reportes">
+                <i class="bi bi-bar-chart-line"></i> Reportes
+            </NavLink>
+        </li>
+        <li class="nav-item">
+            <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Configuracion">
+                <i class="bi bi-gear"></i> Configuración
+            </NavLink>
+        </li>
+    </ul>
+
+    <div class="border-top p-3 px-4" style="border-color: #f0e6e8 !important;">
+        <ul class="nav nav-pills flex-column gap-1">
+            <li class="nav-item">
+                <a href="#" class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4">
+                    <i class="bi bi-question-circle"></i> Ayuda
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4 text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+    <div class="offcanvas-header pb-0 p-4 border-bottom" style="border-color: #f0e6e8 !important;">
+        <div>
+            <h4 class="fw-bold m-0" style="color: #6a3849;" id="sidebarOffcanvasLabel">Lumina Beauty</h4>
+            <small class="text-muted">Portal Administrativo</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body d-flex flex-column p-0 pt-3">
+        <ul class="nav nav-pills flex-column mb-auto px-3 gap-1">
+            <li class="nav-item">
+                <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="" Match="NavLinkMatch.All">
+                    <i class="bi bi-grid-1x2-fill"></i> Catálogo
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Inventario">
+                    <i class="bi bi-box-seam"></i> Inventario
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Pedidos">
+                    <i class="bi bi-bag"></i> Pedidos
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Reclamos">
+                    <i class="bi bi-phone"></i> Reclamos
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Reportes">
+                    <i class="bi bi-bar-chart-line"></i> Reportes
+                </NavLink>
+            </li>
+            <li class="nav-item">
+                <NavLink class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4" href="Configuracion">
+                    <i class="bi bi-gear"></i> Configuración
+                </NavLink>
+            </li>
+        </ul>
+
+        <div class="mt-auto border-top p-3 px-4" style="border-color: #f0e6e8 !important;">
+            <ul class="nav nav-pills flex-column gap-1">
+                <li class="nav-item">
+                    <a href="#" class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4">
+                        <i class="bi bi-question-circle"></i> Ayuda
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link custom-nav-link d-flex align-items-center gap-3 px-3 py-2 rounded-end-4 text-danger">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-nav-link {
+        color: #6c757d;
+        font-weight: 500;
+        border-left: 4px solid transparent;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .custom-nav-link:hover {
+            background-color: #f8f9fa;
+            color: #4a2833;
+        }
+
+        .custom-nav-link.active {
+            background-color: #fbf2f4 !important;
+            color: #4a2833 !important;
+            border-left-color: #6a3849 !important;
+            font-weight: 600 !important;
+        }
+</style>

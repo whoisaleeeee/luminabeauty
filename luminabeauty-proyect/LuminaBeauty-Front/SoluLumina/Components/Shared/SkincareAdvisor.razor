@@ -1,0 +1,195 @@
+@inject LayoutStateService LayoutState
+@inject CartService Cart
+@inject LanguageService LangService
+@inject ToastService Toast
+@implements IDisposable
+
+@if (LayoutState.IsAdvisorOpen)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+      <div id="skincare-advisor-dialog"
+           class="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-3xl border border-white/50 overflow-hidden shadow-2xl relative">
+        <div class="h-2 bg-gradient-to-r from-[#FFF0F3] via-[#FF76A5] to-[#c5a880]" />
+
+        <!-- Close -->
+        <button @onclick="CloseAdvisor"
+                class="absolute top-5 right-5 p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors z-10 cursor-pointer">
+          <span class="font-bold text-lg leading-none">✕</span>
+        </button>
+
+        <div class="p-8">
+          @if (!_quizFinished)
+          {
+            var q = BeautyDb.SkincareQuestions[_currentStep];
+            <div>
+              <div class="flex items-center gap-2 mb-2 select-none">
+                <span class="text-lg">✨</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880]">Asesoría de Belleza Virtual</span>
+              </div>
+              <h3 class="font-serif text-2xl font-semibold text-gray-900 mb-2">Encuentra Tu Rutina Lumina</h3>
+              <p class="text-xs text-gray-500 mb-6 font-medium">
+                Responde 3 preguntas rápidas y nuestro sistema inteligente te sugerirá el producto de lujo perfecto para tu tipo de piel.
+              </p>
+
+              <!-- Progress bar indicator -->
+              <div class="flex items-center justify-between mb-8 select-none">
+                <span class="text-[10px] font-bold text-gray-400">Paso @(_currentStep + 1) de @BeautyDb.SkincareQuestions.Count</span>
+                <div class="flex gap-1.5 flex-1 max-w-[200px] ml-4 bg-gray-200 h-1 rounded-full overflow-hidden">
+                  @for (int i = 0; i < BeautyDb.SkincareQuestions.Count; i++)
+                  {
+                    var index = i;
+                    <div class="flex-1 h-full rounded-full transition-all duration-300 @(index <= _currentStep ? "bg-[#FF76A5]" : "bg-transparent")" />
+                  }
+                </div>
+              </div>
+
+              <!-- Options Grid selection -->
+              <div class="space-y-6">
+                <h4 class="font-sans text-sm font-bold text-gray-800 leading-snug">
+                  @q.Question
+                </h4>
+
+                <div class="grid grid-cols-1 gap-3">
+                  @foreach (var opt in q.Options)
+                  {
+                    var isSelected = _answers.ContainsKey(q.Id) && _answers[q.Id] == opt.Value;
+                    <button @onclick="() => SelectOption(q.Id, opt.Value)"
+                            class="text-left p-4 rounded-xl border text-xs font-medium tracking-wide transition-all duration-300 flex items-center justify-between cursor-pointer @(isSelected ? "bg-[#FF76A5] text-white border-[#FF76A5] shadow-md shadow-pink-100" : "bg-white hover:bg-pink-50/50 border-gray-150 text-gray-700 hover:text-[#C7346A] hover:border-pink-200")">
+                        <span>@opt.Text</span>
+                        @if (isSelected)
+                        {
+                          <div class="w-4 h-4 rounded-full bg-white text-[#FF76A5] flex items-center justify-center font-bold">
+                            ✓
+                          </div>
+                        }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+          else
+          {
+            <!-- COMPLETED DIAGNOSTIC SCREEN -->
+            <div class="text-center">
+              <div class="w-12 h-12 rounded-full bg-pink-50 flex items-center justify-center text-[#FF76A5] mx-auto mb-4 animate-bounce">
+                <span class="text-lg">✨</span>
+              </div>
+              <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] mb-1 block select-none">Tu Diagnóstico</span>
+              <h3 class="font-serif text-2xl font-semibold text-gray-900 mb-4">Recomendación Personalizada</h3>
+
+              @if (_recommendation != null)
+              {
+                <div class="bg-[#FFF0F3]/50 rounded-2xl border border-[#FCD1DB]/50 p-5 mb-6 shadow-sm flex flex-col md:flex-row gap-4 text-left items-center">
+                  <img src="@_recommendation.Image" alt="@_recommendation.Name" class="w-24 h-24 object-contain shrink-0 p-1 bg-white rounded-xl border border-gray-100" referrerpolicy="no-referrer" />
+                  <div class="flex-1">
+                    <span class="text-[10px] font-bold text-[#c5a880] uppercase tracking-widest block font-sans">@_recommendation.Brand</span>
+                    <h4 class="text-xs font-bold text-gray-800 leading-snug mb-1">@_recommendation.Name</h4>
+                    <p class="text-[10px] text-gray-500 mb-2.5 line-clamp-2">@_recommendation.Description</p>
+                    <div class="flex justify-between items-center select-none">
+                      <span class="text-xs font-bold text-[#C7346A] font-mono">S/ @_recommendation.Price.ToString("0.00")</span>
+                      <button @onclick="AddRecommendedToBag"
+                              class="text-[9px] font-bold uppercase tracking-wider px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 border transition-all cursor-pointer @(_addedToCart ? "bg-green-600 border-green-600 text-white" : "bg-stone-900 hover:bg-[#FF76A5] border-stone-900 hover:border-[#FF76A5] text-white")">
+                        @if (_addedToCart)
+                        {
+                            <span>✓ Agregado</span>
+                        }
+                        else
+                        {
+                            <span>Agregar</span>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Coupon code announcement -->
+              <div class="bg-amber-50/50 border border-amber-200/50 rounded-2xl p-4 mb-6 text-xs text-amber-800 leading-relaxed italic text-left">
+                <p class="font-semibold text-amber-900 mb-1">🎁 ¡Regalo Especial Para Ti!</p>
+                Usa el código <strong class="font-mono">MAMA50</strong> en tu carrito de compras para obtener un espectacular <strong>50% de descuento</strong> directo en tu orden de belleza.
+              </div>
+
+              <!-- Diagnostic Controls -->
+              <div class="flex gap-2 select-none">
+                <button @onclick="ResetQuiz"
+                        class="flex-1 bg-gray-100 hover:bg-gray-200 py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs text-gray-700 transition flex items-center justify-center gap-2 cursor-pointer">
+                  <span>🔄</span>
+                  Repetir Test
+                </button>
+                <button @onclick="CloseAdvisor"
+                        class="flex-1 bg-[#FF76A5] hover:bg-[#C7346A] py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs text-white transition shadow-md cursor-pointer">
+                  Ver Más Productos
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+}
+
+@code {
+    private int _currentStep;
+    private Dictionary<int, string> _answers = new();
+    private bool _quizFinished;
+    private Product? _recommendation;
+    private bool _addedToCart;
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += StateHasChanged;
+    }
+
+    private void CloseAdvisor() => LayoutState.SetAdvisorOpen(false);
+
+    private async Task SelectOption(int questionId, string val)
+    {
+        _answers[questionId] = val;
+
+        if (_currentStep < BeautyDb.SkincareQuestions.Count - 1)
+        {
+            await Task.Delay(300);
+            _currentStep++;
+            StateHasChanged();
+        }
+        else
+        {
+            await Task.Delay(500);
+            // Simulate AI matching algorithm
+            var codeSum = val.ToCharArray().Sum(c => (int)c);
+            var index = Math.Abs(codeSum % BeautyDb.BestSells.Count);
+            _recommendation = BeautyDb.BestSells[index];
+            _quizFinished = true;
+            StateHasChanged();
+        }
+    }
+
+    private void ResetQuiz()
+    {
+        _currentStep = 0;
+        _answers.Clear();
+        _quizFinished = false;
+        _recommendation = null;
+        _addedToCart = false;
+    }
+
+    private async Task AddRecommendedToBag()
+    {
+        if (_recommendation != null)
+        {
+            await Cart.AddToCartAsync(_recommendation, 1);
+            _addedToCart = true;
+            Toast.ShowToast($"Agregado a la bolsa: {_recommendation.Name}");
+
+            await Task.Delay(2000);
+            _addedToCart = false;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+    }
+}

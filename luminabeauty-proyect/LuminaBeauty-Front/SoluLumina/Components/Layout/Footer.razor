@@ -1,0 +1,129 @@
+@inject LanguageService LangService
+@inject LayoutStateService LayoutState
+@inject ToastService Toast
+@implements IDisposable
+
+<footer id="footer-workspace" class="bg-white border-t border-[#FCD1DB]/40 mt-20 pt-12 pb-8 px-4 sm:px-6 relative z-10 text-stone-700">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 text-left">
+        
+        <!-- Newsletter subscription -->
+        <div class="md:col-span-3 space-y-4">
+            <span class="font-display font-extrabold text-xl tracking-wider text-stone-900">
+                Lumina <span class="text-[#FF76A5]">Beauty</span>
+            </span>
+            <div class="space-y-1">
+                <p class="text-xs font-bold text-stone-900">@LangService.Translate("subscribeTitle")</p>
+                <p class="text-[11px] text-stone-500 font-medium">@LangService.Translate("subscribeDesc")</p>
+            </div>
+
+            <form @onsubmit="OnSubmitSubscriber" @onsubmit:preventDefault class="flex items-center border border-stone-200 focus-within:border-[#FF76A5] rounded-lg bg-white p-1 shadow-xs max-w-full">
+                <input id="footer-email-input"
+                       type="email"
+                       placeholder="@LangService.Translate("placeholderEmail")"
+                       @bind="_subscriberEmail"
+                       class="bg-transparent text-[11px] text-stone-700 focus:outline-none px-2 w-full font-semibold"
+                       required />
+                <button type="submit" class="p-2 bg-[#FFF0F3] hover:bg-[#FF76A5] text-[#C7346A] hover:text-white rounded-md transition duration-300 cursor-pointer">
+                    <span class="text-xs">➔</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Help Column -->
+        <div class="md:col-span-3 space-y-4 pt-1">
+            <h3 class="text-xs uppercase font-extrabold text-stone-900 tracking-widest">@LangService.Translate("ayuda")</h3>
+            <ul class="space-y-3.5 text-xs font-semibold text-stone-500">
+                <li class="flex items-center gap-2.5"><span>📍</span>Av. Universitaria 1801</li>
+                <li class="flex items-center gap-2.5"><span>✉️</span><a href="mailto:ayuda@luminabeauty.com">ayuda@luminabeauty.com</a></li>
+                <li class="flex items-center gap-2.5"><span>📞</span><a href="tel:+51993579975">(+51) 993 579 975</a></li>
+            </ul>
+        </div>
+
+        <!-- Account Links -->
+        <div class="md:col-span-2 space-y-4 pt-1 select-none">
+            <h3 class="text-xs uppercase font-extrabold text-stone-900 tracking-widest">@LangService.Translate("cuenta")</h3>
+            <ul class="space-y-3 text-xs font-bold text-stone-500">
+                <li><button @onclick='() => NavigateToPortal("Mi Cuenta")' class="cursor-pointer text-left">Mi Cuenta</button></li>
+                <li><button @onclick="OpenCart" class="cursor-pointer text-left">Carrito</button></li>
+                <li><button @onclick="OpenWishlist" class="cursor-pointer text-left">Lista de Deseos</button></li>
+                <li><button @onclick="GoShop" class="cursor-pointer text-left">Tienda</button></li>
+            </ul>
+        </div>
+
+        <!-- Terms & Links -->
+        <div class="md:col-span-2 space-y-4 pt-1 select-none">
+            <h3 class="text-xs uppercase font-extrabold text-stone-900 tracking-widest">@LangService.Translate("terminos")</h3>
+            <ul class="space-y-3 text-xs font-bold text-stone-500">
+                <li><button @onclick='() => NavigateToPortal("Política de privacidad")' class="cursor-pointer text-left">Política de privacidad</button></li>
+                <li><button @onclick='() => NavigateToPortal("Términos de uso")' class="cursor-pointer text-left">Términos de uso</button></li>
+                <li><button @onclick='() => NavigateToPortal("FAQ")' class="cursor-pointer text-left">FAQ</button></li>
+                <li><button @onclick="GoContact" class="cursor-pointer text-left">Contacto</button></li>
+            </ul>
+        </div>
+
+        <!-- App Download -->
+        <div class="md:col-span-2 space-y-4 pt-1 select-none">
+            <h3 class="text-xs uppercase font-extrabold text-stone-900 tracking-widest">@LangService.Translate("downloadApp")</h3>
+            <p class="text-[10px] text-stone-500 font-bold leading-tight">@LangService.Translate("downloadDesc")</p>
+            <div class="flex items-center gap-3 pt-3 border-t border-stone-100">
+                <a href="#facebook">📘</a>
+                <a href="#twitter">🐦</a>
+                <a href="#instagram">📸</a>
+                <a href="#linkedin">💼</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Copyright -->
+    <div class="max-w-7xl mx-auto border-t border-[#FBC2CC]/20 mt-10 pt-6 text-center select-none">
+        <span class="text-[11px] font-semibold text-stone-400/90 tracking-wide">@LangService.Translate("copyright")</span>
+    </div>
+</footer>
+
+@code {
+    [Parameter] public EventCallback OnGoShop { get; set; }
+    [Parameter] public EventCallback OnGoContact { get; set; }
+
+    private string _subscriberEmail = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        LangService.OnChange += StateHasChanged;
+    }
+
+    private void OnSubmitSubscriber()
+    {
+        if (!string.IsNullOrEmpty(_subscriberEmail))
+        {
+            Toast.ShowToast(LangService.CurrentLanguage == "es" 
+                ? $"Gracias por suscribirte con {_subscriberEmail}" 
+                : $"Thank you for subscribing with {_subscriberEmail}");
+            _subscriberEmail = string.Empty;
+        }
+    }
+
+    private void NavigateToPortal(string section)
+    {
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? $"Portal: {section}" : $"Portal: {section}");
+    }
+
+    private void OpenCart() => LayoutState.SetCartDrawerOpen(true);
+    private void OpenWishlist() => LayoutState.SetWishlistDrawerOpen(true);
+
+    private async Task GoShop()
+    {
+        if (OnGoShop.HasDelegate)
+            await OnGoShop.InvokeAsync();
+    }
+
+    private async Task GoContact()
+    {
+        if (OnGoContact.HasDelegate)
+            await OnGoContact.InvokeAsync();
+    }
+
+    public void Dispose()
+    {
+        LangService.OnChange -= StateHasChanged;
+    }
+}
