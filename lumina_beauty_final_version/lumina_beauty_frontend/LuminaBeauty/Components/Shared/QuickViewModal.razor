@@ -1,0 +1,187 @@
+@inject LayoutStateService LayoutState
+@inject CartService Cart
+@inject LanguageService LangService
+@inject ToastService Toast
+@implements IDisposable
+
+@if (LayoutState.QuickViewProduct != null)
+{
+    var p = LayoutState.QuickViewProduct;
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div id="quickview-modal"
+           class="relative w-full max-w-4xl overflow-hidden glass-panel rounded-3xl shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+        
+        <!-- Close button standard coquette offset -->
+        <button @onclick="CloseModal"
+                class="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-white/80 hover:bg-red-50 text-gray-700 hover:text-red-600 transition-all duration-300 shadow cursor-pointer"
+                title="Cerrar">
+          <span class="font-bold text-lg leading-none">✕</span>
+        </button>
+
+        <div class="grid grid-cols-1 md:grid-cols-2">
+          
+          <!-- Image pane -->
+          <div class="relative bg-pink-50/50 p-8 flex items-center justify-center min-h-[350px] md:min-h-[480px]">
+            @if (!string.IsNullOrEmpty(p.DiscountBadge) || !string.IsNullOrEmpty(p.Discount))
+            {
+              <span class="absolute top-6 left-6 px-3 py-1 font-sans text-xs font-semibold tracking-wider text-white uppercase rounded-full bg-[#FF76A5] shadow-sm animate-pulse">
+                @(p.DiscountBadge ?? p.Discount) Dto
+              </span>
+            }
+            
+            <img src="@p.Image" alt="@p.Name" class="max-h-[380px] object-contain rounded-2xl drop-shadow-xl hover:scale-105 transition-transform duration-500 pointer-events-none" />
+          </div>
+
+          <!-- Description and actions pane -->
+          <div class="p-8 flex flex-col justify-between bg-white/70 text-left">
+            <div>
+              <div class="flex items-center gap-2 mb-2 select-none">
+                <span class="text-xs font-bold tracking-widest text-[#c5a880] uppercase">
+                  @p.Brand
+                </span>
+                <span class="text-xs bg-[#FFF0F3] text-[#C7346A] px-2.5 py-0.5 rounded-full font-medium uppercase">
+                  @p.Category
+                </span>
+              </div>
+
+              <h2 class="font-serif text-2xl lg:text-3xl font-medium text-gray-900 tracking-tight leading-tight mb-3">
+                @p.Name
+              </h2>
+
+              <!-- Rating stars -->
+              <div class="flex items-center gap-1.5 mb-5 select-none">
+                <div class="flex text-amber-400">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        var s = i;
+                        <span class="text-sm">
+                            <span class="@(s <= Math.Round(p.Rating) ? "text-amber-400" : "text-gray-300")">★</span>
+                        </span>
+                    }
+                </div>
+                <span class="text-sm font-semibold text-gray-700">@p.Rating</span>
+                <span class="text-xs text-gray-400">(@p.ReviewsCount opiniones)</span>
+              </div>
+
+              <!-- Pricing -->
+              <div class="flex items-baseline gap-3 mb-6 font-mono select-none">
+                <span class="text-3xl font-bold text-[#C7346A]">
+                  S/ @p.Price.ToString("0.00")
+                </span>
+                @if (p.OriginalPrice != null && p.OriginalPrice > p.Price)
+                {
+                  <span class="text-lg text-gray-400 line-through">
+                    S/ @p.OriginalPrice.Value.ToString("0.00")
+                  </span>
+                }
+              </div>
+
+              <!-- Tab selector headers -->
+              <div class="border-b border-gray-100 flex gap-6 mb-5 select-none">
+                @foreach (var tab in _tabs)
+                {
+                    var tCode = tab.Key;
+                    var tLabel = tab.Value;
+                    <button @onclick="() => SetActiveTab(tCode)"
+                            class="pb-2.5 text-xs font-bold uppercase tracking-wider relative transition-all duration-300 cursor-pointer @(_activeTab == tCode ? "text-[#C7346A]" : "text-gray-500 hover:text-gray-800")">
+                      @tLabel
+                      @if (_activeTab == tCode)
+                      {
+                        <span class="absolute bottom-0 left-0 w-full h-0.5 bg-[#FF76A5] rounded-full" />
+                      }
+                    </button>
+                }
+              </div>
+
+              <!-- Tab content zone -->
+              <div class="min-h-[110px] text-sm text-gray-600 leading-relaxed max-h-[160px] overflow-y-auto pr-2">
+                @if (_activeTab == "desc")
+                {
+                  <p>@(string.IsNullOrEmpty(p.Description) ? "Un producto de belleza exclusivo premium elaborado para mejorar tu rutina de cuidado de piel diaria con activos puros de alta efectividad." : p.Description)</p>
+                }
+                else if (_activeTab == "ingr")
+                {
+                  <div class="flex flex-wrap gap-1.5 select-none">
+                    @if (p.Ingredients != null && p.Ingredients.Count > 0)
+                    {
+                      @foreach (var ing in p.Ingredients)
+                      {
+                        <span class="text-xs bg-gray-100 hover:bg-[#FFF0F3] text-gray-700 px-2.5 py-1 rounded-md transition-colors border border-gray-200/50 font-semibold">
+                          @ing
+                        </span>
+                      }
+                    }
+                    else
+                    {
+                      <span class="text-xs text-gray-400">Consultar el envase para obtener detalles sobre los ingredientes orgánicos.</span>
+                    }
+                  </div>
+                }
+                else if (_activeTab == "usage")
+                {
+                  <p class="flex items-start gap-2 italic">
+                    <span class="text-lg text-[#c5a880] shrink-0 mt-0.5">✨</span>
+                    <span>@(string.IsNullOrEmpty(p.Usage) ? "Aplicar generosamente según se requiera, preferentemente después de la limpieza nocturna o preparación diurna." : p.Usage)</span>
+                  </p>
+                }
+              </div>
+            </div>
+
+            <!-- Add to Cart trigger -->
+            <div class="mt-6 pt-5 border-t border-gray-100 flex items-center gap-4 select-none">
+              <button @onclick="() => DirectAddToCart(p)"
+                      class="flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 cursor-pointer @(_added ? "bg-green-600 hover:bg-green-700 text-white shadow-md" : "bg-[#FF76A5] hover:bg-[#C7346A] text-white shadow-lg")">
+                @if (_added)
+                {
+                    <span>✓ ¡Agregado al Carrito!</span>
+                }
+                else
+                {
+                    <span>Añadir al Carrito</span>
+                }
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+}
+
+@code {
+    private string _activeTab = "desc";
+    private bool _added;
+
+    private readonly Dictionary<string, string> _tabs = new()
+    {
+        ["desc"] = "Descripción",
+        ["ingr"] = "Ingredientes",
+        ["usage"] = "Uso"
+    };
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += StateHasChanged;
+    }
+
+    private void SetActiveTab(string code) => _activeTab = code;
+
+    private void CloseModal() => LayoutState.SetQuickViewProduct(null);
+
+    private async Task DirectAddToCart(Product product)
+    {
+        await Cart.AddToCartAsync(product, 1);
+        _added = true;
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? $"Agregado a la bolsa: {product.Name}" : $"Added to bag: {product.Name}");
+
+        await Task.Delay(1800);
+        _added = false;
+        CloseModal();
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+    }
+}

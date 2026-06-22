@@ -1,0 +1,555 @@
+@page "/category/{categoryName}"
+@inject ProductService ProductCache
+@inject WishlistService Wishlist
+@inject CartService Cart
+@inject LanguageService LangService
+@inject ToastService Toast
+@inject LayoutStateService LayoutState
+@inject NavigationManager Navigator
+@implements IDisposable
+
+<PageTitle>@_meta.TitleEn | Lumina Beauty</PageTitle>
+
+<div class="max-w-6xl mx-auto w-full space-y-6 text-left">
+    
+    <!-- Breadcrumbs -->
+    <div id="category-products-breadcrumbs" class="text-left text-[11px] sm:text-xs font-semibold text-stone-400 uppercase tracking-widest flex items-center gap-1.5 select-none pt-2">
+        <span class="hover:text-[#FF76A5] cursor-pointer transition" @onclick='() => NavigateTo("/")'>
+          Inicio
+        </span>
+        <span>/</span>
+        <span class="hover:text-[#FF76A5] cursor-pointer transition" @onclick='() => NavigateTo("/categories")'>
+          Categorías
+        </span>
+        <span>/</span>
+        <span class="text-[#FF76A5] font-bold">@_meta.TitleEs</span>
+    </div>
+
+    <!-- Deluxe Glassmorphism Category Banner Header -->
+    <div class="relative overflow-hidden rounded-3xl border border-[#FCD1DB]/50 shadow-sm aspect-[21/9] md:aspect-[3/1] bg-stone-900 select-none">
+        <img src="@_meta.Banner" alt="@_activeCategoryName" class="absolute inset-0 w-full h-full object-cover opacity-50" referrerpolicy="no-referrer" />
+        
+        <div class="absolute inset-0 bg-gradient-to-r from-stone-950/80 via-stone-950/40 to-transparent" />
+
+        <div class="absolute inset-y-0 left-0 flex flex-col justify-center p-6 sm:p-10 md:p-14 max-w-xl z-10 text-white space-y-2 sm:space-y-3">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-[#FFF0F3] w-fit">
+            <span>⚡</span>
+            <span>@GetFilteredProducts().Count @(LangService.CurrentLanguage == "es" ? "Exclusivos" : "Exclusives")</span>
+          </div>
+          <h1 class="font-serif text-2xl sm:text-3xl md:text-4xl font-light tracking-tight leading-tight">
+            @(LangService.CurrentLanguage == "es" ? _meta.TitleEs : _meta.TitleEn)
+          </h1>
+          <p class="text-[11px] sm:text-xs leading-relaxed text-stone-300 font-medium">
+            @(LangService.CurrentLanguage == "es" ? _meta.TaglineEs : _meta.TaglineEn)
+          </p>
+        </div>
+    </div>
+
+    <!-- Main Shopping Grid Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-2">
+        
+        <!-- Left Sidebar: Desktop Filters -->
+        <div class="hidden lg:block lg:col-span-1 space-y-6">
+          <div class="sticky top-24 bg-white/75 backdrop-blur-md rounded-3xl border border-[#FCD1DB]/50 p-6 space-y-6 shadow-xs select-none text-left">
+            
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+              <span class="text-xs font-black uppercase text-stone-900 tracking-wider flex items-center gap-2">
+                <span>🎛️</span>
+                <span>@(LangService.CurrentLanguage == "es" ? "Filtros de Lujo" : "Luxury Filters")</span>
+              </span>
+              @if (_selectedBrands.Count > 0 || _maxPrice < 350 || _minRating != null || _onlyInStock)
+              {
+                <button @onclick="ClearFilters" class="text-[10px] font-bold text-[#C7346A] hover:text-[#FF76A5] transition flex items-center gap-1 cursor-pointer">
+                  <span>🔄</span>
+                  <span>@(LangService.CurrentLanguage == "es" ? "Limpiar" : "Reset")</span>
+                </button>
+              }
+            </div>
+
+            <!-- Other collection choices -->
+            <div class="space-y-2.5">
+              <span class="text-[10px] font-extrabold uppercase text-stone-400 tracking-widest block">
+                @(LangService.CurrentLanguage == "es" ? "Otras Colecciones" : "Other Collections")
+              </span>
+              <div class="space-y-1.5">
+                @foreach (var cat in _categoriesList)
+                {
+                  var label = LangService.CurrentLanguage == "es" ? cat.LabelEs : cat.LabelEn;
+                  var isActive = cat.Original == _activeCategoryName;
+                  <button @onclick="() => SelectRootCategory(cat.Original, label)"
+                          class="w-full flex items-center justify-between text-left px-3 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all cursor-pointer @(isActive ? "bg-[#FFF0F3] text-[#C7346A] border-l-2 border-[#FF76A5]" : "text-stone-600 hover:bg-stone-50 hover:text-stone-900")">
+                      <span>@label</span>
+                      @if (isActive)
+                      {
+                        <span>✓</span>
+                      }
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Brands filtration list -->
+            @if (_availableBrands.Count > 0)
+            {
+              <div class="space-y-3 pt-4 border-t border-stone-100/60">
+                <span class="text-[10px] font-extrabold uppercase text-stone-400 tracking-widest block">
+                  @(LangService.CurrentLanguage == "es" ? "Seleccionar Marca" : "Filter by Brand")
+                </span>
+                <div class="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  @foreach (var brand in _availableBrands)
+                  {
+                    var bName = brand;
+                    var isChecked = _selectedBrands.Contains(bName);
+                    <label class="flex items-center gap-2.5 text-xs text-stone-700 hover:text-stone-900 cursor-pointer select-none">
+                        <input type="checkbox"
+                               checked="@isChecked"
+                               @onchange="@(() => ToggleBrandSelection(bName))"
+                               class="w-4 h-4 rounded text-[#FF76A5] border-stone-300 focus:ring-[#FF76A5] accent-[#FF76A5] cursor-pointer" />
+                        <span class="font-semibold tracking-wide">@bName</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Price cap slider -->
+            <div class="space-y-3 pt-4 border-t border-[#FFF0F3]">
+              <div class="flex justify-between items-center text-left">
+                <span class="text-[10px] font-extrabold uppercase text-stone-400 tracking-widest">
+                  @(LangService.CurrentLanguage == "es" ? "Precio Máximo" : "Maximum Price")
+                </span>
+                <span class="text-xs font-bold font-mono text-stone-900">S/ @_maxPrice</span>
+              </div>
+              <input type="range" min="5" max="350" step="5"
+                     @bind="_maxPrice" @bind:event="oninput"
+                     class="w-full h-1 bg-[#FFE3E8] rounded-lg appearance-none cursor-pointer accent-[#FF76A5]" />
+              <div class="flex justify-between text-[10px] font-bold text-stone-400">
+                <span>S/ 5</span>
+                <span>S/ 350</span>
+              </div>
+            </div>
+
+            <!-- Client Rating -->
+            <div class="space-y-3 pt-4 border-t border-[#FFF0F3]">
+              <span class="text-[10px] font-extrabold uppercase text-stone-400 tracking-widest block font-sans">
+                @(LangService.CurrentLanguage == "es" ? "Valoración Mínima" : "Customer Rating")
+              </span>
+              <div class="space-y-1.5 flex flex-col">
+                @foreach (var rating in new double[] { 4.5, 4.0, 3.5 })
+                {
+                  var rVal = rating;
+                  var isSelected = _minRating == rVal;
+                  <button @onclick="() => ToggleMinRating(rVal)"
+                          class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs font-semibold text-left cursor-pointer @(isSelected ? "bg-[#FFF0F3] text-[#C7346A]" : "text-stone-600 hover:bg-stone-50")">
+                    <div class="flex text-amber-400 scale-90">
+                      @for (int j = 1; j <= 5; j++)
+                      {
+                        var star = j;
+                        <span>@(star <= Math.Floor(rVal) ? "★" : "☆")</span>
+                      }
+                    </div>
+                    <span>@(rVal.ToString("0.0"))+</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Real stock available availability -->
+            <div class="space-y-3 pt-4 border-t border-stone-100/60">
+              <span class="text-[10px] font-extrabold uppercase text-stone-400 tracking-widest block">
+                @(LangService.CurrentLanguage == "es" ? "Disponibilidad" : "Availability")
+              </span>
+              <label class="flex items-center gap-2.5 text-xs text-stone-700 cursor-pointer">
+                <input type="checkbox"
+                       @bind="_onlyInStock"
+                       class="w-4 h-4 rounded text-[#FF76A5] border-stone-300 focus:ring-[#FF76A5] accent-[#FF76A5] cursor-pointer" />
+                <span class="font-semibold tracking-wide">
+                  @(LangService.CurrentLanguage == "es" ? "Solo con Stock Real" : "In Stock Only")
+                </span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Side: Product listings with sorters -->
+        <div class="col-span-1 lg:col-span-3 space-y-4">
+          
+          <div class="bg-white/70 backdrop-blur-md rounded-2xl border border-[#FCD1DB]/50 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 select-none">
+            
+            <div class="flex items-center justify-between w-full sm:w-auto gap-4">
+              <span class="text-xs text-stone-500 font-semibold tracking-wide text-left">
+                @(LangService.CurrentLanguage == "es" ? "Mostrando" : "Showing"){" "}
+                <strong class="text-stone-900">@GetProcessedProducts().Count</strong>{" "}
+                @(LangService.CurrentLanguage == "es" ? "secretos de belleza" : "selected products")
+              </span>
+
+              <!-- Mobile filters trigger -->
+              <button @onclick="() => _mobileFiltersOpen = true"
+                      class="lg:hidden flex items-center gap-2 px-3.5 py-2 bg-stone-150 rounded-xl hover:bg-stone-200 transition text-xs font-bold uppercase tracking-wide text-stone-800 cursor-pointer">
+                <span>🎛️</span>
+                <span>@(LangService.CurrentLanguage == "es" ? "Filtros" : "Filters")</span>
+              </button>
+            </div>
+
+            <!-- Sorting selector dropdown -->
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <span class="text-[10px] font-extrabold text-stone-400 tracking-widest uppercase truncate">
+                @(LangService.CurrentLanguage == "es" ? "Ordenar por" : "Sort By")
+              </span>
+              <div class="relative">
+                <select @bind="_sortBy"
+                        class="appearance-none bg-stone-50 border border-stone-200 focus:border-[#FF76A5] rounded-xl pl-3.5 pr-8 py-2 text-xs font-bold text-stone-800 outline-none transition cursor-pointer">
+                  <option value="featured">@(LangService.CurrentLanguage == "es" ? "Destacados" : "Featured")</option>
+                  <option value="best_selling">@(LangService.CurrentLanguage == "es" ? "Más Vendidos" : "Best Selling")</option>
+                  <option value="new">@(LangService.CurrentLanguage == "es" ? "Novedades" : "New Arrivals")</option>
+                  <option value="price_asc">@(LangService.CurrentLanguage == "es" ? "Precio: Menor a Mayor" : "Price: Low to High")</option>
+                  <option value="price_desc">@(LangService.CurrentLanguage == "es" ? "Precio: Mayor a Menor" : "Price: High to Low")</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Products grid -->
+          @if (GetProcessedProducts().Count == 0)
+          {
+            <div class="bg-white/60 backdrop-blur-md rounded-3xl border border-[#FCD1DB]/50 p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-6xs">
+              <div class="w-16 h-16 rounded-full bg-[#FFF0F3] flex items-center justify-center text-[#FF76A5] text-xl font-bold">
+                <span>📥</span>
+              </div>
+              <div class="max-w-md space-y-1">
+                <h3 class="font-serif text-lg font-bold text-stone-900">
+                  @(LangService.CurrentLanguage == "es" ? "No se encontraron secretos" : "No results match your ritual")
+                </h3>
+                <p class="text-xs text-stone-500 font-medium">
+                  @(LangService.CurrentLanguage == "es"
+                    ? "Prueba expandiendo el rango de precio, cambiando de marca o eliminando los filtros aplicados para explorar el catálogo."
+                    : "Try broadening your price caps, selecting another brand, or purging selected rating filters.")
+                </p>
+              </div>
+              <button @onclick="ClearFilters"
+                      class="px-5 py-2.5 bg-[#FF76A5] hover:bg-[#C7346A] tracking-wider text-[10px] font-bold uppercase text-white rounded-xl shadow-xs transition cursor-pointer">
+                @(LangService.CurrentLanguage == "es" ? "Restaurar Filtros" : "Clear Active Filters")
+              </button>
+            </div>
+          }
+          else
+          {
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+              @foreach (var p in GetProcessedProducts())
+              {
+                <ProductCard Product="@p" />
+              }
+            </div>
+          }
+
+        </div>
+
+    </div>
+
+    <!-- Mobile Slide-out Filters Drawer Sheet Overlay -->
+    @if (_mobileFiltersOpen)
+    {
+      <div class="fixed inset-0 z-50 lg:hidden flex justify-end">
+        <div class="absolute inset-0 bg-black/60" @onclick="() => _mobileFiltersOpen = false" />
+
+        <div class="relative w-full max-w-xs h-full bg-white shadow-2xl p-6 flex flex-col justify-between overflow-y-auto text-left">
+          <div class="space-y-6 select-none">
+            
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+              <span class="text-xs font-black uppercase text-stone-900 tracking-wider flex items-center gap-2">
+                <span>🎛️</span>
+                <span>Filtros</span>
+              </span>
+              <button @onclick="() => _mobileFiltersOpen = false" class="p-1.5 hover:bg-stone-100 rounded-full text-stone-400 cursor-pointer">
+                <span class="font-bold text-lg">✕</span>
+              </button>
+            </div>
+
+            <!-- Category Browsing -->
+            <div class="space-y-2.5">
+              <span class="text-[9px] font-extrabold uppercase text-stone-400 tracking-widest block">Colecciones</span>
+              <div class="space-y-1.5 flex flex-col">
+                @foreach (var cat in _categoriesList)
+                {
+                  var label = LangService.CurrentLanguage == "es" ? cat.LabelEs : cat.LabelEn;
+                  var isActive = cat.Original == _activeCategoryName;
+                  <button @onclick="() => SelectRootCategory(cat.Original, label)"
+                          class="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer @(isActive ? "bg-[#FFF0F3] text-[#C7346A] border-l-2 border-[#FF76A5]" : "text-stone-600 hover:bg-stone-50")">
+                    @label
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Brand lists -->
+            @if (_availableBrands.Count > 0)
+            {
+              <div class="space-y-3 pt-4 border-t border-stone-100">
+                <span class="text-[9px] font-extrabold uppercase text-stone-400 tracking-widest block">Marcas</span>
+                <div class="space-y-2 max-h-40 overflow-y-auto">
+                  @foreach (var b in _availableBrands)
+                  {
+                    var isChecked = _selectedBrands.Contains(b);
+                    <label class="flex items-center gap-2 text-xs text-stone-700 cursor-pointer">
+                      <input type="checkbox" checked="@isChecked" @onchange="@(() => ToggleBrandSelection(b))" class="w-4 h-4 rounded text-[#FF76A5] accent-[#FF76A5]" />
+                      <span class="font-semibold">@b</span>
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Price cap -->
+            <div class="space-y-3 pt-4 border-t border-stone-100">
+              <div class="flex justify-between items-center">
+                <span class="text-[9px] font-extrabold uppercase text-stone-400 tracking-widest">Precio</span>
+                <span class="text-xs font-bold font-mono text-stone-900">S/ @_maxPrice</span>
+              </div>
+              <input type="range" min="5" max="350" step="5" @bind="_maxPrice" @bind:event="oninput" class="w-full h-1 bg-[#FFE3E8] rounded-lg accent-[#FF76A5]" />
+            </div>
+
+          </div>
+
+          <!-- Actions Mobile Buttons footer -->
+          <div class="pt-6 border-t border-stone-100 space-y-2 select-none">
+            <button @onclick="(() => _mobileFiltersOpen = false)"
+                    class="w-full py-3 bg-[#FF76A5] hover:bg-[#C7346A] tracking-wider text-xs font-bold uppercase text-white rounded-xl transition cursor-pointer">
+              Aplicar Filtros
+            </button>
+            <button @onclick="ClearFilters"
+                    class="w-full py-2.5 bg-stone-100 hover:bg-stone-200 tracking-wider text-xs font-bold uppercase text-stone-600 rounded-xl transition cursor-pointer">
+              Limpiar Todo
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public string CategoryName { get; set; } = "Skincare";
+
+    private string _activeCategoryName = "Skincare";
+    private CategoryMeta _meta = new();
+
+    // Filters states
+    private List<string> _selectedBrands = new();
+    private int _maxPrice = 350;
+    private double? _minRating;
+    private bool _onlyInStock;
+    private string _sortBy = "featured";
+    private bool _mobileFiltersOpen;
+
+    private List<string> _availableBrands = new();
+
+    private class CategoryMeta
+    {
+        public string Banner { get; set; } = string.Empty;
+        public string TitleEs { get; set; } = string.Empty;
+        public string TitleEn { get; set; } = string.Empty;
+        public string TaglineEs { get; set; } = string.Empty;
+        public string TaglineEn { get; set; } = string.Empty;
+    }
+
+    private class CategoryListItem
+    {
+        public string Original { get; set; } = string.Empty;
+        public string LabelEs { get; set; } = string.Empty;
+        public string LabelEn { get; set; } = string.Empty;
+    }
+
+    private readonly List<CategoryListItem> _categoriesList = new()
+    {
+        new CategoryListItem { Original = "Skincare", LabelEs = "Cuidado de la Piel", LabelEn = "Skincare" },
+        new CategoryListItem { Original = "Makeup", LabelEs = "Maquillaje de Lujo", LabelEn = "Makeup" },
+        new CategoryListItem { Original = "Fragrance", LabelEs = "Perfumería de Autor", LabelEn = "Fragrances" },
+        new CategoryListItem { Original = "Hair", LabelEs = "Cuidado Capilar", LabelEn = "Hair Care" },
+        new CategoryListItem { Original = "Bath & Body", LabelEs = "Cuerpo y Baño", LabelEn = "Body Care" },
+        new CategoryListItem { Original = "Tools & Brushes", LabelEs = "Herramientas de Belleza", LabelEn = "Beauty Tools" }
+    };
+
+    protected override void OnInitialized()
+    {
+        LangService.OnChange += StateHasChanged;
+        Wishlist.OnChange += StateHasChanged;
+        Cart.OnChange += StateHasChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        var decoded = Uri.UnescapeDataString(CategoryName).ToLower();
+        
+        if (decoded.Contains("skin") || decoded.Contains("piel")) _activeCategoryName = "Skincare";
+        else if (decoded.Contains("make") || decoded.Contains("maquillaje")) _activeCategoryName = "Makeup";
+        else if (decoded.Contains("frag") || decoded.Contains("perfume")) _activeCategoryName = "Fragrance";
+        else if (decoded.Contains("hair") || decoded.Contains("capilar")) _activeCategoryName = "Hair";
+        else if (decoded.Contains("body") || decoded.Contains("cuerpo") || decoded.Contains("bath")) _activeCategoryName = "Bath & Body";
+        else if (decoded.Contains("tool") || decoded.Contains("herramienta") || decoded.Contains("brush")) _activeCategoryName = "Tools & Brushes";
+        else _activeCategoryName = "Skincare";
+
+        _meta = GetCategoryMeta();
+        
+        // Cache available brands
+        _availableBrands = ProductCache.GetAllProducts()
+            .Where(p => p.Category.Equals(_activeCategoryName, StringComparison.OrdinalIgnoreCase))
+            .Select(p => p.Brand)
+            .Distinct()
+            .ToList();
+
+        _selectedBrands.Clear();
+    }
+
+    private CategoryMeta GetCategoryMeta()
+    {
+        if (_activeCategoryName == "Makeup")
+        {
+            return new CategoryMeta
+            {
+                Banner = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1200&auto=format&fit=crop",
+                TitleEs = "Maquillaje de Lujo",
+                TitleEn = "Makeup",
+                TaglineEs = "Texturas sublimes, polvos aterciopelados y pigmentos audaces que realzan tu luz natural.",
+                TaglineEn = "Sublime textures, velvety powders, and daring pigments crafted to magnify your organic luster."
+            };
+        }
+        else if (_activeCategoryName == "Fragrance")
+        {
+            return new CategoryMeta
+            {
+                Banner = "https://images.unsplash.com/photo-1547887537-6158d64c35b3?q=80&w=1200&auto=format&fit=crop",
+                TitleEs = "Perfumería de Autor",
+                TitleEn = "Luxury Fragrances",
+                TaglineEs = "Sinfonías olfativas selectas enriquecidas con maderas místicas y notas mágicas.",
+                TaglineEn = "Unrivaled olfactory profiles and rich symphonies of exquisite ingredients."
+            };
+        }
+        else if (_activeCategoryName == "Hair")
+        {
+            return new CategoryMeta
+            {
+                Banner = "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?q=80&w=1200&auto=format&fit=crop",
+                TitleEs = "Cuidado Capilar Premium",
+                TitleEn = "Premium Hair Care",
+                TaglineEs = "Rituales de hidratación y reconstrucción profunda para un cabello con brillo de seda.",
+                TaglineEn = "Restorative deep reconstruction and hydration rituals for high-shine silk hair."
+            };
+        }
+        else if (_activeCategoryName == "Bath & Body")
+        {
+            return new CategoryMeta
+            {
+                Banner = "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=1200&auto=format&fit=crop",
+                TitleEs = "Baño y Cuerpo Exclusivo",
+                TitleEn = "Exclusive Bath & Body",
+                TaglineEs = "Néctares corporales, exfoliantes nutritivos y aceites sedosos para tu spa en casa.",
+                TaglineEn = "Nourishing body nectars, gourmet scrubs, and silky oils designed for your home spa."
+            };
+        }
+        else if (_activeCategoryName == "Tools & Brushes")
+        {
+            return new CategoryMeta
+            {
+                Banner = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=1200&auto=format&fit=crop",
+                TitleEs = "Herramientas de Alta Definición",
+                TitleEn = "High-Definition Tools",
+                TaglineEs = "Brindando precisión milimétrica y nivel profesional a cada toque de belleza.",
+                TaglineEn = "Bringing professional-grade speed and millimetric accuracy to every contour."
+            };
+        }
+
+        // Default Skincare fallbacks
+        return new CategoryMeta
+        {
+            Banner = "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=1200&auto=format&fit=crop",
+            TitleEs = "Cuidado de la Piel",
+            TitleEn = "Skincare",
+            TaglineEs = "Fórmulas de prestigio impregnadas de elixires florales e ingredientes activos probados clínicamente.",
+            TaglineEn = "Prestige formulas infused with precious floral elixirs and clinically-proven active ingredients."
+        };
+    }
+
+    private void NavigateTo(string path) => Navigator.NavigateTo(path);
+
+    private void SelectRootCategory(string originalName, string label)
+    {
+        Navigator.NavigateTo($"/category/{Uri.EscapeDataString(originalName)}");
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? $"Colección: {label}" : $"Collection: {label}");
+    }
+
+    private void ToggleBrandSelection(string brandName)
+    {
+        if (_selectedBrands.Contains(brandName))
+            _selectedBrands.Remove(brandName);
+        else
+            _selectedBrands.Add(brandName);
+    }
+
+    private void ToggleMinRating(double val)
+    {
+        _minRating = _minRating == val ? null : val;
+    }
+
+    private void ClearFilters()
+    {
+        _selectedBrands.Clear();
+        _maxPrice = 350;
+        _minRating = null;
+        _onlyInStock = false;
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Filtros limpiados" : "Filters cleared");
+    }
+
+    private List<Product> GetFilteredProducts()
+    {
+        var list = ProductCache.GetAllProducts()
+            .Where(p => p.Category.Equals(_activeCategoryName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (_selectedBrands.Count > 0)
+            list = list.Where(p => _selectedBrands.Contains(p.Brand)).ToList();
+
+        list = list.Where(p => p.Price <= _maxPrice).ToList();
+
+        if (_minRating != null)
+            list = list.Where(p => p.Rating >= _minRating.Value).ToList();
+
+        if (_onlyInStock)
+            list = list.Where(p => p.Stock != 0).ToList();
+
+        return list;
+    }
+
+    private List<Product> GetProcessedProducts()
+    {
+        var list = GetFilteredProducts();
+
+        if (_sortBy == "best_selling")
+        {
+            list = list.OrderByDescending(p => p.Rating).ThenByDescending(p => p.ReviewsCount).ToList();
+        }
+        else if (_sortBy == "new")
+        {
+            // Boost New Arrivals (na- prefix)
+            list = list.OrderByDescending(p => p.Id.StartsWith("na") ? 1 : 0).ToList();
+        }
+        else if (_sortBy == "price_asc")
+        {
+            list = list.OrderBy(p => p.Price).ToList();
+        }
+        else if (_sortBy == "price_desc")
+        {
+            list = list.OrderByDescending(p => p.Price).ToList();
+        }
+
+        return list;
+    }
+
+    public void Dispose()
+    {
+        LangService.OnChange -= StateHasChanged;
+        Wishlist.OnChange -= StateHasChanged;
+        Cart.OnChange -= StateHasChanged;
+    }
+}

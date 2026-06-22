@@ -1,0 +1,23 @@
+@using Microsoft.AspNetCore.Components.Web
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+    <title>Lumina Beauty | Haute Cosmétique & Skincare</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <HeadOutlet />
+</head>
+
+<body class="min-h-screen bg-[#FFF4F7] font-sans text-stone-900 antialiased">
+    <Routes @rendermode="new InteractiveServerRenderMode()" />
+    <script src="_framework/blazor.web.js"></script>
+</body>
+
+</html>

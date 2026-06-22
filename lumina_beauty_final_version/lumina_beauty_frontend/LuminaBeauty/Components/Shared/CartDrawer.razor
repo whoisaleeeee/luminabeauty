@@ -1,0 +1,403 @@
+@inject LayoutStateService LayoutState
+@inject CartService Cart
+@inject LanguageService LangService
+@inject NavigationManager Navigator
+@implements IDisposable
+
+@if (LayoutState.IsCartDrawerOpen)
+{
+    <div class="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <!-- Backdrop clickable zone -->
+        <div class="absolute inset-0 -z-10" @onclick="CloseDrawer" />
+
+        <div id="cart-panel" class="w-full max-w-md h-full bg-white/95 backdrop-blur-md shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300">
+            
+            <!-- Drawer Header -->
+            <div class="p-5 border-b border-gray-100 flex items-center justify-between bg-pink-50/50">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl text-[#FF76A5]">🛍️</span>
+                    <h2 class="font-serif text-xl font-medium text-gray-900">
+                        @(LangService.CurrentLanguage == "es" ? "Tu Carrito de Belleza" : "Your Beauty Cart")
+                    </h2>
+                    <span class="bg-[#FFF0F3] text-[#C7346A] font-bold text-xs px-2 py-0.5 rounded-full">
+                        @Cart.GetCount()
+                    </span>
+                </div>
+                <button @onclick="CloseDrawer" class="p-2 hover:bg-gray-100 text-gray-400 hover:text-gray-700 rounded-full transition-colors cursor-pointer">
+                    <span class="w-5 h-5 text-lg font-bold">✕</span>
+                </button>
+            </div>
+
+            @if (_checkoutStep == "success")
+            {
+                <!-- SUCCESS INVOICE RECEIPT SCREEN -->
+                <div class="flex-1 p-8 flex flex-col items-center justify-center text-center bg-gradient-to-b from-[#FFF0F3]/40 to-white overflow-y-auto">
+                    <div class="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center border border-green-200 mb-6 animate-bounce">
+                        <span class="text-green-600 text-3xl">✓</span>
+                    </div>
+                    
+                    <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] mb-1">¡Pedido Recibido!</span>
+                    <h3 class="font-serif text-2xl font-semibold text-gray-900 mb-3">Tu rutina de lujo está en camino</h3>
+                    <p class="text-xs text-gray-500 max-w-sm mb-6 leading-relaxed">
+                        Muchas gracias por tu compra, <strong>@_paymentName</strong>. Hemos enviado los detalles del comprobante a tu correo y nos comunicaremos al <strong>@_paymentPhone</strong> para coordinar la entrega.
+                    </p>
+
+                    <!-- Simulated Invoice Receipt -->
+                    <div class="w-full bg-white border border-gray-100 p-5 rounded-2xl shadow-sm text-left mb-8 max-w-xs relative overflow-hidden">
+                        <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF76A5] via-[#FFA8BA] to-[#c5a880]" />
+                        <div class="flex justify-between items-center mb-3">
+                          <span class="text-[10px] text-gray-400 uppercase tracking-widest">Comp. N° LM-92701</span>
+                          <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-md font-bold">PAGADO</span>
+                        </div>
+                        <div class="border-b border-dashed border-gray-100 pb-3 mb-3 text-xs flex flex-col gap-1 text-gray-600">
+                          <p><strong>Destinatario:</strong> @_paymentName</p>
+                          <p class="truncate"><strong>Dirección:</strong> @_paymentAddress</p>
+                          <p><strong>Envío:</strong> @(GetShippingCost() == 0 ? "Gratis" : "S/ 15.00")</p>
+                        </div>
+                        <div class="flex justify-between items-center">
+                          <span class="text-xs font-bold text-gray-700">Total Facturado</span>
+                          <span class="text-base font-bold text-[#C7346A] font-mono">S/ @GetTotal().ToString("0.00")</span>
+                        </div>
+                    </div>
+
+                    <button @onclick="HandleSuccessClose"
+                            class="w-full bg-[#FF76A5] hover:bg-[#C7346A] py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs text-white transition-all shadow-md cursor-pointer hover:-translate-y-0.5">
+                        Seguir Comprando
+                    </button>
+                </div>
+            }
+            else if (Cart.GetItems().Count == 0)
+            {
+                <!-- EMPTY CART SCREEN -->
+                <div class="flex-1 p-8 flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 rounded-full bg-[#FFF0F3] flex items-center justify-center mb-5 text-[#FF76A5]">
+                        <span class="text-4xl">🛍️</span>
+                    </div>
+                    <h3 class="font-serif text-lg font-medium text-gray-900 mb-2">Tu cesta está vacía</h3>
+                    <p class="text-xs text-gray-400 max-w-xs mb-6">
+                        Explora nuestra colección y descubre los últimos secretos de la cosmética coreana y el maquillaje de lujo.
+                    </p>
+                    <button @onclick="CloseAndBrowse"
+                            class="px-6 py-3 bg-gray-900 hover:bg-[#FF76A5] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer">
+                        Explorar Catálogo
+                    </button>
+                </div>
+            }
+            else
+            {
+                <!-- ACTIVE CART CONTAINER -->
+                <div class="flex-1 overflow-y-auto p-5 flex flex-col justify-between">
+                    <div>
+                        <!-- Shipping Progress indicator -->
+                        <div class="mb-5 bg-[#FFF0F3]/50 rounded-2xl p-4 border border-[#FFE3E8]/30">
+                            <div class="flex items-center gap-2 mb-2 text-xs text-semibold text-gray-800">
+                                <span class="text-lg animate-pulse">🚚</span>
+                                @if (IsEligibleForFreeShipping())
+                                {
+                                    <span class="font-bold text-green-600">¡Felicidades! Tienes Envío Gratis</span>
+                                }
+                                else
+                                {
+                                    <span>Faltan <strong class="text-[#C7346A] font-mono">S/ @GetMissingForFreeShipping().ToString("0.00")</strong> para <strong>Envío Gratis</strong></span>
+                                }
+                            </div>
+                            <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-[#FF76A5] h-full rounded-full transition-all duration-500"
+                                     style="width: @(Math.Min((Cart.GetSubtotal() / 199m) * 100m, 100m).ToString() + "%")" />
+                            </div>
+                        </div>
+
+                        <!-- Scrollable list of items -->
+                        <div class="space-y-4 mb-6 max-h-[35vh] overflow-y-auto pr-1">
+                            @foreach (var item in Cart.GetItems())
+                            {
+                                <div class="flex gap-3 bg-white p-3 rounded-xl border border-gray-100 hover:border-[#FFF0F3] transition-colors text-left">
+                                    <img src="@item.Product.Image" alt="@item.Product.Name" class="w-16 h-16 object-contain rounded-lg bg-gray-50 p-1 border" referrerpolicy="no-referrer" />
+                                    <div class="flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex justify-between items-start">
+                                                <h4 class="text-xs font-semibold text-gray-800 line-clamp-1 pr-2">
+                                                    @item.Product.Name
+                                                </h4>
+                                                <button @onclick="() => RemoveItem(item.Product.Id)" class="text-gray-400 hover:text-red-500 transition-colors cursor-pointer" title="Eliminar">
+                                                    <span class="text-xs">🗑️</span>
+                                                </button>
+                                            </div>
+                                            <span class="text-[10px] text-[#c5a880] uppercase font-bold">
+                                                @item.Product.Brand
+                                            </span>
+                                        </div>
+
+                                        <div class="flex items-center justify-between mt-1">
+                                            <!-- Quantity Selector controls -->
+                                            <div class="flex items-center gap-1 border border-gray-200 rounded-lg p-1 scale-90 origin-left select-none">
+                                                <button @onclick="() => ChangeQuantity(item.Product.Id, item.Quantity - 1)"
+                                                        disabled="@(item.Quantity <= 1)"
+                                                        class="p-1 hover:bg-gray-100 rounded text-gray-500 disabled:opacity-30 cursor-pointer">
+                                                    <span>-</span>
+                                                </button>
+                                                <span class="text-xs font-bold px-2 text-gray-800 font-mono">@item.Quantity</span>
+                                                <button @onclick="() => ChangeQuantity(item.Product.Id, item.Quantity + 1)"
+                                                        class="p-1 hover:bg-gray-100 rounded text-gray-500 cursor-pointer">
+                                                    <span>+</span>
+                                                </button>
+                                            </div>
+
+                                            <span class="text-xs font-bold text-gray-900 font-mono">
+                                                S/ @((item.Product.Price * item.Quantity).ToString("0.00"))
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Coupon Promo Input form -->
+                        <div class="border-t border-gray-100 pt-4 mb-4 text-left">
+                            @if (!string.IsNullOrEmpty(_couponAppliedCode))
+                            {
+                                <div class="flex items-center justify-between bg-green-50 border border-green-100 rounded-xl p-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-lg">🎁</span>
+                                        <div>
+                                            <p class="text-xs font-bold text-green-800">Cupón @_couponAppliedCode Aplicado</p>
+                                            <p class="text-[10px] text-green-600">¡Ahorras el @_discountPercent% en tu pedido!</p>
+                                        </div>
+                                    </div>
+                                    <button @onclick="RemoveCoupon" class="text-[10px] font-bold text-green-800 hover:underline cursor-pointer">
+                                        Quitar
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <form @onsubmit="ApplyCoupon" @onsubmit:preventDefault class="flex gap-2">
+                                    <input type="text"
+                                           placeholder="Código de cupón (e.g. MAMA50)"
+                                           @bind="_couponInput"
+                                           class="flex-1 border border-gray-200 bg-gray-50 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-[#FF76A5] focus:bg-white transition-all font-semibold" />
+                                    <button type="submit"
+                                            class="px-4 bg-gray-900 hover:bg-[#FF76A5] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer">
+                                        Aplicar
+                                    </button>
+                                </form>
+                            }
+                            @if (!string.IsNullOrEmpty(_couponError))
+                            {
+                                <p class="text-[10px] text-red-500 mt-1.5 pl-1 font-semibold">@_couponError</p>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Bottom totals & Proceed To Checkout fields -->
+                    <div class="border-t border-gray-100 pt-4 bg-gray-50/50 rounded-2xl p-4 border border-gray-100 text-left">
+                        @if (_isCheckingOut)
+                        {
+                            <!-- Inline Delivery Form -->
+                            <form @onsubmit="SubmitQuickCheckout" @onsubmit:preventDefault class="space-y-3.5">
+                                <h4 class="text-xs font-bold uppercase tracking-widest text-gray-700 pb-1.5 border-b border-gray-100">Datos de Entrega</h4>
+                                
+                                <div>
+                                    <input type="text" placeholder="Nombre completo" required
+                                           @bind="_paymentName"
+                                           class="w-full bg-white border border-gray-200 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-[#FF76A5]" />
+                                </div>
+
+                                <div>
+                                    <input type="tel" placeholder="Celular / Teléfono" required
+                                           @bind="_paymentPhone"
+                                           class="w-full bg-white border border-gray-200 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-[#FF76A5]" />
+                                </div>
+
+                                <div>
+                                    <input type="text" placeholder="Dirección exacta de entrega" required
+                                           @bind="_paymentAddress"
+                                           class="w-full bg-white border border-gray-200 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:border-[#FF76A5]" />
+                                </div>
+
+                                <div class="pt-2 flex items-center justify-between text-xs font-bold text-gray-800">
+                                    <span>Total Final:</span>
+                                    <span class="text-lg text-[#C7346A] font-mono">S/ @GetTotal().ToString("0.00")</span>
+                                </div>
+
+                                <div class="flex gap-2 pt-2 select-none">
+                                    <button type="button" @onclick="() => _isCheckingOut = false"
+                                            class="flex-1 bg-gray-100 hover:bg-gray-200 py-3 rounded-xl font-bold uppercase tracking-wider text-[10px] text-gray-700 transition cursor-pointer">
+                                        Atrás
+                                    </button>
+                                    <button type="submit"
+                                            class="flex-[2] bg-[#FF76A5] hover:bg-[#C7346A] py-3 rounded-xl font-bold uppercase tracking-wider text-[10px] text-white transition shadow-md cursor-pointer">
+                                        Realizar Pedido
+                                    </button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <!-- Subtotals & checkout buttons review -->
+                            <div class="space-y-2 text-xs text-gray-600">
+                                <div class="flex justify-between">
+                                    <span>Subtotal</span>
+                                    <span class="font-semibold text-gray-800 font-mono">S/ @Cart.GetSubtotal().ToString("0.00")</span>
+                                </div>
+                                
+                                @if (_discountPercent > 0)
+                                {
+                                    <div class="flex justify-between text-green-600">
+                                        <span>Descuento (@_discountPercent%)</span>
+                                        <span class="font-mono">-S/ @GetDiscountAmount().ToString("0.00")</span>
+                                    </div>
+                                }
+
+                                <div class="flex justify-between">
+                                    <span>Costo de Envío</span>
+                                    <span class="font-mono">@(GetShippingCost() == 0 ? "Gratis" : $"S/ {GetShippingCost().ToString("0.00")}")</span>
+                                </div>
+
+                                <div class="border-t border-gray-200 pt-2.5 flex justify-between items-center text-sm font-bold text-gray-900">
+                                    <span>Total Estimado</span>
+                                    <span class="text-lg text-[#C7346A] font-mono">S/ @GetTotal().ToString("0.00")</span>
+                                </div>
+
+                                <div class="space-y-2 mt-4 select-none">
+                                    <button @onclick="GoToCartPage"
+                                            class="w-full bg-[#FF76A5] hover:bg-[#C7346A] py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs text-white transition-all duration-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer">
+                                        <span>🛒</span>
+                                        <span>@(LangService.CurrentLanguage == "es" ? "Ir al carrito de compras" : "Go to Shopping Cart")</span>
+                                    </button>
+
+                                    <button @onclick="() => _isCheckingOut = true"
+                                            class="w-full bg-stone-900 hover:bg-stone-800 py-3 rounded-xl font-bold uppercase tracking-wider text-[10px] text-white/90 transition-all duration-350 flex items-center justify-center gap-1.5 cursor-pointer">
+                                        <span>@(LangService.CurrentLanguage == "es" ? "Proceder al Pago rápido" : "Express Checkout")</span>
+                                        <span>➔</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    </div>
+}
+
+@code {
+    private string _couponInput = string.Empty;
+    private int _discountPercent;
+    private string _couponAppliedCode = string.Empty;
+    private string _couponError = string.Empty;
+
+    private bool _isCheckingOut;
+    private string _checkoutStep = "review";
+
+    private string _paymentName = string.Empty;
+    private string _paymentPhone = string.Empty;
+    private string _paymentAddress = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += StateHasChanged;
+        Cart.OnChange += StateHasChanged;
+        LangService.OnChange += StateHasChanged;
+    }
+
+    private void CloseDrawer()
+    {
+        LayoutState.SetCartDrawerOpen(false);
+    }
+
+    private void CloseAndBrowse()
+    {
+        CloseDrawer();
+        Navigator.NavigateTo("/");
+    }
+
+    private void GoToCartPage()
+    {
+        CloseDrawer();
+        Navigator.NavigateTo("/cart");
+    }
+
+    private async Task RemoveItem(string id)
+    {
+        await Cart.RemoveItemAsync(id);
+    }
+
+    private async Task ChangeQuantity(string id, int qty)
+    {
+        await Cart.UpdateQuantityAsync(id, qty);
+    }
+
+    // Calculations methods
+    private bool IsEligibleForFreeShipping() => Cart.GetSubtotal() >= 199m;
+    private decimal GetMissingForFreeShipping() => 199m - Cart.GetSubtotal();
+    private decimal GetShippingCost() => (Cart.GetSubtotal() > 0 && !IsEligibleForFreeShipping()) ? 15m : 0m;
+    private decimal GetDiscountAmount() => Cart.GetSubtotal() * (_discountPercent / 100m);
+    private decimal GetTotal() => Cart.GetSubtotal() - GetDiscountAmount() + GetShippingCost();
+
+    private void ApplyCoupon()
+    {
+        var clean = _couponInput.Trim().ToUpper();
+        if (clean == "MAMA50" || clean == "LUMINA50")
+        {
+            _discountPercent = 50;
+            _couponAppliedCode = clean;
+            _couponError = string.Empty;
+        }
+        else if (clean == "BIENVENIDA10")
+        {
+            _discountPercent = 10;
+            _couponAppliedCode = clean;
+            _couponError = string.Empty;
+        }
+        else
+        {
+            _couponError = "Código inválido. Prueba con MAMA50";
+            _ = ClearCouponErrorDelay();
+        }
+        _couponInput = string.Empty;
+    }
+
+    private async Task ClearCouponErrorDelay()
+    {
+        await Task.Delay(3000);
+        _couponError = string.Empty;
+        StateHasChanged();
+    }
+
+    private void RemoveCoupon()
+    {
+        _discountPercent = 0;
+        _couponAppliedCode = string.Empty;
+    }
+
+    private void SubmitQuickCheckout()
+    {
+        if (string.IsNullOrEmpty(_paymentName) || string.IsNullOrEmpty(_paymentPhone) || string.IsNullOrEmpty(_paymentAddress))
+        {
+            return;
+        }
+        _checkoutStep = "success";
+    }
+
+    private async Task HandleSuccessClose()
+    {
+        await Cart.ClearCartAsync();
+        _checkoutStep = "review";
+        _isCheckingOut = false;
+        RemoveCoupon();
+        _paymentName = "";
+        _paymentPhone = "";
+        _paymentAddress = "";
+        CloseDrawer();
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+        Cart.OnChange -= StateHasChanged;
+        LangService.OnChange -= StateHasChanged;
+    }
+}

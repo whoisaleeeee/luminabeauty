@@ -1,0 +1,17 @@
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="text-center py-20">
+                <h1 class="text-4xl font-serif font-bold text-stone-900 mb-4">404 - Página no encontrada</h1>
+                <p class="text-stone-500 mb-8">Lo sentimos, la página de belleza que buscas no existe.</p>
+                <a href="/" class="px-6 py-3 bg-[#FF76A5] text-white font-bold uppercase rounded-xl text-xs hover:bg-[#C7346A] transition">
+                    Volver al Inicio
+                </a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
