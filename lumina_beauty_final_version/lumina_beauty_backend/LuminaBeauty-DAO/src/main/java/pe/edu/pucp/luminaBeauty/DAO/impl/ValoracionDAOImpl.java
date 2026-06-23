@@ -14,31 +14,24 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     @Override
     public Valoracion insertar(Valoracion valoracion) throws Exception {
         String sql = """
-                INSERT INTO Valoracion(calificacion, comentario, fecha, idCliente, idProducto)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO valoracion(id_cliente, id_producto, calificacion, comentario)
+                VALUES (?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, valoracion.getCalificacion());
-            stmt.setString(2, valoracion.getComentario());
-
-            if (valoracion.getFecha() == null) {
-                stmt.setNull(3, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(3, Timestamp.valueOf(valoracion.getFecha()));
-            }
-
-            stmt.setInt(4, valoracion.getCliente().getId());
-            stmt.setString(5, valoracion.getProducto().getId());
+            stmt.setInt(1, valoracion.getCliente().getId_usuario());
+            stmt.setString(2, valoracion.getProducto().getId_producto());
+            stmt.setInt(3, valoracion.getCalificacion());
+            stmt.setString(4, valoracion.getComentario());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    valoracion.setId(rs.getInt(1));
+                    valoracion.setId_valoracion(rs.getInt(1));
                 }
             }
 
@@ -52,14 +45,14 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     @Override
     public void eliminar(Valoracion valoracion) throws Exception {
         String sql = """
-                DELETE FROM Valoracion
-                WHERE id = ?
+                DELETE FROM valoracion
+                WHERE id_valoracion = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, valoracion.getId());
+            stmt.setInt(1, valoracion.getId_valoracion());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -69,9 +62,9 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     @Override
     public Valoracion buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, calificacion, comentario, fecha, idCliente, idProducto
-                FROM Valoracion
-                WHERE id = ?
+                SELECT id_valoracion, id_cliente, id_producto, calificacion, comentario, creando_en, actualizado_en
+                FROM valoracion
+                WHERE id_valoracion = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -79,10 +72,10 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapearValoracion(rs);
-                }
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return mapearValoracion(rs);
             }
 
         } catch (SQLException e) {
@@ -95,31 +88,31 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     @Override
     public Valoracion actualizar(Valoracion valoracion) throws Exception {
         String sql = """
-                UPDATE Valoracion
-                SET calificacion = ?,
+                UPDATE valoracion
+                SET id_cliente = ?,
+                    id_producto = ?,
+                    calificacion = ?,
                     comentario = ?,
-                    fecha = ?,
-                    idCliente = ?,
-                    idProducto = ?
-                WHERE id = ?
+                    actualizado_en = ?
+                WHERE id_valoracion = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, valoracion.getCalificacion());
-            stmt.setString(2, valoracion.getComentario());
+            stmt.setInt(1, valoracion.getCliente().getId_usuario());
+            stmt.setString(2, valoracion.getProducto().getId_producto());
+            stmt.setInt(3, valoracion.getCalificacion());
+            stmt.setString(4, valoracion.getComentario());
 
-            if (valoracion.getFecha() == null) {
-                stmt.setNull(3, Types.TIMESTAMP);
+            if (valoracion.getFecha_actualizacion() == null) {
+                stmt.setNull(5, Types.TIMESTAMP);
             } else {
-                stmt.setTimestamp(3, Timestamp.valueOf(valoracion.getFecha()));
+                stmt.setTimestamp(5, Timestamp.valueOf(valoracion.getFecha_actualizacion()));
             }
 
-            stmt.setInt(4, valoracion.getCliente().getId());
-            stmt.setString(5, valoracion.getProducto().getId());
-            stmt.setInt(6, valoracion.getId());
+            stmt.setInt(6, valoracion.getId_valoracion());
 
             stmt.executeUpdate();
 
@@ -135,8 +128,8 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         ArrayList<Valoracion> valoraciones = new ArrayList<>();
 
         String sql = """
-                SELECT id, calificacion, comentario, fecha, idCliente, idProducto
-                FROM Valoracion
+                SELECT id_valoracion, id_cliente, id_producto, calificacion, comentario, creado_en, actualizado_en
+                FROM valoracion
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -158,21 +151,25 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     private Valoracion mapearValoracion(ResultSet rs) throws SQLException {
         Valoracion valoracion = new Valoracion();
 
-        valoracion.setId(rs.getInt("id"));
+        valoracion.setId_valoracion(rs.getInt("id_valoracion"));
         valoracion.setCalificacion(rs.getInt("calificacion"));
         valoracion.setComentario(rs.getString("comentario"));
 
-        Timestamp fecha = rs.getTimestamp("fecha");
-        if (fecha != null) {
-            valoracion.setFecha(fecha.toLocalDateTime());
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            valoracion.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            valoracion.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
         }
 
         Cliente cliente = new Cliente();
-        cliente.setId(rs.getInt("idCliente"));
+        cliente.setId_usuario(rs.getInt("id_cliente"));
         valoracion.setCliente(cliente);
 
         Producto producto = new Producto();
-        producto.setId(rs.getString("idProducto"));
+        producto.setId_producto(rs.getString("id_producto"));
         valoracion.setProducto(producto);
 
         return valoracion;

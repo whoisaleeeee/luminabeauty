@@ -12,7 +12,7 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public MetodoDePago insertar(MetodoDePago metodo) throws Exception {
         String sql = """
-                INSERT INTO MetodoDePago(nombre, descripcion, icono)
+                INSERT INTO metodo_pago(nombre, descripcion, icono_url)
                 VALUES (?, ?, ?)
                 """;
 
@@ -21,13 +21,13 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, metodo.getNombre());
             stmt.setString(2, metodo.getDescripcion());
-            stmt.setString(3, metodo.getIcono());
+            stmt.setString(3, metodo.getIcono_url());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    metodo.setId(rs.getInt(1));
+                    metodo.setId_metodo_pago(rs.getInt(1));
                 }
             }
 
@@ -40,14 +40,14 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public void eliminar(MetodoDePago metodo) throws Exception {
         String sql = """
-                DELETE FROM MetodoDePago
-                WHERE id = ?
+                DELETE FROM metodo_pago
+                WHERE id_metodo_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, metodo.getId());
+            stmt.setInt(1, metodo.getId_metodo_pago());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -57,9 +57,9 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public MetodoDePago buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, nombre, descripcion, icono
-                FROM MetodoDePago
-                WHERE id = ?
+                SELECT id_metodo_pago, nombre, descripcion, icono_url, estado, creado_en, actualizado_en
+                FROM metodo_pago
+                WHERE id_metodo_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -67,10 +67,9 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapearMetodoDePago(rs);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapearMetodoDePago(rs);
             }
 
         } catch (SQLException e) {
@@ -83,11 +82,13 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public MetodoDePago actualizar(MetodoDePago metodo) throws Exception {
         String sql = """
-                UPDATE MetodoDePago
+                UPDATE metodo_pago
                 SET nombre = ?,
                     descripcion = ?,
-                    icono = ?
-                WHERE id = ?
+                    icono_url = ?,
+                    estado = ?,
+                    actualizado_en = ?
+                WHERE id_metodo_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -95,8 +96,8 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, metodo.getNombre());
             stmt.setString(2, metodo.getDescripcion());
-            stmt.setString(3, metodo.getIcono());
-            stmt.setInt(4, metodo.getId());
+            stmt.setString(3, metodo.getIcono_url());
+            stmt.setInt(4, metodo.getId_metodo_pago());
 
             stmt.executeUpdate();
 
@@ -111,8 +112,8 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
         ArrayList<MetodoDePago> metodos = new ArrayList<>();
 
         String sql = """
-                SELECT id, nombre, descripcion, icono
-                FROM MetodoDePago
+                SELECT id_metodo_pago, nombre, descripcion, icono_url, estado, creado_en, actualizado_en
+                FROM metodo_pago
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -134,10 +135,19 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     private MetodoDePago mapearMetodoDePago(ResultSet rs) throws SQLException {
         MetodoDePago metodo = new MetodoDePago();
 
-        metodo.setId(rs.getInt("id"));
+        metodo.setId_metodo_pago(rs.getInt("id_metodo_pago"));
         metodo.setNombre(rs.getString("nombre"));
         metodo.setDescripcion(rs.getString("descripcion"));
-        metodo.setIcono(rs.getString("icono"));
+        metodo.setIcono_url(rs.getString("icono_url"));
+        metodo.setEstado(rs.getInt("estado"));
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            metodo.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            metodo.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+        }
 
         return metodo;
     }

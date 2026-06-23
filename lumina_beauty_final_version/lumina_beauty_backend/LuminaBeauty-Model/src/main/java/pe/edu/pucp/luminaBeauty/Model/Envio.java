@@ -19,9 +19,7 @@ public class Envio {
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
 
-
     private Pedido pedido;
-    private Direccion direccion;
 
     public Envio() {
     }
@@ -144,14 +142,6 @@ public class Envio {
 
     public void setPedido(Pedido pedido) {
         this.pedido = pedido;
-    }
-
-    public Direccion getDireccion() {
-        return direccion;
-    }
-
-    public void setDireccion(Direccion direccion) {
-        this.direccion = direccion;
     }
 }
 

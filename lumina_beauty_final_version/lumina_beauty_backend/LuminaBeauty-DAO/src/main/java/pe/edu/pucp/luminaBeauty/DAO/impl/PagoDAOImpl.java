@@ -14,31 +14,27 @@ public class PagoDAOImpl implements PagoDAO {
     @Override
     public Pago insertar(Pago pago) throws Exception {
         String sql = """
-                INSERT INTO Pago(monto, estado, fechaPago, idPedido, idMetodo)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO pago(id_pedido, id_metodo_pago, monto, estado, referencia_transaccion, fecha_pago, fecha_reembolso)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setBigDecimal(1, pago.getMonto());
-            stmt.setString(2, pago.getEstado());
-
-            if (pago.getFechaPago() == null) {
-                stmt.setNull(3, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(3, Timestamp.valueOf(pago.getFechaPago()));
-            }
-
-            stmt.setInt(4, pago.getPedido().getId());
-            stmt.setInt(5, pago.getMetodoDePago().getId());
+            stmt.setInt(1, pago.getPedido().getId_pedido());
+            stmt.setInt(2, pago.getMetodoDePago().getId_metodo_pago());
+            stmt.setBigDecimal(3, pago.getMonto());
+            stmt.setString(4, pago.getEstado());
+            stmt.setString(5, pago.getReferencia_transaccion());
+            stmt.setTimestamp(6, Timestamp.valueOf(pago.getFechaPago()));
+            stmt.setTimestamp(7, Timestamp.valueOf(pago.getFecha_reembolso()));
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    pago.setId(rs.getInt(1));
+                    pago.setId_pago(rs.getInt(1));
                 }
             }
 
@@ -52,8 +48,8 @@ public class PagoDAOImpl implements PagoDAO {
     @Override
     public void eliminar(Pago pago) throws Exception {
         String sql = """
-                DELETE FROM Pago
-                WHERE id = ?
+                DELETE FROM pago
+                WHERE id_pago = ?
                 """;
 
 //        String sql = """
@@ -64,7 +60,7 @@ public class PagoDAOImpl implements PagoDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, pago.getId());
+            stmt.setInt(1, pago.getId_pago());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -74,9 +70,9 @@ public class PagoDAOImpl implements PagoDAO {
     @Override
     public Pago buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, monto, estado, fechaPago, idPedido, idMetodo
-                FROM Pago
-                WHERE id = ?
+                SELECT id_pago, id_pedido, id_metodo_pago, monto, estado, referencia_transaccion, fecha_pago, fecha_reembolso
+                FROM pago
+                WHERE id_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -100,31 +96,43 @@ public class PagoDAOImpl implements PagoDAO {
     @Override
     public Pago actualizar(Pago pago) throws Exception {
         String sql = """
-                UPDATE Pago
-                SET monto = ?,
+                UPDATE pago
+                SET id_pedido = ?,
+                    id_metodo_pago = ?,
+                    monto = ?,
                     estado = ?,
-                    fechaPago = ?,
-                    idPedido = ?,
-                    idMetodo = ?
-                WHERE id = ?
+                    referencia_transaccion = ?,
+                    fecha_pago = ?,
+                    fecha_reembolso = ?,
+                    fecha_actualizacion = ?
+                WHERE id_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setBigDecimal(1, pago.getMonto());
-            stmt.setString(2, pago.getEstado());
-
+            stmt.setInt(1, pago.getPedido().getId_pedido());
+            stmt.setInt(2, pago.getMetodoDePago().getId_metodo_pago());
+            stmt.setBigDecimal(3, pago.getMonto());
+            stmt.setString(4, pago.getEstado());
+            stmt.setString(5, pago.getReferencia_transaccion());
             if (pago.getFechaPago() == null) {
-                stmt.setNull(3, Types.TIMESTAMP);
+                stmt.setNull(6, Types.TIMESTAMP);
             } else {
-                stmt.setTimestamp(3, Timestamp.valueOf(pago.getFechaPago()));
+                stmt.setTimestamp(6, Timestamp.valueOf(pago.getFechaPago()));
             }
-
-            stmt.setInt(4, pago.getPedido().getId());
-            stmt.setInt(5, pago.getMetodoDePago().getId());
-            stmt.setInt(6, pago.getId());
+            if (pago.getFecha_reembolso() == null) {
+                stmt.setNull(7, Types.TIMESTAMP);
+            } else {
+                stmt.setTimestamp(7, Timestamp.valueOf(pago.getFecha_reembolso()));
+            }
+            if (pago.getFecha_actualizacion() == null) {
+                stmt.setNull(8, Types.TIMESTAMP);
+            } else {
+                stmt.setTimestamp(8, Timestamp.valueOf(pago.getFecha_actualizacion()));
+            }
+            stmt.setInt(9, pago.getId_pago());
 
             stmt.executeUpdate();
 
@@ -140,8 +148,8 @@ public class PagoDAOImpl implements PagoDAO {
         ArrayList<Pago> pagos = new ArrayList<>();
 
         String sql = """
-                SELECT id, monto, estado, fechaPago, idPedido, idMetodo
-                FROM Pago
+                SELECT id_pago, id_pedido, id_metodo_pago, monto, estado, referencia_transaccion, fecha_pago, fecha_reembolso
+                FROM pago
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -163,22 +171,36 @@ public class PagoDAOImpl implements PagoDAO {
     private Pago mapearPago(ResultSet rs) throws SQLException {
         Pago pago = new Pago();
 
-        pago.setId(rs.getInt("id"));
-        pago.setMonto(rs.getBigDecimal("monto"));
-        pago.setEstado(rs.getString("estado"));
-
-        Timestamp fechaPago = rs.getTimestamp("fechaPago");
-        if (fechaPago != null) {
-            pago.setFechaPago(fechaPago.toLocalDateTime());
-        }
+        pago.setId_pago(rs.getInt("id_pago"));
 
         Pedido pedido = new Pedido();
-        pedido.setId(rs.getInt("idPedido"));
+        pedido.setId_pedido(rs.getInt("id_pedido"));
         pago.setPedido(pedido);
 
         MetodoDePago metodo = new MetodoDePago();
-        metodo.setId(rs.getInt("idMetodo"));
+        metodo.setId_metodo_pago(rs.getInt("id_metodo_pago"));
         pago.setMetodoDePago(metodo);
+
+        pago.setMonto(rs.getBigDecimal("monto"));
+        pago.setEstado(rs.getString("estado"));
+        pago.setReferencia_transaccion(rs.getString("referencia_transaccion"));
+
+        Timestamp fechaPago = rs.getTimestamp("fecha_pago");
+        if (fechaPago != null) {
+            pago.setFechaPago(fechaPago.toLocalDateTime());
+        }
+        Timestamp fechaReembolso = rs.getTimestamp("fecha_reembolso");
+        if (fechaReembolso != null) {
+            pago.setFecha_reembolso(fechaReembolso.toLocalDateTime());
+        }
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            pedido.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            pedido.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+        }
 
         return pago;
     }

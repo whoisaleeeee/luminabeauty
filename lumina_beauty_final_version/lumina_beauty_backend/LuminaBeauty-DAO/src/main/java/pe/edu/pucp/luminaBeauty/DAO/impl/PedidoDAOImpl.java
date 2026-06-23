@@ -1,7 +1,7 @@
 package pe.edu.pucp.luminaBeauty.DAO.impl;
 
 import pe.edu.pucp.luminaBeauty.DAO.PedidoDAO;
-import pe.edu.pucp.luminaBeauty.Model.CarroDeCompras;
+import pe.edu.pucp.luminaBeauty.Model.Cliente;
 import pe.edu.pucp.luminaBeauty.Model.Cupon;
 import pe.edu.pucp.luminaBeauty.Model.Pedido;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
@@ -14,35 +14,37 @@ public class PedidoDAOImpl implements PedidoDAO {
     @Override
     public Pedido insertar(Pedido pedido) throws Exception {
         String sql = """
-                INSERT INTO Pedido(fecha, total, estado, idCarrito, idCupon)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO pedido(codigo_pedido, id_cliente, id_cupon, codigo_cupon_aplicado, subtotal_productos, costo_envio, descuento, total, estado, creado_en, actualizado_en)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            if (pedido.getFecha() == null) {
-                stmt.setNull(1, Types.TIMESTAMP);
+            stmt.setString(1, pedido.getCodigo_pedido());
+            if (pedido.getCliente() == null || pedido.getCliente().getId_usuario() == 0) {
+                stmt.setNull(2, Types.INTEGER);
             } else {
-                stmt.setTimestamp(1, Timestamp.valueOf(pedido.getFecha()));
+                stmt.setInt(2, pedido.getCliente().getId_usuario());
             }
-
-            stmt.setBigDecimal(2, pedido.getTotal());
-            stmt.setString(3, pedido.getEstado());
-            stmt.setInt(4, pedido.getCarroDeCompras().getId());
-
-            if (pedido.getCupon() == null || pedido.getCupon().getId() == 0) {
-                stmt.setNull(5, Types.INTEGER);
+            if (pedido.getCupon() == null || pedido.getCupon().getId_cupon() == 0) {
+                stmt.setNull(3, Types.INTEGER);
             } else {
-                stmt.setInt(5, pedido.getCupon().getId());
+                stmt.setInt(3, pedido.getCupon().getId_cupon());
             }
+            stmt.setString(4, pedido.getCodigo_cupon_aplicado());
+            stmt.setBigDecimal(5, pedido.getSubtotal_productos());
+            stmt.setBigDecimal(6, pedido.getCosto_envio());
+            stmt.setBigDecimal(7, pedido.getDescuento());
+            stmt.setBigDecimal(8, pedido.getTotal());
+            stmt.setString(9, pedido.getEstado());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    pedido.setId(rs.getInt(1));
+                    pedido.setId_pedido(rs.getInt(1));
                 }
             }
 
@@ -56,8 +58,8 @@ public class PedidoDAOImpl implements PedidoDAO {
     @Override
     public void eliminar(Pedido pedido) throws Exception {
         String sql = """
-                DELETE FROM Pedido
-                WHERE id = ?
+                DELETE FROM pedido
+                WHERE id_pedido = ?
                 """;
 
 //        String sql = """
@@ -68,7 +70,7 @@ public class PedidoDAOImpl implements PedidoDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, pedido.getId());
+            stmt.setInt(1, pedido.getId_pedido());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -78,9 +80,9 @@ public class PedidoDAOImpl implements PedidoDAO {
     @Override
     public Pedido buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, fecha, total, estado, idCarrito, idCupon
-                FROM Pedido
-                WHERE id = ?
+                SELECT id_pedido, codigo_pedido, id_cliente, id_cupon, codigo_cupon_aplicado, subtotal_productos, costo_envio, descuento, total, estado, creado_en, actualizado_en
+                FROM pedido
+                WHERE id_pedido = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -104,36 +106,38 @@ public class PedidoDAOImpl implements PedidoDAO {
     @Override
     public Pedido actualizar(Pedido pedido) throws Exception {
         String sql = """
-                UPDATE Pedido
-                SET fecha = ?,
+                UPDATE pedido
+                SET codigo_pedido = ?,
+                    id_cliente = ?,
+                    id_cupon = ?,
+                    codigo_cupon_aplicado = ?,
+                    subtotal_productos = ?,
+                    costo_envio = ?,
+                    descuento = ?,
                     total = ?,
                     estado = ?,
-                    idCarrito = ?,
-                    idCupon = ?
-                WHERE id = ?
+                    actualizado_en = ?
+                WHERE id_pedido = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            if (pedido.getFecha() == null) {
+            stmt.setString(1, pedido.getCodigo_pedido());
+            stmt.setInt(2, pedido.getCliente().getId_usuario());
+            stmt.setInt(3, pedido.getCupon().getId_cupon());
+            stmt.setString(4, pedido.getCodigo_cupon_aplicado());
+            stmt.setBigDecimal(5, pedido.getSubtotal_productos());
+            stmt.setBigDecimal(6, pedido.getCosto_envio());
+            stmt.setBigDecimal(7, pedido.getDescuento());
+            stmt.setBigDecimal(8, pedido.getTotal());
+            stmt.setString(9, pedido.getEstado());
+            if (pedido.getFecha_actualizacion() == null) {
                 stmt.setNull(1, Types.TIMESTAMP);
             } else {
-                stmt.setTimestamp(1, Timestamp.valueOf(pedido.getFecha()));
+                stmt.setTimestamp(1, Timestamp.valueOf(pedido.getFecha_actualizacion()));
             }
-
-            stmt.setBigDecimal(2, pedido.getTotal());
-            stmt.setString(3, pedido.getEstado());
-            stmt.setInt(4, pedido.getCarroDeCompras().getId());
-
-            if (pedido.getCupon() == null || pedido.getCupon().getId() == 0) {
-                stmt.setNull(5, Types.INTEGER);
-            } else {
-                stmt.setInt(5, pedido.getCupon().getId());
-            }
-
-            stmt.setInt(6, pedido.getId());
 
             stmt.executeUpdate();
 
@@ -149,8 +153,8 @@ public class PedidoDAOImpl implements PedidoDAO {
         ArrayList<Pedido> pedidos = new ArrayList<>();
 
         String sql = """
-                SELECT id, fecha, total, estado, idCarrito, idCupon
-                FROM Pedido
+                SELECT id_pedido, codigo_pedido, id_cliente, id_cupon, codigo_cupon_aplicado, subtotal_productos, costo_envio, descuento, total, estado, creado_en, actualizado_en
+                FROM pedido
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -172,27 +176,31 @@ public class PedidoDAOImpl implements PedidoDAO {
     private Pedido mapearPedido(ResultSet rs) throws SQLException {
         Pedido pedido = new Pedido();
 
-        pedido.setId(rs.getInt("id"));
+        pedido.setId_pedido(rs.getInt("id_pedido"));
+        pedido.setCodigo_pedido(rs.getString("codigo_pedido"));
 
-        Timestamp fecha = rs.getTimestamp("fecha");
-        if (fecha != null) {
-            pedido.setFecha(fecha.toLocalDateTime());
-        }
+        Cliente cliente = new Cliente();
+        cliente.setId_usuario(rs.getInt("id_cliente"));
+        pedido.setCliente(cliente);
 
+        Cupon cupon = new Cupon();
+        cupon.setId_cupon(rs.getInt("id_cupon"));
+        pedido.setCupon(cupon);
+
+        pedido.setCodigo_cupon_aplicado(rs.getString("codigo_cupon_aplicado"));
+        pedido.setSubtotal_productos(rs.getBigDecimal("subtotal_productos"));
+        pedido.setCosto_envio(rs.getBigDecimal("costo_envio"));
+        pedido.setDescuento(rs.getBigDecimal("descuento"));
         pedido.setTotal(rs.getBigDecimal("total"));
         pedido.setEstado(rs.getString("estado"));
 
-        CarroDeCompras carro = new CarroDeCompras();
-        carro.setId(rs.getInt("idCarrito"));
-        pedido.setCarroDeCompras(carro);
-
-        int idCupon = rs.getInt("idCupon");
-        if (!rs.wasNull()) {
-            Cupon cupon = new Cupon();
-            cupon.setId(idCupon);
-            pedido.setCupon(cupon);
-        } else {
-            pedido.setCupon(null);
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            pedido.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            pedido.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
         }
 
         return pedido;
