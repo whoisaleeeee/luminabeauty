@@ -315,17 +315,33 @@ CREATE TABLE valoracion (
     id_valoracion       INT UNSIGNED NOT NULL AUTO_INCREMENT,
     id_cliente          INT UNSIGNED NOT NULL,
     id_producto         INT UNSIGNED NOT NULL,
+    id_detalle_pedido   INT UNSIGNED NOT NULL,
     calificacion        TINYINT UNSIGNED NOT NULL,
     comentario          TEXT NULL,
+    estado              ENUM('PENDIENTE', 'PUBLICADA', 'RECHAZADA')
+                        NOT NULL DEFAULT 'PENDIENTE',
+    respuesta_tienda    TEXT NULL,
+    respondido_por      INT UNSIGNED NULL,
+    respondido_en       DATETIME NULL,
     creado_en           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     actualizado_en      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
                         ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT pk_valoracion PRIMARY KEY (id_valoracion),
+    -- Una compra de una linea puede generar una unica valoracion.
+    CONSTRAINT uq_valoracion_detalle_pedido UNIQUE (id_detalle_pedido),
+    -- Un cliente mantiene como maximo una valoracion por producto.
     CONSTRAINT uq_valoracion_cliente_producto UNIQUE (id_cliente, id_producto),
-    INDEX idx_valoracion_producto (id_producto),
+    INDEX idx_valoracion_producto_estado (id_producto, estado),
+    INDEX idx_valoracion_moderacion (estado, creado_en),
     CONSTRAINT chk_valoracion_calificacion
         CHECK (calificacion BETWEEN 1 AND 5),
+    CONSTRAINT chk_valoracion_respuesta
+        CHECK (
+            (respuesta_tienda IS NULL AND respondido_por IS NULL AND respondido_en IS NULL)
+            OR
+            (respuesta_tienda IS NOT NULL AND respondido_por IS NOT NULL AND respondido_en IS NOT NULL)
+        ),
     CONSTRAINT fk_valoracion_cliente
         FOREIGN KEY (id_cliente)
         REFERENCES cliente (id_usuario)
@@ -334,6 +350,35 @@ CREATE TABLE valoracion (
     CONSTRAINT fk_valoracion_producto
         FOREIGN KEY (id_producto)
         REFERENCES producto (id_producto)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT,
+    CONSTRAINT fk_valoracion_detalle_pedido
+        FOREIGN KEY (id_detalle_pedido)
+        REFERENCES detalle_pedido (id_detalle_pedido)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT,
+    CONSTRAINT fk_valoracion_empleado_respuesta
+        FOREIGN KEY (respondido_por)
+        REFERENCES empleado (id_usuario)
+        ON DELETE RESTRICT
+        ON UPDATE RESTRICT
+);
+
+-- Registro de uso efectivo. Un mismo cliente no usa el mismo cupon mas de una vez.
+CREATE TABLE uso_cupon (
+    id_uso_cupon        INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_cupon            INT UNSIGNED NOT NULL,
+    id_cliente          INT UNSIGNED NOT NULL,
+    id_pedido           INT UNSIGNED NOT NULL,
+    usado_en            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT pk_uso_cupon PRIMARY KEY (id_uso_cupon),
+    CONSTRAINT uq_uso_cupon_pedido UNIQUE (id_pedido),
+    CONSTRAINT uq_uso_cupon_cliente UNIQUE (id_cupon, id_cliente),
+    INDEX idx_uso_cupon_pedido_cliente_cupon (id_pedido, id_cliente, id_cupon),
+    CONSTRAINT fk_uso_cupon_pedido_cliente_cupon
+        FOREIGN KEY (id_pedido, id_cliente, id_cupon)
+        REFERENCES pedido (id_pedido, id_cliente, id_cupon)
         ON DELETE RESTRICT
         ON UPDATE RESTRICT
 );
@@ -656,3 +701,269 @@ CREATE TABLE comprobante_pago (
 -- ============================================================================
 -- Ahora los indices se declaran junto a cada tabla para que las FK reutilicen esos
 -- indices y no se creen indices automaticos redundantes.
+
+CREATE TABLE IF NOT EXISTS imagen_producto (
+    id_imagen_producto  INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_producto         INT UNSIGNED NOT NULL,
+    url_imagen          VARCHAR(500) NOT NULL,
+    texto_alternativo   VARCHAR(255) NULL,
+    es_principal        TINYINT UNSIGNED NOT NULL DEFAULT 0,
+    orden_visualizacion SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    creado_en           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_imagen_producto PRIMARY KEY (id_imagen_producto),
+    CONSTRAINT uq_imagen_producto_url UNIQUE (id_producto, url_imagen),
+    CONSTRAINT uq_imagen_producto_orden UNIQUE (id_producto, orden_visualizacion),
+    INDEX idx_imagen_producto_principal (id_producto, es_principal),
+    CONSTRAINT chk_imagen_producto_url_no_vacia CHECK (CHAR_LENGTH(TRIM(url_imagen)) > 0),
+    CONSTRAINT chk_imagen_producto_principal CHECK (es_principal IN (0,1)),
+    CONSTRAINT chk_imagen_producto_orden CHECK (orden_visualizacion > 0),
+    CONSTRAINT fk_imagen_producto_producto FOREIGN KEY (id_producto)
+        REFERENCES producto(id_producto) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS historial_estado_pedido (
+    id_historial_estado_pedido INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_pedido                 INT UNSIGNED NOT NULL,
+    estado_anterior           ENUM('PENDIENTE','CONFIRMADO','EN_PROCESO','ENVIADO','ENTREGADO','CANCELADO') NULL,
+    estado_nuevo              ENUM('PENDIENTE','CONFIRMADO','EN_PROCESO','ENVIADO','ENTREGADO','CANCELADO') NOT NULL,
+    comentario                VARCHAR(500) NULL,
+    registrado_por            INT UNSIGNED NULL,
+    creado_en                 DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_historial_estado_pedido PRIMARY KEY (id_historial_estado_pedido),
+    INDEX idx_historial_pedido_fecha (id_pedido, creado_en),
+    INDEX idx_historial_estado_nuevo_fecha (estado_nuevo, creado_en),
+    CONSTRAINT chk_historial_estado_pedido_cambio CHECK (estado_anterior IS NULL OR estado_anterior <> estado_nuevo),
+    CONSTRAINT fk_historial_estado_pedido_pedido FOREIGN KEY (id_pedido)
+        REFERENCES pedido(id_pedido) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_historial_estado_pedido_empleado FOREIGN KEY (registrado_por)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS movimiento_puntos_fidelidad (
+    id_movimiento_puntos INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_cliente           INT UNSIGNED NOT NULL,
+    tipo_movimiento      ENUM('ACUMULACION_COMPRA','CANJE','AJUSTE_POSITIVO','AJUSTE_NEGATIVO','VENCIMIENTO') NOT NULL,
+    puntos               INT UNSIGNED NOT NULL,
+    saldo_anterior       INT UNSIGNED NOT NULL,
+    saldo_posterior      INT UNSIGNED NOT NULL,
+    id_pedido            INT UNSIGNED NULL,
+    motivo               VARCHAR(500) NULL,
+    registrado_por       INT UNSIGNED NULL,
+    creado_en            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_movimiento_puntos_fidelidad PRIMARY KEY (id_movimiento_puntos),
+    INDEX idx_movimiento_puntos_cliente_fecha (id_cliente, creado_en),
+    INDEX idx_movimiento_puntos_pedido (id_pedido),
+    CONSTRAINT chk_movimiento_puntos_valor CHECK (puntos > 0),
+    CONSTRAINT chk_movimiento_puntos_saldos CHECK (
+        (tipo_movimiento IN ('ACUMULACION_COMPRA','AJUSTE_POSITIVO') AND saldo_posterior = saldo_anterior + puntos)
+        OR (tipo_movimiento IN ('CANJE','AJUSTE_NEGATIVO','VENCIMIENTO') AND saldo_anterior >= puntos AND saldo_posterior = saldo_anterior - puntos)
+    ),
+    CONSTRAINT fk_movimiento_puntos_cliente FOREIGN KEY (id_cliente)
+        REFERENCES cliente(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_movimiento_puntos_pedido FOREIGN KEY (id_pedido)
+        REFERENCES pedido(id_pedido) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_movimiento_puntos_empleado FOREIGN KEY (registrado_por)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS reclamo (
+    id_reclamo          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_cliente          INT UNSIGNED NOT NULL,
+    id_pedido           INT UNSIGNED NULL,
+    id_detalle_pedido   INT UNSIGNED NULL,
+    tipo                ENUM('PRODUCTO_DANADO','PRODUCTO_INCORRECTO','FALTANTE','DEMORA_ENVIO','COBRO_INCORRECTO','OTRO') NOT NULL,
+    asunto              VARCHAR(200) NOT NULL,
+    descripcion         TEXT NOT NULL,
+    estado              ENUM('ABIERTO','EN_REVISION','EN_PROCESO','RESUELTO','CERRADO','RECHAZADO') NOT NULL DEFAULT 'ABIERTO',
+    prioridad           ENUM('BAJA','MEDIA','ALTA') NOT NULL DEFAULT 'MEDIA',
+    resuelto_en         DATETIME NULL,
+    creado_en           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT pk_reclamo PRIMARY KEY (id_reclamo),
+    INDEX idx_reclamo_cliente_fecha (id_cliente, creado_en),
+    INDEX idx_reclamo_estado_prioridad (estado, prioridad, creado_en),
+    INDEX idx_reclamo_pedido (id_pedido),
+    CONSTRAINT chk_reclamo_asunto_no_vacio CHECK (CHAR_LENGTH(TRIM(asunto)) > 0),
+    CONSTRAINT chk_reclamo_descripcion_no_vacia CHECK (CHAR_LENGTH(TRIM(descripcion)) > 0),
+    CONSTRAINT chk_reclamo_resuelto_en CHECK (
+        (estado IN ('RESUELTO','CERRADO','RECHAZADO') AND resuelto_en IS NOT NULL)
+        OR estado NOT IN ('RESUELTO','CERRADO','RECHAZADO')
+    ),
+    CONSTRAINT fk_reclamo_cliente FOREIGN KEY (id_cliente)
+        REFERENCES cliente(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reclamo_pedido_cliente FOREIGN KEY (id_pedido, id_cliente)
+        REFERENCES pedido(id_pedido, id_cliente) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reclamo_detalle_pedido FOREIGN KEY (id_detalle_pedido)
+        REFERENCES detalle_pedido(id_detalle_pedido) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS seguimiento_reclamo (
+    id_seguimiento_reclamo INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_reclamo             INT UNSIGNED NOT NULL,
+    tipo                   ENUM('MENSAJE_CLIENTE','MENSAJE_SOPORTE','CAMBIO_ESTADO','NOTA_INTERNA') NOT NULL,
+    mensaje                TEXT NOT NULL,
+    estado_anterior        ENUM('ABIERTO','EN_REVISION','EN_PROCESO','RESUELTO','CERRADO','RECHAZADO') NULL,
+    estado_nuevo           ENUM('ABIERTO','EN_REVISION','EN_PROCESO','RESUELTO','CERRADO','RECHAZADO') NULL,
+    registrado_por_cliente INT UNSIGNED NULL,
+    registrado_por_empleado INT UNSIGNED NULL,
+    creado_en              DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_seguimiento_reclamo PRIMARY KEY (id_seguimiento_reclamo),
+    INDEX idx_seguimiento_reclamo_fecha (id_reclamo, creado_en),
+    CONSTRAINT chk_seguimiento_reclamo_mensaje CHECK (CHAR_LENGTH(TRIM(mensaje)) > 0),
+    CONSTRAINT chk_seguimiento_reclamo_autor CHECK (
+        (registrado_por_cliente IS NOT NULL AND registrado_por_empleado IS NULL)
+        OR (registrado_por_cliente IS NULL AND registrado_por_empleado IS NOT NULL)
+    ),
+    CONSTRAINT chk_seguimiento_reclamo_cambio_estado CHECK (
+        (tipo = 'CAMBIO_ESTADO' AND estado_nuevo IS NOT NULL)
+        OR (tipo <> 'CAMBIO_ESTADO' AND estado_nuevo IS NULL AND estado_anterior IS NULL)
+    ),
+    CONSTRAINT fk_seguimiento_reclamo FOREIGN KEY (id_reclamo)
+        REFERENCES reclamo(id_reclamo) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_seguimiento_reclamo_cliente FOREIGN KEY (registrado_por_cliente)
+        REFERENCES cliente(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_seguimiento_reclamo_empleado FOREIGN KEY (registrado_por_empleado)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS evidencia_reclamo (
+    id_evidencia_reclamo INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_reclamo           INT UNSIGNED NOT NULL,
+    url_archivo          VARCHAR(500) NOT NULL,
+    tipo_archivo         ENUM('IMAGEN','VIDEO','DOCUMENTO') NOT NULL DEFAULT 'IMAGEN',
+    descripcion          VARCHAR(255) NULL,
+    subido_por_cliente   INT UNSIGNED NULL,
+    subido_por_empleado  INT UNSIGNED NULL,
+    creado_en            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_evidencia_reclamo PRIMARY KEY (id_evidencia_reclamo),
+    INDEX idx_evidencia_reclamo (id_reclamo),
+    CONSTRAINT chk_evidencia_reclamo_url CHECK (CHAR_LENGTH(TRIM(url_archivo)) > 0),
+    CONSTRAINT chk_evidencia_reclamo_autor CHECK (
+        (subido_por_cliente IS NOT NULL AND subido_por_empleado IS NULL)
+        OR (subido_por_cliente IS NULL AND subido_por_empleado IS NOT NULL)
+    ),
+    CONSTRAINT fk_evidencia_reclamo FOREIGN KEY (id_reclamo)
+        REFERENCES reclamo(id_reclamo) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_evidencia_reclamo_cliente FOREIGN KEY (subido_por_cliente)
+        REFERENCES cliente(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_evidencia_reclamo_empleado FOREIGN KEY (subido_por_empleado)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS devolucion (
+    id_devolucion        INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_cliente           INT UNSIGNED NOT NULL,
+    id_pedido            INT UNSIGNED NOT NULL,
+    id_reclamo           INT UNSIGNED NULL,
+    motivo               ENUM('DEFECTUOSO','INCORRECTO','NO_SATISFACTORIO','DANADO_EN_ENVIO','OTRO') NOT NULL,
+    detalle_motivo       VARCHAR(500) NULL,
+    estado               ENUM('SOLICITADA','APROBADA','RECHAZADA','EN_TRANSITO','RECIBIDA','REEMBOLSADA','CERRADA') NOT NULL DEFAULT 'SOLICITADA',
+    solicitado_en        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    aprobado_por         INT UNSIGNED NULL,
+    aprobado_en          DATETIME NULL,
+    recibido_por         INT UNSIGNED NULL,
+    recibido_en          DATETIME NULL,
+    creado_en            DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT pk_devolucion PRIMARY KEY (id_devolucion),
+    INDEX idx_devolucion_cliente_fecha (id_cliente, solicitado_en),
+    INDEX idx_devolucion_estado_fecha (estado, solicitado_en),
+    INDEX idx_devolucion_pedido (id_pedido),
+    CONSTRAINT chk_devolucion_aprobacion CHECK (
+        (estado IN ('APROBADA','EN_TRANSITO','RECIBIDA','REEMBOLSADA','CERRADA') AND aprobado_por IS NOT NULL AND aprobado_en IS NOT NULL)
+        OR estado IN ('SOLICITADA','RECHAZADA')
+    ),
+    CONSTRAINT chk_devolucion_recepcion CHECK (
+        (estado IN ('RECIBIDA','REEMBOLSADA','CERRADA') AND recibido_por IS NOT NULL AND recibido_en IS NOT NULL)
+        OR estado NOT IN ('RECIBIDA','REEMBOLSADA','CERRADA')
+    ),
+    CONSTRAINT fk_devolucion_cliente_pedido FOREIGN KEY (id_pedido, id_cliente)
+        REFERENCES pedido(id_pedido, id_cliente) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_devolucion_reclamo FOREIGN KEY (id_reclamo)
+        REFERENCES reclamo(id_reclamo) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_devolucion_aprobado_por FOREIGN KEY (aprobado_por)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_devolucion_recibido_por FOREIGN KEY (recibido_por)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS detalle_devolucion (
+    id_detalle_devolucion INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_devolucion         INT UNSIGNED NOT NULL,
+    id_detalle_pedido     INT UNSIGNED NOT NULL,
+    cantidad_solicitada   INT UNSIGNED NOT NULL,
+    cantidad_recibida     INT UNSIGNED NULL,
+    condicion_producto    ENUM('SIN_EVALUAR','APTO_REINGRESO','DANADO','NO_RETORNABLE') NOT NULL DEFAULT 'SIN_EVALUAR',
+    observacion           VARCHAR(500) NULL,
+    CONSTRAINT pk_detalle_devolucion PRIMARY KEY (id_detalle_devolucion),
+    CONSTRAINT uq_detalle_devolucion_linea UNIQUE (id_devolucion, id_detalle_pedido),
+    INDEX idx_detalle_devolucion_detalle_pedido (id_detalle_pedido),
+    CONSTRAINT chk_detalle_devolucion_solicitada CHECK (cantidad_solicitada > 0),
+    CONSTRAINT chk_detalle_devolucion_recibida CHECK (cantidad_recibida IS NULL OR cantidad_recibida <= cantidad_solicitada),
+    CONSTRAINT fk_detalle_devolucion_devolucion FOREIGN KEY (id_devolucion)
+        REFERENCES devolucion(id_devolucion) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_detalle_devolucion_detalle_pedido FOREIGN KEY (id_detalle_pedido)
+        REFERENCES detalle_pedido(id_detalle_pedido) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS movimiento_inventario (
+    id_movimiento_inventario INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_producto             INT UNSIGNED NOT NULL,
+    tipo_movimiento         ENUM('ENTRADA','SALIDA_VENTA','AJUSTE_POSITIVO','AJUSTE_NEGATIVO','DEVOLUCION_CLIENTE','MERMA') NOT NULL,
+    cantidad                INT UNSIGNED NOT NULL,
+    stock_anterior          INT UNSIGNED NOT NULL,
+    stock_posterior         INT UNSIGNED NOT NULL,
+    id_pedido               INT UNSIGNED NULL,
+    id_devolucion           INT UNSIGNED NULL,
+    motivo                  VARCHAR(500) NULL,
+    registrado_por          INT UNSIGNED NULL,
+    creado_en               DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_movimiento_inventario PRIMARY KEY (id_movimiento_inventario),
+    INDEX idx_movimiento_inventario_producto_fecha (id_producto, creado_en),
+    INDEX idx_movimiento_inventario_pedido (id_pedido),
+    INDEX idx_movimiento_inventario_devolucion (id_devolucion),
+    CONSTRAINT chk_movimiento_inventario_cantidad CHECK (cantidad > 0),
+    CONSTRAINT chk_movimiento_inventario_saldos CHECK (
+        (tipo_movimiento IN ('ENTRADA','AJUSTE_POSITIVO','DEVOLUCION_CLIENTE') AND stock_posterior = stock_anterior + cantidad)
+        OR (tipo_movimiento IN ('SALIDA_VENTA','AJUSTE_NEGATIVO','MERMA') AND stock_anterior >= cantidad AND stock_posterior = stock_anterior - cantidad)
+    ),
+    CONSTRAINT fk_movimiento_inventario_producto FOREIGN KEY (id_producto)
+        REFERENCES producto(id_producto) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_movimiento_inventario_pedido FOREIGN KEY (id_pedido)
+        REFERENCES pedido(id_pedido) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_movimiento_inventario_devolucion FOREIGN KEY (id_devolucion)
+        REFERENCES devolucion(id_devolucion) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_movimiento_inventario_empleado FOREIGN KEY (registrado_por)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS reembolso (
+    id_reembolso           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id_pago                INT UNSIGNED NOT NULL,
+    id_devolucion          INT UNSIGNED NULL,
+    monto                  DECIMAL(12,2) NOT NULL,
+    estado                 ENUM('PENDIENTE','PROCESADO','FALLIDO') NOT NULL DEFAULT 'PENDIENTE',
+    referencia_transaccion VARCHAR(150) NULL,
+    procesado_por          INT UNSIGNED NULL,
+    procesado_en           DATETIME NULL,
+    motivo                 VARCHAR(500) NULL,
+    creado_en              DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT pk_reembolso PRIMARY KEY (id_reembolso),
+    CONSTRAINT uq_reembolso_referencia UNIQUE (referencia_transaccion),
+    INDEX idx_reembolso_pago_estado (id_pago, estado),
+    INDEX idx_reembolso_devolucion (id_devolucion),
+    CONSTRAINT chk_reembolso_monto CHECK (monto > 0),
+    CONSTRAINT chk_reembolso_procesamiento CHECK (
+        (estado = 'PROCESADO' AND procesado_en IS NOT NULL)
+        OR (estado IN ('PENDIENTE','FALLIDO') AND procesado_en IS NULL)
+    ),
+    CONSTRAINT fk_reembolso_pago FOREIGN KEY (id_pago)
+        REFERENCES pago(id_pago) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reembolso_devolucion FOREIGN KEY (id_devolucion)
+        REFERENCES devolucion(id_devolucion) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_reembolso_procesado_por FOREIGN KEY (procesado_por)
+        REFERENCES empleado(id_usuario) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+COMMIT;
