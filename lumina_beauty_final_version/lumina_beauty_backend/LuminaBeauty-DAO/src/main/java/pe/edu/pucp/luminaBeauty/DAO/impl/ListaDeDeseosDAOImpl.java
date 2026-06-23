@@ -13,21 +13,21 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public ListaDeDeseos insertar(ListaDeDeseos lista) throws Exception {
         String sql = """
-                INSERT INTO ListaDeDeseos(idCliente)
-                VALUES (?)
+                INSERT INTO lista_deseos(id_cliente, nombre, descripcion)
+                VALUES (?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, lista.getCliente().getId());
+            stmt.setInt(1, lista.getCliente().getId_usuario());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    lista.setId(rs.getInt(1));
+                    lista.setId_lista_deseos(rs.getInt(1));
                 }
             }
 
@@ -41,14 +41,14 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public void eliminar(ListaDeDeseos lista) throws Exception {
         String sql = """
-                DELETE FROM ListaDeDeseos
-                WHERE id = ?
+                DELETE FROM lista_deseos
+                WHERE id_lista_deseos = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, lista.getId());
+            stmt.setInt(1, lista.getId_lista_deseos());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -58,9 +58,9 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public ListaDeDeseos buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, idCliente
-                FROM ListaDeDeseos
-                WHERE id = ?
+                SELECT id_lista_deseos, id_cliente, nombre, descripcion, creado_en, actualizado_en
+                FROM lista_Deseos
+                WHERE id_lista_deseos = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -68,10 +68,9 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapearLista(rs);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapearLista(rs);
             }
 
         } catch (SQLException e) {
@@ -84,16 +83,19 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     @Override
     public ListaDeDeseos actualizar(ListaDeDeseos lista) throws Exception {
         String sql = """
-                UPDATE ListaDeDeseos
-                SET idCliente = ?
-                WHERE id = ?
+                UPDATE lista_deseos
+                SET id_cliente = ?,
+                    nombre = ?,
+                    descripcion = ?,
+                    actualizado_en = ?
+                WHERE id_lista_deseos = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, lista.getCliente().getId());
-            stmt.setInt(2, lista.getId());
+            stmt.setInt(1, lista.getCliente().getId_usuario());
+            stmt.setInt(2, lista.getId_lista_deseos());
 
             stmt.executeUpdate();
 
@@ -109,8 +111,8 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
         ArrayList<ListaDeDeseos> listas = new ArrayList<>();
 
         String sql = """
-                SELECT id, idCliente
-                FROM ListaDeDeseos
+                SELECT id_lista_deseos, id_cliente, nombre, descripcion, creado_en, actualizado_en
+                FROM lista_deseos
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -132,12 +134,22 @@ public class ListaDeDeseosDAOImpl implements ListaDeDeseosDAO {
     private ListaDeDeseos mapearLista(ResultSet rs) throws SQLException {
         ListaDeDeseos lista = new ListaDeDeseos();
 
-        lista.setId(rs.getInt("id"));
+        lista.setId_lista_deseos(rs.getInt("id_lista_deseos"));
 
         Cliente cliente = new Cliente();
-        cliente.setId(rs.getInt("idCliente"));
+        cliente.setId_usuario(rs.getInt("id_cliente"));
         lista.setCliente(cliente);
 
+        lista.setNombre(rs.getString("nombre"));
+        lista.setDescripcion(rs.getString("descripcion"));
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            lista.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            lista.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+        }
         return lista;
     }
 }

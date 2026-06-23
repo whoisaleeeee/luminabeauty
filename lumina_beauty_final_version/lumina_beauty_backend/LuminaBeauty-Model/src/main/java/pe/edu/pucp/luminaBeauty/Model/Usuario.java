@@ -1,47 +1,108 @@
 package pe.edu.pucp.luminaBeauty.Model;
 
+import java.time.LocalDateTime;
+
 public class Usuario {
-    private int id;
-    private String nombre;
-    private String apellido;
+    private int id_usuario;
+    private String nombres;
+    private String apellidos;
     private String correo;
-    private String contrasena;
-    private String dni;
+    private String contrasena_hash;
     private String telefono;
+    private String dni;
+    private String tipo_usuario;
     private int estado;
+    private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 
     public Usuario() {
     }
 
-    // ID
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId_usuario() {
+        return id_usuario;
+    }
 
-    // Nombre
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setId_usuario(int id_usuario) {
+        this.id_usuario = id_usuario;
+    }
 
-    // Apellido
-    public String getApellido() { return apellido; }
-    public void setApellido(String apellido) { this.apellido = apellido; }
+    public String getNombres() {
+        return nombres;
+    }
 
-    // Correo
-    public String getCorreo() { return correo; }
-    public void setCorreo(String correo) { this.correo = correo; }
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
 
-    // Contraseña
-    public String getContrasena() { return contrasena; }
-    public void setContrasena(String contrasena) { this.contrasena = contrasena; }
+    public String getApellidos() {
+        return apellidos;
+    }
 
-    // DNI
-    public String getDni() { return dni; }
-    public void setDni(String dni) { this.dni = dni; }
+    public void setApellidos(String apellidos) {
+        this.apellidos = apellidos;
+    }
 
-    // Teléfono
-    public String getTelefono() { return telefono; }
-    public void setTelefono(String telefono) { this.telefono = telefono; }
+    public String getCorreo() {
+        return correo;
+    }
 
-    // Estado
-    public int getEstado() { return estado; }
-    public void setEstado(int estado) { this.estado = estado; }
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getContrasena_hash() {
+        return contrasena_hash;
+    }
+
+    public void setContrasena_hash(String contrasena_hash) {
+        this.contrasena_hash = contrasena_hash;
+    }
+
+    public String getTelefono() {
+        return telefono;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+    public String getTipo_usuario() {
+        return tipo_usuario;
+    }
+
+    public void setTipo_usuario(String tipo_usuario) {
+        this.tipo_usuario = tipo_usuario;
+    }
+
+    public int getEstado() {
+        return estado;
+    }
+
+    public void setEstado(int estado) {
+        this.estado = estado;
+    }
+
+    public LocalDateTime getFecha_creacion() {
+        return fecha_creacion;
+    }
+
+    public void setFecha_creacion(LocalDateTime fecha_creacion) {
+        this.fecha_creacion = fecha_creacion;
+    }
+
+    public LocalDateTime getFecha_actualizacion() {
+        return fecha_actualizacion;
+    }
+
+    public void setFecha_actualizacion(LocalDateTime fecha_actualizacion) {
+        this.fecha_actualizacion = fecha_actualizacion;
+    }
 }

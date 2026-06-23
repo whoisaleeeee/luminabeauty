@@ -12,7 +12,7 @@ public class MarcaDAOImpl implements MarcaDAO {
     @Override
     public Marca insertar(Marca marca) throws Exception {
         String sql = """
-                INSERT INTO Marca(nombre, descripcion, logo)
+                INSERT INTO marca(nombre, descripcion, logo_url)
                 VALUES (?, ?, ?)
                 """;
 
@@ -21,13 +21,13 @@ public class MarcaDAOImpl implements MarcaDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, marca.getNombre());
             stmt.setString(2, marca.getDescripcion());
-            stmt.setString(3, marca.getLogo());
+            stmt.setString(3, marca.getLogo_url());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    marca.setId(rs.getInt(1));
+                    marca.setId_marca(rs.getInt(1));
                 }
             }
 
@@ -40,14 +40,14 @@ public class MarcaDAOImpl implements MarcaDAO {
     @Override
     public void eliminar(Marca marca) throws Exception {
         String sql = """
-                DELETE FROM Marca
-                WHERE id = ?
+                DELETE FROM marca
+                WHERE id_marca = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, marca.getId());
+            stmt.setInt(1, marca.getId_marca());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -57,9 +57,9 @@ public class MarcaDAOImpl implements MarcaDAO {
     @Override
     public Marca buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, nombre, descripcion, logo
-                FROM Marca
-                WHERE id = ?
+                SELECT id_marca, nombre, descripcion, logo_url, estado, creado_en, actualizado_en
+                FROM marca
+                WHERE id_marca = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -67,10 +67,9 @@ public class MarcaDAOImpl implements MarcaDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, id);
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapearMarca(rs);
-                }
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return mapearMarca(rs);
             }
 
         } catch (SQLException e) {
@@ -83,11 +82,13 @@ public class MarcaDAOImpl implements MarcaDAO {
     @Override
     public Marca actualizar(Marca marca) throws Exception {
         String sql = """
-                UPDATE Marca
+                UPDATE marca
                 SET nombre = ?,
                     descripcion = ?,
-                    logo = ?
-                WHERE id = ?
+                    logo_url = ?,
+                    estado = ?,
+                    actualizado_en = ?
+                WHERE id_marca = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -95,8 +96,8 @@ public class MarcaDAOImpl implements MarcaDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, marca.getNombre());
             stmt.setString(2, marca.getDescripcion());
-            stmt.setString(3, marca.getLogo());
-            stmt.setInt(4, marca.getId());
+            stmt.setString(3, marca.getLogo_url());
+            stmt.setInt(4, marca.getId_marca());
 
             stmt.executeUpdate();
 
@@ -111,8 +112,8 @@ public class MarcaDAOImpl implements MarcaDAO {
         ArrayList<Marca> marcas = new ArrayList<>();
 
         String sql = """
-                SELECT id, nombre, descripcion, logo
-                FROM Marca
+                SELECT id_marca, nombre, descripcion, logo_url, estado, creado_en, actualizado_en
+                FROM marca
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -134,10 +135,19 @@ public class MarcaDAOImpl implements MarcaDAO {
     private Marca mapearMarca(ResultSet rs) throws SQLException {
         Marca marca = new Marca();
 
-        marca.setId(rs.getInt("id"));
+        marca.setId_marca(rs.getInt("id"));
         marca.setNombre(rs.getString("nombre"));
         marca.setDescripcion(rs.getString("descripcion"));
-        marca.setLogo(rs.getString("logo"));
+        marca.setLogo_url(rs.getString("logo_url"));
+        marca.setEstado(rs.getInt("estado"));
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            marca.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            marca.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+        }
 
         return marca;
     }

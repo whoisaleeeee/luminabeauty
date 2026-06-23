@@ -12,27 +12,28 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     @Override
     public Usuario insertar(Usuario usuario) throws Exception {
         String sql = """
-                INSERT INTO Usuario(nombre, apellido, correo, contrasena, dni, telefono, estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO usuario(nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, usuario.getNombre());
-            stmt.setString(2, usuario.getApellido());
+            stmt.setString(1, usuario.getNombres());
+            stmt.setString(2, usuario.getApellidos());
             stmt.setString(3, usuario.getCorreo());
-            stmt.setString(4, usuario.getContrasena());
-            stmt.setString(5, usuario.getDni());
-            stmt.setString(6, usuario.getTelefono());
-            stmt.setInt(7, usuario.getEstado());
+            stmt.setString(4, usuario.getContrasena_hash());
+            stmt.setString(5, usuario.getTelefono());
+            stmt.setString(6, usuario.getDni());
+            stmt.setString(7, usuario.getTipo_usuario());
+            stmt.setInt(8, usuario.getEstado());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    usuario.setId(rs.getInt(1));
+                    usuario.setId_usuario(rs.getInt(1));
                 }
             }
 
@@ -51,14 +52,14 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 //                """;
 
         String sql = """
-                  UPDATE Usuario SET estado = 0
-                  WHERE id = ?
+                  UPDATE usuario SET estado = 0
+                  WHERE id_usuario = ?
                   """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, usuario.getId());
+            stmt.setInt(1, usuario.getId_usuario());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -68,9 +69,9 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     @Override
     public Usuario buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, nombre, apellido, correo, contrasena, dni, telefono, estado
-                FROM Usuario
-                WHERE id = ?
+                SELECT id_usuario, nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado, creado_en, actualizado_en
+                FROM usuario
+                WHERE id_usuario = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -94,29 +95,33 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     @Override
     public Usuario actualizar(Usuario usuario) throws Exception {
         String sql = """
-                UPDATE Usuario
-                SET nombre = ?,
-                    apellido = ?,
+                UPDATE usuario
+                SET nombres = ?,
+                    apellidos = ?,
                     correo = ?,
-                    contrasena = ?,
-                    dni = ?,
+                    contrasena_hash = ?,
                     telefono = ?,
-                    estado = ?
-                WHERE id = ?
+                    dni = ?,
+                    tipo_usuario = ?,
+                    estado = ?,
+                    actualizado_en = ?
+                WHERE id_usuario = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setString(1, usuario.getNombre());
-            stmt.setString(2, usuario.getApellido());
+            stmt.setString(1, usuario.getNombres());
+            stmt.setString(2, usuario.getApellidos());
             stmt.setString(3, usuario.getCorreo());
-            stmt.setString(4, usuario.getContrasena());
-            stmt.setString(5, usuario.getDni());
-            stmt.setString(6, usuario.getTelefono());
-            stmt.setInt(7, usuario.getEstado());
-            stmt.setInt(8, usuario.getId());
+            stmt.setString(4, usuario.getContrasena_hash());
+            stmt.setString(5, usuario.getTelefono());
+            stmt.setString(6, usuario.getDni());
+            stmt.setString(7, usuario.getTipo_usuario());
+            stmt.setInt(8, usuario.getEstado());
+            stmt.setTimestamp(9, Timestamp.valueOf(usuario.getFecha_actualizacion()));
+            stmt.setInt(10, usuario.getId_usuario());
 
             stmt.executeUpdate();
 
@@ -132,8 +137,8 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         ArrayList<Usuario> usuarios = new ArrayList<>();
 
         String sql = """
-                SELECT id, nombre, apellido, correo, contrasena, dni, telefono, estado
-                FROM Usuario
+                SELECT nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado, creado_en, actualizado_en
+                FROM usuario
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -155,14 +160,24 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     private Usuario mapearUsuario(ResultSet rs) throws SQLException {
         Usuario usuario = new Usuario();
 
-        usuario.setId(rs.getInt("id"));
-        usuario.setNombre(rs.getString("nombre"));
-        usuario.setApellido(rs.getString("apellido"));
+        usuario.setId_usuario(rs.getInt("id_usuario"));
+        usuario.setNombres(rs.getString("nombres"));
+        usuario.setApellidos(rs.getString("apellidos"));
         usuario.setCorreo(rs.getString("correo"));
-        usuario.setContrasena(rs.getString("contrasena"));
-        usuario.setDni(rs.getString("dni"));
+        usuario.setContrasena_hash(rs.getString("contrasena_hash"));
         usuario.setTelefono(rs.getString("telefono"));
+        usuario.setDni(rs.getString("dni"));
+        usuario.setTipo_usuario(rs.getString("tipo_usuario"));
         usuario.setEstado(rs.getInt("estado"));
+
+        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+        if (fecha_creado != null) {
+            usuario.setFecha_creacion(fecha_creado.toLocalDateTime());
+        }
+        if (fecha_actualizado != null) {
+            usuario.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+        }
 
         return usuario;
     }

@@ -2,11 +2,13 @@ package pe.edu.pucp.luminaBeauty.Model;
 import java.time.LocalDateTime;
 import java.util.Date;
 public class ComprobanteDePago {
-    private int id;
-    private String tipo; // 'BOLETA', 'FACTURA', 'TICKET'
+    private int id_comprobante;
+    private String tipo;
     private String serie;
-    private int numero;
-    private LocalDateTime fechaEmision;
+    private String numero;
+    private LocalDateTime fecha_emision;
+
+    private Pedido pedido;
 
     public Pedido getPedido() {
         return pedido;
@@ -16,19 +18,15 @@ public class ComprobanteDePago {
         this.pedido = pedido;
     }
 
-    //  (Relación 1 a 1 con Pedido)
-    private Pedido pedido;
-
     public ComprobanteDePago() {
     }
 
-    // Getters y Setters
-    public int getId() {
-        return id;
+    public int getId_comprobante() {
+        return id_comprobante;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId_comprobante(int id_comprobante) {
+        this.id_comprobante = id_comprobante;
     }
 
     public String getTipo() {
@@ -47,21 +45,19 @@ public class ComprobanteDePago {
         this.serie = serie;
     }
 
-    public int getNumero() {
+    public String getNumero() {
         return numero;
     }
 
-    public void setNumero(int numero) {
+    public void setNumero(String numero) {
         this.numero = numero;
     }
 
-    public LocalDateTime getFechaEmision() {
-        return fechaEmision;
+    public LocalDateTime getFecha_emision() {
+        return fecha_emision;
     }
 
-    public void setFechaEmision(LocalDateTime fechaEmision) {
-        this.fechaEmision = fechaEmision;
+    public void setFecha_emision(LocalDateTime fecha_emision) {
+        this.fecha_emision = fecha_emision;
     }
-
-
 }
