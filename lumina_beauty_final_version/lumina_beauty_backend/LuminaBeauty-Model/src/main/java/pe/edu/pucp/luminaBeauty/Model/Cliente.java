@@ -1,28 +1,45 @@
 package pe.edu.pucp.luminaBeauty.Model;
 
 public class Cliente extends Usuario {
-    // El idUsuario lo hereda de Usuario
-    private int puntosFidelidad;
-    private String nivelCliente; // En SQL es un ENUM, en Java lo manejamos como String
+    private String tipo_usuario;
+    private int puntos_fidelidad;
+    private String nivel_cliente;
+
+    private Direccion direccion_principal;
 
     public Cliente() {
         super(); // Llama al constructor de Usuario
     }
 
-    // Getters y Setters específicos de Cliente
-    public int getPuntosFidelidad() {
-        return puntosFidelidad;
+    public String getTipo_usuario() {
+        return tipo_usuario;
     }
 
-    public void setPuntosFidelidad(int puntosFidelidad) {
-        this.puntosFidelidad = puntosFidelidad;
+    public void setTipo_usuario(String tipo_usuario) {
+        this.tipo_usuario = tipo_usuario;
     }
 
-    public String getNivelCliente() {
-        return nivelCliente;
+    public int getPuntos_fidelidad() {
+        return puntos_fidelidad;
     }
 
-    public void setNivelCliente(String nivelCliente) {
-        this.nivelCliente = nivelCliente;
+    public void setPuntos_fidelidad(int puntos_fidelidad) {
+        this.puntos_fidelidad = puntos_fidelidad;
+    }
+
+    public String getNivel_cliente() {
+        return nivel_cliente;
+    }
+
+    public void setNivel_cliente(String nivel_cliente) {
+        this.nivel_cliente = nivel_cliente;
+    }
+
+    public Direccion getDireccion_principal() {
+        return direccion_principal;
+    }
+
+    public void setDireccion_principal(Direccion direccion_principal) {
+        this.direccion_principal = direccion_principal;
     }
 }

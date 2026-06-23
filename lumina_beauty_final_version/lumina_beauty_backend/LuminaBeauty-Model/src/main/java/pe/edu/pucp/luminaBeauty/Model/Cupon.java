@@ -3,44 +3,97 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
 public class Cupon {
-    private int id;
+    private int id_cupon;
     private String codigo;
-    private String tipoDescuento; // 'PORCENTAJE' o 'MONTO_FIJO'
-    private BigDecimal valorDescuento;
-    private LocalDateTime fechaInicio;
-    private LocalDateTime fechaFin;
-    private String estado; // 'ACTIVO', 'INACTIVO', 'EXPIRADO'
-    private int limiteUso;
-    private int usosActuales;
+    private String tipo_descuento; // 'PORCENTAJE' o 'MONTO_FIJO'
+    private BigDecimal valor_descuento;
+    private LocalDateTime fecha_inicio;
+    private LocalDateTime fecha_fin;
+    private int limite_uso;
+    private int estado;
+    private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 
-    public Cupon() {
+    public Cupon () {
     }
 
-    // Getters y Setters
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getId_cupon() {
+        return id_cupon;
+    }
 
-    public String getCodigo() { return codigo; }
-    public void setCodigo(String codigo) { this.codigo = codigo; }
+    public void setId_cupon(int id_cupon) {
+        this.id_cupon = id_cupon;
+    }
 
-    public String getTipoDescuento() { return tipoDescuento; }
-    public void setTipoDescuento(String tipoDescuento) { this.tipoDescuento = tipoDescuento; }
+    public String getCodigo() {
+        return codigo;
+    }
 
-    public BigDecimal getValorDescuento() { return valorDescuento; }
-    public void setValorDescuento(BigDecimal valorDescuento) { this.valorDescuento = valorDescuento; }
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
 
-    public LocalDateTime getFechaInicio() { return fechaInicio; }
-    public void setFechaInicio(LocalDateTime fechaInicio) { this.fechaInicio = fechaInicio; }
+    public String getTipo_descuento() {
+        return tipo_descuento;
+    }
 
-    public LocalDateTime getFechaFin() { return fechaFin; }
-    public void setFechaFin(LocalDateTime fechaFin) { this.fechaFin = fechaFin; }
+    public void setTipo_descuento(String tipo_descuento) {
+        this.tipo_descuento = tipo_descuento;
+    }
 
-    public String getEstado() { return estado; }
-    public void setEstado(String estado) { this.estado = estado; }
+    public BigDecimal getValor_descuento() {
+        return valor_descuento;
+    }
 
-    public int getLimiteUso() { return limiteUso; }
-    public void setLimiteUso(int limiteUso) { this.limiteUso = limiteUso; }
+    public void setValor_descuento(BigDecimal valor_descuento) {
+        this.valor_descuento = valor_descuento;
+    }
 
-    public int getUsosActuales() { return usosActuales; }
-    public void setUsosActuales(int usosActuales) { this.usosActuales = usosActuales; }
+    public LocalDateTime getFecha_inicio() {
+        return fecha_inicio;
+    }
+
+    public void setFecha_inicio(LocalDateTime fecha_inicio) {
+        this.fecha_inicio = fecha_inicio;
+    }
+
+    public LocalDateTime getFecha_fin() {
+        return fecha_fin;
+    }
+
+    public void setFecha_fin(LocalDateTime fecha_fin) {
+        this.fecha_fin = fecha_fin;
+    }
+
+    public int getLimiteUso() {
+        return limite_uso;
+    }
+
+    public void setLimiteUso(int limite_uso) {
+        this.limite_uso = limite_uso;
+    }
+
+    public int getEstado() {
+        return estado;
+    }
+
+    public void setEstado(int estado) {
+        this.estado = estado;
+    }
+
+    public LocalDateTime getFecha_creacion() {
+        return fecha_creacion;
+    }
+
+    public void setFecha_creacion(LocalDateTime fecha_creacion) {
+        this.fecha_creacion = fecha_creacion;
+    }
+
+    public LocalDateTime getFecha_actualizacion() {
+        return fecha_actualizacion;
+    }
+
+    public void setFecha_actualizacion(LocalDateTime fecha_actualizacion) {
+        this.fecha_actualizacion = fecha_actualizacion;
+    }
 }

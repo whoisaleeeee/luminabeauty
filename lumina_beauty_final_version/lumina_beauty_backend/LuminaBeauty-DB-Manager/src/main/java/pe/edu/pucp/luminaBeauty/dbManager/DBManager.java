@@ -20,7 +20,7 @@ public class DBManager {
     private Properties properties;
 
     //Datos necesarios para conectarse a MySQL
-    private final String url;
+    private String url;
     private final String user;
     private final String password;
 
@@ -31,6 +31,13 @@ public class DBManager {
     private DBManager() {
         //objeto para cargar los datos del archivo properties
         properties = new Properties();
+
+        //Inyección del driver
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        }catch (ClassNotFoundException e){
+            throw new RuntimeException(e);
+        }
 
         //Inicia bloque donde puede ocurrir un error
         try{
@@ -52,6 +59,7 @@ public class DBManager {
 
         //construccion de la url jdbc
         this.url = "jdbc:mysql://" + host + ":" + port + "/" + database;
+        this.url += "?allowPublicKeyRetrieval=true&useSSL=false";
         this.user = properties.getProperty("user");
         this.password = properties.getProperty("password");
     }

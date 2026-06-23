@@ -4,23 +4,58 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ListaDeDeseos {
-    private int id;
-    private Cliente cliente; // La FK obligatoria en el SQL
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaActualizacion;
+    private int id_lista_deseos;
+    private String nombre;
+    private String descripcion;
+    private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
+
+    private Cliente cliente;
+
     private ArrayList<DetalleLista> detalles;
 
     public ListaDeDeseos() {
         this.detalles = new ArrayList<>();
     }
 
-    // Getters y Setters
-    public int getId() {
-        return id;
+    public int getId_lista_deseos() {
+        return id_lista_deseos;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId_lista_deseos(int id_lista_deseos) {
+        this.id_lista_deseos = id_lista_deseos;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public LocalDateTime getFecha_creacion() {
+        return fecha_creacion;
+    }
+
+    public void setFecha_creacion(LocalDateTime fecha_creacion) {
+        this.fecha_creacion = fecha_creacion;
+    }
+
+    public LocalDateTime getFecha_actualizacion() {
+        return fecha_actualizacion;
+    }
+
+    public void setFecha_actualizacion(LocalDateTime fecha_actualizacion) {
+        this.fecha_actualizacion = fecha_actualizacion;
     }
 
     public ArrayList<DetalleLista> getDetalles() {
@@ -31,21 +66,11 @@ public class ListaDeDeseos {
         this.detalles = detalles;
     }
 
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
+    public Cliente getCliente() {
+        return cliente;
     }
 
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
-
-    public LocalDateTime getFechaActualizacion() {
-        return fechaActualizacion;
-    }
-
-    public void setFechaActualizacion(LocalDateTime fechaActualizacion) {this.fechaActualizacion = fechaActualizacion;}
-
-    public Cliente getCliente() {return cliente;}
-    public void setCliente(Cliente cliente) {this.cliente = cliente;}
-
 }

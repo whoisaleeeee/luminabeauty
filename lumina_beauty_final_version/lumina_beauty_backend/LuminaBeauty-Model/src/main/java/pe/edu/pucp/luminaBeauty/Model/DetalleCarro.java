@@ -1,33 +1,61 @@
 package pe.edu.pucp.luminaBeauty.Model;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class DetalleCarro {
-    private int id; // El ID auto-incremental de la tabla
+    private int id_detalle_carrito; // El ID auto-incremental de la tabla
     private int cantidad;
-    private BigDecimal precioUnitario; // DECIMAL(10,2) en SQL
-    private CarroDeCompras carro; // FK hacia CarroDeCompras
-    private Producto producto; // FK hacia Producto
+    private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
 
-    public Producto getIdProducto() {return producto;}
+    private CarroDeCompras carro;
+    private Producto producto;
 
-    public void setIdProducto(Producto idProducto) {this.producto = idProducto;}
+    public int getId_detalle_carrito() {
+        return id_detalle_carrito;
+    }
 
-    public CarroDeCompras getCarro() {return carro;}
+    public void setId_detalle_carrito(int id_detalle_carrito) {
+        this.id_detalle_carrito = id_detalle_carrito;
+    }
 
-    public void setCarro(CarroDeCompras carro) {this.carro = carro;}
+    public int getCantidad() {
+        return cantidad;
+    }
 
-    public DetalleCarro() {}
+    public void setCantidad(int cantidad) {
+        this.cantidad = cantidad;
+    }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public LocalDateTime getFecha_creacion() {
+        return fecha_creacion;
+    }
 
-    public int getCantidad() { return cantidad; }
-    public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+    public void setFecha_creacion(LocalDateTime fecha_creacion) {
+        this.fecha_creacion = fecha_creacion;
+    }
 
-    public BigDecimal getPrecioUnitario() { return precioUnitario; }
-    public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
+    public LocalDateTime getFecha_actualizacion() {
+        return fecha_actualizacion;
+    }
 
+    public void setFecha_actualizacion(LocalDateTime fecha_actualizacion) {
+        this.fecha_actualizacion = fecha_actualizacion;
+    }
 
+    public CarroDeCompras getCarro() {
+        return carro;
+    }
 
+    public void setCarro(CarroDeCompras carro) {
+        this.carro = carro;
+    }
 
+    public Producto getProducto() {
+        return producto;
+    }
+
+    public void setProducto(Producto producto) {
+        this.producto = producto;
+    }
 }
