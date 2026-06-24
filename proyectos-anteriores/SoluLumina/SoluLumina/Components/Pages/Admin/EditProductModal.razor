@@ -28,7 +28,7 @@
         if (Product != null)
         {
             catId = Product.Categoria?.Id ?? 0;
-            marcaId = Product.Marca?.Id ?? 0;
+            //marcaId = Product.Marca?.Id ?? 0;
         }
     }
 
@@ -41,7 +41,7 @@
     private async Task Save()
     {
         if (catId != 0) Product.Categoria = new CategoriaProducto { Id = catId };
-        if (marcaId != 0) Product.Marca = new Marca { Id = marcaId };
+        //if (marcaId != 0) Product.Marca = new Marca { Id = marcaId };
         
         await OnProductUpdated.InvokeAsync(Product);
         Close();
@@ -82,7 +82,7 @@
                         <option value="0">Seleccionar marca...</option>
                         @foreach (var m in Marcas)
                         {
-                            <option value="@m.Id">@m.Nombre</option>
+                            <option value="@m.Id_marca">@m.Nombre</option>
                         }
                     </select>
                 </div>

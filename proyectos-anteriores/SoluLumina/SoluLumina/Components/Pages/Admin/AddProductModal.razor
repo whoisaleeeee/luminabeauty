@@ -152,7 +152,7 @@
     private async Task SaveProduct()
     {
         if (catId != 0) NewProduct.Categoria = new CategoriaProducto { Id = catId };
-        if (marcaId != 0) NewProduct.Marca = new Marca { Id = marcaId };
+        if (marcaId != 0) NewProduct.Marca = new Marca { Id_marca = marcaId };
         NewProduct.Estado = 1; // Default status active
         
         await OnProductAdded.InvokeAsync(NewProduct);

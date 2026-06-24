@@ -136,7 +136,7 @@
                             <option value="0" selected>Todas las marcas</option>
                             @foreach (var marca in Marcas)
                             {
-                                <option value="@marca.Id">@marca.Nombre</option>
+                                <option value="@marca.Id_marca">@marca.Nombre</option>
                             }
                         </select>
                     </div>
@@ -167,7 +167,7 @@
                      </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
                         @{ int rowNumber = 1; }
-                        @foreach(var p in FilteredProducts)
+                        @foreach(var p in Productos)
                         {
                             <tr class="border-bottom" style="border-color: #f7eff1 !important;">
                                 <td class="text-center">@(rowNumber++)</td>
@@ -254,14 +254,14 @@
 
     private async Task CargarDatos()
     {
-        var todosProductos = new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS");
-        Marcas = new HttpClientUtils<List<Marca>>().get(URL_BASE + "");
+        Productos = new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS");
+        Marcas = new HttpClientUtils<List<Marca>>().get(URL_BASE + "/MarcaRS");
 
         // Mapear los nombres de categoría y marca a los productos si los traen solo con ID
         foreach(var p in Productos)
         {
             if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id == p.Categoria.Id);
-            if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id == p.Marca.Id);
+            if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id_marca == p.Marca.Id_marca);
         }
     }
 
@@ -314,7 +314,7 @@
     private IEnumerable<Producto> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => p.Categoria?.Id == selectedCategoryId);
 
     private IEnumerable<Producto> FilteredProducts => FilteredByCategory
-        .Where(p => selectedBrandId == 0 || p.Marca?.Id == selectedBrandId)
+        //.Where(p => selectedBrandId == 0 || p.Marca?.Id == selectedBrandId)
         .Where(p => selectedSkinTypeId == 0 || (p.Tipo_piel != null && p.Tipo_piel.Equals(GetSkinTypeName(selectedSkinTypeId), StringComparison.OrdinalIgnoreCase)))
         .Where(p => string.IsNullOrWhiteSpace(searchTerm) || (p.Nombre != null && p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) || (p.Slug != null && p.Slug.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
