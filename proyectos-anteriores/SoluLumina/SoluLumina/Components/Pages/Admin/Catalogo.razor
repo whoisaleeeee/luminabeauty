@@ -245,7 +245,7 @@
     private int selectedSkinTypeId = 0;
     private string searchTerm = string.Empty;
 
-    private string url_listar_Productos = "http://localhost:8080/LuminaBeauty-Servicios/webresources/ProductoRS";
+    private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
 
     protected override async Task OnInitializedAsync()
     {
@@ -254,9 +254,15 @@
 
     private async Task CargarDatos()
     {
-        var todosProductos = new HttpClientUtils<List<Producto>>().get(url_listar_Productos);
-        Productos = todosProductos.Where(p => p.Estado == 1).ToList();
+        var todosProductos = new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS");
+        Marcas = new HttpClientUtils<List<Marca>>().get(URL_BASE + "");
 
+        // Mapear los nombres de categoría y marca a los productos si los traen solo con ID
+        foreach(var p in Productos)
+        {
+            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id == p.Categoria.Id);
+            if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id == p.Marca.Id);
+        }
     }
 
     private void ToggleProfileDropdown()
