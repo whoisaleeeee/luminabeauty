@@ -29,7 +29,7 @@ public class PagoBLImpl implements PagoBL {
                 throw new Exception("Debe seleccionar un método de pago.");
             }
 
-            Pedido pedido = pedidoDAO.buscarPorId(pago.getPedido().getId());
+            Pedido pedido = pedidoDAO.buscarPorId(pago.getPedido().getId_pedido());
 
             if (pedido == null) {
                 throw new Exception("El pedido no existe.");

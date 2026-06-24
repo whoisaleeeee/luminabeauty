@@ -21,7 +21,7 @@ public class EnvioBLImpl implements EnvioBL {
                 throw new Exception("El envío debe tener un pedido.");
             }
 
-            if (envio.getDireccion() == null) {
+            if (envio.getDireccion_envio() == null) {
                 throw new Exception("El envío debe tener una dirección.");
             }
 

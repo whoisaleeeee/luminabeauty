@@ -21,12 +21,12 @@ public class ClienteBLImpl implements ClienteBL {
                 throw new Exception("El correo es obligatorio.");
             }
 
-            if (cliente.getContrasena() == null || cliente.getContrasena().isBlank()) {
+            if (cliente.getContrasena_hash() == null || cliente.getContrasena_hash().isBlank()) {
                 throw new Exception("La contraseña es obligatoria.");
             }
 
-            if (cliente.getNivelCliente() == null) {
-                cliente.setNivelCliente("BRONCE");
+            if (cliente.getNivel_cliente() == null) {
+                cliente.setNivel_cliente("BRONCE");
             }
 
             clienteDAO.insertar(cliente);
@@ -52,16 +52,16 @@ public class ClienteBLImpl implements ClienteBL {
                 throw new Exception("El cliente no existe.");
             }
 
-            cliente.setPuntosFidelidad(cliente.getPuntosFidelidad() + puntos);
+            cliente.setPuntos_fidelidad(cliente.getPuntos_fidelidad() + puntos);
 
-            if (cliente.getPuntosFidelidad() >= 1000) {
-                cliente.setNivelCliente("PLATINO");
-            } else if (cliente.getPuntosFidelidad() >= 500) {
-                cliente.setNivelCliente("ORO");
-            } else if (cliente.getPuntosFidelidad() >= 200) {
-                cliente.setNivelCliente("PLATA");
+            if (cliente.getPuntos_fidelidad() >= 1000) {
+                cliente.setNivel_cliente("PLATINO");
+            } else if (cliente.getPuntos_fidelidad() >= 500) {
+                cliente.setNivel_cliente("ORO");
+            } else if (cliente.getPuntos_fidelidad() >= 200) {
+                cliente.setNivel_cliente("PLATA");
             } else {
-                cliente.setNivelCliente("BRONCE");
+                cliente.setNivel_cliente("BRONCE");
             }
 
             clienteDAO.actualizar(cliente);

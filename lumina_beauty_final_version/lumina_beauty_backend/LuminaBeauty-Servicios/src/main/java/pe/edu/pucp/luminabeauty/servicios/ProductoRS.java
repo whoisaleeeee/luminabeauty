@@ -51,13 +51,14 @@ public class ProductoRS {
 
     @GET
     @Path("{id}")
-    public Producto buscarProducto(@PathParam("id") String id) {
-        Producto resultado = null;
+    public Producto buscarProducto(@PathParam("id") Integer id) {
+        Producto resultado = new Producto();
         try {
             resultado = productoBL.buscarProducto(id);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+        resultado.setId_producto(10);
         return resultado;
     }
 }

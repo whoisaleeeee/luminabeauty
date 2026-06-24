@@ -20,26 +20,27 @@ public class CuponBLImpl implements CuponBL {
 
         LocalDateTime hoy = LocalDateTime.now();
 
-        if (hoy.isBefore(cupon.getFechaInicio()) || hoy.isAfter(cupon.getFechaFin())) {
+        if (hoy.isBefore(cupon.getFecha_inicio()) || hoy.isAfter(cupon.getFecha_fin())) {
             throw new Exception("El cupón está fuera de fecha.");
         }
 
-        if (cupon.getLimiteUso() != 0 && cupon.getUsosActuales() >= cupon.getLimiteUso()) {
+        if (cupon.getLimite_uso() != 0 && cupon.getCantidad_usos() >= cupon.getLimite_uso()) {
             throw new Exception("El cupón ya alcanzó su límite de uso.");
         }
+        cupon.setCantidad_usos(cupon.getCantidad_usos()+1);
     }
 
     @Override
     public BigDecimal aplicarDescuento(Cupon cupon, BigDecimal total) throws Exception {
         validarCupon(cupon);
 
-        if ("PORCENTAJE".equals(cupon.getTipoDescuento())) {
-            BigDecimal descuento = total.multiply(cupon.getValorDescuento()).divide(new BigDecimal("100"));
+        if ("PORCENTAJE".equals(cupon.getTipo_descuento())) {
+            BigDecimal descuento = total.multiply(cupon.getValor_descuento()).divide(new BigDecimal("100"));
             return total.subtract(descuento);
         }
 
-        if ("MONTO_FIJO".equals(cupon.getTipoDescuento())) {
-            return total.subtract(cupon.getValorDescuento());
+        if ("MONTO_FIJO".equals(cupon.getTipo_descuento())) {
+            return total.subtract(cupon.getValor_descuento());
         }
 
         throw new Exception("Tipo de descuento no válido.");

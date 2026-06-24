@@ -31,7 +31,7 @@ public class PedidoBLImpl implements PedidoBL {
             }
 
             for (DetallePedido detalle : pedido.getDetalles()) {
-                Producto productoBD = productoDAO.buscarPorId(detalle.getProducto().getId());
+                Producto productoBD = productoDAO.buscarPorId(detalle.getProducto().getId_producto());
 
                 if (productoBD == null) {
                     throw new Exception("El producto no existe.");
@@ -48,7 +48,7 @@ public class PedidoBLImpl implements PedidoBL {
                 detalle.setPedido(pedido);
                 detallePedidoDAO.insertar(detalle);
 
-                Producto productoBD = productoDAO.buscarPorId(detalle.getProducto().getId());
+                Producto productoBD = productoDAO.buscarPorId(detalle.getProducto().getId_producto());
                 productoBD.setStock(productoBD.getStock() - detalle.getCantidad());
                 productoDAO.actualizar(productoBD);
             }

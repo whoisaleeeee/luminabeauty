@@ -12,7 +12,7 @@ public class ProductoBLImpl implements ProductoBL {
 
     @Override
     public void validarStock(String idProducto, int cantidad) throws Exception {
-        Producto producto = productoDAO.buscarPorId(idProducto);
+        Producto producto = productoDAO.buscarPorId(Integer.getInteger(idProducto));
 
         if (producto == null) {
             throw new Exception("El producto no existe.");
@@ -30,7 +30,7 @@ public class ProductoBLImpl implements ProductoBL {
     @Override
     public void descontarStock(String idProducto, int cantidad) throws Exception {
         try {
-            Producto producto = productoDAO.buscarPorId(idProducto);
+            Producto producto = productoDAO.buscarPorId(Integer.getInteger(idProducto));
 
             if (producto == null) {
                 throw new Exception("El producto no existe.");
@@ -54,7 +54,7 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
-    public Producto buscarProducto(String id) throws Exception {
+    public Producto buscarProducto(Integer id) throws Exception {
         return productoDAO.buscarPorId(id);
     }
 }

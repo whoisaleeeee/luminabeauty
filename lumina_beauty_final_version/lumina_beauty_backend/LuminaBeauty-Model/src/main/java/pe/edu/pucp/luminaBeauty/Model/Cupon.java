@@ -11,6 +11,7 @@ public class Cupon {
     private BigDecimal valor_descuento;
     private LocalDateTime fecha_inicio;
     private LocalDateTime fecha_fin;
+    private Integer cantidad_usos;
     private Integer limite_uso;
     private int estado;
     private LocalDateTime fecha_creacion;
@@ -18,6 +19,7 @@ public class Cupon {
 
     public Cupon() {
         this.estado = 1;
+        this.cantidad_usos = 0;
     }
 
     public int getId_cupon() {
@@ -66,6 +68,14 @@ public class Cupon {
 
     public void setFecha_fin(LocalDateTime fecha_fin) {
         this.fecha_fin = fecha_fin;
+    }
+
+    public Integer getCantidad_usos() {
+        return cantidad_usos;
+    }
+
+    public void setCantidad_usos(Integer cantidad_usos) {
+        this.cantidad_usos = cantidad_usos;
     }
 
     public Integer getLimite_uso() {

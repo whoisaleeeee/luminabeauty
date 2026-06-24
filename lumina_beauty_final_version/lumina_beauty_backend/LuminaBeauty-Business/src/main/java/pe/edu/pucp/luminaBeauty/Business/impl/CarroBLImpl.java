@@ -30,7 +30,7 @@ public class CarroBLImpl implements CarroBL {
                 throw new Exception("La cantidad debe ser mayor a cero.");
             }
 
-            Producto productoBD = productoDAO.buscarPorId(producto.getId());
+            Producto productoBD = productoDAO.buscarPorId(producto.getId_producto());
 
             if (productoBD == null) {
                 throw new Exception("El producto no existe.");
@@ -42,9 +42,8 @@ public class CarroBLImpl implements CarroBL {
 
             DetalleCarro detalle = new DetalleCarro();
             detalle.setCarro(carro);
-            detalle.setIdProducto(productoBD);
+            detalle.setProducto(productoBD);
             detalle.setCantidad(cantidad);
-            detalle.setPrecioUnitario(productoBD.getPrecio());
 
             detalleCarroDAO.insertar(detalle);
 
