@@ -11,39 +11,62 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
 
     @Override
     public Empleado insertar(Empleado empleado) throws Exception {
+
+        empleado.setTipo_usuario("EMPLEADO");
+
+        if (empleado.getRol() == null || empleado.getRol().isBlank()) {
+            empleado.setRol("SOPORTE");
+        }
+
         String sqlUsuario = """
-                INSERT INTO Usuario(nombre, apellido, correo, contrasena, dni, telefono, estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO usuario(
+                    nombres,
+                    apellidos,
+                    correo,
+                    contrasena_hash,
+                    telefono,
+                    dni,
+                    tipo_usuario,
+                    estado
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         String sqlEmpleado = """
-                INSERT INTO Empleado(idUsuario, rol)
-                VALUES (?, ?)
+                INSERT INTO empleado(
+                    id_usuario,
+                    tipo_usuario,
+                    rol
+                )
+                VALUES (?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmtUsuario = connection.prepareStatement(sqlUsuario, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmtUsuario.setString(1, empleado.getNombre());
-            stmtUsuario.setString(2, empleado.getApellido());
+            stmtUsuario.setString(1, empleado.getNombres());
+            stmtUsuario.setString(2, empleado.getApellidos());
             stmtUsuario.setString(3, empleado.getCorreo());
-            stmtUsuario.setString(4, empleado.getContrasena());
-            stmtUsuario.setString(5, empleado.getDni());
-            stmtUsuario.setString(6, empleado.getTelefono());
-            stmtUsuario.setInt(7, empleado.getEstado());
+            stmtUsuario.setString(4, empleado.getContrasena_hash());
+            stmtUsuario.setString(5, empleado.getTelefono());
+            stmtUsuario.setString(6, empleado.getDni());
+            stmtUsuario.setString(7, "EMPLEADO");
+            stmtUsuario.setInt(8, empleado.getEstado());
 
             stmtUsuario.executeUpdate();
 
             try (ResultSet rs = stmtUsuario.getGeneratedKeys()) {
                 if (rs.next()) {
-                    empleado.setIdEmpleado(rs.getInt(1));
+                    empleado.setId_usuario(rs.getInt(1));
                 }
             }
 
             try (PreparedStatement stmtEmpleado = connection.prepareStatement(sqlEmpleado)) {
-                stmtEmpleado.setInt(1, empleado.getIdEmpleado());
-                stmtEmpleado.setString(2, empleado.getRol());
+                stmtEmpleado.setInt(1, empleado.getId_usuario());
+                stmtEmpleado.setString(2, "EMPLEADO");
+                stmtEmpleado.setString(3, empleado.getRol());
+
                 stmtEmpleado.executeUpdate();
             }
 
@@ -56,20 +79,26 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
 
     @Override
     public void eliminar(Empleado empleado) throws Exception {
-//        String sql = """
-//                DELETE FROM Usuario
-//                WHERE id = ?
-//                """;
+
         String sql = """
-                  UPDATE Usuario SET estado = 0
-                  WHERE id = ?
-                  """;
+                UPDATE usuario
+                SET estado = 0
+                WHERE id_usuario = ?
+                  AND tipo_usuario = 'EMPLEADO'
+                """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, empleado.getIdEmpleado());
-            stmt.executeUpdate();
+
+            stmt.setInt(1, empleado.getId_usuario());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el empleado con ID: " + empleado.getId_usuario());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -77,18 +106,34 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
 
     @Override
     public Empleado buscarPorId(Integer id) throws Exception {
+
         String sql = """
-                SELECT u.id, u.nombre, u.apellido, u.correo, u.contrasena,
-                       u.dni, u.telefono, u.estado,
-                       e.rol
-                FROM Usuario u
-                INNER JOIN Empleado e ON u.id = e.idUsuario
-                WHERE u.id = ?
+                SELECT
+                    u.id_usuario,
+                    u.nombres,
+                    u.apellidos,
+                    u.correo,
+                    u.contrasena_hash,
+                    u.telefono,
+                    u.dni,
+                    u.tipo_usuario,
+                    u.estado,
+                    u.creado_en,
+                    u.actualizado_en,
+                    e.rol
+                FROM usuario u
+                INNER JOIN empleado e 
+                    ON u.id_usuario = e.id_usuario
+                   AND u.tipo_usuario = e.tipo_usuario
+                WHERE u.id_usuario = ?
+                  AND u.tipo_usuario = 'EMPLEADO'
+                  AND u.estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -106,22 +151,25 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
 
     @Override
     public Empleado actualizar(Empleado empleado) throws Exception {
+
         String sqlUsuario = """
-                UPDATE Usuario
-                SET nombre = ?,
-                    apellido = ?,
+                UPDATE usuario
+                SET nombres = ?,
+                    apellidos = ?,
                     correo = ?,
-                    contrasena = ?,
-                    dni = ?,
+                    contrasena_hash = ?,
                     telefono = ?,
+                    dni = ?,
                     estado = ?
-                WHERE id = ?
+                WHERE id_usuario = ?
+                  AND tipo_usuario = 'EMPLEADO'
                 """;
 
         String sqlEmpleado = """
-                UPDATE Empleado
+                UPDATE empleado
                 SET rol = ?
-                WHERE idUsuario = ?
+                WHERE id_usuario = ?
+                  AND tipo_usuario = 'EMPLEADO'
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -129,18 +177,20 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
         try (PreparedStatement stmtUsuario = connection.prepareStatement(sqlUsuario);
              PreparedStatement stmtEmpleado = connection.prepareStatement(sqlEmpleado)) {
 
-            stmtUsuario.setString(1, empleado.getNombre());
-            stmtUsuario.setString(2, empleado.getApellido());
+            stmtUsuario.setString(1, empleado.getNombres());
+            stmtUsuario.setString(2, empleado.getApellidos());
             stmtUsuario.setString(3, empleado.getCorreo());
-            stmtUsuario.setString(4, empleado.getContrasena());
-            stmtUsuario.setString(5, empleado.getDni());
-            stmtUsuario.setString(6, empleado.getTelefono());
+            stmtUsuario.setString(4, empleado.getContrasena_hash());
+            stmtUsuario.setString(5, empleado.getTelefono());
+            stmtUsuario.setString(6, empleado.getDni());
             stmtUsuario.setInt(7, empleado.getEstado());
-            stmtUsuario.setInt(8, empleado.getIdEmpleado());
+            stmtUsuario.setInt(8, empleado.getId_usuario());
+
             stmtUsuario.executeUpdate();
 
             stmtEmpleado.setString(1, empleado.getRol());
-            stmtEmpleado.setInt(2, empleado.getIdEmpleado());
+            stmtEmpleado.setInt(2, empleado.getId_usuario());
+
             stmtEmpleado.executeUpdate();
 
             return empleado;
@@ -152,14 +202,29 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
 
     @Override
     public ArrayList<Empleado> listarTodos() throws Exception {
+
         ArrayList<Empleado> empleados = new ArrayList<>();
 
         String sql = """
-                SELECT u.id, u.nombre, u.apellido, u.correo, u.contrasena,
-                       u.dni, u.telefono, u.estado,
-                       e.rol
-                FROM Usuario u
-                INNER JOIN Empleado e ON u.id = e.idUsuario
+                SELECT
+                    u.id_usuario,
+                    u.nombres,
+                    u.apellidos,
+                    u.correo,
+                    u.contrasena_hash,
+                    u.telefono,
+                    u.dni,
+                    u.tipo_usuario,
+                    u.estado,
+                    u.creado_en,
+                    u.actualizado_en,
+                    e.rol
+                FROM usuario u
+                INNER JOIN empleado e 
+                    ON u.id_usuario = e.id_usuario
+                   AND u.tipo_usuario = e.tipo_usuario
+                WHERE u.tipo_usuario = 'EMPLEADO'
+                  AND u.estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -179,17 +244,30 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
     }
 
     private Empleado mapearEmpleado(ResultSet rs) throws SQLException {
+
         Empleado empleado = new Empleado();
 
-        empleado.setIdEmpleado(rs.getInt("id"));
-        empleado.setNombre(rs.getString("nombre"));
-        empleado.setApellido(rs.getString("apellido"));
+        empleado.setId_usuario(rs.getInt("id_usuario"));
+        empleado.setNombres(rs.getString("nombres"));
+        empleado.setApellidos(rs.getString("apellidos"));
         empleado.setCorreo(rs.getString("correo"));
-        empleado.setContrasena(rs.getString("contrasena"));
-        empleado.setDni(rs.getString("dni"));
+        empleado.setContrasena_hash(rs.getString("contrasena_hash"));
         empleado.setTelefono(rs.getString("telefono"));
+        empleado.setDni(rs.getString("dni"));
+        empleado.setTipo_usuario(rs.getString("tipo_usuario"));
         empleado.setEstado(rs.getInt("estado"));
         empleado.setRol(rs.getString("rol"));
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaCreacion != null) {
+            empleado.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            empleado.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
 
         return empleado;
     }

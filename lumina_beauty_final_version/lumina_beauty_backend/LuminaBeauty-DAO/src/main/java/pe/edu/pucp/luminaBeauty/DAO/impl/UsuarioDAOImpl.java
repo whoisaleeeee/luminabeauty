@@ -12,8 +12,8 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     @Override
     public Usuario insertar(Usuario usuario) throws Exception {
         String sql = """
-                INSERT INTO usuario(nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO usuario(nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -46,21 +46,23 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public void eliminar(Usuario usuario) throws Exception {
-//        String sql = """
-//                DELETE FROM Usuario
-//                WHERE id = ?
-//                """;
-
         String sql = """
-                  UPDATE usuario SET estado = 0
-                  WHERE id_usuario = ?
-                  """;
+            UPDATE usuario
+            SET estado = 0
+            WHERE id_usuario = ?
+            """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, usuario.getId_usuario());
-            stmt.executeUpdate();
+
+            int filasAfectadas = stmt.executeUpdate();
+
+            if (filasAfectadas == 0) {
+                throw new RuntimeException("No se encontró el usuario con ID: " + usuario.getId_usuario());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -72,6 +74,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                 SELECT id_usuario, nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado, creado_en, actualizado_en
                 FROM usuario
                 WHERE id_usuario = ?
+                AND estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -95,18 +98,17 @@ public class UsuarioDAOImpl implements UsuarioDAO {
     @Override
     public Usuario actualizar(Usuario usuario) throws Exception {
         String sql = """
-                UPDATE usuario
-                SET nombres = ?,
-                    apellidos = ?,
-                    correo = ?,
-                    contrasena_hash = ?,
-                    telefono = ?,
-                    dni = ?,
-                    tipo_usuario = ?,
-                    estado = ?,
-                    actualizado_en = ?
-                WHERE id_usuario = ?
-                """;
+            UPDATE usuario
+            SET nombres = ?,
+                apellidos = ?,
+                correo = ?,
+                contrasena_hash = ?,
+                telefono = ?,
+                dni = ?,
+                tipo_usuario = ?,
+                estado = ?
+            WHERE id_usuario = ?
+            """;
 
         Connection connection = TransactionContext.getConnection();
 
@@ -120,8 +122,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             stmt.setString(6, usuario.getDni());
             stmt.setString(7, usuario.getTipo_usuario());
             stmt.setInt(8, usuario.getEstado());
-            stmt.setTimestamp(9, Timestamp.valueOf(usuario.getFecha_actualizacion()));
-            stmt.setInt(10, usuario.getId_usuario());
+            stmt.setInt(9, usuario.getId_usuario());
 
             stmt.executeUpdate();
 
@@ -131,14 +132,14 @@ public class UsuarioDAOImpl implements UsuarioDAO {
             throw new RuntimeException(e);
         }
     }
-
     @Override
     public ArrayList<Usuario> listarTodos() throws Exception {
         ArrayList<Usuario> usuarios = new ArrayList<>();
 
         String sql = """
-                SELECT nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado, creado_en, actualizado_en
+                SELECT id_usuario,nombres, apellidos, correo, contrasena_hash, telefono, dni, tipo_usuario, estado, creado_en, actualizado_en
                 FROM usuario
+                WHERE estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -170,11 +171,13 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         usuario.setTipo_usuario(rs.getString("tipo_usuario"));
         usuario.setEstado(rs.getInt("estado"));
 
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+        Timestamp fecha_creado = rs.getTimestamp("creado_en");
         Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+
         if (fecha_creado != null) {
             usuario.setFecha_creacion(fecha_creado.toLocalDateTime());
         }
+
         if (fecha_actualizado != null) {
             usuario.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
         }

@@ -14,25 +14,33 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     @Override
     public DetallePedido insertar(DetallePedido detalle) throws Exception {
         String sql = """
-                INSERT INTO DetallePedido(cantidad, precioUnitario, subtotal, idPedido, idProducto)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO detalle_pedido(
+                    id_pedido,
+                    id_producto,
+                    nombre_producto,
+                    sku_producto,
+                    cantidad,
+                    precio_unitario
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, detalle.getCantidad());
-            stmt.setBigDecimal(2, detalle.getPrecioUnitario());
-            stmt.setBigDecimal(3, detalle.getSubtotal());
-            stmt.setInt(4, detalle.getPedido().getId());
-            stmt.setString(5, detalle.getProducto().getId());
+            stmt.setInt(1, detalle.getPedido().getId_pedido());
+            stmt.setInt(2, detalle.getProducto().getId_producto());
+            stmt.setString(3, detalle.getNombre_producto());
+            stmt.setString(4, detalle.getSku_producto());
+            stmt.setInt(5, detalle.getCantidad());
+            stmt.setBigDecimal(6, detalle.getPrecioUnitario());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    detalle.setId(rs.getInt(1));
+                    detalle.setId_detalle_pedido(rs.getInt(1));
                 }
             }
 
@@ -46,15 +54,23 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     @Override
     public void eliminar(DetallePedido detalle) throws Exception {
         String sql = """
-                DELETE FROM DetallePedido
-                WHERE id = ?
+                DELETE FROM detalle_pedido
+                WHERE id_detalle_pedido = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, detalle.getId());
-            stmt.executeUpdate();
+
+            stmt.setInt(1, detalle.getId_detalle_pedido());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el detalle de pedido con ID: "
+                        + detalle.getId_detalle_pedido());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -63,14 +79,21 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     @Override
     public DetallePedido buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, cantidad, precioUnitario, subtotal, idPedido, idProducto
-                FROM DetallePedido
-                WHERE id = ?
+                SELECT id_detalle_pedido,
+                       id_pedido,
+                       id_producto,
+                       nombre_producto,
+                       sku_producto,
+                       cantidad,
+                       precio_unitario
+                FROM detalle_pedido
+                WHERE id_detalle_pedido = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -89,27 +112,34 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     @Override
     public DetallePedido actualizar(DetallePedido detalle) throws Exception {
         String sql = """
-                UPDATE DetallePedido
-                SET cantidad = ?,
-                    precioUnitario = ?,
-                    subtotal = ?,
-                    idPedido = ?,
-                    idProducto = ?
-                WHERE id = ?
+                UPDATE detalle_pedido
+                SET id_pedido = ?,
+                    id_producto = ?,
+                    nombre_producto = ?,
+                    sku_producto = ?,
+                    cantidad = ?,
+                    precio_unitario = ?
+                WHERE id_detalle_pedido = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, detalle.getCantidad());
-            stmt.setBigDecimal(2, detalle.getPrecioUnitario());
-            stmt.setBigDecimal(3, detalle.getSubtotal());
-            stmt.setInt(4, detalle.getPedido().getId());
-            stmt.setString(5, detalle.getProducto().getId());
-            stmt.setInt(6, detalle.getId());
+            stmt.setInt(1, detalle.getPedido().getId_pedido());
+            stmt.setInt(2, detalle.getProducto().getId_producto());
+            stmt.setString(3, detalle.getNombre_producto());
+            stmt.setString(4, detalle.getSku_producto());
+            stmt.setInt(5, detalle.getCantidad());
+            stmt.setBigDecimal(6, detalle.getPrecioUnitario());
+            stmt.setInt(7, detalle.getId_detalle_pedido());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el detalle de pedido con ID: "
+                        + detalle.getId_detalle_pedido());
+            }
 
             return detalle;
 
@@ -123,8 +153,14 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
         ArrayList<DetallePedido> detalles = new ArrayList<>();
 
         String sql = """
-                SELECT id, cantidad, precioUnitario, subtotal, idPedido, idProducto
-                FROM DetallePedido
+                SELECT id_detalle_pedido,
+                       id_pedido,
+                       id_producto,
+                       nombre_producto,
+                       sku_producto,
+                       cantidad,
+                       precio_unitario
+                FROM detalle_pedido
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -146,17 +182,18 @@ public class DetallePedidoDAOImpl implements DetallePedidoDAO {
     private DetallePedido mapearDetallePedido(ResultSet rs) throws SQLException {
         DetallePedido detalle = new DetallePedido();
 
-        detalle.setId(rs.getInt("id"));
+        detalle.setId_detalle_pedido(rs.getInt("id_detalle_pedido"));
+        detalle.setNombre_producto(rs.getString("nombre_producto"));
+        detalle.setSku_producto(rs.getString("sku_producto"));
         detalle.setCantidad(rs.getInt("cantidad"));
-        detalle.setPrecioUnitario(rs.getBigDecimal("precioUnitario"));
-        detalle.setSubtotal(rs.getBigDecimal("subtotal"));
+        detalle.setPrecioUnitario(rs.getBigDecimal("precio_unitario"));
 
         Pedido pedido = new Pedido();
-        pedido.setId(rs.getInt("idPedido"));
+        pedido.setId_pedido(rs.getInt("id_pedido"));
         detalle.setPedido(pedido);
 
         Producto producto = new Producto();
-        producto.setId(rs.getString("idProducto"));
+        producto.setId_producto(rs.getInt("id_producto"));
         detalle.setProducto(producto);
 
         return detalle;

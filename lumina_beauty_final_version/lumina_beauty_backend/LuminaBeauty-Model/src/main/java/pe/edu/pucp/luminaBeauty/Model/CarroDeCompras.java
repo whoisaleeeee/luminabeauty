@@ -1,16 +1,22 @@
 package pe.edu.pucp.luminaBeauty.Model;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CarroDeCompras {
+
     private int id_carrito;
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
-    private LocalDateTime fecha_recordatorio;
-
+    private LocalDateTime recordatorio_enviado_en;
 
     private Cliente cliente;
     private List<DetalleCarro> detalles;
+
+    public CarroDeCompras() {
+        this.detalles = new ArrayList<>();
+    }
 
     public int getId_carrito() {
         return id_carrito;
@@ -36,12 +42,12 @@ public class CarroDeCompras {
         this.fecha_actualizacion = fecha_actualizacion;
     }
 
-    public LocalDateTime getFecha_recordatorio() {
-        return fecha_recordatorio;
+    public LocalDateTime getRecordatorio_enviado_en() {
+        return recordatorio_enviado_en;
     }
 
-    public void setFecha_recordatorio(LocalDateTime fecha_recordatorio) {
-        this.fecha_recordatorio = fecha_recordatorio;
+    public void setRecordatorio_enviado_en(LocalDateTime recordatorio_enviado_en) {
+        this.recordatorio_enviado_en = recordatorio_enviado_en;
     }
 
     public Cliente getCliente() {

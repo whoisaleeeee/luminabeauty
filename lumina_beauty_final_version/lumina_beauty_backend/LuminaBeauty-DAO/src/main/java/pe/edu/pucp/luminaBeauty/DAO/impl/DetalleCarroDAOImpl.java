@@ -14,27 +14,32 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
     @Override
     public DetalleCarro insertar(DetalleCarro detalle) throws Exception {
         String sql = """
-                INSERT INTO DetalleCarro(cantidad, precioUnitario, idCarro, idProducto)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO detalle_carrito(
+                    id_carrito,
+                    id_producto,
+                    cantidad
+                )
+                VALUES (?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setInt(1, detalle.getCantidad());
-            stmt.setBigDecimal(2, detalle.getPrecioUnitario());
-            stmt.setInt(3, detalle.getCarro().getId());
-            stmt.setString(4, detalle.getIdProducto().getId());
+
+            stmt.setInt(1, detalle.getCarro().getId_carrito());
+            stmt.setInt(2, detalle.getProducto().getId_producto());
+            stmt.setInt(3, detalle.getCantidad());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    detalle.setId(rs.getInt(1));
+                    detalle.setId_detalle_carrito(rs.getInt(1));
                 }
             }
 
             return detalle;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -43,15 +48,22 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
     @Override
     public void eliminar(DetalleCarro detalle) throws Exception {
         String sql = """
-                DELETE FROM DetalleCarro
-                WHERE id = ?
+                DELETE FROM detalle_carrito
+                WHERE id_detalle_carrito = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, detalle.getId());
-            stmt.executeUpdate();
+
+            stmt.setInt(1, detalle.getId_detalle_carrito());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el detalle con ID: " + detalle.getId_detalle_carrito());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -60,14 +72,20 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
     @Override
     public DetalleCarro buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, cantidad, precioUnitario, idCarro, idProducto
-                FROM DetalleCarro
-                WHERE id = ?
+                SELECT id_detalle_carrito,
+                       id_carrito,
+                       id_producto,
+                       cantidad,
+                       creado_en,
+                       actualizado_en
+                FROM detalle_carrito
+                WHERE id_detalle_carrito = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -75,6 +93,7 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
                     return mapearDetalleCarro(rs);
                 }
             }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -85,26 +104,30 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
     @Override
     public DetalleCarro actualizar(DetalleCarro detalle) throws Exception {
         String sql = """
-                UPDATE DetalleCarro
-                SET cantidad = ?,
-                    precioUnitario = ?,
-                    idCarro = ?,
-                    idProducto = ?
-                WHERE id = ?
+                UPDATE detalle_carrito
+                SET id_carrito = ?,
+                    id_producto = ?,
+                    cantidad = ?
+                WHERE id_detalle_carrito = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, detalle.getCantidad());
-            stmt.setBigDecimal(2, detalle.getPrecioUnitario());
-            stmt.setInt(3, detalle.getCarro().getId());
-            stmt.setString(4, detalle.getIdProducto().getId());
-            stmt.setInt(5, detalle.getId());
 
-            stmt.executeUpdate();
+            stmt.setInt(1, detalle.getCarro().getId_carrito());
+            stmt.setInt(2, detalle.getProducto().getId_producto());
+            stmt.setInt(3, detalle.getCantidad());
+            stmt.setInt(4, detalle.getId_detalle_carrito());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el detalle con ID: " + detalle.getId_detalle_carrito());
+            }
 
             return detalle;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -115,8 +138,13 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
         ArrayList<DetalleCarro> detalles = new ArrayList<>();
 
         String sql = """
-                SELECT id, cantidad, precioUnitario, idCarro, idProducto
-                FROM DetalleCarro
+                SELECT id_detalle_carrito,
+                       id_carrito,
+                       id_producto,
+                       cantidad,
+                       creado_en,
+                       actualizado_en
+                FROM detalle_carrito
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -138,17 +166,27 @@ public class DetalleCarroDAOImpl implements DetalleCarroDAO {
     private DetalleCarro mapearDetalleCarro(ResultSet rs) throws SQLException {
         DetalleCarro detalle = new DetalleCarro();
 
-        detalle.setId(rs.getInt("id"));
+        detalle.setId_detalle_carrito(rs.getInt("id_detalle_carrito"));
         detalle.setCantidad(rs.getInt("cantidad"));
-        detalle.setPrecioUnitario(rs.getBigDecimal("precioUnitario"));
 
         CarroDeCompras carro = new CarroDeCompras();
-        carro.setId(rs.getInt("idCarro"));
+        carro.setId_carrito(rs.getInt("id_carrito"));
         detalle.setCarro(carro);
 
         Producto producto = new Producto();
-        producto.setId(rs.getString("idProducto"));
-        detalle.setIdProducto(producto);
+        producto.setId_producto(rs.getInt("id_producto"));
+        detalle.setProducto(producto);
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaCreacion != null) {
+            detalle.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            detalle.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
 
         return detalle;
     }

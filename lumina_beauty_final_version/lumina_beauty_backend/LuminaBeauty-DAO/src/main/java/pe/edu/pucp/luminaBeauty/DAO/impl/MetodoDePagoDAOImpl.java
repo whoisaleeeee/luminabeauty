@@ -12,16 +12,23 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public MetodoDePago insertar(MetodoDePago metodo) throws Exception {
         String sql = """
-                INSERT INTO metodo_pago(nombre, descripcion, icono_url)
-                VALUES (?, ?, ?)
+                INSERT INTO metodo_pago(
+                    nombre,
+                    descripcion,
+                    icono_url,
+                    estado
+                )
+                VALUES (?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, metodo.getNombre());
             stmt.setString(2, metodo.getDescripcion());
             stmt.setString(3, metodo.getIcono_url());
+            stmt.setInt(4, metodo.getEstado());
 
             stmt.executeUpdate();
 
@@ -32,6 +39,7 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
             }
 
             return metodo;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -40,15 +48,24 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public void eliminar(MetodoDePago metodo) throws Exception {
         String sql = """
-                DELETE FROM metodo_pago
+                UPDATE metodo_pago
+                SET estado = 0
                 WHERE id_metodo_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, metodo.getId_metodo_pago());
-            stmt.executeUpdate();
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el método de pago con ID: "
+                        + metodo.getId_metodo_pago());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -57,19 +74,28 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
     @Override
     public MetodoDePago buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id_metodo_pago, nombre, descripcion, icono_url, estado, creado_en, actualizado_en
+                SELECT id_metodo_pago,
+                       nombre,
+                       descripcion,
+                       icono_url,
+                       estado,
+                       creado_en,
+                       actualizado_en
                 FROM metodo_pago
                 WHERE id_metodo_pago = ?
+                  AND estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapearMetodoDePago(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearMetodoDePago(rs);
+                }
             }
 
         } catch (SQLException e) {
@@ -86,22 +112,29 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
                 SET nombre = ?,
                     descripcion = ?,
                     icono_url = ?,
-                    estado = ?,
-                    actualizado_en = ?
+                    estado = ?
                 WHERE id_metodo_pago = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setString(1, metodo.getNombre());
             stmt.setString(2, metodo.getDescripcion());
             stmt.setString(3, metodo.getIcono_url());
-            stmt.setInt(4, metodo.getId_metodo_pago());
+            stmt.setInt(4, metodo.getEstado());
+            stmt.setInt(5, metodo.getId_metodo_pago());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el método de pago con ID: "
+                        + metodo.getId_metodo_pago());
+            }
 
             return metodo;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -112,8 +145,15 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
         ArrayList<MetodoDePago> metodos = new ArrayList<>();
 
         String sql = """
-                SELECT id_metodo_pago, nombre, descripcion, icono_url, estado, creado_en, actualizado_en
+                SELECT id_metodo_pago,
+                       nombre,
+                       descripcion,
+                       icono_url,
+                       estado,
+                       creado_en,
+                       actualizado_en
                 FROM metodo_pago
+                WHERE estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -140,13 +180,16 @@ public class MetodoDePagoDAOImpl implements MetodoDePagoDAO {
         metodo.setDescripcion(rs.getString("descripcion"));
         metodo.setIcono_url(rs.getString("icono_url"));
         metodo.setEstado(rs.getInt("estado"));
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
-        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
-        if (fecha_creado != null) {
-            metodo.setFecha_creacion(fecha_creado.toLocalDateTime());
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaCreacion != null) {
+            metodo.setFecha_creacion(fechaCreacion.toLocalDateTime());
         }
-        if (fecha_actualizado != null) {
-            metodo.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+
+        if (fechaActualizacion != null) {
+            metodo.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
         }
 
         return metodo;

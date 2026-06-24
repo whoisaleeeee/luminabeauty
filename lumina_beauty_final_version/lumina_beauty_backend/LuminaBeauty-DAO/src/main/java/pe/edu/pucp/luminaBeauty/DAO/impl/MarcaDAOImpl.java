@@ -12,16 +12,18 @@ public class MarcaDAOImpl implements MarcaDAO {
     @Override
     public Marca insertar(Marca marca) throws Exception {
         String sql = """
-                INSERT INTO marca(nombre, descripcion, logo_url)
-                VALUES (?, ?, ?)
+                INSERT INTO marca(nombre, descripcion, logo_url, estado)
+                VALUES (?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setString(1, marca.getNombre());
             stmt.setString(2, marca.getDescripcion());
             stmt.setString(3, marca.getLogo_url());
+            stmt.setInt(4, marca.getEstado());
 
             stmt.executeUpdate();
 
@@ -32,6 +34,7 @@ public class MarcaDAOImpl implements MarcaDAO {
             }
 
             return marca;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -40,15 +43,23 @@ public class MarcaDAOImpl implements MarcaDAO {
     @Override
     public void eliminar(Marca marca) throws Exception {
         String sql = """
-                DELETE FROM marca
+                UPDATE marca
+                SET estado = 0
                 WHERE id_marca = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, marca.getId_marca());
-            stmt.executeUpdate();
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró la marca con ID: " + marca.getId_marca());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -60,16 +71,19 @@ public class MarcaDAOImpl implements MarcaDAO {
                 SELECT id_marca, nombre, descripcion, logo_url, estado, creado_en, actualizado_en
                 FROM marca
                 WHERE id_marca = ?
+                  AND estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapearMarca(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearMarca(rs);
+                }
             }
 
         } catch (SQLException e) {
@@ -86,22 +100,24 @@ public class MarcaDAOImpl implements MarcaDAO {
                 SET nombre = ?,
                     descripcion = ?,
                     logo_url = ?,
-                    estado = ?,
-                    actualizado_en = ?
+                    estado = ?
                 WHERE id_marca = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setString(1, marca.getNombre());
             stmt.setString(2, marca.getDescripcion());
             stmt.setString(3, marca.getLogo_url());
-            stmt.setInt(4, marca.getId_marca());
+            stmt.setInt(4, marca.getEstado());
+            stmt.setInt(5, marca.getId_marca());
 
             stmt.executeUpdate();
 
             return marca;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -114,6 +130,7 @@ public class MarcaDAOImpl implements MarcaDAO {
         String sql = """
                 SELECT id_marca, nombre, descripcion, logo_url, estado, creado_en, actualizado_en
                 FROM marca
+                WHERE estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -135,16 +152,19 @@ public class MarcaDAOImpl implements MarcaDAO {
     private Marca mapearMarca(ResultSet rs) throws SQLException {
         Marca marca = new Marca();
 
-        marca.setId_marca(rs.getInt("id"));
+        marca.setId_marca(rs.getInt("id_marca"));
         marca.setNombre(rs.getString("nombre"));
         marca.setDescripcion(rs.getString("descripcion"));
         marca.setLogo_url(rs.getString("logo_url"));
         marca.setEstado(rs.getInt("estado"));
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
+
+        Timestamp fecha_creado = rs.getTimestamp("creado_en");
         Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
+
         if (fecha_creado != null) {
             marca.setFecha_creacion(fecha_creado.toLocalDateTime());
         }
+
         if (fecha_actualizado != null) {
             marca.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
         }

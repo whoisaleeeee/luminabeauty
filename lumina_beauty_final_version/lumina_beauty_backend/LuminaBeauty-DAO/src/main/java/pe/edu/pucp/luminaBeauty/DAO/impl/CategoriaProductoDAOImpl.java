@@ -13,31 +13,23 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
     public CategoriaProducto insertar(CategoriaProducto categoria) throws Exception {
 
         String sql = """
-                INSERT INTO CategoriaProducto(nombre, descripcion, idCategoriaPadre)
+                INSERT INTO categoria_producto(nombre, descripcion, estado)
                 VALUES (?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
-        try (PreparedStatement stmt = connection.prepareStatement(
-                sql,
-                Statement.RETURN_GENERATED_KEYS
-        )) {
+        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, categoria.getNombre());
             stmt.setString(2, categoria.getDescripcion());
-
-            if (categoria.getIdCategoriaPadre() == 0) {
-                stmt.setNull(3, Types.INTEGER);
-            } else {
-                stmt.setInt(3, categoria.getIdCategoriaPadre());
-            }
+            stmt.setInt(3, categoria.getEstado());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    categoria.setId(rs.getInt(1));
+                    categoria.setId_categoria(rs.getInt(1));
                 }
             }
 
@@ -52,16 +44,22 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
     public void eliminar(CategoriaProducto categoria) throws Exception {
 
         String sql = """
-                DELETE FROM CategoriaProducto
-                WHERE id = ?
+                UPDATE categoria_producto
+                SET estado = 0
+                WHERE id_categoria = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, categoria.getId());
-            stmt.executeUpdate();
+            stmt.setInt(1, categoria.getId_categoria());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró la categoría con ID: " + categoria.getId_categoria());
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -72,9 +70,10 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
     public CategoriaProducto buscarPorId(Integer id) throws Exception {
 
         String sql = """
-                SELECT id, nombre, descripcion, idCategoriaPadre
-                FROM CategoriaProducto
-                WHERE id = ?
+                SELECT id_categoria, nombre, descripcion, estado, creado_en, actualizado_en
+                FROM categoria_producto
+                WHERE id_categoria = ?
+                  AND estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -84,24 +83,8 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
-
                 if (rs.next()) {
-
-                    CategoriaProducto categoria = new CategoriaProducto();
-
-                    categoria.setId(rs.getInt("id"));
-                    categoria.setNombre(rs.getString("nombre"));
-                    categoria.setDescripcion(rs.getString("descripcion"));
-
-                    int idPadre = rs.getInt("idCategoriaPadre");
-
-                    if (rs.wasNull()) {
-                        categoria.setIdCategoriaPadre(0);
-                    } else {
-                        categoria.setIdCategoriaPadre(idPadre);
-                    }
-
-                    return categoria;
+                    return mapearCategoria(rs);
                 }
             }
 
@@ -116,11 +99,11 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
     public CategoriaProducto actualizar(CategoriaProducto categoria) throws Exception {
 
         String sql = """
-                UPDATE CategoriaProducto
+                UPDATE categoria_producto
                 SET nombre = ?,
                     descripcion = ?,
-                    idCategoriaPadre = ?
-                WHERE id = ?
+                    estado = ?
+                WHERE id_categoria = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -129,14 +112,8 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
 
             stmt.setString(1, categoria.getNombre());
             stmt.setString(2, categoria.getDescripcion());
-
-            if (categoria.getIdCategoriaPadre() == 0) {
-                stmt.setNull(3, Types.INTEGER);
-            } else {
-                stmt.setInt(3, categoria.getIdCategoriaPadre());
-            }
-
-            stmt.setInt(4, categoria.getId());
+            stmt.setInt(3, categoria.getEstado());
+            stmt.setInt(4, categoria.getId_categoria());
 
             stmt.executeUpdate();
 
@@ -153,8 +130,9 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
         ArrayList<CategoriaProducto> categorias = new ArrayList<>();
 
         String sql = """
-                SELECT id, nombre, descripcion, idCategoriaPadre
-                FROM CategoriaProducto
+                SELECT id_categoria, nombre, descripcion, estado, creado_en, actualizado_en
+                FROM categoria_producto
+                WHERE estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -163,22 +141,7 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-
-                CategoriaProducto categoria = new CategoriaProducto();
-
-                categoria.setId(rs.getInt("id"));
-                categoria.setNombre(rs.getString("nombre"));
-                categoria.setDescripcion(rs.getString("descripcion"));
-
-                int idPadre = rs.getInt("idCategoriaPadre");
-
-                if (rs.wasNull()) {
-                    categoria.setIdCategoriaPadre(0);
-                } else {
-                    categoria.setIdCategoriaPadre(idPadre);
-                }
-
-                categorias.add(categoria);
+                categorias.add(mapearCategoria(rs));
             }
 
         } catch (SQLException e) {
@@ -186,5 +149,28 @@ public class CategoriaProductoDAOImpl implements CategoriaProductoDAO {
         }
 
         return categorias;
+    }
+
+    private CategoriaProducto mapearCategoria(ResultSet rs) throws SQLException {
+
+        CategoriaProducto categoria = new CategoriaProducto();
+
+        categoria.setId_categoria(rs.getInt("id_categoria"));
+        categoria.setNombre(rs.getString("nombre"));
+        categoria.setDescripcion(rs.getString("descripcion"));
+        categoria.setEstado(rs.getInt("estado"));
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaCreacion != null) {
+            categoria.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            categoria.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
+
+        return categoria;
     }
 }

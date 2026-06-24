@@ -1,22 +1,16 @@
 package pe.edu.pucp.luminaBeauty.Model;
 
 public class Cliente extends Usuario {
-    private String tipo_usuario;
+
     private int puntos_fidelidad;
     private String nivel_cliente;
-
     private Direccion direccion_principal;
 
     public Cliente() {
-        super(); // Llama al constructor de Usuario
-    }
-
-    public String getTipo_usuario() {
-        return tipo_usuario;
-    }
-
-    public void setTipo_usuario(String tipo_usuario) {
-        this.tipo_usuario = tipo_usuario;
+        super();
+        this.setTipo_usuario("CLIENTE");
+        this.puntos_fidelidad = 0;
+        this.nivel_cliente = "BRONCE";
     }
 
     public int getPuntos_fidelidad() {

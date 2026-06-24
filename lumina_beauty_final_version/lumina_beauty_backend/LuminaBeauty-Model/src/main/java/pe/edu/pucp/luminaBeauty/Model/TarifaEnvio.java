@@ -4,11 +4,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class TarifaEnvio {
+
     private String zona_envio;
     private BigDecimal costo_base;
-    private BigDecimal costo_minimo_envio_gratis;
+    private BigDecimal monto_minimo_envio_gratis;
     private int estado;
-    private LocalDateTime fecha_creacion;
+    private LocalDateTime fecha_actualizacion;
+
+    public TarifaEnvio() {
+        this.estado = 1;
+    }
 
     public String getZona_envio() {
         return zona_envio;
@@ -26,12 +31,12 @@ public class TarifaEnvio {
         this.costo_base = costo_base;
     }
 
-    public BigDecimal getCosto_minimo_envio_gratis() {
-        return costo_minimo_envio_gratis;
+    public BigDecimal getMonto_minimo_envio_gratis() {
+        return monto_minimo_envio_gratis;
     }
 
-    public void setCosto_minimo_envio_gratis(BigDecimal costo_minimo_envio_gratis) {
-        this.costo_minimo_envio_gratis = costo_minimo_envio_gratis;
+    public void setMonto_minimo_envio_gratis(BigDecimal monto_minimo_envio_gratis) {
+        this.monto_minimo_envio_gratis = monto_minimo_envio_gratis;
     }
 
     public int getEstado() {
@@ -42,11 +47,11 @@ public class TarifaEnvio {
         this.estado = estado;
     }
 
-    public LocalDateTime getFecha_creacion() {
-        return fecha_creacion;
+    public LocalDateTime getFecha_actualizacion() {
+        return fecha_actualizacion;
     }
 
-    public void setFecha_creacion(LocalDateTime fecha_creacion) {
-        this.fecha_creacion = fecha_creacion;
+    public void setFecha_actualizacion(LocalDateTime fecha_actualizacion) {
+        this.fecha_actualizacion = fecha_actualizacion;
     }
 }

@@ -13,7 +13,10 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
     @Override
     public CarroDeCompras insertar(CarroDeCompras carro) throws Exception {
         String sql = """
-                INSERT INTO CarroDeCompras(fechaCreacion, idCliente)
+                INSERT INTO carrito(
+                    id_cliente,
+                    recordatorio_enviado_en
+                )
                 VALUES (?, ?)
                 """;
 
@@ -21,18 +24,24 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setTimestamp(1, Timestamp.valueOf(carro.getFechaCreacion()));
-            stmt.setInt(2, carro.getCliente().getId());
+            stmt.setInt(1, carro.getCliente().getId_usuario());
+
+            if (carro.getRecordatorio_enviado_en() != null) {
+                stmt.setTimestamp(2, Timestamp.valueOf(carro.getRecordatorio_enviado_en()));
+            } else {
+                stmt.setNull(2, Types.TIMESTAMP);
+            }
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    carro.setId(rs.getInt(1));
+                    carro.setId_carrito(rs.getInt(1));
                 }
             }
 
             return carro;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -41,15 +50,22 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
     @Override
     public void eliminar(CarroDeCompras carro) throws Exception {
         String sql = """
-                DELETE FROM CarroDeCompras
-                WHERE id = ?
+                DELETE FROM carrito
+                WHERE id_carrito = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, carro.getId());
-            stmt.executeUpdate();
+
+            stmt.setInt(1, carro.getId_carrito());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el carrito con ID: " + carro.getId_carrito());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -58,14 +74,19 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
     @Override
     public CarroDeCompras buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, fechaCreacion, idCliente
-                FROM CarroDeCompras
-                WHERE id = ?
+                SELECT id_carrito,
+                       id_cliente,
+                       creado_en,
+                       actualizado_en,
+                       recordatorio_enviado_en
+                FROM carrito
+                WHERE id_carrito = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -84,22 +105,34 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
     @Override
     public CarroDeCompras actualizar(CarroDeCompras carro) throws Exception {
         String sql = """
-                UPDATE CarroDeCompras
-                SET fechaCreacion = ?,
-                    idCliente = ?
-                WHERE id = ?
+                UPDATE carrito
+                SET id_cliente = ?,
+                    recordatorio_enviado_en = ?
+                WHERE id_carrito = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setTimestamp(1, Timestamp.valueOf(carro.getFechaCreacion()));
-            stmt.setInt(2, carro.getCliente().getId());
-            stmt.setInt(3, carro.getId());
 
-            stmt.executeUpdate();
+            stmt.setInt(1, carro.getCliente().getId_usuario());
+
+            if (carro.getRecordatorio_enviado_en() != null) {
+                stmt.setTimestamp(2, Timestamp.valueOf(carro.getRecordatorio_enviado_en()));
+            } else {
+                stmt.setNull(2, Types.TIMESTAMP);
+            }
+
+            stmt.setInt(3, carro.getId_carrito());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el carrito con ID: " + carro.getId_carrito());
+            }
 
             return carro;
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -110,8 +143,12 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
         ArrayList<CarroDeCompras> carros = new ArrayList<>();
 
         String sql = """
-                SELECT id, fechaCreacion, idCliente
-                FROM CarroDeCompras
+                SELECT id_carrito,
+                       id_cliente,
+                       creado_en,
+                       actualizado_en,
+                       recordatorio_enviado_en
+                FROM carrito
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -133,12 +170,27 @@ public class CarroDeComprasDAOImpl implements CarroDeComprasDAO {
     private CarroDeCompras mapearCarro(ResultSet rs) throws SQLException {
         CarroDeCompras carro = new CarroDeCompras();
 
-        carro.setId(rs.getInt("id"));
-        carro.setFechaCreacion(rs.getTimestamp("fechaCreacion").toLocalDateTime());
+        carro.setId_carrito(rs.getInt("id_carrito"));
 
         Cliente cliente = new Cliente();
-        cliente.setId(rs.getInt("idCliente"));
+        cliente.setId_usuario(rs.getInt("id_cliente"));
         carro.setCliente(cliente);
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+        Timestamp recordatorio = rs.getTimestamp("recordatorio_enviado_en");
+
+        if (fechaCreacion != null) {
+            carro.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            carro.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
+
+        if (recordatorio != null) {
+            carro.setRecordatorio_enviado_en(recordatorio.toLocalDateTime());
+        }
 
         return carro;
     }

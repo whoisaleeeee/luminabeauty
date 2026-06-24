@@ -1,7 +1,6 @@
 package pe.edu.pucp.luminaBeauty.Model;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 public class Envio {
     private int id_envio;
@@ -22,6 +21,7 @@ public class Envio {
     private Pedido pedido;
 
     public Envio() {
+        this.estado = "PREPARANDO";
     }
 
     public int getId_envio() {
@@ -144,4 +144,3 @@ public class Envio {
         this.pedido = pedido;
     }
 }
-

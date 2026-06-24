@@ -4,7 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class Producto {
-    private String id_producto;
+
+    private int id_producto;
     private String nombre;
     private String sku;
     private String slug;
@@ -20,11 +21,16 @@ public class Producto {
     private CategoriaProducto categoria;
     private Marca marca;
 
-    public String getId_producto() {
+    public Producto() {
+        this.estado = 1;
+        this.stock = 0;
+    }
+
+    public int getId_producto() {
         return id_producto;
     }
 
-    public void setId_producto(String id_producto) {
+    public void setId_producto(int id_producto) {
         this.id_producto = id_producto;
     }
 
@@ -84,11 +90,11 @@ public class Producto {
         this.tipo_piel = tipo_piel;
     }
 
-    public String getImagen() {
+    public String getImagenUrl() {
         return imagen_url;
     }
 
-    public void setImagen(String imagen_url) {
+    public void setImagenUrl(String imagen_url) {
         this.imagen_url = imagen_url;
     }
 

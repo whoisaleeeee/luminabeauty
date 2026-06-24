@@ -14,7 +14,15 @@ public class PagoDAOImpl implements PagoDAO {
     @Override
     public Pago insertar(Pago pago) throws Exception {
         String sql = """
-                INSERT INTO pago(id_pedido, id_metodo_pago, monto, estado, referencia_transaccion, fecha_pago, fecha_reembolso)
+                INSERT INTO pago(
+                    id_pedido,
+                    id_metodo_pago,
+                    monto,
+                    estado,
+                    referencia_transaccion,
+                    fecha_pago,
+                    fecha_reembolso
+                )
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
@@ -27,8 +35,18 @@ public class PagoDAOImpl implements PagoDAO {
             stmt.setBigDecimal(3, pago.getMonto());
             stmt.setString(4, pago.getEstado());
             stmt.setString(5, pago.getReferencia_transaccion());
-            stmt.setTimestamp(6, Timestamp.valueOf(pago.getFechaPago()));
-            stmt.setTimestamp(7, Timestamp.valueOf(pago.getFecha_reembolso()));
+
+            if (pago.getFecha_pago() != null) {
+                stmt.setTimestamp(6, Timestamp.valueOf(pago.getFecha_pago()));
+            } else {
+                stmt.setNull(6, Types.TIMESTAMP);
+            }
+
+            if (pago.getFecha_reembolso() != null) {
+                stmt.setTimestamp(7, Timestamp.valueOf(pago.getFecha_reembolso()));
+            } else {
+                stmt.setNull(7, Types.TIMESTAMP);
+            }
 
             stmt.executeUpdate();
 
@@ -52,16 +70,18 @@ public class PagoDAOImpl implements PagoDAO {
                 WHERE id_pago = ?
                 """;
 
-//        String sql = """
-//                  UPDATE Pago SET estado = 'CANCELADO'
-//                  WHERE id = ?
-//                  """;
-
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, pago.getId_pago());
-            stmt.executeUpdate();
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el pago con ID: " + pago.getId_pago());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -70,7 +90,16 @@ public class PagoDAOImpl implements PagoDAO {
     @Override
     public Pago buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id_pago, id_pedido, id_metodo_pago, monto, estado, referencia_transaccion, fecha_pago, fecha_reembolso
+                SELECT id_pago,
+                       id_pedido,
+                       id_metodo_pago,
+                       monto,
+                       estado,
+                       referencia_transaccion,
+                       fecha_pago,
+                       fecha_reembolso,
+                       creado_en,
+                       actualizado_en
                 FROM pago
                 WHERE id_pago = ?
                 """;
@@ -78,6 +107,7 @@ public class PagoDAOImpl implements PagoDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -103,8 +133,7 @@ public class PagoDAOImpl implements PagoDAO {
                     estado = ?,
                     referencia_transaccion = ?,
                     fecha_pago = ?,
-                    fecha_reembolso = ?,
-                    fecha_actualizacion = ?
+                    fecha_reembolso = ?
                 WHERE id_pago = ?
                 """;
 
@@ -117,24 +146,26 @@ public class PagoDAOImpl implements PagoDAO {
             stmt.setBigDecimal(3, pago.getMonto());
             stmt.setString(4, pago.getEstado());
             stmt.setString(5, pago.getReferencia_transaccion());
-            if (pago.getFechaPago() == null) {
-                stmt.setNull(6, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(6, Timestamp.valueOf(pago.getFechaPago()));
-            }
-            if (pago.getFecha_reembolso() == null) {
-                stmt.setNull(7, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(7, Timestamp.valueOf(pago.getFecha_reembolso()));
-            }
-            if (pago.getFecha_actualizacion() == null) {
-                stmt.setNull(8, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(8, Timestamp.valueOf(pago.getFecha_actualizacion()));
-            }
-            stmt.setInt(9, pago.getId_pago());
 
-            stmt.executeUpdate();
+            if (pago.getFecha_pago() != null) {
+                stmt.setTimestamp(6, Timestamp.valueOf(pago.getFecha_pago()));
+            } else {
+                stmt.setNull(6, Types.TIMESTAMP);
+            }
+
+            if (pago.getFecha_reembolso() != null) {
+                stmt.setTimestamp(7, Timestamp.valueOf(pago.getFecha_reembolso()));
+            } else {
+                stmt.setNull(7, Types.TIMESTAMP);
+            }
+
+            stmt.setInt(8, pago.getId_pago());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el pago con ID: " + pago.getId_pago());
+            }
 
             return pago;
 
@@ -148,7 +179,16 @@ public class PagoDAOImpl implements PagoDAO {
         ArrayList<Pago> pagos = new ArrayList<>();
 
         String sql = """
-                SELECT id_pago, id_pedido, id_metodo_pago, monto, estado, referencia_transaccion, fecha_pago, fecha_reembolso
+                SELECT id_pago,
+                       id_pedido,
+                       id_metodo_pago,
+                       monto,
+                       estado,
+                       referencia_transaccion,
+                       fecha_pago,
+                       fecha_reembolso,
+                       creado_en,
+                       actualizado_en
                 FROM pago
                 """;
 
@@ -172,6 +212,9 @@ public class PagoDAOImpl implements PagoDAO {
         Pago pago = new Pago();
 
         pago.setId_pago(rs.getInt("id_pago"));
+        pago.setMonto(rs.getBigDecimal("monto"));
+        pago.setEstado(rs.getString("estado"));
+        pago.setReferencia_transaccion(rs.getString("referencia_transaccion"));
 
         Pedido pedido = new Pedido();
         pedido.setId_pedido(rs.getInt("id_pedido"));
@@ -181,25 +224,25 @@ public class PagoDAOImpl implements PagoDAO {
         metodo.setId_metodo_pago(rs.getInt("id_metodo_pago"));
         pago.setMetodoDePago(metodo);
 
-        pago.setMonto(rs.getBigDecimal("monto"));
-        pago.setEstado(rs.getString("estado"));
-        pago.setReferencia_transaccion(rs.getString("referencia_transaccion"));
-
         Timestamp fechaPago = rs.getTimestamp("fecha_pago");
-        if (fechaPago != null) {
-            pago.setFechaPago(fechaPago.toLocalDateTime());
-        }
         Timestamp fechaReembolso = rs.getTimestamp("fecha_reembolso");
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaPago != null) {
+            pago.setFecha_pago(fechaPago.toLocalDateTime());
+        }
+
         if (fechaReembolso != null) {
             pago.setFecha_reembolso(fechaReembolso.toLocalDateTime());
         }
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
-        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
-        if (fecha_creado != null) {
-            pedido.setFecha_creacion(fecha_creado.toLocalDateTime());
+
+        if (fechaCreacion != null) {
+            pago.setFecha_creacion(fechaCreacion.toLocalDateTime());
         }
-        if (fecha_actualizado != null) {
-            pedido.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+
+        if (fechaActualizacion != null) {
+            pago.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
         }
 
         return pago;

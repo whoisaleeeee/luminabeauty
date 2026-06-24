@@ -12,28 +12,41 @@ public class DireccionDAOImpl implements DireccionDAO {
 
     @Override
     public Direccion insertar(Direccion direccion) throws Exception {
+
         String sql = """
-                INSERT INTO Direccion(direccion, ciudad, pais, referencia, codigoPostal, esPrincipal, idCliente)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO direccion(
+                    id_cliente,
+                    direccion,
+                    ciudad,
+                    pais,
+                    referencia,
+                    codigo_postal
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setString(1, direccion.getDireccion());
-            stmt.setString(2, direccion.getCiudad());
-            stmt.setString(3, direccion.getPais());
-            stmt.setString(4, direccion.getReferencia());
-            stmt.setString(5, direccion.getCodigoPostal());
-            stmt.setBoolean(6, direccion.isEsPrincipal());
-            stmt.setInt(7, direccion.getCliente().getId());
+            stmt.setInt(1, direccion.getCliente().getId_usuario());
+            stmt.setString(2, direccion.getDireccion());
+            stmt.setString(3, direccion.getCiudad());
+
+            if (direccion.getPais() == null || direccion.getPais().isBlank()) {
+                stmt.setString(4, "Peru");
+            } else {
+                stmt.setString(4, direccion.getPais());
+            }
+
+            stmt.setString(5, direccion.getReferencia());
+            stmt.setString(6, direccion.getCodigo_postal());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    direccion.setId(rs.getInt(1));
+                    direccion.setId_direccion(rs.getInt(1));
                 }
             }
 
@@ -46,15 +59,16 @@ public class DireccionDAOImpl implements DireccionDAO {
 
     @Override
     public void eliminar(Direccion direccion) throws Exception {
+
         String sql = """
-                DELETE FROM Direccion
-                WHERE id = ?
+                DELETE FROM direccion
+                WHERE id_direccion = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, direccion.getId());
+            stmt.setInt(1, direccion.getId_direccion());
             stmt.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -63,10 +77,12 @@ public class DireccionDAOImpl implements DireccionDAO {
 
     @Override
     public Direccion buscarPorId(Integer id) throws Exception {
+
         String sql = """
-                SELECT id, direccion, ciudad, pais, referencia, codigoPostal, esPrincipal, idCliente
-                FROM Direccion
-                WHERE id = ?
+                SELECT id_direccion, id_cliente, direccion, ciudad, pais,
+                       referencia, codigo_postal, creado_en, actualizado_en
+                FROM direccion
+                WHERE id_direccion = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -89,16 +105,15 @@ public class DireccionDAOImpl implements DireccionDAO {
 
     @Override
     public Direccion actualizar(Direccion direccion) throws Exception {
+
         String sql = """
-                UPDATE Direccion
+                UPDATE direccion
                 SET direccion = ?,
                     ciudad = ?,
                     pais = ?,
                     referencia = ?,
-                    codigoPostal = ?,
-                    esPrincipal = ?,
-                    idCliente = ?
-                WHERE id = ?
+                    codigo_postal = ?
+                WHERE id_direccion = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -107,12 +122,16 @@ public class DireccionDAOImpl implements DireccionDAO {
 
             stmt.setString(1, direccion.getDireccion());
             stmt.setString(2, direccion.getCiudad());
-            stmt.setString(3, direccion.getPais());
+
+            if (direccion.getPais() == null || direccion.getPais().isBlank()) {
+                stmt.setString(3, "Peru");
+            } else {
+                stmt.setString(3, direccion.getPais());
+            }
+
             stmt.setString(4, direccion.getReferencia());
-            stmt.setString(5, direccion.getCodigoPostal());
-            stmt.setBoolean(6, direccion.isEsPrincipal());
-            stmt.setInt(7, direccion.getCliente().getId());
-            stmt.setInt(8, direccion.getId());
+            stmt.setString(5, direccion.getCodigo_postal());
+            stmt.setInt(6, direccion.getId_direccion());
 
             stmt.executeUpdate();
 
@@ -125,11 +144,13 @@ public class DireccionDAOImpl implements DireccionDAO {
 
     @Override
     public ArrayList<Direccion> listarTodos() throws Exception {
+
         ArrayList<Direccion> direcciones = new ArrayList<>();
 
         String sql = """
-                SELECT id, direccion, ciudad, pais, referencia, codigoPostal, esPrincipal, idCliente
-                FROM Direccion
+                SELECT id_direccion, id_cliente, direccion, ciudad, pais,
+                       referencia, codigo_postal, creado_en, actualizado_en
+                FROM direccion
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -149,19 +170,30 @@ public class DireccionDAOImpl implements DireccionDAO {
     }
 
     private Direccion mapearDireccion(ResultSet rs) throws SQLException {
+
         Direccion direccion = new Direccion();
 
-        direccion.setId(rs.getInt("id"));
+        direccion.setId_direccion(rs.getInt("id_direccion"));
         direccion.setDireccion(rs.getString("direccion"));
         direccion.setCiudad(rs.getString("ciudad"));
         direccion.setPais(rs.getString("pais"));
         direccion.setReferencia(rs.getString("referencia"));
-        direccion.setCodigoPostal(rs.getString("codigoPostal"));
-        direccion.setEsPrincipal(rs.getBoolean("esPrincipal"));
+        direccion.setCodigo_postal(rs.getString("codigo_postal"));
 
         Cliente cliente = new Cliente();
-        cliente.setId(rs.getInt("idCliente"));
+        cliente.setId_usuario(rs.getInt("id_cliente"));
         direccion.setCliente(cliente);
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaCreacion != null) {
+            direccion.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            direccion.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
 
         return direccion;
     }

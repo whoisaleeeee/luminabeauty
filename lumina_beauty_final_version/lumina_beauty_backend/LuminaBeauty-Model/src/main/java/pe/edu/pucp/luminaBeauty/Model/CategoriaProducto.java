@@ -10,7 +10,8 @@ public class CategoriaProducto {
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
 
-    public CategoriaProducto(){
+    public CategoriaProducto() {
+        this.estado = 1;
     }
 
     public int getId_categoria() {

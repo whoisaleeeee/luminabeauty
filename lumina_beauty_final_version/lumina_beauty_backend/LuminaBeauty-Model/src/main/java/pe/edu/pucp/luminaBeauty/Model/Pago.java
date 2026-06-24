@@ -1,12 +1,13 @@
 package pe.edu.pucp.luminaBeauty.Model;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
+
 public class Pago {
+
     private int id_pago;
     private BigDecimal monto;
     private String estado;
-    private LocalDateTime fechaPago;
     private String referencia_transaccion;
     private LocalDateTime fecha_pago;
     private LocalDateTime fecha_reembolso;
@@ -17,6 +18,7 @@ public class Pago {
     private MetodoDePago metodoDePago;
 
     public Pago() {
+        this.estado = "PENDIENTE";
     }
 
     public int getId_pago() {
@@ -41,14 +43,6 @@ public class Pago {
 
     public void setEstado(String estado) {
         this.estado = estado;
-    }
-
-    public LocalDateTime getFechaPago() {
-        return fechaPago;
-    }
-
-    public void setFechaPago(LocalDateTime fechaPago) {
-        this.fechaPago = fechaPago;
     }
 
     public String getReferencia_transaccion() {

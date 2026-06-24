@@ -1,7 +1,6 @@
 package pe.edu.pucp.luminaBeauty.DAO.impl;
 
 import pe.edu.pucp.luminaBeauty.DAO.EnvioDAO;
-import pe.edu.pucp.luminaBeauty.Model.Direccion;
 import pe.edu.pucp.luminaBeauty.Model.Envio;
 import pe.edu.pucp.luminaBeauty.Model.Pedido;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
@@ -14,42 +13,53 @@ public class EnvioDAOImpl implements EnvioDAO {
     @Override
     public Envio insertar(Envio envio) throws Exception {
         String sql = """
-                INSERT INTO envio(id_pedido, zona_envio, numero_seguimiento, direccion_envio, ciudad_envio, pais_envio, 
-                                  referencia_envio, codigo_postaL_envio, fecha_envio, fecha_entrega_estimada, 
-                                  fecha_entrega_real)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO envio(
+                    id_pedido,
+                    zona_envio,
+                    estado,
+                    numero_seguimiento,
+                    direccion_envio,
+                    ciudad_envio,
+                    pais_envio,
+                    referencia_envio,
+                    codigo_postal_envio,
+                    fecha_envio,
+                    fecha_entrega_estimada,
+                    fecha_entrega_real
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            if (envio.getPedido() == null) {
-                stmt.setNull(1, Types.TIMESTAMP);
-            } else {
-                stmt.setInt(1, envio.getPedido().getId_pedido());
-            }
-            stmt.setString(2, envio.getZona_envio());
-            stmt.setString(3, envio.getNumero_seguimiento());
-            stmt.setString(4, envio.getDireccion_envio());
-            stmt.setString(5, envio.getCiudad_envio());
-            stmt.setString(6, envio.getPais_envio());
-            stmt.setString(7, envio.getReferencia_envio());
-            stmt.setString(8, envio.getCodigo_postal_envio());
 
-            if (envio.getFecha_envio() == null) {
-                stmt.setNull(9, Types.TIMESTAMP);
+            stmt.setInt(1, envio.getPedido().getId_pedido());
+            stmt.setString(2, envio.getZona_envio());
+            stmt.setString(3, envio.getEstado());
+            stmt.setString(4, envio.getNumero_seguimiento());
+            stmt.setString(5, envio.getDireccion_envio());
+            stmt.setString(6, envio.getCiudad_envio());
+            stmt.setString(7, envio.getPais_envio());
+            stmt.setString(8, envio.getReferencia_envio());
+            stmt.setString(9, envio.getCodigo_postal_envio());
+
+            if (envio.getFecha_envio() != null) {
+                stmt.setTimestamp(10, Timestamp.valueOf(envio.getFecha_envio()));
             } else {
-                stmt.setTimestamp(9, Timestamp.valueOf(envio.getFecha_envio()));
-            }
-            if (envio.getFecha_entrega_estimada() == null) {
                 stmt.setNull(10, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(10, Timestamp.valueOf(envio.getFecha_entrega_estimada()));
             }
-            if (envio.getFecha_entrega_real() == null) {
-                stmt.setNull(11, Types.TIMESTAMP);
+
+            if (envio.getFecha_entrega_estimada() != null) {
+                stmt.setTimestamp(11, Timestamp.valueOf(envio.getFecha_entrega_estimada()));
             } else {
-                stmt.setTimestamp(11, Timestamp.valueOf(envio.getFecha_entrega_real()));
+                stmt.setNull(11, Types.TIMESTAMP);
+            }
+
+            if (envio.getFecha_entrega_real() != null) {
+                stmt.setTimestamp(12, Timestamp.valueOf(envio.getFecha_entrega_real()));
+            } else {
+                stmt.setNull(12, Types.TIMESTAMP);
             }
 
             stmt.executeUpdate();
@@ -74,16 +84,18 @@ public class EnvioDAOImpl implements EnvioDAO {
                 WHERE id_envio = ?
                 """;
 
-//        String sql = """
-//                  UPDATE Envio SET estado = 'CANCELADO'
-//                  WHERE id = ?
-//                  """;
-
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, envio.getId_envio());
-            stmt.executeUpdate();
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el envío con ID: " + envio.getId_envio());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -92,9 +104,21 @@ public class EnvioDAOImpl implements EnvioDAO {
     @Override
     public Envio buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id_envio, id_pedido, zona_envio, numero_seguimiento, direccion_envio, ciudad_envio, pais_envio, 
-                       referencia_envio, codigo_postaL_envio, fecha_envio, fecha_entrega_estimada, fecha_entrega_real, 
-                       creado_en, actualizado_en
+                SELECT id_envio,
+                       id_pedido,
+                       zona_envio,
+                       estado,
+                       numero_seguimiento,
+                       direccion_envio,
+                       ciudad_envio,
+                       pais_envio,
+                       referencia_envio,
+                       codigo_postal_envio,
+                       fecha_envio,
+                       fecha_entrega_estimada,
+                       fecha_entrega_real,
+                       creado_en,
+                       actualizado_en
                 FROM envio
                 WHERE id_envio = ?
                 """;
@@ -102,6 +126,7 @@ public class EnvioDAOImpl implements EnvioDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -121,60 +146,60 @@ public class EnvioDAOImpl implements EnvioDAO {
     public Envio actualizar(Envio envio) throws Exception {
         String sql = """
                 UPDATE envio
-                SET id_pedido = ?, 
-                    zona_envio = ?, 
-                    numero_seguimiento = ?, 
-                    direccion_envio = ?, 
-                    ciudad_envio = ?, 
-                    pais_envio = ?, 
-                    referencia_envio = ?, 
-                    codigo_postaL_envio = ?, 
-                    fecha_envio = ?, 
-                    fecha_entrega_estimada = ?, 
-                    fecha_entrega_real = ?, 
-                    actualizado_en ? ?
+                SET id_pedido = ?,
+                    zona_envio = ?,
+                    estado = ?,
+                    numero_seguimiento = ?,
+                    direccion_envio = ?,
+                    ciudad_envio = ?,
+                    pais_envio = ?,
+                    referencia_envio = ?,
+                    codigo_postal_envio = ?,
+                    fecha_envio = ?,
+                    fecha_entrega_estimada = ?,
+                    fecha_entrega_real = ?
                 WHERE id_envio = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            if (envio.getPedido() == null) {
-                stmt.setNull(1, Types.TIMESTAMP);
-            } else {
-                stmt.setInt(1, envio.getPedido().getId_pedido());
-            }
+
+            stmt.setInt(1, envio.getPedido().getId_pedido());
             stmt.setString(2, envio.getZona_envio());
-            stmt.setString(3, envio.getNumero_seguimiento());
-            stmt.setString(4, envio.getDireccion_envio());
-            stmt.setString(5, envio.getCiudad_envio());
-            stmt.setString(6, envio.getPais_envio());
-            stmt.setString(7, envio.getReferencia_envio());
-            stmt.setString(8, envio.getCodigo_postal_envio());
-            if (envio.getFecha_envio() == null) {
-                stmt.setNull(9, Types.TIMESTAMP);
+            stmt.setString(3, envio.getEstado());
+            stmt.setString(4, envio.getNumero_seguimiento());
+            stmt.setString(5, envio.getDireccion_envio());
+            stmt.setString(6, envio.getCiudad_envio());
+            stmt.setString(7, envio.getPais_envio());
+            stmt.setString(8, envio.getReferencia_envio());
+            stmt.setString(9, envio.getCodigo_postal_envio());
+
+            if (envio.getFecha_envio() != null) {
+                stmt.setTimestamp(10, Timestamp.valueOf(envio.getFecha_envio()));
             } else {
-                stmt.setTimestamp(9, Timestamp.valueOf(envio.getFecha_envio()));
+                stmt.setNull(10, Types.TIMESTAMP);
             }
 
-            if (envio.getFecha_entrega_estimada() == null) {
-                stmt.setNull(10, Types.TIMESTAMP);
+            if (envio.getFecha_entrega_estimada() != null) {
+                stmt.setTimestamp(11, Timestamp.valueOf(envio.getFecha_entrega_estimada()));
             } else {
-                stmt.setTimestamp(10, Timestamp.valueOf(envio.getFecha_entrega_estimada()));
-            }
-            if (envio.getFecha_entrega_real() == null) {
                 stmt.setNull(11, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(11, Timestamp.valueOf(envio.getFecha_entrega_real()));
             }
-            if (envio.getFecha_actualizacion() == null) {
+
+            if (envio.getFecha_entrega_real() != null) {
+                stmt.setTimestamp(12, Timestamp.valueOf(envio.getFecha_entrega_real()));
+            } else {
                 stmt.setNull(12, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(12, Timestamp.valueOf(envio.getFecha_actualizacion()));
             }
+
             stmt.setInt(13, envio.getId_envio());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el envío con ID: " + envio.getId_envio());
+            }
 
             return envio;
 
@@ -188,9 +213,21 @@ public class EnvioDAOImpl implements EnvioDAO {
         ArrayList<Envio> envios = new ArrayList<>();
 
         String sql = """
-                SELECT id_envio, id_pedido, zona_envio, numero_seguimiento, direccion_envio, ciudad_envio, pais_envio, 
-                       referencia_envio, codigo_postaL_envio, fecha_envio, fecha_entrega_estimada, fecha_entrega_real, 
-                       creado_en, actualizado_en
+                SELECT id_envio,
+                       id_pedido,
+                       zona_envio,
+                       estado,
+                       numero_seguimiento,
+                       direccion_envio,
+                       ciudad_envio,
+                       pais_envio,
+                       referencia_envio,
+                       codigo_postal_envio,
+                       fecha_envio,
+                       fecha_entrega_estimada,
+                       fecha_entrega_real,
+                       creado_en,
+                       actualizado_en
                 FROM envio
                 """;
 
@@ -214,41 +251,43 @@ public class EnvioDAOImpl implements EnvioDAO {
         Envio envio = new Envio();
 
         envio.setId_envio(rs.getInt("id_envio"));
-
-        Pedido pedido = new Pedido();
-        pedido.setId_pedido(rs.getInt("id_pedido"));
-        envio.setPedido(pedido);
-
         envio.setZona_envio(rs.getString("zona_envio"));
         envio.setEstado(rs.getString("estado"));
         envio.setNumero_seguimiento(rs.getString("numero_seguimiento"));
+        envio.setDireccion_envio(rs.getString("direccion_envio"));
         envio.setCiudad_envio(rs.getString("ciudad_envio"));
         envio.setPais_envio(rs.getString("pais_envio"));
         envio.setReferencia_envio(rs.getString("referencia_envio"));
         envio.setCodigo_postal_envio(rs.getString("codigo_postal_envio"));
 
+        Pedido pedido = new Pedido();
+        pedido.setId_pedido(rs.getInt("id_pedido"));
+        envio.setPedido(pedido);
+
         Timestamp fechaEnvio = rs.getTimestamp("fecha_envio");
+        Timestamp fechaEstimada = rs.getTimestamp("fecha_entrega_estimada");
+        Timestamp fechaReal = rs.getTimestamp("fecha_entrega_real");
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
         if (fechaEnvio != null) {
             envio.setFecha_envio(fechaEnvio.toLocalDateTime());
         }
 
-        Timestamp fechaEstimada = rs.getTimestamp("fecha_entrega_estimada");
         if (fechaEstimada != null) {
             envio.setFecha_entrega_estimada(fechaEstimada.toLocalDateTime());
         }
 
-        Timestamp fechaReal = rs.getTimestamp("fecha_entrega_real");
         if (fechaReal != null) {
             envio.setFecha_entrega_real(fechaReal.toLocalDateTime());
         }
 
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
-        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
-        if (fecha_creado != null) {
-            envio.setFecha_creacion(fecha_creado.toLocalDateTime());
+        if (fechaCreacion != null) {
+            envio.setFecha_creacion(fechaCreacion.toLocalDateTime());
         }
-        if (fecha_actualizado != null) {
-            envio.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+
+        if (fechaActualizacion != null) {
+            envio.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
         }
 
         return envio;

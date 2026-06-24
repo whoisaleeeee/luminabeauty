@@ -1,7 +1,9 @@
 package pe.edu.pucp.luminaBeauty.Model;
+
 import java.time.LocalDateTime;
-import java.util.Date;
+
 public class ComprobanteDePago {
+
     private int id_comprobante;
     private String tipo;
     private String serie;
@@ -9,14 +11,6 @@ public class ComprobanteDePago {
     private LocalDateTime fecha_emision;
 
     private Pedido pedido;
-
-    public Pedido getPedido() {
-        return pedido;
-    }
-
-    public void setPedido(Pedido pedido) {
-        this.pedido = pedido;
-    }
 
     public ComprobanteDePago() {
     }
@@ -59,5 +53,13 @@ public class ComprobanteDePago {
 
     public void setFecha_emision(LocalDateTime fecha_emision) {
         this.fecha_emision = fecha_emision;
+    }
+
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
     }
 }

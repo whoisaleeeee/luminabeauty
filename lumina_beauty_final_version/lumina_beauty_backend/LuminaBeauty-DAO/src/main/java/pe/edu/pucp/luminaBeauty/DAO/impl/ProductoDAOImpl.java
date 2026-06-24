@@ -14,8 +14,20 @@ public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public Producto insertar(Producto producto) throws Exception {
         String sql = """
-                INSERT INTO producto(idCategoria, idMarca, nombre, sku, slug, descripcion, precio, stock, tipo_piel, imagen_url, estado)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO producto(
+                    id_categoria,
+                    id_marca,
+                    nombre,
+                    sku,
+                    slug,
+                    descripcion,
+                    precio,
+                    stock,
+                    tipo_piel,
+                    imagen_url,
+                    estado
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -31,14 +43,14 @@ public class ProductoDAOImpl implements ProductoDAO {
             stmt.setBigDecimal(7, producto.getPrecio());
             stmt.setInt(8, producto.getStock());
             stmt.setString(9, producto.getTipoPiel());
-            stmt.setString(10, producto.getImagen());
+            stmt.setString(10, producto.getImagenUrl());
             stmt.setInt(11, producto.getEstado());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    producto.setId_producto(rs.getString(1));
+                    producto.setId_producto(rs.getInt(1));
                 }
             }
 
@@ -51,42 +63,61 @@ public class ProductoDAOImpl implements ProductoDAO {
 
     @Override
     public void eliminar(Producto producto) throws Exception {
-//        String sql = """
-//                DELETE FROM Producto
-//                WHERE id = ?
-//                """;
-
         String sql = """
-                  UPDATE producto SET estado = 0
-                  WHERE id_producto = ?
-                  """;
-
-        Connection connection = TransactionContext.getConnection();
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, producto.getId_producto());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public Producto buscarPorId(String id) throws Exception {
-        String sql = """
-                SELECT id_producto, idCategoria, idMarca, nombre, sku, slug, descripcion, precio, stock, tipoPiel, imagen_url, estado, creado_en, actualizado_en
-                FROM producto
+                UPDATE producto
+                SET estado = 0
                 WHERE id_producto = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, id);
 
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return mapearProducto(rs);
+            stmt.setInt(1, producto.getId_producto());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el producto con ID: " + producto.getId_producto());
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Producto buscarPorId(Integer id) throws Exception {
+        String sql = """
+                SELECT id_producto,
+                       id_categoria,
+                       id_marca,
+                       nombre,
+                       sku,
+                       slug,
+                       descripcion,
+                       precio,
+                       stock,
+                       tipo_piel,
+                       imagen_url,
+                       estado,
+                       creado_en,
+                       actualizado_en
+                FROM producto
+                WHERE id_producto = ?
+                  AND estado = 1
+                """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, id);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearProducto(rs);
+                }
             }
 
         } catch (SQLException e) {
@@ -100,8 +131,8 @@ public class ProductoDAOImpl implements ProductoDAO {
     public Producto actualizar(Producto producto) throws Exception {
         String sql = """
                 UPDATE producto
-                SET idCategoria = ?,
-                    idMarca = ?,
+                SET id_categoria = ?,
+                    id_marca = ?,
                     nombre = ?,
                     sku = ?,
                     slug = ?,
@@ -110,8 +141,7 @@ public class ProductoDAOImpl implements ProductoDAO {
                     stock = ?,
                     tipo_piel = ?,
                     imagen_url = ?,
-                    estado = ?,
-                    actualizado_en = ?
+                    estado = ?
                 WHERE id_producto = ?
                 """;
 
@@ -128,15 +158,15 @@ public class ProductoDAOImpl implements ProductoDAO {
             stmt.setBigDecimal(7, producto.getPrecio());
             stmt.setInt(8, producto.getStock());
             stmt.setString(9, producto.getTipoPiel());
-            stmt.setString(10, producto.getImagen());
+            stmt.setString(10, producto.getImagenUrl());
             stmt.setInt(11, producto.getEstado());
-            if (producto.getFecha_actualizacion() == null) {
-                stmt.setNull(5, Types.TIMESTAMP);
-            } else {
-                stmt.setTimestamp(5, Timestamp.valueOf(producto.getFecha_actualizacion()));
-            }
+            stmt.setInt(12, producto.getId_producto());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el producto con ID: " + producto.getId_producto());
+            }
 
             return producto;
 
@@ -150,8 +180,22 @@ public class ProductoDAOImpl implements ProductoDAO {
         ArrayList<Producto> productos = new ArrayList<>();
 
         String sql = """
-                SELECT id_producto, idCategoria, idMarca, nombre, sku, slug, descripcion, precio, stock, tipo_piel, imagen_url, estado, creado_en, actualizado_en
+                SELECT id_producto,
+                       id_categoria,
+                       id_marca,
+                       nombre,
+                       sku,
+                       slug,
+                       descripcion,
+                       precio,
+                       stock,
+                       tipo_piel,
+                       imagen_url,
+                       estado,
+                       creado_en,
+                       actualizado_en
                 FROM producto
+                WHERE estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -173,16 +217,7 @@ public class ProductoDAOImpl implements ProductoDAO {
     private Producto mapearProducto(ResultSet rs) throws SQLException {
         Producto producto = new Producto();
 
-        producto.setId_producto(rs.getString("id_producto"));
-
-        CategoriaProducto categoria = new CategoriaProducto();
-        categoria.setId_categoria(rs.getInt("idCategoria"));
-        producto.setCategoria(categoria);
-
-        Marca marca = new Marca();
-        marca.setId_marca(rs.getInt("id_marca"));
-        producto.setMarca(marca);
-
+        producto.setId_producto(rs.getInt("id_producto"));
         producto.setNombre(rs.getString("nombre"));
         producto.setSku(rs.getString("sku"));
         producto.setSlug(rs.getString("slug"));
@@ -190,16 +225,26 @@ public class ProductoDAOImpl implements ProductoDAO {
         producto.setPrecio(rs.getBigDecimal("precio"));
         producto.setStock(rs.getInt("stock"));
         producto.setTipoPiel(rs.getString("tipo_piel"));
-        producto.setImagen(rs.getString("imagen_url"));
+        producto.setImagenUrl(rs.getString("imagen_url"));
         producto.setEstado(rs.getInt("estado"));
 
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
-        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
-        if (fecha_creado != null) {
-            producto.setFecha_creacion(fecha_creado.toLocalDateTime());
+        CategoriaProducto categoria = new CategoriaProducto();
+        categoria.setId_categoria(rs.getInt("id_categoria"));
+        producto.setCategoria(categoria);
+
+        Marca marca = new Marca();
+        marca.setId_marca(rs.getInt("id_marca"));
+        producto.setMarca(marca);
+
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaCreacion != null) {
+            producto.setFecha_creacion(fechaCreacion.toLocalDateTime());
         }
-        if (fecha_actualizado != null) {
-            producto.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
+
+        if (fechaActualizacion != null) {
+            producto.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
         }
 
         return producto;

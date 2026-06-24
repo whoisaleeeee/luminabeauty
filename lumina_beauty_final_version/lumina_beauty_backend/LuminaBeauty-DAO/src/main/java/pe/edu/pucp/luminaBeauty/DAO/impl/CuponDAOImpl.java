@@ -12,33 +12,41 @@ public class CuponDAOImpl implements CuponDAO {
     @Override
     public Cupon insertar(Cupon cupon) throws Exception {
         String sql = """
-                INSERT INTO Cupon(codigo, tipoDescuento, valorDescuento, fechaInicio, fechaFin, estado, limiteUso, usosActuales)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO cupon(
+                    codigo,
+                    tipo_descuento,
+                    valor_descuento,
+                    fecha_inicio,
+                    fecha_fin,
+                    limite_uso,
+                    estado
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, cupon.getCodigo());
-            stmt.setString(2, cupon.getTipoDescuento());
-            stmt.setBigDecimal(3, cupon.getValorDescuento());
-            stmt.setTimestamp(4, Timestamp.valueOf(cupon.getFechaInicio()));
-            stmt.setTimestamp(5, Timestamp.valueOf(cupon.getFechaFin()));
-            stmt.setString(6, cupon.getEstado());
 
-            if (cupon.getLimiteUso() == 0) {
-                stmt.setNull(7, Types.INTEGER);
+            stmt.setString(1, cupon.getCodigo());
+            stmt.setString(2, cupon.getTipo_descuento());
+            stmt.setBigDecimal(3, cupon.getValor_descuento());
+            stmt.setTimestamp(4, Timestamp.valueOf(cupon.getFecha_inicio()));
+            stmt.setTimestamp(5, Timestamp.valueOf(cupon.getFecha_fin()));
+
+            if (cupon.getLimite_uso() != null) {
+                stmt.setInt(6, cupon.getLimite_uso());
             } else {
-                stmt.setInt(7, cupon.getLimiteUso());
+                stmt.setNull(6, Types.INTEGER);
             }
 
-            stmt.setInt(8, cupon.getUsosActuales());
+            stmt.setInt(7, cupon.getEstado());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    cupon.setId(rs.getInt(1));
+                    cupon.setId_cupon(rs.getInt(1));
                 }
             }
 
@@ -52,15 +60,23 @@ public class CuponDAOImpl implements CuponDAO {
     @Override
     public void eliminar(Cupon cupon) throws Exception {
         String sql = """
-                DELETE FROM Cupon
-                WHERE id = ?
+                UPDATE cupon
+                SET estado = 0
+                WHERE id_cupon = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, cupon.getId());
-            stmt.executeUpdate();
+
+            stmt.setInt(1, cupon.getId_cupon());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el cupón con ID: " + cupon.getId_cupon());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -69,14 +85,25 @@ public class CuponDAOImpl implements CuponDAO {
     @Override
     public Cupon buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, codigo, tipoDescuento, valorDescuento, fechaInicio, fechaFin, estado, limiteUso, usosActuales
-                FROM Cupon
-                WHERE id = ?
+                SELECT id_cupon,
+                       codigo,
+                       tipo_descuento,
+                       valor_descuento,
+                       fecha_inicio,
+                       fecha_fin,
+                       limite_uso,
+                       estado,
+                       creado_en,
+                       actualizado_en
+                FROM cupon
+                WHERE id_cupon = ?
+                  AND estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -95,38 +122,41 @@ public class CuponDAOImpl implements CuponDAO {
     @Override
     public Cupon actualizar(Cupon cupon) throws Exception {
         String sql = """
-                UPDATE Cupon
+                UPDATE cupon
                 SET codigo = ?,
-                    tipoDescuento = ?,
-                    valorDescuento = ?,
-                    fechaInicio = ?,
-                    fechaFin = ?,
-                    estado = ?,
-                    limiteUso = ?,
-                    usosActuales = ?
-                WHERE id = ?
+                    tipo_descuento = ?,
+                    valor_descuento = ?,
+                    fecha_inicio = ?,
+                    fecha_fin = ?,
+                    limite_uso = ?,
+                    estado = ?
+                WHERE id_cupon = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, cupon.getCodigo());
-            stmt.setString(2, cupon.getTipoDescuento());
-            stmt.setBigDecimal(3, cupon.getValorDescuento());
-            stmt.setTimestamp(4, Timestamp.valueOf(cupon.getFechaInicio()));
-            stmt.setTimestamp(5, Timestamp.valueOf(cupon.getFechaFin()));
-            stmt.setString(6, cupon.getEstado());
 
-            if (cupon.getLimiteUso() == 0) {
-                stmt.setNull(7, Types.INTEGER);
+            stmt.setString(1, cupon.getCodigo());
+            stmt.setString(2, cupon.getTipo_descuento());
+            stmt.setBigDecimal(3, cupon.getValor_descuento());
+            stmt.setTimestamp(4, Timestamp.valueOf(cupon.getFecha_inicio()));
+            stmt.setTimestamp(5, Timestamp.valueOf(cupon.getFecha_fin()));
+
+            if (cupon.getLimite_uso() != null) {
+                stmt.setInt(6, cupon.getLimite_uso());
             } else {
-                stmt.setInt(7, cupon.getLimiteUso());
+                stmt.setNull(6, Types.INTEGER);
             }
 
-            stmt.setInt(8, cupon.getUsosActuales());
-            stmt.setInt(9, cupon.getId());
+            stmt.setInt(7, cupon.getEstado());
+            stmt.setInt(8, cupon.getId_cupon());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el cupón con ID: " + cupon.getId_cupon());
+            }
 
             return cupon;
 
@@ -140,8 +170,18 @@ public class CuponDAOImpl implements CuponDAO {
         ArrayList<Cupon> cupones = new ArrayList<>();
 
         String sql = """
-                SELECT id, codigo, tipoDescuento, valorDescuento, fechaInicio, fechaFin, estado, limiteUso, usosActuales
-                FROM Cupon
+                SELECT id_cupon,
+                       codigo,
+                       tipo_descuento,
+                       valor_descuento,
+                       fecha_inicio,
+                       fecha_fin,
+                       limite_uso,
+                       estado,
+                       creado_en,
+                       actualizado_en
+                FROM cupon
+                WHERE estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -163,22 +203,39 @@ public class CuponDAOImpl implements CuponDAO {
     private Cupon mapearCupon(ResultSet rs) throws SQLException {
         Cupon cupon = new Cupon();
 
-        cupon.setId(rs.getInt("id"));
+        cupon.setId_cupon(rs.getInt("id_cupon"));
         cupon.setCodigo(rs.getString("codigo"));
-        cupon.setTipoDescuento(rs.getString("tipoDescuento"));
-        cupon.setValorDescuento(rs.getBigDecimal("valorDescuento"));
-        cupon.setFechaInicio(rs.getTimestamp("fechaInicio").toLocalDateTime());
-        cupon.setFechaFin(rs.getTimestamp("fechaFin").toLocalDateTime());
-        cupon.setEstado(rs.getString("estado"));
+        cupon.setTipo_descuento(rs.getString("tipo_descuento"));
+        cupon.setValor_descuento(rs.getBigDecimal("valor_descuento"));
+        cupon.setEstado(rs.getInt("estado"));
 
-        int limiteUso = rs.getInt("limiteUso");
+        int limiteUso = rs.getInt("limite_uso");
         if (rs.wasNull()) {
-            cupon.setLimiteUso(0);
+            cupon.setLimite_uso(null);
         } else {
-            cupon.setLimiteUso(limiteUso);
+            cupon.setLimite_uso(limiteUso);
         }
 
-        cupon.setUsosActuales(rs.getInt("usosActuales"));
+        Timestamp fechaInicio = rs.getTimestamp("fecha_inicio");
+        Timestamp fechaFin = rs.getTimestamp("fecha_fin");
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (fechaInicio != null) {
+            cupon.setFecha_inicio(fechaInicio.toLocalDateTime());
+        }
+
+        if (fechaFin != null) {
+            cupon.setFecha_fin(fechaFin.toLocalDateTime());
+        }
+
+        if (fechaCreacion != null) {
+            cupon.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            cupon.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
 
         return cupon;
     }

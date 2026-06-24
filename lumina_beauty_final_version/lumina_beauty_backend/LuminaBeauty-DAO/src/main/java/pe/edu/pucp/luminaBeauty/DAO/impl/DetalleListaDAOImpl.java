@@ -14,7 +14,10 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
     @Override
     public DetalleLista insertar(DetalleLista detalle) throws Exception {
         String sql = """
-                INSERT INTO DetalleLista(idLista, idProducto)
+                INSERT INTO detalle_lista_deseos(
+                    id_lista_deseos,
+                    id_producto
+                )
                 VALUES (?, ?)
                 """;
 
@@ -22,14 +25,14 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, detalle.getLista().getId());
-            stmt.setString(2, detalle.getProducto().getId());
+            stmt.setInt(1, detalle.getLista().getId_lista_deseos());
+            stmt.setInt(2, detalle.getProducto().getId_producto());
 
             stmt.executeUpdate();
 
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    detalle.setId(rs.getInt(1));
+                    detalle.setId_detalle_lista_deseos(rs.getInt(1));
                 }
             }
 
@@ -43,16 +46,22 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
     @Override
     public void eliminar(DetalleLista detalle) throws Exception {
         String sql = """
-                DELETE FROM DetalleLista
-                WHERE id = ?
+                DELETE FROM detalle_lista_deseos
+                WHERE id_detalle_lista_deseos = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, detalle.getId());
-            stmt.executeUpdate();
+            stmt.setInt(1, detalle.getId_detalle_lista_deseos());
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el detalle de lista con ID: "
+                        + detalle.getId_detalle_lista_deseos());
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -62,9 +71,11 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
     @Override
     public DetalleLista buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id, idLista, idProducto
-                FROM DetalleLista
-                WHERE id = ?
+                SELECT id_detalle_lista_deseos,
+                       id_lista_deseos,
+                       id_producto
+                FROM detalle_lista_deseos
+                WHERE id_detalle_lista_deseos = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -89,21 +100,26 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
     @Override
     public DetalleLista actualizar(DetalleLista detalle) throws Exception {
         String sql = """
-                UPDATE DetalleLista
-                SET idLista = ?,
-                    idProducto = ?
-                WHERE id = ?
+                UPDATE detalle_lista_deseos
+                SET id_lista_deseos = ?,
+                    id_producto = ?
+                WHERE id_detalle_lista_deseos = ?
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
-            stmt.setInt(1, detalle.getLista().getId());
-            stmt.setString(2, detalle.getProducto().getId());
-            stmt.setInt(3, detalle.getId());
+            stmt.setInt(1, detalle.getLista().getId_lista_deseos());
+            stmt.setInt(2, detalle.getProducto().getId_producto());
+            stmt.setInt(3, detalle.getId_detalle_lista_deseos());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró el detalle de lista con ID: "
+                        + detalle.getId_detalle_lista_deseos());
+            }
 
             return detalle;
 
@@ -117,8 +133,10 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
         ArrayList<DetalleLista> detalles = new ArrayList<>();
 
         String sql = """
-                SELECT id, idLista, idProducto
-                FROM DetalleLista
+                SELECT id_detalle_lista_deseos,
+                       id_lista_deseos,
+                       id_producto
+                FROM detalle_lista_deseos
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -140,14 +158,14 @@ public class DetalleListaDAOImpl implements DetalleListaDAO {
     private DetalleLista mapearDetalleLista(ResultSet rs) throws SQLException {
         DetalleLista detalle = new DetalleLista();
 
-        detalle.setId(rs.getInt("id"));
+        detalle.setId_detalle_lista_deseos(rs.getInt("id_detalle_lista_deseos"));
 
         ListaDeDeseos lista = new ListaDeDeseos();
-        lista.setId(rs.getInt("idLista"));
+        lista.setId_lista_deseos(rs.getInt("id_lista_deseos"));
         detalle.setLista(lista);
 
         Producto producto = new Producto();
-        producto.setId(rs.getString("idProducto"));
+        producto.setId_producto(rs.getInt("id_producto"));
         detalle.setProducto(producto);
 
         return detalle;

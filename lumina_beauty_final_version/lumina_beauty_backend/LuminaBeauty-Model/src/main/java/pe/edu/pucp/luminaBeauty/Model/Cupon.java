@@ -1,20 +1,23 @@
 package pe.edu.pucp.luminaBeauty.Model;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
+
 public class Cupon {
+
     private int id_cupon;
     private String codigo;
-    private String tipo_descuento; // 'PORCENTAJE' o 'MONTO_FIJO'
+    private String tipo_descuento;
     private BigDecimal valor_descuento;
     private LocalDateTime fecha_inicio;
     private LocalDateTime fecha_fin;
-    private int limite_uso;
+    private Integer limite_uso;
     private int estado;
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
 
-    public Cupon () {
+    public Cupon() {
+        this.estado = 1;
     }
 
     public int getId_cupon() {
@@ -65,11 +68,11 @@ public class Cupon {
         this.fecha_fin = fecha_fin;
     }
 
-    public int getLimiteUso() {
+    public Integer getLimite_uso() {
         return limite_uso;
     }
 
-    public void setLimiteUso(int limite_uso) {
+    public void setLimite_uso(Integer limite_uso) {
         this.limite_uso = limite_uso;
     }
 

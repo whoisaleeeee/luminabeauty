@@ -1,15 +1,20 @@
 package pe.edu.pucp.luminaBeauty.Model;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 
 public class DetalleCarro {
-    private int id_detalle_carrito; // El ID auto-incremental de la tabla
+
+    private int id_detalle_carrito;
     private int cantidad;
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
 
     private CarroDeCompras carro;
     private Producto producto;
+
+    public DetalleCarro() {
+        this.cantidad = 1;
+    }
 
     public int getId_detalle_carrito() {
         return id_detalle_carrito;

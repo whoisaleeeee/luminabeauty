@@ -11,7 +11,9 @@ public class Marca {
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
 
-    public Marca() {}
+    public Marca() {
+        this.estado = 1;
+    }
 
     public int getId_marca() {
         return id_marca;

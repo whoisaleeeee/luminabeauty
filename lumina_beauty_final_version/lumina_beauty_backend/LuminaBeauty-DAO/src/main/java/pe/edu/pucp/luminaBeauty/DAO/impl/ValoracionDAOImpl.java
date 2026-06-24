@@ -1,9 +1,7 @@
 package pe.edu.pucp.luminaBeauty.DAO.impl;
 
 import pe.edu.pucp.luminaBeauty.DAO.ValoracionDAO;
-import pe.edu.pucp.luminaBeauty.Model.Cliente;
-import pe.edu.pucp.luminaBeauty.Model.Producto;
-import pe.edu.pucp.luminaBeauty.Model.Valoracion;
+import pe.edu.pucp.luminaBeauty.Model.*;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 
 import java.sql.*;
@@ -14,8 +12,18 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     @Override
     public Valoracion insertar(Valoracion valoracion) throws Exception {
         String sql = """
-                INSERT INTO valoracion(id_cliente, id_producto, calificacion, comentario)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO valoracion(
+                    id_cliente,
+                    id_producto,
+                    id_detalle_pedido,
+                    calificacion,
+                    comentario,
+                    estado,
+                    respuesta_tienda,
+                    respondido_por,
+                    respondido_en
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -23,9 +31,21 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, valoracion.getCliente().getId_usuario());
-            stmt.setString(2, valoracion.getProducto().getId_producto());
-            stmt.setInt(3, valoracion.getCalificacion());
-            stmt.setString(4, valoracion.getComentario());
+            stmt.setInt(2, valoracion.getProducto().getId_producto());
+            stmt.setInt(3, valoracion.getDetallePedido().getId_detalle_pedido());
+            stmt.setInt(4, valoracion.getCalificacion());
+            stmt.setString(5, valoracion.getComentario());
+            stmt.setString(6, valoracion.getEstado());
+
+            if (valoracion.getRespuesta_tienda() == null) {
+                stmt.setNull(7, Types.VARCHAR);
+                stmt.setNull(8, Types.INTEGER);
+                stmt.setNull(9, Types.TIMESTAMP);
+            } else {
+                stmt.setString(7, valoracion.getRespuesta_tienda());
+                stmt.setInt(8, valoracion.getRespondido_por().getId_usuario());
+                stmt.setTimestamp(9, Timestamp.valueOf(valoracion.getRespondido_en()));
+            }
 
             stmt.executeUpdate();
 
@@ -52,8 +72,15 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, valoracion.getId_valoracion());
-            stmt.executeUpdate();
+
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró la valoración con ID: " + valoracion.getId_valoracion());
+            }
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -62,7 +89,18 @@ public class ValoracionDAOImpl implements ValoracionDAO {
     @Override
     public Valoracion buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id_valoracion, id_cliente, id_producto, calificacion, comentario, creando_en, actualizado_en
+                SELECT id_valoracion,
+                       id_cliente,
+                       id_producto,
+                       id_detalle_pedido,
+                       calificacion,
+                       comentario,
+                       estado,
+                       respuesta_tienda,
+                       respondido_por,
+                       respondido_en,
+                       creado_en,
+                       actualizado_en
                 FROM valoracion
                 WHERE id_valoracion = ?
                 """;
@@ -70,12 +108,13 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, id);
 
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                return mapearValoracion(rs);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapearValoracion(rs);
+                }
             }
 
         } catch (SQLException e) {
@@ -91,9 +130,13 @@ public class ValoracionDAOImpl implements ValoracionDAO {
                 UPDATE valoracion
                 SET id_cliente = ?,
                     id_producto = ?,
+                    id_detalle_pedido = ?,
                     calificacion = ?,
                     comentario = ?,
-                    actualizado_en = ?
+                    estado = ?,
+                    respuesta_tienda = ?,
+                    respondido_por = ?,
+                    respondido_en = ?
                 WHERE id_valoracion = ?
                 """;
 
@@ -102,19 +145,29 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
 
             stmt.setInt(1, valoracion.getCliente().getId_usuario());
-            stmt.setString(2, valoracion.getProducto().getId_producto());
-            stmt.setInt(3, valoracion.getCalificacion());
-            stmt.setString(4, valoracion.getComentario());
+            stmt.setInt(2, valoracion.getProducto().getId_producto());
+            stmt.setInt(3, valoracion.getDetallePedido().getId_detalle_pedido());
+            stmt.setInt(4, valoracion.getCalificacion());
+            stmt.setString(5, valoracion.getComentario());
+            stmt.setString(6, valoracion.getEstado());
 
-            if (valoracion.getFecha_actualizacion() == null) {
-                stmt.setNull(5, Types.TIMESTAMP);
+            if (valoracion.getRespuesta_tienda() == null) {
+                stmt.setNull(7, Types.VARCHAR);
+                stmt.setNull(8, Types.INTEGER);
+                stmt.setNull(9, Types.TIMESTAMP);
             } else {
-                stmt.setTimestamp(5, Timestamp.valueOf(valoracion.getFecha_actualizacion()));
+                stmt.setString(7, valoracion.getRespuesta_tienda());
+                stmt.setInt(8, valoracion.getRespondido_por().getId_usuario());
+                stmt.setTimestamp(9, Timestamp.valueOf(valoracion.getRespondido_en()));
             }
 
-            stmt.setInt(6, valoracion.getId_valoracion());
+            stmt.setInt(10, valoracion.getId_valoracion());
 
-            stmt.executeUpdate();
+            int filas = stmt.executeUpdate();
+
+            if (filas == 0) {
+                throw new RuntimeException("No se encontró la valoración con ID: " + valoracion.getId_valoracion());
+            }
 
             return valoracion;
 
@@ -128,7 +181,18 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         ArrayList<Valoracion> valoraciones = new ArrayList<>();
 
         String sql = """
-                SELECT id_valoracion, id_cliente, id_producto, calificacion, comentario, creado_en, actualizado_en
+                SELECT id_valoracion,
+                       id_cliente,
+                       id_producto,
+                       id_detalle_pedido,
+                       calificacion,
+                       comentario,
+                       estado,
+                       respuesta_tienda,
+                       respondido_por,
+                       respondido_en,
+                       creado_en,
+                       actualizado_en
                 FROM valoracion
                 """;
 
@@ -154,23 +218,43 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         valoracion.setId_valoracion(rs.getInt("id_valoracion"));
         valoracion.setCalificacion(rs.getInt("calificacion"));
         valoracion.setComentario(rs.getString("comentario"));
-
-        Timestamp fecha_creado = rs.getTimestamp("creando_en");
-        Timestamp fecha_actualizado = rs.getTimestamp("actualizado_en");
-        if (fecha_creado != null) {
-            valoracion.setFecha_creacion(fecha_creado.toLocalDateTime());
-        }
-        if (fecha_actualizado != null) {
-            valoracion.setFecha_actualizacion(fecha_actualizado.toLocalDateTime());
-        }
+        valoracion.setEstado(rs.getString("estado"));
+        valoracion.setRespuesta_tienda(rs.getString("respuesta_tienda"));
 
         Cliente cliente = new Cliente();
         cliente.setId_usuario(rs.getInt("id_cliente"));
         valoracion.setCliente(cliente);
 
         Producto producto = new Producto();
-        producto.setId_producto(rs.getString("id_producto"));
+        producto.setId_producto(rs.getInt("id_producto"));
         valoracion.setProducto(producto);
+
+        DetallePedido detallePedido = new DetallePedido();
+        detallePedido.setId_detalle_pedido(rs.getInt("id_detalle_pedido"));
+        valoracion.setDetallePedido(detallePedido);
+
+        int idEmpleado = rs.getInt("respondido_por");
+        if (!rs.wasNull()) {
+            Empleado empleado = new Empleado();
+            empleado.setId_usuario(idEmpleado);
+            valoracion.setRespondido_por(empleado);
+        }
+
+        Timestamp respondidoEn = rs.getTimestamp("respondido_en");
+        Timestamp fechaCreacion = rs.getTimestamp("creado_en");
+        Timestamp fechaActualizacion = rs.getTimestamp("actualizado_en");
+
+        if (respondidoEn != null) {
+            valoracion.setRespondido_en(respondidoEn.toLocalDateTime());
+        }
+
+        if (fechaCreacion != null) {
+            valoracion.setFecha_creacion(fechaCreacion.toLocalDateTime());
+        }
+
+        if (fechaActualizacion != null) {
+            valoracion.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+        }
 
         return valoracion;
     }

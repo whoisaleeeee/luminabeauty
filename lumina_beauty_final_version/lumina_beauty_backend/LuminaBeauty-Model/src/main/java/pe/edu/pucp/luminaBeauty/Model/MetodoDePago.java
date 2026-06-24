@@ -6,12 +6,13 @@ public class MetodoDePago {
     private int id_metodo_pago;
     private String nombre;
     private String descripcion;
-    private String icono_url; // URL o nombre del archivo de imagen
+    private String icono_url;
     private int estado;
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
 
     public MetodoDePago() {
+        this.estado = 1;
     }
 
     public int getId_metodo_pago() {
