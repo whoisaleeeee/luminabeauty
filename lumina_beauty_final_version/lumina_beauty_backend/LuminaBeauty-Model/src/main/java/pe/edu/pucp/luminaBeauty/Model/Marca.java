@@ -2,7 +2,7 @@ package pe.edu.pucp.luminaBeauty.Model;
 
 import java.time.LocalDateTime;
 
-public class Marca {
+public class   Marca {
     private int id_marca;
     private String nombre;
     private String descripcion;
