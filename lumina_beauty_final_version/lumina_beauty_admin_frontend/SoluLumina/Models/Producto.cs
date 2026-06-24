@@ -34,7 +34,7 @@ namespace SoluLumina.Models
         public decimal Precio { get => precio; set => precio = value; }
         [JsonProperty("stock")]
         public int Stock { get => stock; set => stock = value; }
-        [JsonProperty("tipo_piel")]
+        [JsonProperty("tipoPiel")]
         public string Tipo_piel { get => tipo_piel; set => tipo_piel = value; }
         [JsonProperty("imagen_url")]
         public string Imagen_url { get => imagen_url; set => imagen_url = value; }
