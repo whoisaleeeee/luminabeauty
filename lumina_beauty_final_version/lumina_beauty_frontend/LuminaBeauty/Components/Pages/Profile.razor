@@ -1,16 +1,19 @@
 @page "/profile"
+@using LuminaBeauty.Servicios.Modelo
+@using LuminaBeauty.Servicios.REST
 @inject LanguageService LangService
 @inject AuthService Auth
 @inject WishlistService Wishlist
 @inject ProductService ProductCache
 @inject ToastService Toast
 @inject NavigationManager Navigator
+@inject ClienteRestService ClienteRest
 @implements IDisposable
 
 <PageTitle>Mi Cuenta VIP | Lumina Beauty</PageTitle>
 
 <div class="max-w-6xl mx-auto px-1 sm:px-4 py-6 text-left">
-    
+
     <nav class="text-xs font-semibold text-stone-400 mb-8 flex items-center gap-2 select-none">
         <span class="hover:text-[#FF76A5] cursor-pointer transition" @onclick='() => NavigateTo("/")'>
             Inicio
@@ -37,17 +40,23 @@
             </button>
         </div>
     }
+    else if (_isLoadingProfile)
+    {
+        <div class="bg-white/75 backdrop-blur-md border border-[#FCD1DB]/50 rounded-[32px] p-10 text-center max-w-md mx-auto shadow-xl">
+            <p class="text-sm text-stone-500 font-bold">Cargando información de tu perfil...</p>
+        </div>
+    }
     else
     {
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
             <div class="lg:col-span-4 space-y-6">
-          
+
                 <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-xs relative text-center">
-            
+
                     <div class="relative w-24 h-24 mx-auto mb-4">
                         <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
-                             alt="Lumina VIP Member"
+                             alt="Miembro VIP Lumina"
                              class="w-24 h-24 rounded-full object-cover border-2 border-[#FCD1DB] p-0.5" />
                         <div class="absolute bottom-0 right-1 w-6 h-6 bg-white border border-stone-100 rounded-full flex items-center justify-center shadow-xs text-[10px] select-none">
                             ✨
@@ -57,6 +66,7 @@
                     <h2 class="font-serif text-2xl font-semibold text-stone-900">
                         @_profileName
                     </h2>
+
                     <p class="text-[10px] uppercase font-bold tracking-widest text-stone-400 mt-1 mb-6 select-none">
                         MIEMBRO LUMINA VIP
                     </p>
@@ -77,10 +87,10 @@
                                 class="flex-1 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-[10px] font-bold uppercase tracking-wider py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
                             <span>✏️</span> EDITAR PERFIL
                         </button>
-              
+
                         <button @onclick="LogOff"
                                 class="w-12 bg-stone-900 hover:bg-red-600 text-white py-3 rounded-xl transition flex items-center justify-center cursor-pointer shadow-2xs"
-                                title="Cerrar Sesión">
+                                title="Cerrar sesión">
                             <span>↳</span>
                         </button>
                     </div>
@@ -92,6 +102,7 @@
                         var tCode = tab.Key;
                         var tLabel = tab.Value;
                         var isActive = _activeTab == tCode;
+
                         <button @onclick="() => SetActiveTab(tCode)"
                                 class="w-full text-left px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition flex items-center justify-between cursor-pointer @(isActive ? "bg-[#FFF0F3] text-[#C7346A] shadow-xs border-l-2 border-[#FF76A5]" : "text-stone-600 hover:bg-white")">
                             <span>@tLabel</span>
@@ -104,7 +115,7 @@
                 </div>
 
                 <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-xs text-left space-y-5 select-none">
-            
+
                     <div class="flex items-center gap-2.5">
                         <div class="w-7 h-7 bg-[#FFF0F3] text-[#FF76A5] rounded-xl flex items-center justify-center text-xs">
                             ⚙️
@@ -112,7 +123,6 @@
                         <h3 class="font-serif text-sm font-bold text-stone-800">Ajustes de Cuenta</h3>
                     </div>
 
-                   
                     <div class="space-y-2">
                         <label class="text-[9px] font-black uppercase text-stone-400 tracking-wider block">Preferencia de Idioma</label>
                         <div class="grid grid-cols-2 gap-2">
@@ -125,7 +135,6 @@
                         </div>
                     </div>
 
-                   
                     <div class="space-y-2.5 pt-1">
                         <label class="text-[9px] font-black uppercase text-stone-400 tracking-wider block">Preferencias de Notificación</label>
                         <div class="space-y-2 text-[11px] font-bold text-stone-600">
@@ -144,7 +153,6 @@
                         </div>
                     </div>
 
-                  
                     <div class="pt-2">
                         <button @onclick="TriggerPasswordReset"
                                 class="w-full bg-[#FFF0F3] hover:bg-[#FF76A5]/20 text-[#C7346A] text-[10px] font-bold uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
@@ -156,11 +164,10 @@
 
             </div>
 
-            
             <div class="lg:col-span-8 bg-white/70 backdrop-blur-md rounded-3xl border border-stone-100 p-6 sm:p-8 shadow-md">
+
                 @if (_activeTab == "detalles")
                 {
-                    
                     <div class="space-y-6 animate-in fade-in duration-300 text-left">
                         <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
                             Configuración Personal de Belleza
@@ -168,46 +175,54 @@
 
                         <form @onsubmit="SaveDetails" @onsubmit:preventDefault class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Nombre completo</label>
-                                <input type="text" required placeholder="Alexandra Arrobas..." @bind="_profileName"
+                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
+                                    Nombre completo
+                                </label>
+                                <input type="text"
+                                       required
+                                       placeholder="Nombre completo"
+                                       @bind="_profileName"
                                        class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Email registrado</label>
-                                <input type="email" required placeholder="alexandra@mail..." @bind="_profileEmail"
+                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
+                                    Email registrado
+                                </label>
+                                <input type="email"
+                                       required
+                                       placeholder="correo@ejemplo.com"
+                                       @bind="_profileEmail"
                                        class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Celular de contacto</label>
-                                <input type="tel" placeholder="954 391..." @bind="_profilePhone"
-                                       class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Dirección habitual</label>
-                                <input type="text" placeholder="Av. Primavera..." @bind="_profileAddress"
+                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
+                                    Celular de contacto
+                                </label>
+                                <input type="tel"
+                                       placeholder="999 999 999"
+                                       @bind="_profilePhone"
                                        class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                             </div>
 
                             <button type="submit"
-                                    class="sm:col-span-2 w-fit bg-stone-950 hover:bg-[#C7346A] tracking-wider uppercase font-bold text-[10px] text-white px-7 py-3 rounded-xl transition shadow-xs cursor-pointer select-none">
-                                Guardar Cambios
+                                    disabled="@_isSavingProfile"
+                                    class="sm:col-span-2 w-fit bg-stone-950 hover:bg-[#C7346A] tracking-wider uppercase font-bold text-[10px] text-white px-7 py-3 rounded-xl transition shadow-xs cursor-pointer select-none disabled:opacity-60 disabled:cursor-not-allowed">
+                                @(_isSavingProfile ? "Guardando..." : "Guardar Cambios")
                             </button>
                         </form>
                     </div>
                 }
                 else if (_activeTab == "pedidos")
                 {
-                    
                     <div class="space-y-6 animate-in fade-in duration-300 text-left">
                         <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
                             Historial de Pedidos de Lujo
                         </h3>
 
                         <div class="border border-[#FCD1DB]/50 rounded-2xl overflow-hidden p-5 space-y-5 bg-[#faf6f7]/20">
-                   
+
                             <div class="flex flex-wrap justify-between items-center bg-white p-3 rounded-xl border border-stone-100 select-none text-[11px] font-bold text-stone-500 font-mono gap-2">
                                 <p>Pedido: <strong class="text-stone-900">#LUM-8924</strong></p>
                                 <p>Fecha: <strong class="text-stone-900">29/05/2026</strong></p>
@@ -259,7 +274,9 @@
                         @if (Wishlist.GetWishlist().Count == 0)
                         {
                             <div class="py-12 text-center select-none bg-stone-50 rounded-2xl border border-dashed border-stone-200">
-                                <p class="text-xs text-stone-400 font-bold mb-4">No tienes productos de culto guardados</p>
+                                <p class="text-xs text-stone-400 font-bold mb-4">
+                                    No tienes productos de culto guardados
+                                </p>
                                 <button @onclick='() => NavigateTo("/")'
                                         class="px-5 py-2.5 bg-[#FF76A5] hover:bg-[#C7346A] font-bold text-[10px] uppercase tracking-wider text-white rounded-xl transition cursor-pointer">
                                     Ver Catálogo
@@ -272,20 +289,28 @@
                                 @foreach (var id in Wishlist.GetWishlist())
                                 {
                                     var p = ProductCache.GetProductById(id);
+
                                     if (p != null)
                                     {
                                         <div class="bg-white p-3.5 rounded-xl border border-stone-150 hover:border-[#FF76A5]/25 transition flex flex-col justify-between block hover:shadow-xs">
                                             <div @onclick='() => NavigateTo($"/product/{p.Id}")'
                                                  class="aspect-square bg-stone-50/70 p-2 rounded-lg flex items-center justify-center overflow-hidden mb-3.5 cursor-pointer">
-                                                <img src="@p.Image" alt="@p.Name" class="max-h-20 object-contain pointer-events-none" referrerpolicy="no-referrer" />
+                                                <img src="@p.Image"
+                                                     alt="@p.Name"
+                                                     class="max-h-20 object-contain pointer-events-none"
+                                                     referrerpolicy="no-referrer" />
                                             </div>
                                             <div class="text-left font-medium">
-                                                <span class="text-[8px] font-black uppercase tracking-wider text-[#c5a880] block">@p.Brand</span>
+                                                <span class="text-[8px] font-black uppercase tracking-wider text-[#c5a880] block">
+                                                    @p.Brand
+                                                </span>
                                                 <h4 @onclick='() => NavigateTo($"/product/{p.Id}")'
                                                     class="text-[11px] font-bold text-stone-800 line-clamp-1 hover:text-[#C7346A] cursor-pointer transition">
                                                     @p.Name
                                                 </h4>
-                                                <span class="text-xs font-bold text-[#C7346A] font-mono block mt-1.5">S/ @p.Price.ToString("0.00")</span>
+                                                <span class="text-xs font-bold text-[#C7346A] font-mono block mt-1.5">
+                                                    S/ @p.Price.ToString("0.00")
+                                                </span>
                                             </div>
                                         </div>
                                     }
@@ -294,11 +319,10 @@
                         }
                     </div>
                 }
-            </div>
 
+            </div>
         </div>
     }
-
 </div>
 
 @code {
@@ -311,24 +335,134 @@
         ["favoritos"] = "Mis Favoritos"
     };
 
-    private string _profileName = "Alexandra Arrobas";
-    private string _profileEmail = "alexandra.arrobas@pucp.edu.pe";
-    private string _profilePhone = "+51 987 654 321";
-    private string _profileAddress = "Av. Circunvalación El Golf 423, Santiago de Surco";
+    private Cliente? _currentClient;
 
-    protected override void OnInitialized()
+    private string _profileName = string.Empty;
+    private string _profileEmail = string.Empty;
+    private string _profilePhone = string.Empty;
+
+    private bool _isLoadingProfile = true;
+    private bool _isSavingProfile;
+
+    protected override async Task OnInitializedAsync()
     {
+        await ProductCache.EnsureLoadedAsync();
+
         LangService.OnChange += StateHasChanged;
         Wishlist.OnChange += StateHasChanged;
+        Auth.OnChange += StateHasChanged;
+
+        await LoadProfileAsync();
     }
 
-    private void NavigateTo(string path) => Navigator.NavigateTo(path);
-
-    private void SetActiveTab(string code) => _activeTab = code;
-
-    private void SaveDetails()
+    private async Task LoadProfileAsync()
     {
-        Toast.ShowToast("¡Cambios de perfil registrados con éxito!");
+        if (!Auth.IsLoggedIn || Auth.CurrentClient == null)
+        {
+            _isLoadingProfile = false;
+            return;
+        }
+
+        try
+        {
+            _isLoadingProfile = true;
+
+            _currentClient = await ClienteRest.BuscarClienteAsync(
+                Auth.CurrentClient.Id
+            );
+
+            if (_currentClient == null)
+            {
+                Toast.ShowToast("No se pudo cargar la información de tu perfil.");
+                return;
+            }
+
+            _profileName = GetFullName(_currentClient);
+            _profileEmail = _currentClient.Correo ?? string.Empty;
+            _profilePhone = _currentClient.Telefono ?? string.Empty;
+
+            await Auth.RefreshCurrentClientAsync(_currentClient);
+        }
+        catch
+        {
+            Toast.ShowToast("No se pudo cargar la información de tu perfil.");
+        }
+        finally
+        {
+            _isLoadingProfile = false;
+        }
+    }
+
+    private static string GetFullName(Cliente client)
+    {
+        return $"{client.Nombre} {client.Apellido}".Trim();
+    }
+
+    private void NavigateTo(string path)
+    {
+        Navigator.NavigateTo(path);
+    }
+
+    private void SetActiveTab(string code)
+    {
+        _activeTab = code;
+    }
+
+    private async Task SaveDetails()
+    {
+        if (_currentClient == null)
+        {
+            Toast.ShowToast("No se encontró una sesión de cliente válida.");
+            return;
+        }
+
+        try
+        {
+            _isSavingProfile = true;
+
+            var nameParts = _profileName.Trim().Split(
+                ' ',
+                StringSplitOptions.RemoveEmptyEntries
+            );
+
+            _currentClient.Nombre = nameParts.Length > 0
+                ? nameParts[0]
+                : string.Empty;
+
+            _currentClient.Apellido = nameParts.Length > 1
+                ? string.Join(" ", nameParts.Skip(1))
+                : string.Empty;
+
+            _currentClient.Correo = _profileEmail.Trim();
+            _currentClient.Telefono = _profilePhone.Trim();
+
+            var updatedClient = await ClienteRest.ActualizarClienteAsync(
+                _currentClient
+            );
+
+            if (updatedClient == null)
+            {
+                Toast.ShowToast("No se pudieron guardar los cambios de perfil.");
+                return;
+            }
+
+            _currentClient = updatedClient;
+            _profileName = GetFullName(updatedClient);
+            _profileEmail = updatedClient.Correo ?? string.Empty;
+            _profilePhone = updatedClient.Telefono ?? string.Empty;
+
+            await Auth.RefreshCurrentClientAsync(updatedClient);
+
+            Toast.ShowToast("¡Cambios de perfil guardados correctamente!");
+        }
+        catch
+        {
+            Toast.ShowToast("No se pudieron guardar los cambios de perfil.");
+        }
+        finally
+        {
+            _isSavingProfile = false;
+        }
     }
 
     private void TriggerPasswordReset()
@@ -347,5 +481,6 @@
     {
         LangService.OnChange -= StateHasChanged;
         Wishlist.OnChange -= StateHasChanged;
+        Auth.OnChange -= StateHasChanged;
     }
 }

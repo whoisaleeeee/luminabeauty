@@ -1,6 +1,5 @@
 using LuminaBeauty.Servicios.Modelo;
 using LuminaBeauty.Servicios.REST;
-using LuminaBeauty.Models;
 
 namespace LuminaBeauty.Services
 {
@@ -19,14 +18,20 @@ namespace LuminaBeauty.Services
 
         /// <summary>
         /// Registra un nuevo cliente en la base de datos via REST.
-        /// Retorna el cliente registrado (con id generado) o null si falla.
+        /// Retorna el cliente registrado o null si falla.
         /// </summary>
-        public async Task<Cliente?> RegistrarClienteAsync(string nombre, string apellido, string correo, string contrasena)
+        public async Task<Cliente?> RegistrarClienteAsync(
+            string nombre,
+            string apellido,
+            string dni,
+            string correo,
+            string contrasena)
         {
             var nuevoCliente = new Cliente
             {
                 Nombre = nombre,
                 Apellido = apellido,
+                Dni = dni,
                 Correo = correo,
                 Contrasena = contrasena,
                 Estado = 1,

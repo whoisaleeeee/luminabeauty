@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using LuminaBeauty.Models;
@@ -7,148 +7,377 @@ using LuminaBeauty.Servicios.REST;
 
 namespace LuminaBeauty.Services
 {
-    /// <summary>
-    /// Servicio de aplicación que orquesta los datos de productos para el frontend Blazor.
-    /// Internamente usa ProductoRestService para llamar al backend Java via REST.
-    /// </summary>
     public class ProductService
     {
         private readonly ProductoRestService _productoRestService;
+        private readonly SemaphoreSlim _loadLock = new(1, 1);
+
+        private bool _loaded;
+        private List<Product> _products = new();
+        private List<Category> _categories = new();
+        private List<Brand> _brands = new();
 
         public ProductService(ProductoRestService productoRestService)
         {
             _productoRestService = productoRestService;
         }
 
-        // ── Metadata extra para enriquecer la UI (no va en BD) ───────────────
-        private static readonly Dictionary<string, (decimal originalPrice, string? discount, string? badge, string usage, List<string> ingredients)> ProductMetadata =
-            new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, (
+            decimal originalPrice,
+            string? discount,
+            string? badge,
+            string usage,
+            List<string> ingredients
+        )> ProductMetadata = new(StringComparer.OrdinalIgnoreCase)
         {
-            ["fs-1"] = (61.90m, "-40%", "SALE", "Aplicar sobre los labios limpios y secos de forma uniforme. Esperar 30 segundos a que se fije.", new() { "Paraffinum Liquidum", "Ozokerite", "Cera Microcristallina", "Mentha Piperita Oil" }),
-            ["fs-2"] = (116.00m, "-35%", "SALE", "Deslizar directamente sobre los labios. Puede usarse solo o sobre tu labial favorito.", new() { "Ricinus Communis Seed Oil", "Candelilla Cera", "Shea Butter", "Tocopheryl Acetate" }),
-            ["fs-3"] = (140.20m, "-30%", "SALE", "Aplicar el sérum sobre el rostro limpio, seguido de las cremas de día y noche con masajes circulares.", new() { "Aqua", "Glycerin", "Sodium Hyaluronate", "Phenoxyethanol", "Adenosine" }),
-            ["fs-4"] = (40.00m, "-25%", "SALE", "Rociar en puntos de pulso como muñecas, cuello y detrás de las orejas a una distancia de 15 cm.", new() { "Alcohol Denat.", "Parfum", "Limonene", "Linalool", "Benzotriazolyl Dodecyl P-Cresol" }),
-            ["bs-1"] = (35.00m, null, null, "Deslizar el cepillo desde la raíz de las pestañas hacia las puntas en movimientos zigzag suave.", new() { "Aqua", "Paraffin", "Potassium Cetyl Phosphate", "Cera Alba", "Copernicia Cerifera Cera" }),
-            ["bs-2"] = (15.00m, null, null, "Aplicar una cantidad mínima con un pincel angular para cejas, difuminar con el cepillo de espiral para suavizar.", new() { "Cyclopentasiloxane", "Trimethylsiloxysilicate", "Cyclohexasiloxane", "Silica" }),
-            ["bs-3"] = (170.00m, null, null, "Deslizar sobre las mejillas y difuminar suavemente con las yemas de los dedos o brocha.", new() { "Caprylic/Capric Triglyceride", "Aloe Barbadensis Leaf Extract", "Ginseng Root Extract" }),
-            ["chubby-stick"] = (11.20m, null, null, "Girar la base para extraer el producto y deslizar libremente en tus labios cuando sientas sequedad.", new() { "Mango Seed Butter", "Shea Butter", "Castor Seed Oil", "Olive Fruit Oil" }),
-            ["na-1"] = (480.00m, null, null, "Aplicar en zonas deseadas.", new() { "Alcohol", "Parfum", "Water" }),
-            ["na-2"] = (240.00m, null, null, "Aplicar suavemente sobre el rostro.", new() { "Mica", "Talc", "Silica" })
+            ["fs-1"] = (
+                61.90m,
+                "-40%",
+                "SALE",
+                "Aplicar sobre los labios limpios y secos de forma uniforme.",
+                new() { "Paraffinum Liquidum", "Ozokerite", "Cera Microcristallina" }
+            ),
+            ["fs-2"] = (
+                116.00m,
+                "-35%",
+                "SALE",
+                "Deslizar directamente sobre los labios.",
+                new() { "Ricinus Communis Seed Oil", "Shea Butter", "Tocopheryl Acetate" }
+            ),
+            ["fs-3"] = (
+                140.20m,
+                "-30%",
+                "SALE",
+                "Aplicar el sérum sobre el rostro limpio.",
+                new() { "Aqua", "Glycerin", "Sodium Hyaluronate" }
+            ),
+            ["fs-4"] = (
+                40.00m,
+                "-25%",
+                "SALE",
+                "Rociar en puntos de pulso.",
+                new() { "Alcohol Denat.", "Parfum", "Limonene" }
+            ),
+            ["bs-1"] = (
+                35.00m,
+                null,
+                null,
+                "Aplicar desde la raíz de las pestañas hacia las puntas.",
+                new() { "Aqua", "Paraffin", "Cera Alba" }
+            ),
+            ["bs-2"] = (
+                15.00m,
+                null,
+                null,
+                "Aplicar con pincel angular para cejas.",
+                new() { "Cyclopentasiloxane", "Silica" }
+            ),
+            ["bs-3"] = (
+                170.00m,
+                null,
+                null,
+                "Deslizar sobre las mejillas y difuminar.",
+                new() { "Caprylic/Capric Triglyceride", "Aloe Barbadensis Leaf Extract" }
+            ),
+            ["chubby-stick"] = (
+                11.20m,
+                null,
+                null,
+                "Deslizar en los labios cuando sientas sequedad.",
+                new() { "Mango Seed Butter", "Shea Butter", "Castor Seed Oil" }
+            ),
+            ["na-1"] = (
+                480.00m,
+                null,
+                null,
+                "Aplicar en zonas deseadas.",
+                new() { "Alcohol", "Parfum", "Water" }
+            ),
+            ["na-2"] = (
+                240.00m,
+                null,
+                null,
+                "Aplicar suavemente sobre el rostro.",
+                new() { "Mica", "Talc", "Silica" }
+            )
         };
 
         private static readonly Dictionary<string, List<string>> CategorySubcategories =
             new(StringComparer.OrdinalIgnoreCase)
-        {
-            ["Makeup"]        = new() { "Lips", "Eyes", "Face", "Brushes" },
-            ["Skincare"]      = new() { "Cleansers", "Toners", "Serums", "Moisturizers" },
-            ["Fragrance"]     = new() { "Eau de Parfum", "Eau de Toilette", "Body Mist" },
-            ["Hair"]          = new() { "Shampoo", "Conditioner", "Treatments" },
-            ["Tools & Brushes"] = new() { "Makeup Brushes", "Sponges", "Lash Curlers" },
-            ["Bath & Body"]   = new() { "Body Wash", "Lotions", "Scrubs" },
-            ["Mini Size"]     = new() { "Travel Essentials", "Mini Kits" },
-            ["Brands"]        = new() { "All Luxury Brands", "New Brands" },
-            ["New"]           = new() { "This Week", "Trending Secrets" }
-        };
+            {
+                ["Makeup"] = new() { "Lips", "Eyes", "Face", "Brushes" },
+                ["Skincare"] = new() { "Cleansers", "Toners", "Serums", "Moisturizers" },
+                ["Fragrance"] = new() { "Eau de Parfum", "Eau de Toilette", "Body Mist" },
+                ["Hair"] = new() { "Shampoo", "Conditioner", "Treatments" },
+                ["Tools & Brushes"] = new() { "Makeup Brushes", "Sponges", "Lash Curlers" },
+                ["Bath & Body"] = new() { "Body Wash", "Lotions", "Scrubs" },
+                ["Mini Size"] = new() { "Travel Essentials", "Mini Kits" },
+                ["Brands"] = new() { "All Luxury Brands", "New Brands" },
+                ["New"] = new() { "This Week", "Trending Secrets" }
+            };
 
-        // ── Mapeo: DTO backend → modelo frontend ────────────────────────────
-        private Product MapToFrontendProduct(Producto bp)
+        private Product MapToFrontendProduct(
+            Producto bp,
+            IReadOnlyDictionary<int, CategoriaProducto> categorias,
+            IReadOnlyDictionary<int, Marca> marcas)
         {
-            ProductMetadata.TryGetValue(bp.Id, out var meta);
+            string id = !string.IsNullOrWhiteSpace(bp.Id)
+                ? bp.Id
+                : bp.IdProducto.ToString();
+
+            ProductMetadata.TryGetValue(id, out var meta);
+
+            CategoriaProducto? categoria = bp.Categoria;
+            Marca? marca = bp.Marca;
+
+            if (categoria?.IdCategoria > 0 &&
+                categorias.TryGetValue(categoria.IdCategoria, out var categoriaCompleta))
+            {
+                categoria = categoriaCompleta;
+            }
+
+            if (marca?.IdMarca > 0 &&
+                marcas.TryGetValue(marca.IdMarca, out var marcaCompleta))
+            {
+                marca = marcaCompleta;
+            }
 
             return new Product
             {
-                Id           = bp.Id,
-                Name         = bp.Nombre,
-                Brand        = bp.Marca?.Nombre ?? "Lumina",
-                Category     = bp.Categoria?.Nombre ?? "Skincare",
-                Price        = bp.Precio,
-                OriginalPrice = meta.originalPrice > 0 ? meta.originalPrice : (bp.Precio * 1.3m),
-                Image        = bp.Imagen,
-                Rating       = bp.Id.StartsWith("fs-") || bp.Id.StartsWith("bs-") ? 4.8 : 4.5,
-                ReviewsCount = bp.Id.StartsWith("fs-") ? 88 : 65,
-                Discount     = meta.discount,
+                Id = id,
+                IdProducto = bp.IdProducto,
+                Name = bp.Nombre ?? string.Empty,
+                Brand = marca?.Nombre ?? "Lumina",
+                Category = categoria?.Nombre ?? "Sin categoría",
+                Price = bp.Precio,
+                OriginalPrice = meta.originalPrice > 0
+                    ? meta.originalPrice
+                    : Math.Round(bp.Precio * 1.3m, 2),
+                Image = ResolveProductImage(bp.Imagen),
+                Rating = id.StartsWith("fs-", StringComparison.OrdinalIgnoreCase) ||
+                         id.StartsWith("bs-", StringComparison.OrdinalIgnoreCase)
+                    ? 4.8
+                    : 4.5,
+                ReviewsCount = id.StartsWith("fs-", StringComparison.OrdinalIgnoreCase)
+                    ? 88
+                    : 65,
+                Discount = meta.discount,
                 DiscountBadge = meta.badge,
-                Stock        = bp.Stock,
-                Description  = bp.Descripcion,
-                Ingredients  = meta.ingredients ?? new List<string>(),
-                Usage        = meta.usage
+                Stock = bp.Stock,
+                Description = bp.Descripcion ?? string.Empty,
+                Ingredients = meta.ingredients ?? new List<string>(),
+                Usage = meta.usage ?? "Aplicar según indicación del producto."
             };
         }
 
-        // ── Métodos de consulta ───────────────────────────────────────────────
+        private string ResolveProductImage(string imageUrl)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                return string.Empty;
+            }
 
-        public List<Product> GetAllProducts()
+            if (Uri.TryCreate(imageUrl, UriKind.Absolute, out _))
+            {
+                return imageUrl;
+            }
+
+            var baseAddress = _productoRestService.BaseAddress;
+
+            if (baseAddress == null)
+            {
+                return imageUrl;
+            }
+
+            return new Uri(baseAddress, imageUrl.TrimStart('/')).ToString();
+        }
+
+        public async Task EnsureLoadedAsync()
+        {
+            if (_loaded)
+            {
+                return;
+            }
+
+            await _loadLock.WaitAsync();
+
+            try
+            {
+                if (_loaded)
+                {
+                    return;
+                }
+
+                await ReloadAsync();
+                _loaded = true;
+            }
+            finally
+            {
+                _loadLock.Release();
+            }
+        }
+
+        public async Task ReloadAsync()
+        {
+            var productosTask = LoadListAsync(
+                () => _productoRestService.ListarProductosTodosAsync(),
+                "ListarProductosTodosAsync"
+            );
+
+            var categoriasTask = LoadListAsync(
+                () => _productoRestService.ListarCategoriasAsync(),
+                "ListarCategoriasAsync"
+            );
+
+            var marcasTask = LoadListAsync(
+                () => _productoRestService.ListarMarcasAsync(),
+                "ListarMarcasAsync"
+            );
+
+            await Task.WhenAll(productosTask, categoriasTask, marcasTask);
+
+            var productos = await productosTask;
+            var categorias = await categoriasTask;
+            var marcas = await marcasTask;
+
+            var categoriasPorId = categorias
+                .Where(c => c.IdCategoria > 0)
+                .GroupBy(c => c.IdCategoria)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            var marcasPorId = marcas
+                .Where(m => m.IdMarca > 0)
+                .GroupBy(m => m.IdMarca)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            _products = productos
+                .Select(p => MapToFrontendProduct(p, categoriasPorId, marcasPorId))
+                .ToList();
+
+            _categories = categorias
+                .Select(c => new Category
+                {
+                    Name = c.Nombre ?? string.Empty,
+                    Subcategories = CategorySubcategories.TryGetValue(
+                        c.Nombre ?? string.Empty,
+                        out var sub
+                    )
+                        ? sub
+                        : new List<string>()
+                })
+                .ToList();
+
+            _brands = marcas
+                .Select(m => new Brand
+                {
+                    Name = m.Nombre ?? string.Empty,
+                    Logo = string.IsNullOrEmpty(m.Logo)
+                        ? (m.Nombre ?? string.Empty).ToUpper()
+                        : m.Logo
+                })
+                .ToList();
+        }
+
+        private static async Task<List<T>> LoadListAsync<T>(
+            Func<Task<List<T>>> load,
+            string operation)
         {
             try
             {
-                var list = _productoRestService.ListarProductosTodos();
-                return list.Select(MapToFrontendProduct).ToList();
+                return await load();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error en ProductService.GetAllProducts: " + ex.Message);
+                Console.WriteLine($"Error en ProductService.{operation}: {ex.Message}");
+                return new List<T>();
             }
-            return new List<Product>();
+        }
+
+        public List<Product> GetAllProducts()
+        {
+            return _products.ToList();
         }
 
         public Product? GetProductById(string id)
         {
-            try
-            {
-                var bp = _productoRestService.BuscarProductoPorId(id);
-                if (bp != null) return MapToFrontendProduct(bp);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error en ProductService.GetProductById({id}): " + ex.Message);
-            }
-            return GetAllProducts().FirstOrDefault(p => p.Id == id);
+            return _products.FirstOrDefault(
+                p => p.Id.Equals(id, StringComparison.OrdinalIgnoreCase)
+            );
         }
 
-        public List<Product> GetFlashSaleProducts() =>
-            GetAllProducts().Where(p => p.Id.StartsWith("fs-") || p.Discount != null).ToList();
+        public List<Product> GetFlashSaleProducts()
+        {
+            var products = _products
+                .Where(p =>
+                    p.Id.StartsWith("fs-", StringComparison.OrdinalIgnoreCase) ||
+                    p.Discount != null
+                )
+                .ToList();
 
-        public List<Product> GetBestSellers() =>
-            GetAllProducts().Where(p => p.Id.StartsWith("bs-") || p.Id.Equals("chubby-stick", StringComparison.OrdinalIgnoreCase)).ToList();
+            return products.Count > 0
+                ? products
+                : _products.Take(4).ToList();
+        }
 
-        public List<Product> GetNewArrivals() =>
-            GetAllProducts().Where(p => p.Id.StartsWith("na-")).ToList();
+        public List<Product> GetBestSellers()
+        {
+            var products = _products
+                .Where(p =>
+                    p.Id.StartsWith("bs-", StringComparison.OrdinalIgnoreCase) ||
+                    p.Id.Equals("chubby-stick", StringComparison.OrdinalIgnoreCase)
+                )
+                .ToList();
+
+            return products.Count > 0
+                ? products
+                : _products.Skip(4).Take(4).ToList();
+        }
+
+        public List<Product> GetNewArrivals()
+        {
+            var products = _products
+                .Where(p => p.Id.StartsWith("na-", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            return products.Count > 0
+                ? products
+                : _products.OrderByDescending(p => p.Id).Take(4).ToList();
+        }
+
+        public List<Product> GetProductsByCategory(string category)
+        {
+            return _products
+                .Where(p => p.Category.Equals(category, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        public List<Product> SearchProducts(string texto)
+        {
+            if (string.IsNullOrWhiteSpace(texto))
+            {
+                return GetAllProducts();
+            }
+
+            texto = texto.Trim().ToLower();
+
+            return _products
+                .Where(p =>
+                    p.Name.ToLower().Contains(texto) ||
+                    p.Brand.ToLower().Contains(texto) ||
+                    p.Category.ToLower().Contains(texto) ||
+                    (p.Description ?? string.Empty).ToLower().Contains(texto)
+                )
+                .ToList();
+        }
 
         public List<Category> GetCategories()
         {
-            try
-            {
-                var list = _productoRestService.ListarCategorias();
-                return list.Select(bc => new Category
-                {
-                    Name = bc.Nombre,
-                    Subcategories = CategorySubcategories.TryGetValue(bc.Nombre, out var sub)
-                        ? sub : new List<string>()
-                }).ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error en ProductService.GetCategories: " + ex.Message);
-            }
-            return new List<Category>();
+            return _categories.ToList();
         }
 
         public List<Brand> GetBrands()
         {
-            try
-            {
-                var list = _productoRestService.ListarMarcas();
-                return list.Select(bm => new Brand
-                {
-                    Name = bm.Nombre,
-                    Logo = string.IsNullOrEmpty(bm.Logo) ? bm.Nombre.ToUpper() : bm.Logo
-                }).ToList();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error en ProductService.GetBrands: " + ex.Message);
-            }
-            return new List<Brand>();
+            return _brands.ToList();
         }
     }
 }

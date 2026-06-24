@@ -12,8 +12,13 @@ import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 
 public class CarroBLImpl implements CarroBL {
 
-    private ProductoDAO productoDAO = new ProductoDAOImpl();
-    private DetalleCarroDAO detalleCarroDAO = new DetalleCarroDAOImpl();
+    private ProductoDAO productoDAO;
+    private DetalleCarroDAO detalleCarroDAO;
+
+    public CarroBLImpl() {
+        this.productoDAO = new ProductoDAOImpl();
+        this.detalleCarroDAO = new DetalleCarroDAOImpl();
+    }
 
     @Override
     public void agregarProducto(CarroDeCompras carro, Producto producto, int cantidad) throws Exception {
@@ -26,6 +31,10 @@ public class CarroBLImpl implements CarroBL {
                 throw new Exception("El producto no puede ser nulo.");
             }
 
+            if (producto.getId_producto() <= 0) {
+                throw new Exception("El ID del producto no es válido.");
+            }
+
             if (cantidad <= 0) {
                 throw new Exception("La cantidad debe ser mayor a cero.");
             }
@@ -34,6 +43,10 @@ public class CarroBLImpl implements CarroBL {
 
             if (productoBD == null) {
                 throw new Exception("El producto no existe.");
+            }
+
+            if (productoBD.getEstado() != 1) {
+                throw new Exception("El producto no está activo.");
             }
 
             if (productoBD.getStock() < cantidad) {
@@ -51,7 +64,7 @@ public class CarroBLImpl implements CarroBL {
 
         } catch (Exception ex) {
             TransactionContext.rollback();
-            throw new Exception("Error al agregar producto al carro.", ex);
+            throw new Exception("Error al agregar producto al carro: " + ex.getMessage(), ex);
         } finally {
             TransactionContext.close();
         }

@@ -1,11 +1,19 @@
+using System.Text.Json.Serialization;
+
 namespace LuminaBeauty.Servicios.Modelo
 {
-  
     public class CategoriaProducto
     {
-        public int Id { get; set; }
+        [JsonPropertyName("id_categoria")]
+        public int IdCategoria { get; set; }
+
+        [JsonPropertyName("nombre")]
         public string Nombre { get; set; } = string.Empty;
+
+        [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; } = string.Empty;
-        public int IdCategoriaPadre { get; set; }
+
+        [JsonPropertyName("estado")]
+        public int Estado { get; set; }
     }
 }

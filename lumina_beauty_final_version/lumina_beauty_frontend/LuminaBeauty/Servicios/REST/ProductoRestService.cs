@@ -1,94 +1,114 @@
+using System.Net.Http.Json;
 using LuminaBeauty.Servicios.Modelo;
 
 namespace LuminaBeauty.Servicios.REST
 {
-  
     public class ProductoRestService
     {
-        private readonly HttpClient http;
+        private readonly HttpClient _http;
 
         public ProductoRestService(HttpClient http)
         {
-            this.http = http;
+            _http = http;
         }
 
-        // ── Operaciones Sincrónicas ──────────────────────────────────────────
+        public Uri? BaseAddress => _http.BaseAddress;
 
-        public List<Producto> ListarProductosTodos()
+        public Task<List<Producto>> ListarProductosTodosAsync()
         {
-            return http.GetFromJsonAsync<List<Producto>>("webresources/ProductoRS")
-                .GetAwaiter().GetResult() ?? new List<Producto>();
+            return GetListAsync<Producto>("webresources/ProductoRS/listar");
         }
 
-        public Producto? BuscarProductoPorId(string idProducto)
+        public async Task<Producto?> BuscarProductoPorIdAsync(int idProducto)
         {
-            return http.GetFromJsonAsync<Producto>($"webresources/ProductoRS/{idProducto}")
-                .GetAwaiter().GetResult();
+            using var response = await _http.GetAsync($"webresources/ProductoRS/buscar/{idProducto}");
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"ProductoRS/buscar fallo con estado {(int)response.StatusCode}.");
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<Producto>();
         }
 
-        public List<CategoriaProducto> ListarCategorias()
+        public async Task<Producto?> RegistrarProductoAsync(Producto producto)
         {
-            return http.GetFromJsonAsync<List<CategoriaProducto>>("webresources/ProductoRS/categorias")
-                .GetAwaiter().GetResult() ?? new List<CategoriaProducto>();
+            using var response = await _http.PostAsJsonAsync("webresources/ProductoRS/registrar", producto);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"ProductoRS/registrar fallo con estado {(int)response.StatusCode}.");
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<Producto>();
         }
 
-        public List<Marca> ListarMarcas()
+        public async Task<Producto?> ActualizarProductoAsync(Producto producto)
         {
-            return http.GetFromJsonAsync<List<Marca>>("webresources/ProductoRS/marcas")
-                .GetAwaiter().GetResult() ?? new List<Marca>();
+            using var response = await _http.PutAsJsonAsync("webresources/ProductoRS/actualizar", producto);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"ProductoRS/actualizar fallo con estado {(int)response.StatusCode}.");
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<Producto>();
         }
 
-        public int ValidarStock(string idProducto, int cantidad)
+        public async Task<int> EliminarProductoAsync(int idProducto)
         {
-            return http.GetFromJsonAsync<int>($"webresources/ProductoRS/validarStock/{idProducto}/{cantidad}")
-                .GetAwaiter().GetResult();
+            using var response = await _http.DeleteAsync($"webresources/ProductoRS/eliminar/{idProducto}");
+            return await ReadIntResultAsync(response, "ProductoRS/eliminar");
         }
 
-        public int DescontarStock(string idProducto, int cantidad)
+        public Task<List<Producto>> FiltrarPorTipoPielAsync(string tipoPiel)
         {
-            var response = http.PutAsync($"webresources/ProductoRS/descontarStock/{idProducto}/{cantidad}", null)
-                .GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-                return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
-            return 0;
+            return GetListAsync<Producto>($"webresources/ProductoRS/filtrarTipoPiel/{Uri.EscapeDataString(tipoPiel)}");
         }
 
-        // ── Operaciones Asíncronas ───────────────────────────────────────────
-
-        public async Task<List<Producto>> ListarProductosTodosAsync()
+        public Task<List<CategoriaProducto>> ListarCategoriasAsync()
         {
-            return await http.GetFromJsonAsync<List<Producto>>("webresources/ProductoRS")
-                ?? new List<Producto>();
+            return GetListAsync<CategoriaProducto>("webresources/CategoriaProductoRS/listar");
         }
 
-        public async Task<Producto?> BuscarProductoPorIdAsync(string idProducto)
+        public Task<List<Marca>> ListarMarcasAsync()
         {
-            return await http.GetFromJsonAsync<Producto>($"webresources/ProductoRS/{idProducto}");
+            return GetListAsync<Marca>("webresources/MarcaRS/listar");
         }
 
-        public async Task<List<CategoriaProducto>> ListarCategoriasAsync()
+        public async Task<int> ValidarStockAsync(int idProducto, int cantidad)
         {
-            return await http.GetFromJsonAsync<List<CategoriaProducto>>("webresources/ProductoRS/categorias")
-                ?? new List<CategoriaProducto>();
+            using var response = await _http.GetAsync($"webresources/ProductoRS/validarStock/{idProducto}/{cantidad}");
+            return await ReadIntResultAsync(response, "ProductoRS/validarStock");
         }
 
-        public async Task<List<Marca>> ListarMarcasAsync()
+        public async Task<int> DescontarStockAsync(int idProducto, int cantidad)
         {
-            return await http.GetFromJsonAsync<List<Marca>>("webresources/ProductoRS/marcas")
-                ?? new List<Marca>();
+            using var response = await _http.PutAsync($"webresources/ProductoRS/descontarStock/{idProducto}/{cantidad}", null);
+            return await ReadIntResultAsync(response, "ProductoRS/descontarStock");
         }
 
-        public async Task<int> ValidarStockAsync(string idProducto, int cantidad)
+        private async Task<List<T>> GetListAsync<T>(string endpoint)
         {
-            return await http.GetFromJsonAsync<int>($"webresources/ProductoRS/validarStock/{idProducto}/{cantidad}");
+            using var response = await _http.GetAsync(endpoint);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"{endpoint} fallo con estado {(int)response.StatusCode}.");
+                return new List<T>();
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<T>>() ?? new List<T>();
         }
 
-        public async Task<int> DescontarStockAsync(string idProducto, int cantidad)
+        private static async Task<int> ReadIntResultAsync(HttpResponseMessage response, string operation)
         {
-            var response = await http.PutAsync($"webresources/ProductoRS/descontarStock/{idProducto}/{cantidad}", null);
-            if (response.IsSuccessStatusCode)
-                return await response.Content.ReadFromJsonAsync<int>();
-            return 0;
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"{operation} fallo con estado {(int)response.StatusCode}.");
+                return 0;
+            }
+
+            return await response.Content.ReadFromJsonAsync<int>();
         }
     }
 }

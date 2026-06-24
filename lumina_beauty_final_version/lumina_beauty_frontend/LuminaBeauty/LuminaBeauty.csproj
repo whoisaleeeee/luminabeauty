@@ -11,7 +11,6 @@
     <Folder Include="Components\Shared\" />
     <Folder Include="Data\" />
     <Folder Include="Models\" />
-    <Folder Include="Services\" />
     <Folder Include="wwwroot\images\brands\" />
     <Folder Include="wwwroot\images\ui\" />
     <Folder Include="wwwroot\images\products\" />

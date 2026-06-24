@@ -1,4 +1,4 @@
-package pe.edu.pucp.luminaBeauty.Test;
+/*package pe.edu.pucp.luminaBeauty.Test;
 
 import pe.edu.pucp.luminaBeauty.DAO.*;
 import pe.edu.pucp.luminaBeauty.DAO.impl.*;
@@ -608,4 +608,4 @@ public class MainCRUD {
         new ClienteDAOImpl().eliminar(c);
         System.out.println("Cliente eliminado");
     }
-}
+}*/

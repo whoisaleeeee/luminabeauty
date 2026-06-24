@@ -1,55 +1,122 @@
+using System.Net.Http.Json;
 using LuminaBeauty.Servicios.Modelo;
 
 namespace LuminaBeauty.Servicios.REST
 {
-
     public class ClienteRestService
     {
-        private readonly HttpClient http;
+        private readonly HttpClient _http;
 
         public ClienteRestService(HttpClient http)
         {
-            this.http = http;
+            _http = http;
         }
-
-        // ── Operaciones Sincrónicas ──────────────────────────────────────────
-
-        public Cliente? RegistrarCliente(Cliente cliente)
-        {
-            var response = http.PostAsJsonAsync("webresources/ClienteRS", cliente)
-                .GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-                return response.Content.ReadFromJsonAsync<Cliente>().GetAwaiter().GetResult();
-            return null;
-        }
-
-        public int SumarPuntos(int idCliente, int puntos)
-        {
-            var response = http.PutAsync(
-                $"webresources/ClienteRS/sumarPuntos/{idCliente}?puntos={puntos}", null)
-                .GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-                return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
-            return 0;
-        }
-
-        // ── Operaciones Asíncronas ───────────────────────────────────────────
 
         public async Task<Cliente?> RegistrarClienteAsync(Cliente cliente)
         {
-            var response = await http.PostAsJsonAsync("webresources/ClienteRS", cliente);
-            if (response.IsSuccessStatusCode)
-                return await response.Content.ReadFromJsonAsync<Cliente>();
-            return null;
+            try
+            {
+                using var response = await _http.PostAsJsonAsync("webresources/ClienteRS/registrar", cliente);
+
+                string contenido = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine("========== REGISTRO CLIENTE ==========");
+                Console.WriteLine($"URL llamada: {_http.BaseAddress}webresources/ClienteRS/registrar");
+                Console.WriteLine($"Estado HTTP: {(int)response.StatusCode} - {response.StatusCode}");
+                Console.WriteLine($"Respuesta backend: '{contenido}'");
+                Console.WriteLine("======================================");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(contenido))
+                {
+                    Console.WriteLine("El backend respondió OK, pero sin JSON.");
+                    return null;
+                }
+
+                return System.Text.Json.JsonSerializer.Deserialize<Cliente>(
+                    contenido,
+                    new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al llamar ClienteRS/registrar:");
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         public async Task<int> SumarPuntosAsync(int idCliente, int puntos)
         {
-            var response = await http.PutAsync(
-                $"webresources/ClienteRS/sumarPuntos/{idCliente}?puntos={puntos}", null);
-            if (response.IsSuccessStatusCode)
-                return await response.Content.ReadFromJsonAsync<int>();
-            return 0;
+            using var response = await _http.PutAsync($"webresources/ClienteRS/sumarPuntos/{idCliente}?puntos={puntos}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"ClienteRS/sumarPuntos fallo con estado {(int)response.StatusCode}.");
+                return 0;
+            }
+
+            return await response.Content.ReadFromJsonAsync<int>();
+        }
+
+        public async Task<Cliente?> BuscarClienteAsync(int idCliente)
+        {
+            try
+            {
+                using var response = await _http.GetAsync(
+                    $"webresources/ClienteRS/buscar/{idCliente}"
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(
+                        $"ClienteRS/buscar/{idCliente} falló con estado {(int)response.StatusCode}."
+                    );
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Cliente>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"Error al llamar ClienteRS/buscar/{idCliente}: {ex.Message}"
+                );
+                return null;
+            }
+        }
+
+        public async Task<Cliente?> ActualizarClienteAsync(Cliente cliente)
+        {
+            try
+            {
+                using var response = await _http.PutAsJsonAsync(
+                    "webresources/ClienteRS/actualizar",
+                    cliente
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(
+                        $"ClienteRS/actualizar falló con estado {(int)response.StatusCode}."
+                    );
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Cliente>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"Error al llamar ClienteRS/actualizar: {ex.Message}"
+                );
+                return null;
+            }
         }
     }
 }

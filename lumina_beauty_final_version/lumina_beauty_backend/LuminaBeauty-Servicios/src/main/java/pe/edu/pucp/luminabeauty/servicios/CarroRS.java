@@ -26,28 +26,66 @@ public class CarroRS {
     @Path("agregarProducto")
     public int agregarProducto(AgregarProductoRequest request) {
         int resultado = 0;
+
         try {
-            carroBL.agregarProducto(request.getCarro(), request.getProducto(), request.getCantidad());
+            if (request == null) {
+                throw new Exception("La solicitud no puede ser nula.");
+            }
+
+            if (request.getCarro() == null) {
+                throw new Exception("Debe enviar el carro de compras.");
+            }
+
+            if (request.getProducto() == null) {
+                throw new Exception("Debe enviar el producto.");
+            }
+
+            if (request.getCantidad() <= 0) {
+                throw new Exception("La cantidad debe ser mayor a cero.");
+            }
+
+            carroBL.agregarProducto(
+                    request.getCarro(),
+                    request.getProducto(),
+                    request.getCantidad()
+            );
+
             resultado = 1;
+
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+
         return resultado;
     }
 
-    // DTO porque agregarProducto necesita 3 parámetros y JSON solo manda un body
     public static class AgregarProductoRequest {
         private CarroDeCompras carro;
         private Producto producto;
         private int cantidad;
 
-        public CarroDeCompras getCarro() { return carro; }
-        public void setCarro(CarroDeCompras carro) { this.carro = carro; }
+        public CarroDeCompras getCarro() {
+            return carro;
+        }
 
-        public Producto getProducto() { return producto; }
-        public void setProducto(Producto producto) { this.producto = producto; }
+        public void setCarro(CarroDeCompras carro) {
+            this.carro = carro;
+        }
 
-        public int getCantidad() { return cantidad; }
-        public void setCantidad(int cantidad) { this.cantidad = cantidad; }
+        public Producto getProducto() {
+            return producto;
+        }
+
+        public void setProducto(Producto producto) {
+            this.producto = producto;
+        }
+
+        public int getCantidad() {
+            return cantidad;
+        }
+
+        public void setCantidad(int cantidad) {
+            this.cantidad = cantidad;
+        }
     }
 }

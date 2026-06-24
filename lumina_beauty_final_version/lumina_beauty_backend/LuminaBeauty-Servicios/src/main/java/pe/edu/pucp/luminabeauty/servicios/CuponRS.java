@@ -1,8 +1,12 @@
-package pe.edu.pucp.luminabeauty.servicios;
+    package pe.edu.pucp.luminabeauty.servicios;
 
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
@@ -10,7 +14,7 @@ import pe.edu.pucp.luminaBeauty.Business.CuponBL;
 import pe.edu.pucp.luminaBeauty.Business.impl.CuponBLImpl;
 import pe.edu.pucp.luminaBeauty.Model.Cupon;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 
 @Path("CuponRS")
 @Produces(MediaType.APPLICATION_JSON)
@@ -24,39 +28,135 @@ public class CuponRS {
     }
 
     @POST
-    @Path("validar")
-    public int validarCupon(Cupon cupon) {
-        int resultado = 0;
+    @Path("registrar")
+    public Cupon registrarCupon(Cupon cupon) {
+        Cupon resultado = null;
+
         try {
-            cuponBL.validarCupon(cupon);
+            resultado = cuponBL.registrarCupon(cupon);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
+
+    @PUT
+    @Path("actualizar")
+    public Cupon actualizarCupon(Cupon cupon) {
+        Cupon resultado = null;
+
+        try {
+            resultado = cuponBL.actualizarCupon(cupon);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
+
+    @DELETE
+    @Path("eliminar/{idCupon}")
+    public int eliminarCupon(@PathParam("idCupon") int idCupon) {
+        int resultado = 0;
+
+        try {
+            cuponBL.eliminarCupon(idCupon);
             resultado = 1;
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+
         return resultado;
     }
 
-    @POST
-    @Path("aplicarDescuento")
-    public BigDecimal aplicarDescuento(AplicarDescuentoRequest request) {
-        BigDecimal resultado = null;
+    @GET
+    @Path("buscar/{idCupon}")
+    public Cupon buscarCupon(@PathParam("idCupon") int idCupon) {
+        Cupon resultado = null;
+
         try {
-            resultado = cuponBL.aplicarDescuento(request.getCupon(), request.getTotal());
+            resultado = cuponBL.buscarCupon(idCupon);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
+
         return resultado;
     }
 
-    // DTO porque aplicarDescuento necesita 2 parámetros y JSON solo manda un body
-    public static class AplicarDescuentoRequest {
-        private Cupon cupon;
-        private BigDecimal total;
+    @GET
+    @Path("listar")
+    public ArrayList<Cupon> listarCupones() {
+        ArrayList<Cupon> resultado = new ArrayList<>();
 
-        public Cupon getCupon() { return cupon; }
-        public void setCupon(Cupon cupon) { this.cupon = cupon; }
+        try {
+            resultado = cuponBL.listarCupones();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
 
-        public BigDecimal getTotal() { return total; }
-        public void setTotal(BigDecimal total) { this.total = total; }
+        return resultado;
+    }
+
+    @GET
+    @Path("listarActivos")
+    public ArrayList<Cupon> listarCuponesActivos() {
+        ArrayList<Cupon> resultado = new ArrayList<>();
+
+        try {
+            resultado = cuponBL.listarCuponesActivos();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
+
+    @GET
+    @Path("buscarPorCodigo/{codigo}")
+    public Cupon buscarCuponPorCodigo(@PathParam("codigo") String codigo) {
+        Cupon resultado = null;
+
+        try {
+            resultado = cuponBL.buscarCuponPorCodigo(codigo);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
+
+    @GET
+    @Path("validar/{codigo}")
+    public int validarCupon(@PathParam("codigo") String codigo) {
+        int resultado = 0;
+
+        try {
+            boolean valido = cuponBL.validarCupon(codigo);
+
+            if (valido) {
+                resultado = 1;
+            }
+
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
+
+    @GET
+    @Path("aplicar/{codigo}")
+    public Cupon aplicarCupon(@PathParam("codigo") String codigo) {
+        Cupon resultado = null;
+
+        try {
+            resultado = cuponBL.aplicarCupon(codigo);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
     }
 }
+

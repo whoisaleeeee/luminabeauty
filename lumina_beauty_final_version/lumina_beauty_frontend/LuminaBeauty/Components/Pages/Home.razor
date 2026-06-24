@@ -25,7 +25,7 @@
         <div class="flex items-center justify-between mb-8 pb-5 border-b border-stone-100 select-none">
             <div class="text-left">
                 <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">Tiempo Limitado</span>
-                <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">Flash Sales</h2>
+                <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">Ofertas del Día</h2>
             </div>
 
             <div class="hidden sm:flex items-center gap-1.5 font-mono">
@@ -87,7 +87,7 @@
             <div class="text-left">
                 <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">Este Mes</span>
                 <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">
-                    @(!string.IsNullOrEmpty(HomeService.ActiveCategory) ? $"Colección: {HomeService.ActiveCategory}" : "Best Selling Products")
+                    @(!string.IsNullOrEmpty(HomeService.ActiveCategory) ? $"Colección: {HomeService.ActiveCategory}" : "Los Más Vendidos")
                 </h2>
             </div>
             <button @onclick="HomeService.ResetCatalogue"
@@ -140,7 +140,7 @@
             </p>
             <button @onclick='() => HomeService.SelectCategory("Skincare")'
                     class="w-fit bg-[#FF76A5] hover:bg-[#C7346A] font-bold uppercase tracking-wider text-[10px] text-white px-8 py-3.5 rounded-xl transition shadow-md cursor-pointer select-none">
-                ¡Buy Now!
+                ¡Lo quiero!
             </button>
         </div>
         <div class="md:col-span-7 h-[280px] md:h-auto min-h-[300px] relative overflow-hidden group select-none">
@@ -182,7 +182,7 @@
                 <div class="pt-4 border-t border-stone-100 flex items-center justify-between select-none">
                     <button @onclick="HomeService.OpenConsultation"
                             class="text-xs font-bold uppercase tracking-wider text-stone-900 hover:text-[#C7346A] transition flex items-center gap-1 cursor-pointer">
-                        Shop Now <span>➔</span>
+                        Comprar Ahora <span>➔</span>
                     </button>
                 </div>
             </div>
@@ -245,8 +245,9 @@
 }
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await ProductCache.EnsureLoadedAsync();
         LayoutState.OnChange += StateHasChanged;
         LangService.OnChange += StateHasChanged;
         HomeService.OnChange += StateHasChanged;

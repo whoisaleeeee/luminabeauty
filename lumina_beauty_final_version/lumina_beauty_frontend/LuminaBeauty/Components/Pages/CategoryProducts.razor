@@ -378,8 +378,9 @@
         Cart.OnChange += StateHasChanged;
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
+        await ProductCache.EnsureLoadedAsync();
         var decoded = Uri.UnescapeDataString(CategoryName).ToLower();
         
         if (decoded.Contains("skin") || decoded.Contains("piel")) _activeCategoryName = "Skincare";

@@ -5,7 +5,13 @@ namespace LuminaBeauty.Models
 {
     public class Product
     {
+        // SKU o slug usado por frontend, rutas, favoritos y carrito visual.
         public string Id { get; set; } = string.Empty;
+
+        // ID numérico real de la base de datos.
+        // Debe llenarse desde Producto.IdProducto en ProductService.
+        public int IdProducto { get; set; }
+
         public string Name { get; set; } = string.Empty;
         public string Brand { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;

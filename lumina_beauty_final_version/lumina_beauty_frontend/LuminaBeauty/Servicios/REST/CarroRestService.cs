@@ -1,48 +1,39 @@
-using LuminaBeauty.Servicios.Modelo;
+using System.Net.Http.Json;
 
 namespace LuminaBeauty.Servicios.REST
 {
-
     public class CarroRestService
     {
-        private readonly HttpClient http;
+        private readonly HttpClient _http;
 
         public CarroRestService(HttpClient http)
         {
-            this.http = http;
+            _http = http;
         }
 
-        // ── Operaciones Sincrónicas ──────────────────────────────────────────
-
-        public int AgregarProducto(int idCarro, string idProducto, int cantidad)
+        public async Task<int> AgregarProductoAsync(int idCarro, int idProducto, int cantidad)
         {
             var requestBody = new
             {
-                carro = new { id = idCarro },
-                producto = new { id = idProducto },
-                cantidad = cantidad
+                carro = new
+                {
+                    id_carrito = idCarro
+                },
+                producto = new
+                {
+                    id_producto = idProducto
+                },
+                cantidad
             };
-            var response = http.PostAsJsonAsync("webresources/CarroRS/agregarProducto", requestBody)
-                .GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-                return response.Content.ReadFromJsonAsync<int>().GetAwaiter().GetResult();
-            return 0;
-        }
 
-        // ── Operaciones Asíncronas ───────────────────────────────────────────
-
-        public async Task<int> AgregarProductoAsync(int idCarro, string idProducto, int cantidad)
-        {
-            var requestBody = new
+            using var response = await _http.PostAsJsonAsync("webresources/CarroRS/agregarProducto", requestBody);
+            if (!response.IsSuccessStatusCode)
             {
-                carro = new { id = idCarro },
-                producto = new { id = idProducto },
-                cantidad = cantidad
-            };
-            var response = await http.PostAsJsonAsync("webresources/CarroRS/agregarProducto", requestBody);
-            if (response.IsSuccessStatusCode)
-                return await response.Content.ReadFromJsonAsync<int>();
-            return 0;
+                Console.WriteLine($"CarroRS/agregarProducto fallo con estado {(int)response.StatusCode}.");
+                return 0;
+            }
+
+            return await response.Content.ReadFromJsonAsync<int>();
         }
     }
 }

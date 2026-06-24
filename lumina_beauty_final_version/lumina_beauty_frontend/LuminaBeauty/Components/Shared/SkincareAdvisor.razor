@@ -197,6 +197,7 @@
         {
             await Task.Delay(500);
             // Simulate AI matching algorithm using real best seller products
+            await ProductService.EnsureLoadedAsync();
             var bestSells = ProductService.GetBestSellers();
             if (bestSells.Count > 0)
             {

@@ -103,8 +103,9 @@
 }
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        await ProductCache.EnsureLoadedAsync();
         LayoutState.OnChange += StateHasChanged;
         Wishlist.OnChange += StateHasChanged;
         LangService.OnChange += StateHasChanged;

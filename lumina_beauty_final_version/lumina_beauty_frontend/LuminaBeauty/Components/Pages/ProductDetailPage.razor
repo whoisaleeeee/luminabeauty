@@ -367,8 +367,9 @@ else
         Wishlist.OnChange += StateHasChanged;
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
+        await ProductCache.EnsureLoadedAsync();
         _product = ProductCache.GetProductById(Id);
         _detailThumb = 0;
         _detailQty = 1;

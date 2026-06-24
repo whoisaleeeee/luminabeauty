@@ -1,9 +1,15 @@
+using System.Text.Json.Serialization;
+
 namespace LuminaBeauty.Servicios.Modelo
 {
-
     public class Cliente : Usuario
     {
-        public int PuntosFidelidad { get; set; } = 0;
+        [JsonPropertyName("puntos_fidelidad")]
+        public int PuntosFidelidad { get; set; }
+
+        [JsonPropertyName("nivel_cliente")]
         public string NivelCliente { get; set; } = "BRONCE";
+
+
     }
 }
