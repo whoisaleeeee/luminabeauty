@@ -11,8 +11,8 @@ public class ProductoBLImpl implements ProductoBL {
     private ProductoDAO productoDAO = new ProductoDAOImpl();
 
     @Override
-    public void validarStock(String idProducto, int cantidad) throws Exception {
-        Producto producto = productoDAO.buscarPorId(Integer.getInteger(idProducto));
+    public void validarStock(Integer idProducto, int cantidad) throws Exception {
+        Producto producto = productoDAO.buscarPorId(idProducto);
 
         if (producto == null) {
             throw new Exception("El producto no existe.");
@@ -28,9 +28,9 @@ public class ProductoBLImpl implements ProductoBL {
     }
 
     @Override
-    public void descontarStock(String idProducto, int cantidad) throws Exception {
+    public void descontarStock(Integer idProducto, int cantidad) throws Exception {
         try {
-            Producto producto = productoDAO.buscarPorId(Integer.getInteger(idProducto));
+            Producto producto = productoDAO.buscarPorId(idProducto);
 
             if (producto == null) {
                 throw new Exception("El producto no existe.");

@@ -25,7 +25,7 @@ public class ProductoRS {
 
     @GET
     @Path("validarStock/{idProducto}/{cantidad}")
-    public int validarStock(@PathParam("idProducto") String idProducto, @PathParam("cantidad") int cantidad) {
+    public int validarStock(@PathParam("idProducto") Integer idProducto, @PathParam("cantidad") int cantidad) {
         int resultado = 0;
         try {
             productoBL.validarStock(idProducto, cantidad);
@@ -38,7 +38,7 @@ public class ProductoRS {
 
     @PUT
     @Path("descontarStock/{idProducto}/{cantidad}")
-    public int descontarStock(@PathParam("idProducto") String idProducto, @PathParam("cantidad") int cantidad) {
+    public int descontarStock(@PathParam("idProducto") Integer idProducto, @PathParam("cantidad") int cantidad) {
         int resultado = 0;
         try {
             productoBL.descontarStock(idProducto, cantidad);
