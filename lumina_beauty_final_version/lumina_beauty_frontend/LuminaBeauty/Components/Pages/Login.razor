@@ -73,6 +73,7 @@
                 <div class="relative border-b border-stone-250/80 focus-within:border-[#FF76A5] transition-all duration-300 py-1">
                   <input type="email"
                          required
+                         id="email"
                          @bind="_email"
                          placeholder="Ingresar correo electrónico..."
                          class="w-full bg-transparent text-xs text-stone-800 font-bold focus:outline-none placeholder-stone-400 py-1" />
@@ -83,6 +84,7 @@
                 <div class="relative border-b border-stone-250/80 focus-within:border-[#FF76A5] transition-all duration-300 py-1">
                   <input type="password"
                          required
+                         id="password"
                          @bind="_password"
                          placeholder="Contraseña..."
                          class="w-full bg-transparent text-xs text-stone-800 font-bold focus:outline-none placeholder-stone-400 py-1" />
@@ -92,7 +94,7 @@
               
               <div class="flex items-center justify-between text-[11px] font-semibold text-stone-500 pt-1 pointer-events-auto select-none">
                 <label class="flex items-center gap-2 cursor-pointer select-none">
-                  <input type="checkbox" checked class="rounded text-[#FF76A5] focus:ring-[#FF76A5] border-stone-300 cursor-pointer" />
+                  <input type="checkbox" id="rememberMe" checked class="rounded text-[#FF76A5] focus:ring-[#FF76A5] border-stone-300 cursor-pointer" />
                   <span>@LangService.Translate("rememberMe")</span>
                 </label>
                 <button type="button" @onclick="ForgotPasswordClicked" class="text-[#C7346A] hover:underline cursor-pointer">

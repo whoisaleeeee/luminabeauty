@@ -1,0 +1,106 @@
+@using SoluLumina.Models
+@using Microsoft.AspNetCore.Components
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    [Parameter]
+    public Producto Product { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Producto> OnProductUpdated { get; set; }
+
+    [Parameter]
+    public List<CategoriaProducto> Categorias { get; set; } = new();
+
+    [Parameter]
+    public List<Marca> Marcas { get; set; } = new();
+
+    private int catId = 0;
+    private int marcaId = 0;
+
+    protected override void OnParametersSet()
+    {
+        if (Product != null)
+        {
+            catId = Product.Categoria?.Id ?? 0;
+            marcaId = Product.Marca?.Id ?? 0;
+        }
+    }
+
+    private void Close()
+    {
+        IsVisible = false;
+        IsVisibleChanged.InvokeAsync(IsVisible);
+    }
+
+    private async Task Save()
+    {
+        if (catId != 0) Product.Categoria = new CategoriaProducto { Id = catId };
+        if (marcaId != 0) Product.Marca = new Marca { Id = marcaId };
+        
+        await OnProductUpdated.InvokeAsync(Product);
+        Close();
+    }
+}
+
+<div class="modal fade @(IsVisible ? "show d-block" : "")" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Producto</h5>
+                <button type="button" class="btn-close" @onclick="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input class="form-control" @bind="Product.Nombre" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Slug / Código</label>
+                    <input class="form-control" @bind="Product.Slug" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Precio</label>
+                    <input type="number" step="0.01" class="form-control" @bind="Product.Precio" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Stock</label>
+                    <input type="number" class="form-control" @bind="Product.Stock" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Piel</label>
+                    <input class="form-control" @bind="Product.TipoPiel" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Marca</label>
+                    <select class="form-select" @bind="marcaId">
+                        <option value="0">Seleccionar marca...</option>
+                        @foreach (var m in Marcas)
+                        {
+                            <option value="@m.Id">@m.Nombre</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Categoría</label>
+                    <select class="form-select" @bind="catId">
+                        <option value="0">Seleccionar categoría...</option>
+                        @foreach (var c in Categorias)
+                        {
+                            <option value="@c.Id">@c.Nombre</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="Close">Cancelar</button>
+                <button class="btn btn-primary" @onclick="Save">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
