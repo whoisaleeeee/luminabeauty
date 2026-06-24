@@ -1,7 +1,6 @@
 @page "/"
 @using SoluLumina.Components.Pages.Shared
 @using SoluLumina.Models
-@using SoluLumina.Data
 @using SoluLumina.Services
 @inject IProductoService ProductoService
 @inject ICategoriaService CategoriaService
@@ -175,9 +174,9 @@
                                 <td class="py-3 px-4">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
-                                            @if(!string.IsNullOrEmpty(p.Imagen))
+                                            @if(!string.IsNullOrEmpty(p.Imagen_url))
                                             {
-                                                <img src="@p.Imagen" alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                                <img src="@p.Imagen_url" alt="Producto" class="w-100 h-100 object-fit-cover" />
                                             }
                                             else
                                             {
@@ -190,10 +189,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge rounded-pill fw-medium" style="background-color: @p.CatBgColor; color: @p.CatColor; padding: 0.4em 0.8em;">@p.Categoria?.Nombre</span></td>
-                                <td class="text-secondary">@p.TipoPiel</td>
+                                <td><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Categoria?.Nombre</span></td>
+                                <td class="text-secondary">@p.Tipo_piel</td>
                                 <td class="fw-bold text-dark">S/ @p.Precio.ToString("F2")</td>
-                                <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: @p.StockBgColor; color: @p.StockColor; padding: 0.4em 0.8em;">@p.Stock uds</span></td>
+                                <td class="text-center"><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Stock uds</span></td>
                                 <td class="py-3 px-4 text-end">
                                 <div class="d-flex justify-content-end gap-2">
                                     <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar" @onclick="() => EditProduct(p)">
@@ -237,14 +236,16 @@
 @code {
     private bool showAddProductModal = false;
     private bool showProfileDropdown = false;
-    private List<Producto> Productos = new();
+    private List<Producto> Productos = new List<Producto>();
     private List<CategoriaProducto> Categorias = new();
     private List<Marca> Marcas = new();
-    
+
     private int selectedCategoryId = 0;
     private int selectedBrandId = 0;
     private int selectedSkinTypeId = 0;
     private string searchTerm = string.Empty;
+
+    private string url_listar_Productos = "http://localhost:8080/LuminaBeauty-Servicios/webresources/ProductoRS";
 
     protected override async Task OnInitializedAsync()
     {
@@ -253,17 +254,9 @@
 
     private async Task CargarDatos()
     {
-        var todosProductos = await ProductoService.ListarTodosAsync();
+        var todosProductos = new HttpClientUtils<List<Producto>>().get(url_listar_Productos);
         Productos = todosProductos.Where(p => p.Estado == 1).ToList();
-        Categorias = await CategoriaService.ListarTodosAsync();
-        Marcas = await MarcaService.ListarTodosAsync();
 
-        // Mapear los nombres de categoría y marca a los productos si los traen solo con ID
-        foreach(var p in Productos)
-        {
-            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id == p.Categoria.Id);
-            if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id == p.Marca.Id);
-        }
     }
 
     private void ToggleProfileDropdown()
@@ -316,7 +309,7 @@
 
     private IEnumerable<Producto> FilteredProducts => FilteredByCategory
         .Where(p => selectedBrandId == 0 || p.Marca?.Id == selectedBrandId)
-        .Where(p => selectedSkinTypeId == 0 || (p.TipoPiel != null && p.TipoPiel.Equals(GetSkinTypeName(selectedSkinTypeId), StringComparison.OrdinalIgnoreCase)))
+        .Where(p => selectedSkinTypeId == 0 || (p.Tipo_piel != null && p.Tipo_piel.Equals(GetSkinTypeName(selectedSkinTypeId), StringComparison.OrdinalIgnoreCase)))
         .Where(p => string.IsNullOrWhiteSpace(searchTerm) || (p.Nombre != null && p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) || (p.Slug != null && p.Slug.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
 
     private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
@@ -333,19 +326,6 @@
 
     private void EditProduct(Producto product)
     {
-        selectedProduct = new Producto
-        {
-            Id = product.Id,
-            Nombre = product.Nombre,
-            Slug = product.Slug,
-            Precio = product.Precio,
-            Stock = product.Stock,
-            TipoPiel = product.TipoPiel,
-            Imagen = product.Imagen,
-            Marca = product.Marca,
-            Categoria = product.Categoria,
-            Estado = product.Estado
-        };
         showEditProductModal = true;
     }
 
@@ -359,7 +339,7 @@
     private async Task DeleteProduct(Producto product)
     {
         // En una app real, aquí se pondría un confirm de JS
-        var exito = await ProductoService.EliminarAsync(product.Id);
+        var exito = await ProductoService.EliminarAsync(product.Id_producto);
         if (exito)
         {
             await CargarDatos();

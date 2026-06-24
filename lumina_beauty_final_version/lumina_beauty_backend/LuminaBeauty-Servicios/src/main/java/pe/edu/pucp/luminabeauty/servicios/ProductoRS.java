@@ -12,6 +12,9 @@ import pe.edu.pucp.luminaBeauty.Business.ProductoBL;
 import pe.edu.pucp.luminaBeauty.Business.impl.ProductoBLImpl;
 import pe.edu.pucp.luminaBeauty.Model.Producto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Path("ProductoRS")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -60,5 +63,16 @@ public class ProductoRS {
         }
         resultado.setId_producto(10);
         return resultado;
+    }
+
+    @GET
+    public List<Producto> listarProductos() {
+        List<Producto> lista = new ArrayList<>();
+        try {
+            lista = productoBL.listarProductos();
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return lista;
     }
 }

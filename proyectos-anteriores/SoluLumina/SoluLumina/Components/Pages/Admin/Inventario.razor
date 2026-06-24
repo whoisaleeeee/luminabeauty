@@ -1,5 +1,6 @@
 @page "/Inventario"
 @using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
 @rendermode InteractiveServer
 @using SoluLumina.Models
 
@@ -155,9 +156,9 @@
                                 <td class="py-3 px-4">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
-                                            @if(!string.IsNullOrEmpty(p.Imagen))
+                                            @if(!string.IsNullOrEmpty(p.Imagen_url))
                                             {
-                                                <img src="@p.Imagen alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                                <img src="@p.Imagen_url alt="Producto" class="w-100 h-100 object-fit-cover" />
                                             }
                                             else
                                             {
@@ -170,10 +171,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge rounded-pill fw-medium" style="background-color: @p.CatBgColor; color: @p.CatColor; padding: 0.4em 0.8em;">@p.Categoria</span></td>
-                                <td class="text-secondary">@p.TipoPiel</td>
+                                <td><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Categoria</span></td>
+                                <td class="text-secondary">@p.Tipo_piel</td>
                                 <td class="fw-bold text-dark">S/ @p.Precio.ToString("F2")</td>
-                                <td class="text-center"><span class="badge rounded-pill fw-medium" style="background-color: @p.StockBgColor; color: @p.StockColor; padding: 0.4em 0.8em;">@p.Stock uds</span></td>
+                                <td class="text-center"><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Stock uds</span></td>
                                 <td class="py-3 px-4 text-end">
                                 <div class="d-flex justify-content-end gap-2">
                                     <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar">
@@ -286,7 +287,19 @@
 }
 
 @code {
+    private string url_listar_Productos = "http://localhost:8080/LuminaBeauty-Servicios/webresources/ProductoRS";
     private bool showProfileDropdown = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        Productos = new HttpClientUtils<List<Producto>>().get(url_listar_Productos);
+    }
+
     private void ToggleProfileDropdown()
     {
         showProfileDropdown = !showProfileDropdown;

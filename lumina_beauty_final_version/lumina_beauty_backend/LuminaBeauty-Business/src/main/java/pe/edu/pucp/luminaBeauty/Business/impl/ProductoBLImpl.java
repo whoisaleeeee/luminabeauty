@@ -6,6 +6,8 @@ import pe.edu.pucp.luminaBeauty.DAO.impl.ProductoDAOImpl;
 import pe.edu.pucp.luminaBeauty.Model.Producto;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 
+import java.util.List;
+
 public class ProductoBLImpl implements ProductoBL {
 
     private ProductoDAO productoDAO = new ProductoDAOImpl();
@@ -56,5 +58,10 @@ public class ProductoBLImpl implements ProductoBL {
     @Override
     public Producto buscarProducto(Integer id) throws Exception {
         return productoDAO.buscarPorId(id);
+    }
+
+    @Override
+    public List<Producto> listarProductos() throws Exception {
+        return productoDAO.listarTodos();
     }
 }
