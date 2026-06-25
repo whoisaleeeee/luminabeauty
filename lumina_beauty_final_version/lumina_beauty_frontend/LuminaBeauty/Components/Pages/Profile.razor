@@ -59,114 +59,110 @@
 
             <div class="lg:col-span-4 space-y-6">
 
-                <div class="bg-white/75 backdrop-blur-md rounded-[2rem] border border-white/70 p-6 shadow-md relative text-center">
+                <div class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/80 p-6 text-center shadow-md backdrop-blur-md">
 
-                    <div class="relative w-24 h-24 mx-auto mb-4">
-                        <div class="w-24 h-24 rounded-full border-2 border-[#FCD1DB] bg-gradient-to-br from-[#FFF0F3] to-[#FCD1DB] flex items-center justify-center text-[#C7346A] font-serif text-2xl font-bold shadow-sm select-none">
-                            @ProfileApp.ObtenerInicialesCliente()
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-[#FFF0F3] via-white to-[#FFF0F3] opacity-80"></div>
+
+                    <div class="relative">
+                        <div class="relative mx-auto mb-4 h-24 w-24">
+                            <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#FCD1DB] bg-gradient-to-br from-[#FFF0F3] to-[#FCD1DB] font-serif text-2xl font-bold text-[#C7346A] shadow-sm select-none">
+                                @ProfileApp.ObtenerInicialesCliente()
+                            </div>
+
+                            <div class="absolute bottom-0 right-1 flex h-6 w-6 items-center justify-center rounded-full border border-stone-100 bg-white text-[10px] shadow-xs select-none">
+                                ✨
+                            </div>
                         </div>
 
-                        <div class="absolute bottom-0 right-1 w-6 h-6 bg-white border border-stone-100 rounded-full flex items-center justify-center shadow-xs text-[10px] select-none">
-                            ✨
-                        </div>
-                    </div>
+                        <h2 class="font-serif text-2xl font-semibold leading-tight text-stone-900">
+                            @($"{ProfileApp.State.ProfileFirstName} {ProfileApp.State.ProfileLastName}".Trim())
+                        </h2>
 
-                    <h2 class="font-serif text-2xl font-semibold text-stone-900">
-                        @($"{ProfileApp.State.ProfileFirstName} {ProfileApp.State.ProfileLastName}".Trim())
-                    </h2>
-
-                    <p class="text-[10px] uppercase font-bold tracking-widest text-stone-400 mt-1 mb-6 select-none">
-                        MIEMBRO @ProfileApp.State.CurrentClient?.NivelCliente
-                    </p>
-
-                    <div class="space-y-3 text-left max-w-xs mx-auto px-2 text-stone-500 text-xs font-medium border-t border-stone-50 pt-5 pb-4">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[#C7346A] text-sm select-none">✉</span>
-                            <span class="truncate">@ProfileApp.State.ProfileEmail</span>
+                        <div class="mt-2 flex items-center justify-center gap-2">
+                            <span class="rounded-full border border-[#FCD1DB]/70 bg-[#FFF0F3] px-3 py-1 text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
+                                Miembro @ProfileApp.State.CurrentClient?.NivelCliente
+                            </span>
                         </div>
 
-                        <div class="flex items-center gap-3">
-                            <span class="text-[#C7346A] text-sm select-none">📞</span>
-                            <span>@ProfileApp.State.ProfilePhone</span>
-                        </div>
-                    </div>
+                        <div class="mx-auto mt-6 max-w-xs space-y-3 border-y border-stone-100 py-4 text-left text-xs font-medium text-stone-500">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FFF0F3] text-sm text-[#C7346A] select-none">
+                                    ✉
+                                </span>
+                                <span class="min-w-0 truncate">@ProfileApp.State.ProfileEmail</span>
+                            </div>
 
-                    @if (ProfileApp.State.CurrentClient is not null)
-                    {
-                        <div class="mb-5 rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/60 px-4 py-3 text-left">
-                            <p class="text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
-                                Puntos Lumina
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FFF0F3] text-sm text-[#C7346A] select-none">
+                                    📞
+                                </span>
+                                <span>@ProfileApp.State.ProfilePhone</span>
+                            </div>
+                        </div>
+
+                        @if (ProfileApp.State.CurrentClient is not null)
+                        {
+                            <div class="mt-5 grid grid-cols-2 overflow-hidden rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/50 text-left">
+                                <div class="border-r border-[#FCD1DB]/50 px-4 py-3">
+                                    <p class="text-[8px] font-black uppercase tracking-widest text-[#C7346A]">
+                                        Puntos Lumina
+                                    </p>
+
+                                    <p class="mt-1 text-lg font-bold text-stone-900">
+                                        @ProfileApp.State.CurrentClient.PuntosFidelidad
+                                    </p>
+                                </div>
+
+                                <div class="px-4 py-3">
+                                    <p class="text-[8px] font-black uppercase tracking-widest text-[#C7346A]">
+                                        Categoría
+                                    </p>
+
+                                    <p class="mt-1 text-sm font-bold text-stone-900">
+                                        @ProfileApp.State.CurrentClient.NivelCliente
+                                    </p>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="mt-5 border-t border-stone-100 pt-4 select-none">
+                            <button @onclick="LogOff"
+                                    class="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-900 bg-stone-900 px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white shadow-2xs transition hover:border-red-500 hover:bg-red-600 cursor-pointer">
+                                <span>↳</span>
+                                Cerrar sesión
+                            </button>
+
+                            <p class="mt-2 text-center text-[9px] font-medium text-stone-400">
+                                Cierra tu sesión en este dispositivo.
                             </p>
-
-                            <p class="mt-1 text-lg font-bold text-stone-900">
-                                @ProfileApp.State.CurrentClient.PuntosFidelidad puntos
-                            </p>
-
-                            <p class="text-[10px] font-medium text-stone-500">
-                                Nivel @ProfileApp.State.CurrentClient.NivelCliente
-                            </p>
                         </div>
-                    }
-
-                    <div class="flex items-center gap-2 mt-2 select-none">
-                        <button @onclick='() => SetActiveTabAsync("detalles")'
-                                class="flex-1 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-[10px] font-bold uppercase tracking-wider py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
-                            <span>✏️</span> EDITAR PERFIL
-                        </button>
-
-                        <button @onclick="LogOff"
-                                class="w-12 bg-stone-900 hover:bg-red-600 text-white py-3 rounded-xl transition flex items-center justify-center cursor-pointer shadow-2xs"
-                                title="Cerrar sesión">
-                            <span>↳</span>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-white/40 border border-stone-100/70 p-2.5 rounded-2xl space-y-1 select-none">
-                    @foreach (var tab in _profileTabs)
-                    {
-                        var tCode = tab.Key;
-                        var tLabel = tab.Value;
-                        var isActive = ProfileApp.State.ActiveTab == tCode;
-
-                        <button @onclick="() => SetActiveTabAsync(tCode)"
-                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition flex items-center justify-between cursor-pointer @(isActive ? "bg-[#FFF0F3] text-[#C7346A] shadow-xs border-l-2 border-[#FF76A5]" : "text-stone-600 hover:bg-white")">
-                            <span>@tLabel</span>
-
-                            @if (isActive)
-                            {
-                                <span>➔</span>
-                            }
-                        </button>
-                    }
-                </div>
-
-                <div class="bg-white/75 backdrop-blur-md rounded-[2rem] border border-white/70 p-6 shadow-md text-left space-y-4 select-none">
-
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 bg-[#FFF0F3] text-[#FF76A5] rounded-xl flex items-center justify-center text-xs">
-                            ⚙️
-                        </div>
-
-                        <h3 class="font-serif text-sm font-bold text-stone-800">
-                            Preferencias de cuenta
-                        </h3>
-                    </div>
-
-                    <div class="rounded-2xl border border-[#FCD1DB]/50 bg-[#FFF0F3]/45 p-4">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
-                            Próximamente
-                        </p>
-
-                        <p class="mt-2 text-[11px] leading-relaxed text-stone-500">
-                            Las preferencias de idioma, notificaciones y gestión de contraseña
-                            estarán disponibles en una próxima actualización.
-                        </p>
                     </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-8 bg-white/70 backdrop-blur-md rounded-3xl border border-white/70 p-6 sm:p-8 shadow-md">
+            <div id="perfil-contenido"
+                 class="lg:col-span-8 bg-white/70 backdrop-blur-md rounded-3xl border border-white/70 px-6 pt-4 pb-6 sm:px-8 sm:pt-5 sm:pb-8 shadow-md scroll-mt-6">
+
+                <div class="mb-6 border-b border-stone-100 pb-5">
+                    <div class="flex gap-2 overflow-x-auto pb-1">
+                    </div>
+
+                    <div class="mt-5 flex gap-2 overflow-x-auto pb-1">
+                        @foreach (var tab in _profileTabs)
+                        {
+                            var tCode = tab.Key;
+                            var tLabel = tab.Value;
+                            var isActive = ProfileApp.State.ActiveTab == tCode;
+
+                            <button @onclick="() => SetActiveTabAsync(tCode)"
+                                    class="shrink-0 rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider transition cursor-pointer @(isActive
+                                                                ? "bg-stone-900 text-white shadow-xs"
+                                                                : "border border-stone-200 bg-white text-stone-500 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                                @tLabel
+                            </button>
+                        }
+                    </div>
+                </div>
 
                 @if (ProfileApp.State.ActiveTab == "detalles")
                 {
@@ -243,6 +239,36 @@
                                 @(ProfileApp.State.IsSavingProfile ? "Guardando..." : "Guardar Cambios")
                             </button>
                         </form>
+
+                        <div class="rounded-2xl border border-[#FCD1DB]/55 bg-[#FFF0F3]/35 p-5">
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div class="flex gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#C7346A] shadow-2xs">
+                                        ✉
+                                    </div>
+
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                                            Comunicaciones Lumina
+                                        </p>
+
+                                        <h4 class="mt-1 text-sm font-bold text-stone-800">
+                                            Preferencias de correo
+                                        </h4>
+
+                                        <p class="mt-1 max-w-lg text-[11px] leading-relaxed text-stone-500">
+                                            Próximamente podrás elegir si deseas recibir novedades,
+                                            lanzamientos, beneficios de fidelidad y promociones por correo.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <span class="w-fit rounded-full border border-[#FCD1DB] bg-white px-3 py-1.5 text-[8px] font-black uppercase tracking-wider text-stone-400">
+                                    Próximamente
+                                </span>
+                            </div>
+                        </div>
+
                     </div>
                 }
                 else if (ProfileApp.State.ActiveTab == "direcciones")
