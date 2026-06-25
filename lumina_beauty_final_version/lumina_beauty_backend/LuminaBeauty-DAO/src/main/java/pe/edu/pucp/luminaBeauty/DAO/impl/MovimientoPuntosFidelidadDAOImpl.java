@@ -217,6 +217,46 @@ public class MovimientoPuntosFidelidadDAOImpl implements MovimientoPuntosFidelid
         return movimientos;
     }
 
+    @Override
+    public ArrayList<MovimientoPuntosFidelidad> listarPorCliente(
+            int idCliente
+    ) throws Exception {
+        ArrayList<MovimientoPuntosFidelidad> movimientos = new ArrayList<>();
+
+        String sql = """
+            SELECT id_movimiento_puntos,
+                   id_cliente,
+                   tipo_movimiento,
+                   puntos,
+                   saldo_anterior,
+                   saldo_posterior,
+                   id_pedido,
+                   motivo,
+                   registrado_por,
+                   creado_en
+            FROM movimiento_puntos_fidelidad
+            WHERE id_cliente = ?
+            ORDER BY creado_en DESC, id_movimiento_puntos DESC
+            """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    movimientos.add(mapearMovimiento(rs));
+                }
+            }
+
+            return movimientos;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private MovimientoPuntosFidelidad mapearMovimiento(ResultSet rs) throws SQLException {
         MovimientoPuntosFidelidad movimiento = new MovimientoPuntosFidelidad();
 
