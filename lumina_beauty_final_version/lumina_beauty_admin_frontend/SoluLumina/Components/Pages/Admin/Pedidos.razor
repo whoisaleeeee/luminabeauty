@@ -124,17 +124,12 @@
                 </div>
                 <div class="col-12 col-md-2">
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Estado</label>
-                    <select class="form-select bg-light border-1 text-secondary" @bind="filtroEstado" @bind:after="Buscar">
-                        <option value="Todos">Todos</option>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Preparando">Preparando</option>
-                        <option value="En Camino">En Camino</option>
-                        <option value="Entregado">Entregado</option>
+                    <select class="form-select bg-light border-1 text-secondary" @bind="filtroEstado">
+                        @foreach (var e in Estados)
+                        {
+                            <option value="@e">@e</option>
+                        }
                     </select>
-                </div>
-                <div class="col-12 col-md-2">
-                    <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Fecha</label>
-                    <input type="date" class="form-control bg-light border-1 text-secondary" @bind="filtroFecha" @bind:after="Buscar">
                 </div>
                 <div class="col-12 col-md-3 d-flex justify-content-end gap-2">
                     <button class="btn btn-light px-3 border rounded-3 text-secondary shadow-sm" style="font-size: 0.9rem; font-weight: 500;" @onclick="LimpiarFiltros">
@@ -153,21 +148,21 @@
             <div class="table-responsive">
                 <table class="table align-middle table-hover m-0">
                     <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <tr class="align-middle text-muted small text-uppercase border-bottom-0" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem;">
-                            <th class="py-3 px-3 text-center" style="width: 0.2%;">No.</th>
+                        <tr class="align-middle text-muted small text-uppercase border-bottom" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem; border-color: #f7eff1 !important;">
+                            <th class="py-3 px-3 text-center" style="width: 1%;">No.</th>
                             <th class="py-3 px-3 text-start" style="width: 1%; white-space: nowrap;">ID Pedido</th>
                             <th class="py-3 px-3 text-start">Cliente</th>
-                            <th class="py-3 px-3 text-center" style="width: 1%; white-space: nowrap;">Fecha y Hora</th>
+                            <th class="py-3 px-3 text-start" style="width: 1%; white-space: nowrap;">Fecha y Hora</th>
                             <th class="py-3 px-3 text-start" style="width: 1%;">Estado</th>
-                            <th class="py-3 px-3 text-center" style="width: 1%;">Total</th>
-                            <th class="py-3 px-3 text-center    " style="width: 1%;">Acciones</th>
+                            <th class="py-3 px-3 text-start" style="width: 1%;">Total</th>
+                            <th class="py-3 px-3 text-end" style="width: 1%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
                         @{ int rowNumber = 1; }
                         @if (PedidosPaginados.Any())
                         {
-                            @foreach (var pedido in todosLosPedidos)
+                            @foreach (var pedido in PedidosPaginados)
                             {
                                 <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
                                     <td class="text-center text-muted small" style="width: 0.2%;">@(rowNumber++)</td>
@@ -184,7 +179,7 @@
 
                                     <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
                                         <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@pedido.Cliente.Nombres @pedido.Cliente.Apellidos">
-                                            @pedido.Cliente.Nombres @pedido.Fecha_creacion
+                                            @pedido.Fecha_creacion
                                         </div>
                                     </td>
 
@@ -199,11 +194,14 @@
                                     </td>
 
                                     <td class="py-2 px-3 text-end" style="width: 1%;">
-                                        <button class="btn btn-sm btn-light text-secondary border border-1 rounded-3 px-3 fw-medium"
-                                                style="height: 30px; line-height: 1.2; font-size: 0.75rem;"
-                                                @onclick="() => VerDetalles(pedido)">
-                                            <i class="bi bi-eye me-1"></i> Detalles
-                                        </button>
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <button class="btn btn-sm btn-light text-primary border-0 rounded-3" style="width: 30px; height: 30px; padding: 0;" title="Modificar">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light text-danger border-0 rounded-3" style="width: 30px; height: 30px; padding: 0;" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -360,11 +358,11 @@
 
     private string filtroId = "";
     private string filtroCliente = "";
-    private string filtroEstado = "Todos";
+    private string filtroEstado = "";
     private DateTime? filtroFecha;
 
     private int paginaActual = 1;
-    private int itemsPorPagina = 5;
+    private int itemsPorPagina = 10;
 
     private bool mostrarModal = false;
     private Pedido? pedidoSeleccionado;
@@ -373,6 +371,7 @@
 
     private List<Pedido> todosLosPedidos = new List<Pedido>();
     private List<Cliente> todosLosClientes = new List<Cliente>();
+    private List<string> Estados = new List<string>() { "CONFIRMADO", "EN PROCESO", "ENVIADO", "ENTREGADO", "PENDIENTE" };
 
     private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
 
@@ -401,7 +400,7 @@
             if (!string.IsNullOrWhiteSpace(filtroId))
             {
                 var fId = filtroId.Replace("#ORD-", "").Trim();
-                query = query.Where(p => p.Id_pedido.ToString().Contains(fId));
+                query = query.Where(p => p.Codigo_pedido.ToString().Contains(fId));
             }
 
             if (filtroEstado != "Todos")
@@ -422,7 +421,7 @@
 
     private int TotalPaginas => (int)Math.Ceiling(TotalPedidosFiltrados / (double)itemsPorPagina);
 
-    private IEnumerable<Pedido> PedidosPaginados => PedidosFiltrados.Skip((paginaActual - 1) * itemsPorPagina).Take(itemsPorPagina);
+    private IEnumerable<Pedido> PedidosPaginados=> PedidosFiltrados.Skip((paginaActual - 1) * itemsPorPagina).Take(itemsPorPagina);
 
     private void Buscar()
     {
