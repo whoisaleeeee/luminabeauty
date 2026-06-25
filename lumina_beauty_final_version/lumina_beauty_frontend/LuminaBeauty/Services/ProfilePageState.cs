@@ -12,6 +12,14 @@ namespace LuminaBeauty.Services
 
         public List<Pedido> Orders { get; set; } = [];
 
+        public Pedido? SelectedOrder { get; set; }
+
+        public Envio? SelectedOrderShipment { get; set; }
+
+        public bool IsOrderDetailOpen { get; set; }
+
+        public bool IsLoadingOrderDetail { get; set; }
+
         public string ProfileFirstName { get; set; } = string.Empty;
 
         public string ProfileLastName { get; set; } = string.Empty;

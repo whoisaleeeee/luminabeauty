@@ -6,6 +6,7 @@ namespace LuminaBeauty.Services
     {
         private readonly ClienteAppService _clienteAppService;
         private readonly PedidoAppService _pedidoAppService;
+        private readonly EnvioAppService _envioAppService;
         private readonly MovimientoPuntosAppService _movimientoPuntosAppService;
         private readonly AuthService _authService;
 
@@ -14,11 +15,13 @@ namespace LuminaBeauty.Services
         public ProfileAppService(
                     ClienteAppService clienteAppService,
                     PedidoAppService pedidoAppService,
+                    EnvioAppService envioAppService,
                     MovimientoPuntosAppService movimientoPuntosAppService,
                     AuthService authService)
         {
             _clienteAppService = clienteAppService;
             _pedidoAppService = pedidoAppService;
+            _envioAppService = envioAppService;
             _movimientoPuntosAppService = movimientoPuntosAppService;
             _authService = authService;
         }
@@ -372,6 +375,50 @@ namespace LuminaBeauty.Services
             {
                 State.IsLoadingOrders = false;
             }
+        }
+
+        public async Task<ProfileActionResult> AbrirDetallePedidoAsync(
+    Pedido order
+)
+        {
+            try
+            {
+                State.IsLoadingOrderDetail = true;
+                State.IsOrderDetailOpen = true;
+                State.SelectedOrder = order;
+
+                var pedidoCompleto = await _pedidoAppService.BuscarPedidoAsync(
+                    order.IdPedido
+                );
+
+                if (pedidoCompleto is not null)
+                {
+                    State.SelectedOrder = pedidoCompleto;
+                }
+
+                State.SelectedOrderShipment =
+                    await _envioAppService.BuscarPorPedidoAsync(order.IdPedido);
+
+                return new ProfileActionResult(true, string.Empty);
+            }
+            catch
+            {
+                return new ProfileActionResult(
+                    false,
+                    "No se pudo cargar el detalle y seguimiento del pedido."
+                );
+            }
+            finally
+            {
+                State.IsLoadingOrderDetail = false;
+            }
+        }
+
+        public void CerrarDetallePedido()
+        {
+            State.IsOrderDetailOpen = false;
+            State.SelectedOrder = null;
+            State.SelectedOrderShipment = null;
         }
 
         public async Task<ProfileActionResult> CargarMovimientosPuntosAsync()
