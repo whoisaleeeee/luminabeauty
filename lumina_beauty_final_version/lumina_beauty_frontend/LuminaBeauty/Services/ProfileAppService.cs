@@ -6,17 +6,20 @@ namespace LuminaBeauty.Services
     {
         private readonly ClienteAppService _clienteAppService;
         private readonly PedidoAppService _pedidoAppService;
+        private readonly MovimientoPuntosAppService _movimientoPuntosAppService;
         private readonly AuthService _authService;
 
         public ProfilePageState State { get; } = new();
 
         public ProfileAppService(
-            ClienteAppService clienteAppService,
-            PedidoAppService pedidoAppService,
-            AuthService authService)
+                    ClienteAppService clienteAppService,
+                    PedidoAppService pedidoAppService,
+                    MovimientoPuntosAppService movimientoPuntosAppService,
+                    AuthService authService)
         {
             _clienteAppService = clienteAppService;
             _pedidoAppService = pedidoAppService;
+            _movimientoPuntosAppService = movimientoPuntosAppService;
             _authService = authService;
         }
 
@@ -139,6 +142,11 @@ namespace LuminaBeauty.Services
             if (code == "pedidos" && State.Orders.Count == 0)
             {
                 await CargarPedidosAsync();
+            }
+
+            if (code == "puntos" && State.PointMovements.Count == 0)
+            {
+                await CargarMovimientosPuntosAsync();
             }
         }
 
@@ -363,6 +371,40 @@ namespace LuminaBeauty.Services
             finally
             {
                 State.IsLoadingOrders = false;
+            }
+        }
+
+        public async Task<ProfileActionResult> CargarMovimientosPuntosAsync()
+        {
+            if (State.CurrentClient is null)
+            {
+                return new ProfileActionResult(
+                    false,
+                    "No se encontró una sesión de cliente válida."
+                );
+            }
+
+            try
+            {
+                State.IsLoadingPoints = true;
+
+                State.PointMovements =
+                    await _movimientoPuntosAppService.ListarPorClienteAsync(
+                        State.CurrentClient.Id
+                    );
+
+                return new ProfileActionResult(true, string.Empty);
+            }
+            catch
+            {
+                return new ProfileActionResult(
+                    false,
+                    "No se pudo cargar el historial de puntos."
+                );
+            }
+            finally
+            {
+                State.IsLoadingPoints = false;
             }
         }
 

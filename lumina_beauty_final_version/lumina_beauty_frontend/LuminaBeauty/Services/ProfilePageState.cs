@@ -32,6 +32,10 @@ namespace LuminaBeauty.Services
 
         public bool IsLoadingOrders { get; set; }
 
+        public List<MovimientoPuntosFidelidad> PointMovements { get; set; } = [];
+
+        public bool IsLoadingPoints { get; set; }
+
         public bool IsAddressEditorOpen { get; set; }
 
         public bool IsSavingAddress { get; set; }
