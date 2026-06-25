@@ -2,6 +2,7 @@ package pe.edu.pucp.luminaBeauty.DAO.impl;
 
 import pe.edu.pucp.luminaBeauty.DAO.ClienteDAO;
 import pe.edu.pucp.luminaBeauty.Model.Cliente;
+import pe.edu.pucp.luminaBeauty.Model.Direccion;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 
 import java.sql.*;
@@ -287,6 +288,14 @@ public class ClienteDAOImpl implements ClienteDAO {
         cliente.setPuntos_fidelidad(rs.getInt("puntos_fidelidad"));
         cliente.setNivel_cliente(rs.getString("nivel_cliente"));
 
+        int idDireccionPrincipal = rs.getInt("id_direccion_principal");
+
+        if (!rs.wasNull()) {
+            Direccion direccionPrincipal = new Direccion();
+            direccionPrincipal.setId_direccion(idDireccionPrincipal);
+            cliente.setDireccion_principal(direccionPrincipal);
+        }
+        
         return cliente;
     }
 }

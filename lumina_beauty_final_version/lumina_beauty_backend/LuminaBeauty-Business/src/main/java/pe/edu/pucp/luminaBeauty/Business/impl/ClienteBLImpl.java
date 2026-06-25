@@ -2,8 +2,11 @@ package pe.edu.pucp.luminaBeauty.Business.impl;
 
 import pe.edu.pucp.luminaBeauty.Business.ClienteBL;
 import pe.edu.pucp.luminaBeauty.DAO.ClienteDAO;
+import pe.edu.pucp.luminaBeauty.DAO.DireccionDAO;
 import pe.edu.pucp.luminaBeauty.DAO.impl.ClienteDAOImpl;
+import pe.edu.pucp.luminaBeauty.DAO.impl.DireccionDAOImpl;
 import pe.edu.pucp.luminaBeauty.Model.Cliente;
+import pe.edu.pucp.luminaBeauty.Model.Direccion;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 
 import java.util.ArrayList;
@@ -11,6 +14,7 @@ import java.util.ArrayList;
 public class ClienteBLImpl implements ClienteBL {
 
     private final ClienteDAO clienteDAO = new ClienteDAOImpl();
+    private final DireccionDAO direccionDAO = new DireccionDAOImpl();
 
     @Override
     public Cliente registrarCliente(Cliente cliente) throws Exception {
@@ -77,6 +81,7 @@ public class ClienteBLImpl implements ClienteBL {
             }
 
             validarNivelCliente(cliente.getNivel_cliente());
+            validarDireccionPrincipal(cliente);
 
             Cliente clienteActualizado = clienteDAO.actualizar(cliente);
             TransactionContext.commit();
@@ -206,6 +211,32 @@ public class ClienteBLImpl implements ClienteBL {
             throw new Exception("Error al restar puntos: " + ex.getMessage(), ex);
         } finally {
             TransactionContext.close();
+        }
+    }
+
+    private void validarDireccionPrincipal(Cliente cliente) throws Exception {
+        if (cliente.getDireccion_principal() == null) {
+            return;
+        }
+
+        int idDireccionPrincipal =
+                cliente.getDireccion_principal().getId_direccion();
+
+        if (idDireccionPrincipal <= 0) {
+            throw new Exception("La dirección principal no es válida.");
+        }
+
+        Direccion direccion =
+                direccionDAO.buscarPorId(idDireccionPrincipal);
+
+        if (direccion == null ||
+                direccion.getCliente() == null ||
+                direccion.getCliente().getId_usuario()
+                        != cliente.getId_usuario()) {
+
+            throw new Exception(
+                    "La dirección principal no pertenece al cliente."
+            );
         }
     }
 
