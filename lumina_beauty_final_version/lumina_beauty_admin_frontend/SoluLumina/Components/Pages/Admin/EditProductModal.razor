@@ -20,6 +20,9 @@
     [Parameter]
     public List<Marca> Marcas { get; set; } = new();
 
+    [Parameter]
+    public List<string> Tipo_piel { get; set; } = new();
+
     private int catId = 0;
     private int marcaId = 0;
 
@@ -41,66 +44,141 @@
     private async Task Save()
     {
         if (catId != 0) Product.Categoria = new CategoriaProducto { Id_categoria = catId };
-        //if (marcaId != 0) Product.Marca = new Marca { Id = marcaId };
+        if (marcaId != 0) Product.Marca = new Marca { Id_marca = marcaId };
 
         await OnProductUpdated.InvokeAsync(Product);
         Close();
     }
 }
 
-<div class="modal fade @(IsVisible ? "show d-block" : "")" tabindex="-1" style="background: rgba(0,0,0,0.5);">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Editar Producto</h5>
-                <button type="button" class="btn-close" @onclick="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Nombre</label>
-                    <input class="form-control" @bind="Product.Nombre" />
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                    <div>
+                        <h4 class="modal-title fw-bold" style="color: #6a3849;">Modificar producto</h4>
+                        <p class="text-muted small m-0">Modifica la información técnica y visual necesaria del producto.</p>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="Close" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Slug / Código</label>
-                    <input class="form-control" @bind="Product.Slug" />
+                <div class="modal-body px-4 py-4">
+                    <!-- 01 Información Básica -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">01</span>
+                            <h6 class="m-0 fw-semibold text-dark">Información Básica</h6>
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nombre del producto</label>
+                                <input type="text" class="form-control bg-light border-1" @bind="Product.Nombre" />
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Slug / Código</label>
+                                <input type="text" class="form-control bg-light border-1" @bind="Product.Slug" />
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">SKU</label>
+                                <input type="text" class="form-control bg-light border-1" placeholder="1234567890" @bind="Product.Sku" />
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-12">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Descripción del producto</label>
+                            <input type="text" class="form-control bg-light border-1" @bind="Product.Descripcion" />
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="marcaId" required>
+                                    <option disabled selected hidden>Seleccionar marca...</option>
+                                    @foreach (var m in Marcas)
+                                    {
+                                        <option value="@m.Id_marca">@m.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 02 Categorización -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">02</span>
+                            <h6 class="m-0 fw-semibold text-dark">Categorización</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="catId" required>
+                                    <option disabled selected hidden>Seleccionar categoria...</option>
+                                    @foreach (var c in Categorias)
+                                    {
+                                        <option value="@c.Id_categoria">@c.Nombre</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel</label>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="Product.Tipo_piel" required>
+                                    <option value="" disabled selected hidden>Seleccionar tipo de piel...</option>
+                                    @foreach (var t in Tipo_piel)
+                                    {
+                                        <option value="@t">@t</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 03 Precios y Stock -->
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">03</span>
+                            <h6 class="m-0 fw-semibold text-dark">Precios y Stock</h6>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
+                                    <input type="number" class="form-control bg-light border-start-0" placeholder="0.00" min="0.00" @bind="Product.Precio" />
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stock Actual</label>
+                                <input type="number" class="form-control bg-light border-1" min="0" @bind="Product.Stock" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 04 Imágenes -->
+                    <div class="mb-2">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">04</span>
+                            <h6 class="m-0 fw-semibold text-dark">Imágenes</h6>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <div class="flex-grow-1 border rounded-3 d-flex flex-column align-items-center justify-content-center py-4 bg-light" style="border-color: #e0e0e0 !important; border-style: dashed !important; border-width: 2px !important; cursor: pointer;">
+                                <i class="bi bi-cloud-arrow-up fs-2 text-muted mb-2"></i>
+                                <span class="text-secondary small fw-medium">Arrastra o haz clic para subir</span>
+                                <span class="text-muted" style="font-size: 0.65rem;">(JPEG, PNG MÁX 2MB)</span>
+                            </div>
+                            <div class="rounded-3 overflow-hidden shadow-sm" style="width: 120px; height: 100px; flex-shrink: 0; background-color: #f0e6e8;">
+                                <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Preview" class="w-100 h-100 object-fit-cover" />
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Precio</label>
-                    <input type="number" step="0.01" class="form-control" @bind="Product.Precio" />
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-2">
+                    <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="Close">Cancelar</button>
+                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d;" @onclick="Save">
+                        <i class="bi bi-save"></i> Guardar producto
+                    </button>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Stock</label>
-                    <input type="number" class="form-control" @bind="Product.Stock" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Tipo de Piel</label>
-                    <input class="form-control" @bind="Product.Tipo_piel" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Marca</label>
-                    <select class="form-select" @bind="marcaId">
-                        <option value="0">Seleccionar marca...</option>
-                        @foreach (var m in Marcas)
-                        {
-                            <option value="@m.Id_marca">@m.Nombre</option>
-                        }
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Categoría</label>
-                    <select class="form-select" @bind="catId">
-                        <option value="0">Seleccionar categoría...</option>
-                        @foreach (var c in Categorias)
-                        {
-                            <option value="@c.Id_categoria">@c.Nombre</option>
-                        }
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" @onclick="Close">Cancelar</button>
-                <button class="btn btn-primary" @onclick="Save">Guardar</button>
             </div>
         </div>
     </div>
-</div>
+}

@@ -14,10 +14,6 @@
             <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Inventario</h3>
 
             <div class="d-flex align-items-center gap-3">
-                <div class="input-group" style="width: 280px;">
-                    <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar productos..." style="font-size: 0.9rem;">
-                </div>
                 <button class="btn btn-link text-secondary position-relative p-1">
                     <i class="bi bi-bell fs-5"></i>
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
@@ -64,7 +60,7 @@
                 <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
                     <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Unidades Totales</small>
                     <div class="d-flex align-items-end justify-content-between mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">4,821</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@unidades_totales</h2>
                         <span class="p-2 rounded-3 bg-light text-muted d-flex align-items-center justify-content-center" style="color: #f1aeb5 !important; width: 40px; height: 40px; background-color: #fef4f6 !important;"><i class="bi bi-box-seam fs-5"></i></span>
                     </div>
                 </div>
@@ -73,16 +69,16 @@
                 <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden" style="border-right: 4px solid #dc3545 !important;">
                     <small class="text-danger text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Alertas Activas</small>
                     <div class="d-flex align-items-end justify-content-between mt-auto">
-                        <h2 class="fw-black m-0 text-danger" style="font-size: 2.2rem; line-height: 1;">3</h2>
+                        <h2 class="fw-black m-0 text-danger" style="font-size: 2.2rem; line-height: 1;">@alertas_totales</h2>
                         <span class="p-2 rounded-3 d-flex align-items-center justify-content-center" style="color: #dc3545; width: 40px; height: 40px; background-color: #fdf5f5;"><i class="bi bi-exclamation-triangle-fill fs-5"></i></span>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                    <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Valor Inventario</small>
+                    <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Valor Inventario (S/)</small>
                     <div class="d-flex align-items-end justify-content-between mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/142k</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@valor_total.ToString("F2") k</h2>
                         <span class="p-2 rounded-3 bg-light text-muted d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-cash-stack fs-5"></i></span>
                     </div>
                 </div>
@@ -91,7 +87,7 @@
                 <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
                     <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Sin Stock</small>
                     <div class="d-flex align-items-end justify-content-between mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">7</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@ZeroStockCount</h2>
                         <span class="p-2 rounded-3 bg-light text-muted d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-slash-circle fs-5"></i></span>
                     </div>
                 </div>
@@ -137,53 +133,66 @@
             <div class="table-responsive">
                 <table class="table align-middle table-hover m-0">
                     <thead class="bg-light">
-                        <tr>
-                            <th class="text-center">No.</th>
-                            <th>    Producto</th>
-                            <th>Categoria</th>
-                            <th>Piel</th>
-                            <th class="text-center">Precio</th>
-                            <th class="text-center">Stock</th>
-                            <th class="text-center">Acciones</th>
+                        <tr class="align-middle text-muted small text-uppercase" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem;">
+                            <th class="text-center py-3 px-3" style="width: 0.2%;">No.</th>
+                            <th class="text-start py-3 px-3">Producto</th>
+                            <th class="text-center py-3 px-3" style="width: 1%;">Stock</th>
+                            <th class="text-start py-3 px-3" style="width: 1%; white-space: nowrap;">Precio</th>
+                            <th class="text-end py-3 px-3" style="width: 1%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
                         @{int rowNumber = 1;}
                         @foreach (var p in Productos)
                         {
-                            <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                                <td class="text-center">@(rowNumber++)</td>
-                                <td class="py-3 px-4">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
-                                            @if(!string.IsNullOrEmpty(p.Imagen_url))
+                            <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
+                                <td class="text-center text-muted small" style="width: 0.2%;">@(rowNumber++)</td>
+
+                                <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                    <div class="d-flex align-items-center gap-2" style="max-width: 260px;">
+
+                                        <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 38px; height: 38px; flex-shrink: 0; background-color: #f8f9fa;">
+                                            @if (!string.IsNullOrEmpty(p.Imagen_url))
                                             {
-                                                <img src="@p.Imagen_url alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                                <img src="@p.Imagen_url" alt="Producto" class="w-100 h-100 object-fit-cover" />
                                             }
                                             else
                                             {
-                                                <i class="bi bi-image text-muted opacity-50 d-flex justify-content-center align-items-center h-100 fs-4"></i>
+                                                <i class="bi bi-image text-muted opacity-50 d-flex justify-content-center align-items-center h-100 fs-5"></i>
                                             }
                                         </div>
-                                        <div>
-                                            <h6 class="m-0 fw-bold text-dark">@p.Nombre</h6>
-                                            <small class="text-muted font-monospace" style="font-size: 0.7rem;">@p.Slug</small>
+
+                                        <div class="d-flex flex-column justify-content-center overflow-hidden">
+                                            <span class="fw-bold text-dark lh-sm text-truncate" style="font-size: 0.85rem;" title="@p.Nombre">
+                                                @p.Nombre
+                                            </span>
+                                            <small class="text-muted font-monospace text-truncate" style="font-size: 0.65rem; letter-spacing: 0.2px;">
+                                                @p.Sku
+                                            </small>
                                         </div>
+
                                     </div>
                                 </td>
-                                <td><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Categoria</span></td>
-                                <td class="text-secondary">@p.Tipo_piel</td>
-                                <td class="fw-bold text-dark">S/ @p.Precio.ToString("F2")</td>
-                                <td class="text-center"><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Stock uds</span></td>
-                                <td class="py-3 px-4 text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+
+                                <td class="text-center" style="width: 1%;">
+                                    <span class="badge bg-light text-secondary border rounded-pill fw-medium" style="padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                        @p.Stock uds
+                                    </span>
+                                </td>
+
+                                <td class="fw-bold text-dark" style="font-size: 0.9rem; width: 1%; white-space: nowrap;">
+                                    S/ @p.Precio.ToString("F2")
+                                </td>
+
+                                <td class="py-2 px-3 text-end" style="width: 1%;">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <button class="btn btn-sm btn-light text-primary border-0 rounded-3" style="width: 30px; height: 30px; padding: 0;" title="Modificar">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light text-danger border-0 rounded-3" style="width: 30px; height: 30px; padding: 0;" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -287,8 +296,15 @@
 }
 
 @code {
-    private string url_listar_Productos = "http://localhost:8080/LuminaBeauty-Servicios/webresources/ProductoRS";
+    private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
     private bool showProfileDropdown = false;
+
+    private int unidades_totales;
+    private decimal valor_total;
+    private int alertas_totales;
+    private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
+
+    private Producto ProductoReabastecido = new Producto();
 
     protected override async Task OnInitializedAsync()
     {
@@ -297,7 +313,17 @@
 
     private async Task CargarDatos()
     {
-        Productos = await new HttpClientUtils<List<Producto>>().get(url_listar_Productos);
+        alertas_totales = 0;
+        unidades_totales = 0;
+        valor_total = 0;
+        Productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar");
+        foreach (var p in Productos)
+        {
+            valor_total += p.Stock * p.Precio;
+            unidades_totales += p.Stock;
+            if (p.Stock < 10) alertas_totales++;
+        }
+        valor_total /= 1000;//en miles de soles
     }
 
     private void ToggleProfileDropdown()
