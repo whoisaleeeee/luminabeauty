@@ -1,5 +1,7 @@
 @page "/Pedidos"
 @using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@using SoluLumina.Models
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -151,33 +153,57 @@
             <div class="table-responsive">
                 <table class="table align-middle table-hover m-0">
                     <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                        <tr>
-                            <th class="py-3 px-4 border-bottom-0">ID Pedido</th>
-                            <th class="py-3 border-bottom-0">Cliente</th>
-                            <th class="py-3 border-bottom-0">Fecha y Hora</th>
-                            <th class="py-3 border-bottom-0">Estado</th>
-                            <th class="py-3 border-bottom-0">Total</th>
-                            <th class="py-3 px-4 border-bottom-0 text-end">Acciones</th>
+                        <tr class="align-middle text-muted small text-uppercase border-bottom-0" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem;">
+                            <th class="py-3 px-3 text-center" style="width: 0.2%;">No.</th>
+                            <th class="py-3 px-3 text-start" style="width: 1%; white-space: nowrap;">ID Pedido</th>
+                            <th class="py-3 px-3 text-start">Cliente</th>
+                            <th class="py-3 px-3 text-center" style="width: 1%; white-space: nowrap;">Fecha y Hora</th>
+                            <th class="py-3 px-3 text-start" style="width: 1%;">Estado</th>
+                            <th class="py-3 px-3 text-center" style="width: 1%;">Total</th>
+                            <th class="py-3 px-3 text-center    " style="width: 1%;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        @{ int rowNumber = 1; }
                         @if (PedidosPaginados.Any())
                         {
-                            @foreach (var pedido in PedidosPaginados)
+                            @foreach (var pedido in todosLosPedidos)
                             {
-                                <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                                    <td class="py-3 px-4 fw-bold text-dark">@pedido.IdStr</td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 32px; height: 32px; font-size: 0.7rem;">@pedido.Iniciales</div>
-                                            <span class="fw-medium text-dark">@pedido.Cliente</span>
+                                <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
+                                    <td class="text-center text-muted small" style="width: 0.2%;">@(rowNumber++)</td>
+
+                                    <td class="py-2 px-3 font-monospace text-secondary fw-bold" style="width: 1%; white-space: nowrap; font-size: 0.85rem;">
+                                        @pedido.Codigo_pedido
+                                    </td>
+
+                                    <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@pedido.Cliente.Nombres @pedido.Cliente.Apellidos">
+                                            @pedido.Cliente.Apellidos
                                         </div>
                                     </td>
-                                    <td>@pedido.FechaFormateada</td>
-                                    <td><span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(pedido.Estado); color: @GetEstadoTextColor(pedido.Estado); padding: 0.4em 0.8em;">@pedido.Estado</span></td>
-                                    <td class="fw-bold text-dark">S/ @pedido.Total.ToString("F2") <span class="text-muted fw-normal small">(@pedido.CantidadProductos prod.)</span></td>
-                                    <td class="py-3 px-4 text-end">
-                                        <button class="btn btn-sm btn-light text-secondary rounded-3 px-3" @onclick="() => VerDetalles(pedido)"><i class="bi bi-eye"></i> Detalles</button>
+
+                                    <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@pedido.Cliente.Nombres @pedido.Cliente.Apellidos">
+                                            @pedido.Cliente.Nombres @pedido.Fecha_creacion
+                                        </div>
+                                    </td>
+
+                                    <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                        <span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(pedido.Estado); padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                            @pedido.Estado
+                                        </span>
+                                    </td>
+
+                                    <td class="fw-bold text-dark py-2 px-3" style="font-size: 0.9rem; width: 1%; white-space: nowrap;">
+                                        S/ @pedido.Total.ToString("F2")
+                                    </td>
+
+                                    <td class="py-2 px-3 text-end" style="width: 1%;">
+                                        <button class="btn btn-sm btn-light text-secondary border border-1 rounded-3 px-3 fw-medium"
+                                                style="height: 30px; line-height: 1.2; font-size: 0.75rem;"
+                                                @onclick="() => VerDetalles(pedido)">
+                                            <i class="bi bi-eye me-1"></i> Detalles
+                                        </button>
                                     </td>
                                 </tr>
                             }
@@ -247,7 +273,7 @@
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content border-0 rounded-4 shadow">
                     <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
-                        <h5 class="modal-title fw-bold" style="color: #6a3849;">Detalles del Pedido @pedidoSeleccionado.IdStr</h5>
+                        <h5 class="modal-title fw-bold" style="color: #6a3849;">Detalles del Pedido @pedidoSeleccionado.Id_pedido</h5>
                         <button type="button" class="btn-close" @onclick="CerrarModal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body px-4 py-3">
@@ -255,7 +281,7 @@
                             <div class="col-md-6">
                                 <p class="mb-1 text-muted small fw-bold text-uppercase">Cliente</p>
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;">@pedidoSeleccionado.Iniciales</div>
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;"></div>
                                     <div>
                                         <p class="m-0 fw-bold text-dark">@pedidoSeleccionado.Cliente</p>
                                         <small class="text-muted">cliente@ejemplo.com</small>
@@ -264,8 +290,8 @@
                             </div>
                             <div class="col-md-6 text-md-end mt-3 mt-md-0">
                                 <p class="mb-1 text-muted small fw-bold text-uppercase">Estado actual</p>
-                                <span class="badge rounded-pill fw-medium fs-6" style="background-color: @GetEstadoBgColor(pedidoSeleccionado.Estado); color: @GetEstadoTextColor(pedidoSeleccionado.Estado); padding: 0.5em 1em;">@pedidoSeleccionado.Estado</span>
-                                <p class="mt-2 mb-0 small text-muted">Fecha: @pedidoSeleccionado.FechaFormateada</p>
+                                <span class="badge rounded-pill fw-medium fs-6" style="background-color: @GetEstadoBgColor(pedidoSeleccionado.Estado); padding: 0.5em 1em;">@pedidoSeleccionado.Estado</span>
+                                <p class="mt-2 mb-0 small text-muted">Fecha: @pedidoSeleccionado.Fecha_creacion</p>
                             </div>
                         </div>
 
@@ -284,21 +310,18 @@
                                     @foreach (var prod in pedidoSeleccionado.Detalles)
                                     {
                                         <tr>
-                                            <td class="border-bottom text-dark fw-medium">@prod.Nombre</td>
-                                            <td class="border-bottom text-center">@prod.Cantidad</td>
-                                            <td class="border-bottom text-end">S/ @prod.PrecioUnitario.ToString("F2")</td>
-                                            <td class="border-bottom text-end fw-bold">S/ @prod.Subtotal.ToString("F2")</td>
+                                            
                                         </tr>
                                     }
                                 </tbody>
                                 <tfoot>
                                     <tr>
                                         <td colspan="3" class="text-end border-0 pt-3 fw-bold text-muted">Subtotal:</td>
-                                        <td class="text-end border-0 pt-3 fw-bold">S/ @pedidoSeleccionado.Subtotal.ToString("F2")</td>
+                                        <td class="text-end border-0 pt-3 fw-bold">S/ @pedidoSeleccionado.Subtotal_productos.ToString("F2")</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-end border-0 pb-3 fw-bold text-muted">Envío:</td>
-                                        <td class="text-end border-0 pb-3 fw-bold">S/ @pedidoSeleccionado.CostoEnvio.ToString("F2")</td>
+                                        <td class="text-end border-0 pb-3 fw-bold">S/ @pedidoSeleccionado.Costo_envio.ToString("F2")</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" class="text-end border-0 pt-2 fw-black fs-5" style="color: #6a3849;">Total:</td>
@@ -348,76 +371,25 @@
     private string nuevoEstadoTemp = "";
     private string mensajeExito = "";
 
-    private List<Pedido> todosLosPedidos = new();
+    private List<Pedido> todosLosPedidos = new List<Pedido>();
+    private List<Cliente> todosLosClientes = new List<Cliente>();
 
-    protected override void OnInitialized()
+    private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
+
+    protected override async Task OnInitializedAsync()
     {
-        // Generar datos estáticos basados en el HTML original para demostración
-        var r = new Random(1);
-        todosLosPedidos = new List<Pedido>
-        {
-            new Pedido { Id = 9012, Cliente = "Valeria Arias", Fecha = DateTime.Today.AddHours(10).AddMinutes(45), Estado = "Entregado", CostoEnvio = 15.00m,
-                Detalles = new List<DetallePedido> { 
-                    new DetallePedido { Nombre = "Crema Hidratante Facial", Cantidad = 1, PrecioUnitario = 150.00m },
-                    new DetallePedido { Nombre = "Serum Vitamina C", Cantidad = 2, PrecioUnitario = 127.50m }
-                }
-            },
-            new Pedido { Id = 9013, Cliente = "Camila Mendoza", Fecha = DateTime.Today.AddHours(9).AddMinutes(20), Estado = "Preparando", CostoEnvio = 10.00m,
-                Detalles = new List<DetallePedido> { 
-                    new DetallePedido { Nombre = "Paleta de Sombras Neutras", Cantidad = 1, PrecioUnitario = 175.50m }
-                }
-            },
-            new Pedido { Id = 9014, Cliente = "Luciana Rojas", Fecha = DateTime.Today.AddHours(8).AddMinutes(15), Estado = "En Camino", CostoEnvio = 15.00m,
-                Detalles = new List<DetallePedido> { 
-                    new DetallePedido { Nombre = "Base Liquida Mate", Cantidad = 1, PrecioUnitario = 120.00m },
-                    new DetallePedido { Nombre = "Corrector de Ojeras", Cantidad = 1, PrecioUnitario = 155.00m }
-                }
-            },
-            new Pedido { Id = 9005, Cliente = "Sofia Galdos", Fecha = DateTime.Today.AddDays(-1).AddHours(19).AddMinutes(45), Estado = "Pendiente", CostoEnvio = 0.00m,
-                Detalles = new List<DetallePedido> { 
-                    new DetallePedido { Nombre = "Set Brochas Profesionales", Cantidad = 1, PrecioUnitario = 350.00m },
-                    new DetallePedido { Nombre = "Esponja Maquillaje", Cantidad = 2, PrecioUnitario = 25.00m },
-                    new DetallePedido { Nombre = "Fijador de Maquillaje", Cantidad = 2, PrecioUnitario = 222.00m }
-                }
-            },
-            new Pedido { Id = 9004, Cliente = "Daniela Paz", Fecha = DateTime.Today.AddDays(-1).AddHours(16).AddMinutes(30), Estado = "Entregado", CostoEnvio = 15.00m,
-                Detalles = new List<DetallePedido> { 
-                    new DetallePedido { Nombre = "Labial Liquido Rojo", Cantidad = 1, PrecioUnitario = 45.00m },
-                    new DetallePedido { Nombre = "Delineador en Gel", Cantidad = 1, PrecioUnitario = 45.00m }
-                }
-            }
-        };
+        await CargarDatos();
+    }
 
-        // Agregar más pedidos para demostrar la paginación
-        string[] nombres = { "Maria", "Jose", "Andrea", "Luis", "Ana", "Carlos", "Diana", "Jorge", "Laura", "Pedro" };
-        string[] apellidos = { "Garcia", "Martinez", "Rodriguez", "Lopez", "Gonzalez", "Perez", "Sanchez", "Ramirez", "Torres", "Flores" };
-        string[] estados = { "Pendiente", "Preparando", "En Camino", "Entregado" };
+    private async Task CargarDatos()
+    {
+        todosLosClientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar");
+        todosLosPedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar");
 
-        for (int i = 0; i < 18; i++)
+        foreach (var pedido in todosLosPedidos)
         {
-            var p = new Pedido
-            {
-                Id = 8900 + i,
-                Cliente = $"{nombres[r.Next(nombres.Length)]} {apellidos[r.Next(apellidos.Length)]}",
-                Fecha = DateTime.Today.AddDays(-r.Next(1, 10)).AddHours(r.Next(8, 20)).AddMinutes(r.Next(0, 60)),
-                Estado = estados[r.Next(estados.Length)],
-                CostoEnvio = r.Next(0, 2) == 0 ? 0 : 15m,
-                Detalles = new List<DetallePedido>()
-            };
-            int numProds = r.Next(1, 4);
-            for (int j = 0; j < numProds; j++)
-            {
-                p.Detalles.Add(new DetallePedido
-                {
-                    Nombre = $"Producto Genérico {r.Next(1, 100)}",
-                    Cantidad = r.Next(1, 3),
-                    PrecioUnitario = r.Next(20, 200) + 0.90m
-                });
-            }
-            todosLosPedidos.Add(p);
+            if (pedido.Cliente != null) pedido.Cliente = todosLosClientes.FirstOrDefault(c => c.Id_usuario == pedido.Cliente.Id_usuario);
         }
-        
-        todosLosPedidos = todosLosPedidos.OrderByDescending(p => p.Fecha).ToList();
     }
 
     private IEnumerable<Pedido> PedidosFiltrados
@@ -429,12 +401,7 @@
             if (!string.IsNullOrWhiteSpace(filtroId))
             {
                 var fId = filtroId.Replace("#ORD-", "").Trim();
-                query = query.Where(p => p.Id.ToString().Contains(fId));
-            }
-
-            if (!string.IsNullOrWhiteSpace(filtroCliente))
-            {
-                query = query.Where(p => p.Cliente.Contains(filtroCliente, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(p => p.Id_pedido.ToString().Contains(fId));
             }
 
             if (filtroEstado != "Todos")
@@ -444,7 +411,7 @@
 
             if (filtroFecha.HasValue)
             {
-                query = query.Where(p => p.Fecha.Date == filtroFecha.Value.Date);
+                query = query.Where(p => p.Fecha_creacion.Date == filtroFecha.Value.Date);
             }
 
             return query;
@@ -506,7 +473,7 @@
         if (pedidoSeleccionado != null && pedidoSeleccionado.Estado != nuevoEstadoTemp)
         {
             pedidoSeleccionado.Estado = nuevoEstadoTemp;
-            mensajeExito = $"¡Éxito! El estado del pedido {pedidoSeleccionado.IdStr} ha sido actualizado a '{nuevoEstadoTemp}'.";
+            mensajeExito = $"¡Éxito! El estado del pedido {pedidoSeleccionado.Id_pedido} ha sido actualizado a '{nuevoEstadoTemp}'.";
             
             // Refrescar para asegurar que la UI se actualice
             StateHasChanged();
@@ -530,56 +497,6 @@
         };
     }
 
-    private string GetEstadoTextColor(string estado)
-    {
-        return estado switch
-        {
-            "Pendiente" => "#dc3545",
-            "Preparando" => "#fd7e14",
-            "En Camino" => "#0dcaf0",
-            "Entregado" => "#198754",
-            _ => "#6c757d"
-        };
-    }
-
-    public class Pedido
-    {
-        public int Id { get; set; }
-        public string Cliente { get; set; } = string.Empty;
-        public DateTime Fecha { get; set; }
-        public string Estado { get; set; } = string.Empty;
-        public List<DetallePedido> Detalles { get; set; } = new();
-        public decimal CostoEnvio { get; set; }
-
-        public string IdStr => $"#ORD-{Id}";
-        
-        public string Iniciales
-        {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(Cliente)) return "?";
-                var parts = Cliente.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
-                return $"{parts[0][0]}{parts[1][0]}".ToUpper();
-            }
-        }
-
-        public string FechaFormateada
-        {
-            get
-            {
-                if (Fecha.Date == DateTime.Today)
-                    return $"Hoy, {Fecha:hh:mm tt}";
-                if (Fecha.Date == DateTime.Today.AddDays(-1))
-                    return $"Ayer, {Fecha:hh:mm tt}";
-                return $"{Fecha:dd/MM/yy}, {Fecha:hh:mm tt}";
-            }
-        }
-
-        public decimal Subtotal => Detalles.Sum(d => d.Subtotal);
-        public decimal Total => Subtotal + CostoEnvio;
-        public int CantidadProductos => Detalles.Sum(d => d.Cantidad);
-    }
 
     public class DetallePedido
     {
