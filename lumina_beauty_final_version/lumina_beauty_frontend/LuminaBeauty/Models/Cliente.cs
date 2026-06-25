@@ -10,6 +10,7 @@ namespace LuminaBeauty.Servicios.Modelo
         [JsonPropertyName("nivel_cliente")]
         public string NivelCliente { get; set; } = "BRONCE";
 
-
+        [JsonPropertyName("direccion_principal")]
+        public Direccion? DireccionPrincipal { get; set; }
     }
 }
