@@ -291,12 +291,13 @@
                 _password
             );
 
-            if (resultado != null)
-            {
-                await Auth.LoginAsync();
-                Toast.ShowToast(LangService.Translate("signupToastSuccess"));
-                Navigator.NavigateTo("/profile");
-            }
+            if (resultado != null &&
+    await Auth.RegistrarEIniciarSesionAsync(resultado))
+{
+    Toast.ShowToast(LangService.Translate("signupToastSuccess"));
+    Navigator.NavigateTo("/profile");
+    return;
+}
             else
             {
                 Toast.ShowToast(LangService.CurrentLanguage == "es"

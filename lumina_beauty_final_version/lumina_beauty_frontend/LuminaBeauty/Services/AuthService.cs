@@ -113,5 +113,16 @@ namespace LuminaBeauty.Services
 
             OnChange?.Invoke();
         }
+
+public async Task<bool> RegistrarEIniciarSesionAsync(Cliente? cliente)
+{
+    if (cliente == null || cliente.Id <= 0)
+    {
+        return false;
+    }
+
+    await SetLoggedInAsync(cliente);
+    return true;
+}
     }
 }
