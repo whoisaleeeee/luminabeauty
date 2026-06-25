@@ -39,6 +39,7 @@ builder.Services.AddScoped<AuthRestService>();
 builder.Services.AddScoped<PedidoRestService>();
 builder.Services.AddScoped<DireccionRestService>();
 builder.Services.AddScoped<MovimientoPuntosFidelidadRestService>();
+builder.Services.AddScoped<EnvioRestService>();
 
 // Servicios de aplicación: lógica de la interfaz
 builder.Services.AddScoped<LocalStorageService>();
@@ -48,15 +49,16 @@ builder.Services.AddScoped<WishlistService>();
 builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<LayoutStateService>();
 builder.Services.AddScoped<ToastService>();
-
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<HomeService>();
+
 builder.Services.AddScoped<ClienteAppService>();
 builder.Services.AddScoped<ProfileAppService>();
 builder.Services.AddScoped<CarroAppService>();
 builder.Services.AddScoped<PedidoAppService>();
 builder.Services.AddScoped<CheckoutAppService>();
 builder.Services.AddScoped<MovimientoPuntosAppService>();
+builder.Services.AddScoped<EnvioAppService>();
 
 
 var app = builder.Build();
