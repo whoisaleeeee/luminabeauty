@@ -36,7 +36,7 @@ namespace SoluLumina.Models
         public int Stock { get => stock; set => stock = value; }
         [JsonProperty("tipoPiel")]
         public string Tipo_piel { get => tipo_piel; set => tipo_piel = value; }
-        [JsonProperty("imagen_url")]
+        [JsonProperty("imagenUrl")]
         public string Imagen_url { get => imagen_url; set => imagen_url = value; }
         [JsonProperty("estado")]
         public int Estado { get => estado; set => estado = value; }
