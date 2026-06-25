@@ -126,10 +126,12 @@
                     <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Estado</label>
                     <select class="form-select bg-light border-1 text-secondary" @bind="filtroEstado" @bind:after="Buscar">
                         <option value="Todos">Todos</option>
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="Preparando">Preparando</option>
-                        <option value="En Camino">En Camino</option>
-                        <option value="Entregado">Entregado</option>
+                        <option value="PENDIENTE">Pendiente</option>
+                        <option value="CONFIRMADO">Confirmado</option>
+                        <option value="EN_PROCESO">En Proceso</option>
+                        <option value="ENVIADO">Enviado</option>
+                        <option value="ENTREGADO">Entregado</option>
+                        <option value="CANCELADO">Cancelado</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-2">
@@ -167,24 +169,24 @@
                         @{ int rowNumber = 1; }
                         @if (PedidosPaginados.Any())
                         {
-                            @foreach (var pedido in todosLosPedidos)
+                            @foreach (var pedido in PedidosPaginados)
                             {
                                 <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
-                                    <td class="text-center text-muted small" style="width: 0.2%;">@(rowNumber++)</td>
+                                    <td class="text-center text-muted small" style="width: 0.2%;">@(((paginaActual - 1) * itemsPorPagina) + rowNumber++)</td>
 
                                     <td class="py-2 px-3 font-monospace text-secondary fw-bold" style="width: 1%; white-space: nowrap; font-size: 0.85rem;">
                                         @pedido.Codigo_pedido
                                     </td>
 
                                     <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@pedido.Cliente.Nombres @pedido.Cliente.Apellidos">
-                                            @pedido.Cliente.Apellidos
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@(pedido.Cliente != null ? $"{pedido.Cliente.Nombres} {pedido.Cliente.Apellidos}" : "")">
+                                            @(pedido.Cliente != null ? $"{pedido.Cliente.Nombres} {pedido.Cliente.Apellidos}" : "Sin Cliente")
                                         </div>
                                     </td>
 
-                                    <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
-                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@pedido.Cliente.Nombres @pedido.Cliente.Apellidos">
-                                            @pedido.Cliente.Nombres @pedido.Fecha_creacion
+                                    <td class="py-2 px-3 text-center" style="width: 1%; white-space: nowrap;">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;">
+                                            @pedido.Fecha_creacion.ToString("dd/MM/yyyy HH:mm:ss")
                                         </div>
                                     </td>
 
@@ -283,8 +285,8 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;"></div>
                                     <div>
-                                        <p class="m-0 fw-bold text-dark">@pedidoSeleccionado.Cliente</p>
-                                        <small class="text-muted">cliente@ejemplo.com</small>
+                                        <p class="m-0 fw-bold text-dark">@(pedidoSeleccionado.Cliente != null ? $"{pedidoSeleccionado.Cliente.Nombres} {pedidoSeleccionado.Cliente.Apellidos}" : "Sin Cliente")</p>
+                                        <small class="text-muted">@(pedidoSeleccionado.Cliente?.Correo ?? "")</small>
                                     </div>
                                 </div>
                             </div>
@@ -307,11 +309,17 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var prod in pedidoSeleccionado.Detalles)
+                                    @if (pedidoSeleccionado.Detalles != null)
                                     {
-                                        <tr>
-                                            
-                                        </tr>
+                                        @foreach (var prod in pedidoSeleccionado.Detalles)
+                                        {
+                                            <tr>
+                                                <td class="border-0">@prod.Nombre_producto</td>
+                                                <td class="border-0 text-center">@prod.Cantidad</td>
+                                                <td class="border-0 text-end">S/ @prod.PrecioUnitario.ToString("F2")</td>
+                                                <td class="border-0 text-end">S/ @prod.Subtotal.ToString("F2")</td>
+                                            </tr>
+                                        }
                                     }
                                 </tbody>
                                 <tfoot>
@@ -335,10 +343,12 @@
                         <div class="d-flex align-items-center gap-3 bg-light p-2 px-3 rounded-4 border">
                             <label class="fw-bold small text-muted text-uppercase m-0" style="letter-spacing: 0.5px; font-size: 0.75rem;">Cambiar Estado:</label>
                             <select class="form-select form-select-sm shadow-none border-0 fw-bold text-dark" style="width: 140px; background-color: transparent;" @bind="nuevoEstadoTemp">
-                                <option value="Pendiente">Pendiente</option>
-                                <option value="Preparando">Preparando</option>
-                                <option value="En Camino">En Camino</option>
-                                <option value="Entregado">Entregado</option>
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="CONFIRMADO">Confirmado</option>
+                                <option value="EN_PROCESO">En Proceso</option>
+                                <option value="ENVIADO">Enviado</option>
+                                <option value="ENTREGADO">Entregado</option>
+                                <option value="CANCELADO">Cancelado</option>
                             </select>
                             <button type="button" class="btn text-white rounded-3 px-3 shadow-sm btn-sm fw-medium d-flex align-items-center gap-1" style="background-color: #834a5d;" @onclick="GuardarEstado">
                                 <i class="bi bi-check2-circle"></i> Guardar
@@ -401,7 +411,16 @@
             if (!string.IsNullOrWhiteSpace(filtroId))
             {
                 var fId = filtroId.Replace("#ORD-", "").Trim();
-                query = query.Where(p => p.Id_pedido.ToString().Contains(fId));
+                query = query.Where(p => p.Id_pedido.ToString().Contains(fId) || 
+                                         (p.Codigo_pedido != null && p.Codigo_pedido.Contains(fId, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtroCliente))
+            {
+                var fCliente = filtroCliente.Trim();
+                query = query.Where(p => p.Cliente != null && 
+                    ((p.Cliente.Nombres != null && p.Cliente.Nombres.Contains(fCliente, StringComparison.OrdinalIgnoreCase)) ||
+                     (p.Cliente.Apellidos != null && p.Cliente.Apellidos.Contains(fCliente, StringComparison.OrdinalIgnoreCase))));
             }
 
             if (filtroEstado != "Todos")
@@ -472,9 +491,21 @@
     {
         if (pedidoSeleccionado != null && pedidoSeleccionado.Estado != nuevoEstadoTemp)
         {
-            pedidoSeleccionado.Estado = nuevoEstadoTemp;
-            mensajeExito = $"¡Éxito! El estado del pedido {pedidoSeleccionado.Id_pedido} ha sido actualizado a '{nuevoEstadoTemp}'.";
-            
+            try
+            {
+                await new HttpClientUtils<Pedido>().put(
+                    URL_BASE + $"/PedidoRS/actualizarEstado/{pedidoSeleccionado.Id_pedido}/{nuevoEstadoTemp}", 
+                    new object()
+                );
+                
+                await CargarDatos();
+                mensajeExito = $"¡Éxito! El estado del pedido {pedidoSeleccionado.Id_pedido} ha sido actualizado a '{nuevoEstadoTemp}'.";
+            }
+            catch (Exception ex)
+            {
+                mensajeExito = $"Error al actualizar el estado: {ex.Message}";
+            }
+
             // Refrescar para asegurar que la UI se actualice
             StateHasChanged();
 
@@ -487,22 +518,16 @@
 
     private string GetEstadoBgColor(string estado)
     {
-        return estado switch
+        if (string.IsNullOrEmpty(estado)) return "#f8f9fa";
+        return estado.ToUpper() switch
         {
-            "Pendiente" => "#f8d7da",
-            "Preparando" => "#fff3cd",
-            "En Camino" => "#cff4fc",
-            "Entregado" => "#e2f3eb",
+            "PENDIENTE" => "#f8d7da",
+            "CONFIRMADO" => "#fff3cd",
+            "EN_PROCESO" => "#fff3cd",
+            "ENVIADO" => "#cff4fc",
+            "ENTREGADO" => "#e2f3eb",
+            "CANCELADO" => "#e2e3e5",
             _ => "#f8f9fa"
         };
-    }
-
-
-    public class DetallePedido
-    {
-        public string Nombre { get; set; } = string.Empty;
-        public int Cantidad { get; set; }
-        public decimal PrecioUnitario { get; set; }
-        public decimal Subtotal => Cantidad * PrecioUnitario;
     }
 }
