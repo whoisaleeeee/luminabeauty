@@ -20,9 +20,9 @@
                     <i class="bi bi-list fs-5"></i>
                 </button>
                 <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Catálogo</h3>
-                
+
             </div>
-                
+
             <div class="d-flex align-items-center gap-3">
                 <!-- Search input removed, only title and profile remain -->
                 <button class="btn btn-link text-secondary position-relative p-1">
@@ -75,7 +75,7 @@
                     <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Productos.Count</h2>
                 </div>
             </div>
-            
+
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-tag position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
@@ -83,7 +83,7 @@
                     <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Marcas.Count</h2>
                 </div>
             </div>
-            
+
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-layers position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
@@ -91,7 +91,7 @@
                     <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Categorias.Count</h2>
                 </div>
             </div>
-            
+
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card border border-danger-subtle shadow-sm rounded-4 p-4 h-100 position-relative overflow-hidden" style="background-color: #fdf5f5;">
                     <i class="bi bi-exclamation-triangle position-absolute opacity-25" style="font-size: 5rem; top: -10px; right: -10px; color: #d9557b;"></i>
@@ -106,7 +106,7 @@
 
         <!-- Main Card -->
         <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
-            
+
             <!-- Filtros y Botón -->
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: #f7eff1 !important;">
                 <div class="d-flex flex-wrap gap-3">
@@ -116,18 +116,17 @@
                             <option value="0" selected>Todas las categorías</option>
                             @foreach (var cat in Categorias)
                             {
-                                <option value="@cat.Id">@cat.Nombre</option>
+                                <option value="@cat.Id_categoria">@cat.Nombre</option>
                             }
                         </select>
                     </div>
                     <div>
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de Piel</label>
                         <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnSkinTypeChanged">
-                            <option value="0" selected>Cualquiera</option>
-                            <option value="1">Normal</option>
-                            <option value="2">Seca</option>
-                            <option value="3">Grasa</option>
-                            <option value="4">Mixta</option>
+                            @foreach (var tipo_piel in Tipo_piel)
+                            {
+                                <option value="@tipo_piel">@tipo_piel </option>
+                            }
                         </select>
                     </div>
                     <div>
@@ -154,27 +153,29 @@
             <!-- Tabla de Productos Mejorada -->
             <div class="table-responsive">
                 <table class="table align-middle table-hover m-0">
-                     <thead class="bg-light">
-                         <tr>
-                             <th class="text-center">No.</th>
-                             <th>    Producto</th>
-                             <th>Categoría</th>
-                             <th>Piel</th>
-                             <th class="text-center">Precio</th>
-                             <th class="text-center">Stock</th>
-                             <th class="text-center">Acciones</th>
-                         </tr>
-                     </thead>
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="text-center">No.</th>
+                            <th>    Producto</th>
+                            <th>Categoría</th>
+                            <th>Piel</th>
+                            <th class="text-center">Precio</th>
+                            <th class="text-center">Stock</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
-                        @{ int rowNumber = 1; }
-                        @foreach(var p in Productos)
+                        @{
+                            int rowNumber = 1;
+                        }
+                        @foreach (var p in FilteredProducts)
                         {
                             <tr class="border-bottom" style="border-color: #f7eff1 !important;">
                                 <td class="text-center">@(rowNumber++)</td>
                                 <td class="py-3 px-4">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
-                                            @if(!string.IsNullOrEmpty(p.Imagen_url))
+                                            @if (!string.IsNullOrEmpty(p.Imagen_url))
                                             {
                                                 <img src="@p.Imagen_url" alt="Producto" class="w-100 h-100 object-fit-cover" />
                                             }
@@ -189,19 +190,19 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Categoria?.Nombre</span></td>
-                                <td class="text-secondary">@p.Tipo_piel</td>
+                                <td class="fw-bold text-dark">@p.Categoria?.Nombre</td>
+                                <td class="fw-bold text-dark">@p.Tipo_piel</td>
                                 <td class="fw-bold text-dark">S/ @p.Precio.ToString("F2")</td>
-                                <td class="text-center"><span class="badge rounded-pill fw-medium" padding: 0.4em 0.8em;">@p.Stock uds</span></td>
+                                <td class="fw-bold text-dark">@p.Stock uds.</td>
                                 <td class="py-3 px-4 text-end">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar" @onclick="() => EditProduct(p)">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                                    <button class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar" @onclick="() => DeleteProduct(p)">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm btn-light text-primary rounded-circle" title="Modificar" @onclick="() => EditProduct(p)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light text-danger rounded-circle" title="Eliminar" @onclick="() => DeleteProduct(p)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -230,7 +231,7 @@
 
 </div>
 
-<AddProductModal @bind-IsVisible="showAddProductModal" OnProductAdded="OnProductAdded" Categorias="Categorias" Marcas="Marcas" />
+<AddProductModal @bind-IsVisible="showAddProductModal" OnProductAdded="OnProductAdded" Categorias="Categorias" Marcas="Marcas" Tipo_piel="Tipo_piel" />
 <EditProductModal @bind-IsVisible="showEditProductModal" Product="selectedProduct" OnProductUpdated="OnProductUpdated" Categorias="Categorias" Marcas="Marcas" />
 
 @code {
@@ -239,11 +240,11 @@
     private List<Producto> Productos = new List<Producto>();
     private List<CategoriaProducto> Categorias = new();
     private List<Marca> Marcas = new();
+    private List<string> Tipo_piel = new() { "TODOS", "NORMAL", "SECA", "GRASA", "MIXTA", "SENSIBLE" };
 
     private int selectedCategoryId = 0;
     private int selectedBrandId = 0;
-    private int selectedSkinTypeId = 0;
-    private string searchTerm = string.Empty;
+    private string selectedSkinType = string.Empty;
 
     private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
 
@@ -254,14 +255,15 @@
 
     private async Task CargarDatos()
     {
-        Productos = new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS");
-        Marcas = new HttpClientUtils<List<Marca>>().get(URL_BASE + "/MarcaRS");
+        Productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar");
+        Marcas = await new HttpClientUtils<List<Marca>>().get(URL_BASE + "/MarcaRS/listar");
+        Categorias = await new HttpClientUtils<List<CategoriaProducto>>().get(URL_BASE + "/CategoriaProductoRS/listar");
 
-        // Mapear los nombres de categoría y marca a los productos si los traen solo con ID
-        foreach(var p in Productos)
+        foreach (var p in Productos)
         {
-            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id == p.Categoria.Id);
+            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id_categoria == p.Categoria.Id_categoria);
             if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id_marca == p.Marca.Id_marca);
+            if (string.IsNullOrEmpty(p.Tipo_piel)) p.Tipo_piel = "TODOS";
         }
     }
 
@@ -288,42 +290,27 @@
 
     private void OnSkinTypeChanged(ChangeEventArgs e)
     {
-        if (int.TryParse(e.Value?.ToString(), out var id))
-        {
-            selectedSkinTypeId = id;
-        }
-    }
-
-    private string GetSkinTypeName(int id)
-    {
-        return id switch
-        {
-            1 => "Normal",
-            2 => "Seca",
-            3 => "Grasa",
-            4 => "Mixta",
-            _ => string.Empty,
-        };
+        selectedSkinType = e.Value?.ToString() ?? "TODOS";
     }
 
     private void OpenAddProductModal()
     {
         showAddProductModal = true;
+
     }
 
-    private IEnumerable<Producto> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => p.Categoria?.Id == selectedCategoryId);
+    private IEnumerable<Producto> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => p.Categoria?.Id_categoria == selectedCategoryId);
 
     private IEnumerable<Producto> FilteredProducts => FilteredByCategory
-        //.Where(p => selectedBrandId == 0 || p.Marca?.Id == selectedBrandId)
-        .Where(p => selectedSkinTypeId == 0 || (p.Tipo_piel != null && p.Tipo_piel.Equals(GetSkinTypeName(selectedSkinTypeId), StringComparison.OrdinalIgnoreCase)))
-        .Where(p => string.IsNullOrWhiteSpace(searchTerm) || (p.Nombre != null && p.Nombre.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) || (p.Slug != null && p.Slug.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+        .Where(p => selectedBrandId == 0 || p.Marca?.Id_marca == selectedBrandId)
+        .Where(p => string.IsNullOrEmpty(selectedSkinType) || p.Tipo_piel == selectedSkinType);
 
     private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
 
     private async Task OnProductAdded(Producto newProduct)
     {
         showAddProductModal = false;
-        await ProductoService.InsertarAsync(newProduct);
+        Producto newP = await new HttpClientUtils<Producto>().post(URL_BASE + "/ProductoRS/registrar", newProduct);
         await CargarDatos();
     }
 
@@ -345,8 +332,8 @@
     private async Task DeleteProduct(Producto product)
     {
         // En una app real, aquí se pondría un confirm de JS
-        var exito = await ProductoService.EliminarAsync(product.Id_producto);
-        if (exito)
+        var exito = await new HttpClientUtils<int>().delete(URL_BASE + "/ProductoRS/eliminar/" + product.Id_producto);
+        if (exito != 0)
         {
             await CargarDatos();
         }

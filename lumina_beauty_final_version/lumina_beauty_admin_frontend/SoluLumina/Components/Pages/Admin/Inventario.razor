@@ -297,7 +297,7 @@
 
     private async Task CargarDatos()
     {
-        Productos = new HttpClientUtils<List<Producto>>().get(url_listar_Productos);
+        Productos = await new HttpClientUtils<List<Producto>>().get(url_listar_Productos);
     }
 
     private void ToggleProfileDropdown()

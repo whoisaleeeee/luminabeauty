@@ -1,4 +1,6 @@
 @using SoluLumina.Models
+@using SoluLumina.Components.Pages.Admin
+
 @if (IsVisible)
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
@@ -27,12 +29,16 @@
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Slug / Código</label>
                                 <input type="text" class="form-control bg-light border-1 font-monospace text-muted" placeholder="GLAM-CR-001" @bind="NewProduct.Slug" />
                             </div>
+                            <div class="col-12 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">SKU</label>
+                                <input type="text" class="form-control bg-light border-1 font-monospace text-muted" placeholder="GLAM-CR-001" @bind="NewProduct.Sku" />
+                            </div>
                         </div>
                         <div class="row g-3">
                             <div class="col-12">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
-                                <select class="form-select bg-light border-1 text-secondary" @bind="marcaId">
-                                    <option value="0" selected>Seleccionar marca...</option>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="marcaId" required>
+                                    <option disabled selected hidden>Seleccionar marca...</option>
                                     @foreach (var m in Marcas)
                                     {
                                         <option value="@m.Id_marca">@m.Nombre</option>
@@ -51,22 +57,22 @@
                         <div class="row g-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
-                                <select class="form-select bg-light border-1 text-secondary" @bind="catId">
-                                    <option value="0" selected>Seleccionar categoría...</option>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="catId" required>
+                                    <option disabled selected hidden>Seleccionar categoria...</option>
                                     @foreach (var c in Categorias)
                                     {
-                                        <option value="@c.Id">@c.Nombre</option>
+                                        <option value="@c.Id_categoria">@c.Nombre</option>
                                     }
                                 </select>
                             </div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel</label>
-                                <select class="form-select bg-light border-1 text-secondary" @bind="NewProduct.Tipo_piel">
-                                    <option value="" selected>Seleccionar tipo de piel...</option>
-                                    <option value="Normal">Normal</option>
-                                    <option value="Seca">Seca</option>
-                                    <option value="Grasa">Grasa</option>
-                                    <option value="Mixta">Mixta</option>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="NewProduct.Tipo_piel" required>
+                                    <option value="" disabled selected hidden>Seleccionar tipo de piel...</option>
+                                    @foreach (var t in Tipo_piel)
+                                    {
+                                        <option value="@t">@t</option>
+                                    }
                                 </select>
                             </div>
                         </div>
@@ -83,12 +89,12 @@
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted">$</span>
-                                    <input type="text" class="form-control bg-light border-start-0" placeholder="0.00" @bind="NewProduct.Precio" />
+                                    <input type="number" class="form-control bg-light border-start-0" placeholder="0.00" min="0.00" @bind="NewProduct.Precio" />
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Stock Actual</label>
-                                <input type="number" class="form-control bg-light border-1" @bind="NewProduct.Stock" />
+                                <input type="number" class="form-control bg-light border-1" min="0" @bind="NewProduct.Stock" />
                             </div>
                         </div>
                     </div>
@@ -139,6 +145,9 @@
     [Parameter]
     public List<Marca> Marcas { get; set; } = new();
 
+    [Parameter]
+    public List<string> Tipo_piel { get; set; } = new();
+
     private Producto NewProduct = new Producto();
     private int catId = 0;
     private int marcaId = 0;
@@ -151,10 +160,10 @@
 
     private async Task SaveProduct()
     {
-        if (catId != 0) NewProduct.Categoria = new CategoriaProducto { Id = catId };
+        if (catId != 0) NewProduct.Categoria = new CategoriaProducto { Id_categoria = catId };
         if (marcaId != 0) NewProduct.Marca = new Marca { Id_marca = marcaId };
         NewProduct.Estado = 1; // Default status active
-        
+
         await OnProductAdded.InvokeAsync(NewProduct);
         // Reset form for next entry
         NewProduct = new Producto();
