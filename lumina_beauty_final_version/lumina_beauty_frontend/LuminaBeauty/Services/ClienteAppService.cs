@@ -3,23 +3,19 @@ using LuminaBeauty.Servicios.REST;
 
 namespace LuminaBeauty.Services
 {
-    /// <summary>
-    /// Servicio de aplicación para operaciones relacionadas con el Cliente.
-    /// Delega las llamadas REST al ClienteRestService de Servicios/REST/.
-    /// </summary>
     public class ClienteAppService
     {
         private readonly ClienteRestService _clienteRestService;
+        private readonly DireccionRestService _direccionRestService;
 
-        public ClienteAppService(ClienteRestService clienteRestService)
+        public ClienteAppService(
+            ClienteRestService clienteRestService,
+            DireccionRestService direccionRestService)
         {
             _clienteRestService = clienteRestService;
+            _direccionRestService = direccionRestService;
         }
 
-        /// <summary>
-        /// Registra un nuevo cliente en la base de datos via REST.
-        /// Retorna el cliente registrado o null si falla.
-        /// </summary>
         public async Task<Cliente?> RegistrarClienteAsync(
             string nombre,
             string apellido,
@@ -42,9 +38,46 @@ namespace LuminaBeauty.Services
             return await _clienteRestService.RegistrarClienteAsync(nuevoCliente);
         }
 
-        /// <summary>
-        /// Suma puntos de fidelidad al cliente tras una compra exitosa.
-        /// </summary>
+        public Task<Cliente?> ObtenerClienteAsync(int idCliente)
+        {
+            return _clienteRestService.BuscarClienteAsync(idCliente);
+        }
+
+        public Task<Cliente?> ActualizarClienteAsync(Cliente cliente)
+        {
+            return _clienteRestService.ActualizarClienteAsync(cliente);
+        }
+
+        public Task<List<Direccion>> ObtenerDireccionesAsync(int idCliente)
+        {
+            return _direccionRestService.ListarPorClienteAsync(idCliente);
+        }
+
+        public Task<Direccion?> GuardarDireccionAsync(Direccion direccion)
+        {
+            return direccion.IdDireccion > 0
+                ? _direccionRestService.ActualizarAsync(direccion)
+                : _direccionRestService.RegistrarAsync(direccion);
+        }
+
+        public Task<bool> EliminarDireccionAsync(int idDireccion)
+        {
+            return _direccionRestService.EliminarAsync(idDireccion);
+        }
+
+        public async Task<bool> MarcarDireccionPrincipalAsync(
+            Cliente cliente,
+            Direccion direccion)
+        {
+            cliente.DireccionPrincipal = direccion;
+
+            var actualizado = await _clienteRestService.ActualizarClienteAsync(
+                cliente
+            );
+
+            return actualizado != null;
+        }
+
         public async Task<int> SumarPuntosAsync(int idCliente, int puntos)
         {
             return await _clienteRestService.SumarPuntosAsync(idCliente, puntos);
