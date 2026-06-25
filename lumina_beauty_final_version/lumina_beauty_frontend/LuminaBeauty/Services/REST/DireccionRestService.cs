@@ -16,20 +16,95 @@ namespace LuminaBeauty.Servicios.REST
         {
             try
             {
-                using var response = await _http.GetAsync($"webresources/DireccionRS/listarPorCliente/{idCliente}");
+                using var response = await _http.GetAsync(
+                    $"webresources/DireccionRS/listarPorCliente/{idCliente}"
+                );
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine($"DireccionRS/listarPorCliente falló con estado {(int)response.StatusCode}.");
-                    return new List<Direccion>();
+                    Console.WriteLine(
+                        $"DireccionRS/listarPorCliente falló con estado {(int)response.StatusCode}."
+                    );
+
+                    return [];
                 }
 
-                return await response.Content.ReadFromJsonAsync<List<Direccion>>() ?? new List<Direccion>();
+                return await response.Content.ReadFromJsonAsync<List<Direccion>>()
+                    ?? [];
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al listar direcciones del cliente: {ex.Message}");
-                return new List<Direccion>();
+                Console.WriteLine(
+                    $"Error al listar direcciones del cliente: {ex.Message}"
+                );
+
+                return [];
+            }
+        }
+
+        public async Task<Direccion?> RegistrarAsync(Direccion direccion)
+        {
+            try
+            {
+                using var response = await _http.PostAsJsonAsync(
+                    "webresources/DireccionRS/registrar",
+                    direccion
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Direccion>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<Direccion?> ActualizarAsync(Direccion direccion)
+        {
+            try
+            {
+                using var response = await _http.PutAsJsonAsync(
+                    "webresources/DireccionRS/actualizar",
+                    direccion
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Direccion>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> EliminarAsync(int idDireccion)
+        {
+            try
+            {
+                using var response = await _http.DeleteAsync(
+                    $"webresources/DireccionRS/eliminar/{idDireccion}"
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return false;
+                }
+
+                var result = await response.Content.ReadFromJsonAsync<int>();
+                return result == 1;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

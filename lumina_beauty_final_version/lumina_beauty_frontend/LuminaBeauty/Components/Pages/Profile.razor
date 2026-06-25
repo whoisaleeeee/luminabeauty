@@ -1,13 +1,12 @@
 @page "/profile"
 @using LuminaBeauty.Servicios.Modelo
-@using LuminaBeauty.Servicios.REST
 @inject LanguageService LangService
 @inject AuthService Auth
 @inject WishlistService Wishlist
 @inject ProductService ProductCache
 @inject ToastService Toast
 @inject NavigationManager Navigator
-@inject ClienteRestService ClienteRest
+@inject ProfileAppService ProfileApp
 @implements IDisposable
 
 <PageTitle>Mi Cuenta VIP | Lumina Beauty</PageTitle>
@@ -28,22 +27,30 @@
             <div class="w-14 h-14 bg-[#FFF0F3] text-[#FF76A5] border border-[#FCD1DB]/50 rounded-full flex items-center justify-center mx-auto text-xl font-bold select-none">
                 <span>🔒</span>
             </div>
+
             <div class="space-y-1 select-none">
-                <h2 class="font-serif text-2xl font-bold text-stone-900 leading-tight">Acceso Exclusivo VIP</h2>
+                <h2 class="font-serif text-2xl font-bold text-stone-900 leading-tight">
+                    Acceso Exclusivo VIP
+                </h2>
+
                 <p class="text-[11px] text-stone-500 font-bold max-w-xs mx-auto leading-relaxed">
-                    Inicia sesión para poder visualizar tus pedidos de lujo, configurar tu dirección de despacho y administrar tu lista de deseos personalizada.
+                    Inicia sesión para visualizar tu información, direcciones de entrega,
+                    pedidos y lista de deseos.
                 </p>
             </div>
+
             <button @onclick='() => NavigateTo("/login")'
                     class="w-full bg-[#FF76A5] hover:bg-[#C7346A] tracking-wider font-bold text-xs uppercase text-white py-3.5 rounded-xl transition duration-300 shadow cursor-pointer select-none">
                 Ingresar / Crear Cuenta
             </button>
         </div>
     }
-    else if (_isLoadingProfile)
+    else if (ProfileApp.State.IsLoadingProfile)
     {
         <div class="bg-white/75 backdrop-blur-md border border-[#FCD1DB]/50 rounded-[32px] p-10 text-center max-w-md mx-auto shadow-xl">
-            <p class="text-sm text-stone-500 font-bold">Cargando información de tu perfil...</p>
+            <p class="text-sm text-stone-500 font-bold">
+                Cargando información de tu perfil...
+            </p>
         </div>
     }
     else
@@ -52,136 +59,140 @@
 
             <div class="lg:col-span-4 space-y-6">
 
-                <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-xs relative text-center">
+                <div class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/80 p-6 text-center shadow-md backdrop-blur-md">
 
-                    <div class="relative w-24 h-24 mx-auto mb-4">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
-                             alt="Miembro VIP Lumina"
-                             class="w-24 h-24 rounded-full object-cover border-2 border-[#FCD1DB] p-0.5" />
-                        <div class="absolute bottom-0 right-1 w-6 h-6 bg-white border border-stone-100 rounded-full flex items-center justify-center shadow-xs text-[10px] select-none">
-                            ✨
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-[#FFF0F3] via-white to-[#FFF0F3] opacity-80"></div>
+
+                    <div class="relative">
+                        <div class="relative mx-auto mb-4 h-24 w-24">
+                            <div class="flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#FCD1DB] bg-gradient-to-br from-[#FFF0F3] to-[#FCD1DB] font-serif text-2xl font-bold text-[#C7346A] shadow-sm select-none">
+                                @ProfileApp.ObtenerInicialesCliente()
+                            </div>
+
+                            <div class="absolute bottom-0 right-1 flex h-6 w-6 items-center justify-center rounded-full border border-stone-100 bg-white text-[10px] shadow-xs select-none">
+                                ✨
+                            </div>
                         </div>
-                    </div>
 
-                    <h2 class="font-serif text-2xl font-semibold text-stone-900">
-                        @_profileName
-                    </h2>
+                        <h2 class="font-serif text-2xl font-semibold leading-tight text-stone-900">
+                            @($"{ProfileApp.State.ProfileFirstName} {ProfileApp.State.ProfileLastName}".Trim())
+                        </h2>
 
-                    <p class="text-[10px] uppercase font-bold tracking-widest text-stone-400 mt-1 mb-6 select-none">
-                        MIEMBRO LUMINA VIP
-                    </p>
-
-                    <div class="space-y-3 text-left max-w-xs mx-auto px-2 text-stone-500 text-xs font-medium border-t border-stone-50 pt-5 pb-6">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[#C7346A] text-sm select-none">✉</span>
-                            <span class="truncate">@_profileEmail</span>
+                        <div class="mt-2 flex items-center justify-center gap-2">
+                            <span class="rounded-full border border-[#FCD1DB]/70 bg-[#FFF0F3] px-3 py-1 text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
+                                Miembro @ProfileApp.State.CurrentClient?.NivelCliente
+                            </span>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-[#C7346A] text-sm select-none">📞</span>
-                            <span>@_profilePhone</span>
+
+                        <div class="mx-auto mt-6 max-w-xs space-y-3 border-y border-stone-100 py-4 text-left text-xs font-medium text-stone-500">
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FFF0F3] text-sm text-[#C7346A] select-none">
+                                    ✉
+                                </span>
+                                <span class="min-w-0 truncate">@ProfileApp.State.ProfileEmail</span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#FFF0F3] text-sm text-[#C7346A] select-none">
+                                    📞
+                                </span>
+                                <span>@ProfileApp.State.ProfilePhone</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="flex items-center gap-2 mt-2 select-none">
-                        <button @onclick='() => SetActiveTab("detalles")'
-                                class="flex-1 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-[10px] font-bold uppercase tracking-wider py-3 px-4 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer shadow-2xs">
-                            <span>✏️</span> EDITAR PERFIL
-                        </button>
+                        @if (ProfileApp.State.CurrentClient is not null)
+                        {
+                            <div class="mt-5 grid grid-cols-2 overflow-hidden rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/50 text-left">
+                                <div class="border-r border-[#FCD1DB]/50 px-4 py-3">
+                                    <p class="text-[8px] font-black uppercase tracking-widest text-[#C7346A]">
+                                        Puntos Lumina
+                                    </p>
 
-                        <button @onclick="LogOff"
-                                class="w-12 bg-stone-900 hover:bg-red-600 text-white py-3 rounded-xl transition flex items-center justify-center cursor-pointer shadow-2xs"
-                                title="Cerrar sesión">
-                            <span>↳</span>
-                        </button>
-                    </div>
-                </div>
+                                    <p class="mt-1 text-lg font-bold text-stone-900">
+                                        @ProfileApp.State.CurrentClient.PuntosFidelidad
+                                    </p>
+                                </div>
 
-                <div class="bg-white/40 border border-stone-100/70 p-2.5 rounded-2xl space-y-1 select-none">
-                    @foreach (var tab in _profileTabs)
-                    {
-                        var tCode = tab.Key;
-                        var tLabel = tab.Value;
-                        var isActive = _activeTab == tCode;
+                                <div class="px-4 py-3">
+                                    <p class="text-[8px] font-black uppercase tracking-widest text-[#C7346A]">
+                                        Categoría
+                                    </p>
 
-                        <button @onclick="() => SetActiveTab(tCode)"
-                                class="w-full text-left px-4 py-3 rounded-xl text-xs font-semibold tracking-wide transition flex items-center justify-between cursor-pointer @(isActive ? "bg-[#FFF0F3] text-[#C7346A] shadow-xs border-l-2 border-[#FF76A5]" : "text-stone-600 hover:bg-white")">
-                            <span>@tLabel</span>
-                            @if (isActive)
-                            {
-                                <span>➔</span>
-                            }
-                        </button>
-                    }
-                </div>
+                                    <p class="mt-1 text-sm font-bold text-stone-900">
+                                        @ProfileApp.State.CurrentClient.NivelCliente
+                                    </p>
+                                </div>
+                            </div>
+                        }
 
-                <div class="bg-white rounded-[2rem] border border-stone-100 p-6 shadow-xs text-left space-y-5 select-none">
-
-                    <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 bg-[#FFF0F3] text-[#FF76A5] rounded-xl flex items-center justify-center text-xs">
-                            ⚙️
-                        </div>
-                        <h3 class="font-serif text-sm font-bold text-stone-800">Ajustes de Cuenta</h3>
-                    </div>
-
-                    <div class="space-y-2">
-                        <label class="text-[9px] font-black uppercase text-stone-400 tracking-wider block">Preferencia de Idioma</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button class="bg-[#FFF0F3] text-[#C7346A] border border-[#FF76A5]/25 text-[11px] font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
-                                🌐 Español
+                        <div class="mt-5 border-t border-stone-100 pt-4 select-none">
+                            <button @onclick="LogOff"
+                                    class="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-900 bg-stone-900 px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-white shadow-2xs transition hover:border-red-500 hover:bg-red-600 cursor-pointer">
+                                <span>↳</span>
+                                Cerrar sesión
                             </button>
-                            <button class="bg-white hover:bg-stone-50 border border-stone-200 text-stone-500 text-[11px] font-bold py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
-                                🌐 English
-                            </button>
+
+                            <p class="mt-2 text-center text-[9px] font-medium text-stone-400">
+                                Cierra tu sesión en este dispositivo.
+                            </p>
                         </div>
                     </div>
-
-                    <div class="space-y-2.5 pt-1">
-                        <label class="text-[9px] font-black uppercase text-stone-400 tracking-wider block">Preferencias de Notificación</label>
-                        <div class="space-y-2 text-[11px] font-bold text-stone-600">
-                            <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="checkbox" checked class="accent-[#FF76A5] h-3.5 w-3.5 rounded" />
-                                <span>Ofertas y Promociones Exclusivas</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="checkbox" checked class="accent-[#FF76A5] h-3.5 w-3.5 rounded" />
-                                <span>Consejos de Skincare Semanales</span>
-                            </label>
-                            <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="checkbox" checked class="accent-[#FF76A5] h-3.5 w-3.5 rounded" />
-                                <span>Estado de mis Órdenes y Entregas</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="pt-2">
-                        <button @onclick="TriggerPasswordReset"
-                                class="w-full bg-[#FFF0F3] hover:bg-[#FF76A5]/20 text-[#C7346A] text-[10px] font-bold uppercase tracking-wider py-3 rounded-xl transition flex items-center justify-center gap-2 cursor-pointer">
-                            🔒 Cambiar Contraseña
-                        </button>
-                    </div>
-
                 </div>
-
             </div>
 
-            <div class="lg:col-span-8 bg-white/70 backdrop-blur-md rounded-3xl border border-stone-100 p-6 sm:p-8 shadow-md">
+            <div id="perfil-contenido"
+                 class="lg:col-span-8 bg-white/70 backdrop-blur-md rounded-3xl border border-white/70 px-6 pt-6 pb-6 sm:px-8 sm:pt-8 sm:pb-8 shadow-md scroll-mt-6">
 
-                @if (_activeTab == "detalles")
+                <div class="mb-6 border-b border-stone-100 pb-5">
+                    <div class="flex gap-2 overflow-x-auto pb-1">
+                        @foreach (var tab in _profileTabs)
+                        {
+                            var tCode = tab.Key;
+                            var tLabel = tab.Value;
+                            var isActive = ProfileApp.State.ActiveTab == tCode;
+
+                            <button @onclick="() => SetActiveTabAsync(tCode)"
+                                    class="shrink-0 rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider transition cursor-pointer @(isActive
+                                                                ? "bg-stone-900 text-white shadow-xs"
+                                                                : "border border-stone-200 bg-white text-stone-500 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                                @tLabel
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @if (ProfileApp.State.ActiveTab == "detalles")
                 {
                     <div class="space-y-6 animate-in fade-in duration-300 text-left">
                         <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
                             Configuración Personal de Belleza
                         </h3>
 
-                        <form @onsubmit="SaveDetails" @onsubmit:preventDefault class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <form @onsubmit="SaveDetailsAsync"
+                              @onsubmit:preventDefault
+                              class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
                             <div class="space-y-1">
                                 <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
-                                    Nombre completo
+                                    Nombres
                                 </label>
+
                                 <input type="text"
                                        required
-                                       placeholder="Nombre completo"
-                                       @bind="_profileName"
+                                       placeholder="Tus nombres"
+                                       @bind="ProfileApp.State.ProfileFirstName"
+                                       class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                            </div>
+
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
+                                    Apellidos
+                                </label>
+
+                                <input type="text"
+                                       required
+                                       placeholder="Tus apellidos"
+                                       @bind="ProfileApp.State.ProfileLastName"
                                        class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                             </div>
 
@@ -189,10 +200,11 @@
                                 <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
                                     Email registrado
                                 </label>
+
                                 <input type="email"
                                        required
                                        placeholder="correo@ejemplo.com"
-                                       @bind="_profileEmail"
+                                       @bind="ProfileApp.State.ProfileEmail"
                                        class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                             </div>
 
@@ -200,71 +212,538 @@
                                 <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
                                     Celular de contacto
                                 </label>
+
                                 <input type="tel"
                                        placeholder="999 999 999"
-                                       @bind="_profilePhone"
+                                       @bind="ProfileApp.State.ProfilePhone"
                                        class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                             </div>
 
-                            <button type="submit"
-                                    disabled="@_isSavingProfile"
-                                    class="sm:col-span-2 w-fit bg-stone-950 hover:bg-[#C7346A] tracking-wider uppercase font-bold text-[10px] text-white px-7 py-3 rounded-xl transition shadow-xs cursor-pointer select-none disabled:opacity-60 disabled:cursor-not-allowed">
-                                @(_isSavingProfile ? "Guardando..." : "Guardar Cambios")
-                            </button>
-                        </form>
-                    </div>
-                }
-                else if (_activeTab == "pedidos")
-                {
-                    <div class="space-y-6 animate-in fade-in duration-300 text-left">
-                        <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
-                            Historial de Pedidos de Lujo
-                        </h3>
+                            <div class="space-y-1">
+                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">
+                                    Documento de identidad
+                                </label>
 
-                        <div class="border border-[#FCD1DB]/50 rounded-2xl overflow-hidden p-5 space-y-5 bg-[#faf6f7]/20">
-
-                            <div class="flex flex-wrap justify-between items-center bg-white p-3 rounded-xl border border-stone-100 select-none text-[11px] font-bold text-stone-500 font-mono gap-2">
-                                <p>Pedido: <strong class="text-stone-900">#LUM-8924</strong></p>
-                                <p>Fecha: <strong class="text-stone-900">29/05/2026</strong></p>
-                                <p>Total: <strong class="text-[#C7346A]">S/ 399.00</strong></p>
-                                <p>Estado: <span class="bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full uppercase text-[9px] font-bold">En Tránsito</span></p>
+                                <input type="text"
+                                       value="@ProfileApp.State.CurrentClient?.Dni"
+                                       readonly
+                                       class="w-full bg-stone-50 border border-stone-200 text-xs font-bold rounded-xl px-3.5 py-2.5 text-stone-400 cursor-not-allowed" />
                             </div>
 
-                            <div class="py-4 select-none">
-                                <div class="grid grid-cols-3 relative text-center">
-                                    <div class="absolute top-2.5 left-1/6 right-1/6 h-0.5 bg-stone-200 -z-10" />
-                                    <div class="absolute top-2.5 left-1/6 w-1/3 h-0.5 bg-pink-500 -z-10 animate-pulse" />
+                            <button type="submit"
+                                    disabled="@ProfileApp.State.IsSavingProfile"
+                                    class="sm:col-span-2 w-fit bg-stone-950 hover:bg-[#C7346A] tracking-wider uppercase font-bold text-[10px] text-white px-7 py-3 rounded-xl transition shadow-xs cursor-pointer select-none disabled:opacity-60 disabled:cursor-not-allowed">
+                                @(ProfileApp.State.IsSavingProfile ? "Guardando..." : "Guardar Cambios")
+                            </button>
+                        </form>
 
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-6 h-6 rounded-full bg-[#FF76A5] text-white flex items-center justify-center font-bold text-[9px]">
-                                            ✓
-                                        </div>
-                                        <span class="text-[9px] font-black uppercase text-stone-800 tracking-wider mt-2 block">Preparado</span>
-                                        <span class="text-[8px] text-stone-400 font-mono">11:32 AM</span>
+                        <div class="rounded-2xl border border-[#FCD1DB]/55 bg-[#FFF0F3]/35 p-5">
+                            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                <div class="flex gap-3">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#C7346A] shadow-2xs">
+                                        ✉
                                     </div>
 
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-6 h-6 rounded-full bg-[#FF76A5] text-white flex items-center justify-center font-bold text-[9px]">
-                                            ✓
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                                            Comunicaciones Lumina
+                                        </p>
+
+                                        <h4 class="mt-1 text-sm font-bold text-stone-800">
+                                            Preferencias de correo
+                                        </h4>
+
+                                        <p class="mt-1 max-w-lg text-[11px] leading-relaxed text-stone-500">
+                                            Próximamente podrás elegir si deseas recibir novedades,
+                                            lanzamientos, beneficios de fidelidad y promociones por correo.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <span class="w-fit rounded-full border border-[#FCD1DB] bg-white px-3 py-1.5 text-[8px] font-black uppercase tracking-wider text-stone-400">
+                                    Próximamente
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                else if (ProfileApp.State.ActiveTab == "direcciones")
+                {
+                    <div class="space-y-6 animate-in fade-in duration-300 text-left">
+
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-4">
+                            <div>
+                                <h3 class="font-serif text-lg font-bold text-stone-900 uppercase text-xs tracking-widest text-[#C7346A]">
+                                    Direcciones de entrega
+                                </h3>
+
+                                <p class="mt-1 text-[11px] font-medium text-stone-500">
+                                    Gestiona las direcciones disponibles para tus pedidos.
+                                </p>
+                            </div>
+
+                            <button @onclick="ProfileApp.AbrirNuevaDireccion"
+                                    class="bg-stone-950 hover:bg-[#C7346A] text-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer">
+                                + Nueva dirección
+                            </button>
+                        </div>
+
+                        @if (ProfileApp.State.IsLoadingAddresses)
+                        {
+                            <p class="text-xs font-bold text-stone-400">
+                                Cargando direcciones...
+                            </p>
+                        }
+                        else if (ProfileApp.State.Addresses.Count == 0)
+                        {
+                            <div class="rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/40 p-8 text-center">
+                                <p class="text-xs font-bold text-stone-700">
+                                    Aún no tienes direcciones registradas.
+                                </p>
+
+                                <p class="mt-1 text-[11px] text-stone-500">
+                                    Agrega una dirección para utilizarla durante el checkout.
+                                </p>
+
+                                <button @onclick="ProfileApp.AbrirNuevaDireccion"
+                                        class="mt-4 bg-[#FF76A5] hover:bg-[#C7346A] text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer">
+                                    Registrar dirección
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="grid grid-cols-1 gap-4">
+                                @foreach (var address in ProfileApp.State.Addresses)
+                                {
+                                    var isPrincipal = ProfileApp.EsDireccionPrincipal(address);
+
+                                    <article class="rounded-2xl border p-5 backdrop-blur-md @(isPrincipal
+                                                                     ? "border-[#FF76A5]/50 bg-[#FFF0F3]/60"
+                                                                     : "border-stone-100 bg-white/70")">
+
+                                        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                                            <div class="space-y-1">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <h4 class="text-sm font-bold text-stone-900">
+                                                        Dirección de entrega
+                                                    </h4>
+
+                                                    @if (isPrincipal)
+                                                    {
+                                                        <span class="rounded-full bg-[#FF76A5] px-2.5 py-1 text-[8px] font-black uppercase tracking-wider text-white">
+                                                            Principal
+                                                        </span>
+                                                    }
+                                                </div>
+
+                                                <p class="text-xs font-semibold text-stone-700">
+                                                    @address.DireccionTexto
+                                                </p>
+
+                                                <p class="text-[11px] text-stone-500">
+                                                    @address.Ciudad, @address.Pais
+                                                    @if (!string.IsNullOrWhiteSpace(address.CodigoPostal))
+                                                    {
+                                                        <span>· @address.CodigoPostal</span>
+                                                    }
+                                                </p>
+
+                                                @if (!string.IsNullOrWhiteSpace(address.Referencia))
+                                                {
+                                                    <p class="text-[11px] text-stone-400">
+                                                        Referencia: @address.Referencia
+                                                    </p>
+                                                }
+                                            </div>
+
+                                            <div class="flex flex-wrap gap-2 sm:justify-end">
+                                                @if (!isPrincipal)
+                                                {
+                                                    <button @onclick="() => MarkAsPrincipalAsync(address)"
+                                                            disabled="@ProfileApp.State.IsSavingAddress"
+                                                            class="border border-[#FCD1DB] bg-white hover:bg-[#FFF0F3] text-[#C7346A] px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition cursor-pointer disabled:opacity-60">
+                                                        Marcar principal
+                                                    </button>
+                                                }
+
+                                                <button @onclick="() => ProfileApp.AbrirEdicionDireccion(address)"
+                                                        class="border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition cursor-pointer">
+                                                    Editar
+                                                </button>
+
+                                                <button @onclick="() => ProfileApp.PrepararEliminacionDireccion(address)"
+                                                        class="border border-red-100 bg-white hover:bg-red-50 text-red-500 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition cursor-pointer">
+                                                    Eliminar
+                                                </button>
+                                            </div>
                                         </div>
-                                        <span class="text-[9px] font-black uppercase text-[#C7346A] tracking-wider mt-2 block">En Tránsito</span>
-                                        <span class="text-[8px] text-stone-400 font-mono">En ruta, Miraflores</span>
+                                    </article>
+                                }
+                            </div>
+                        }
+
+                        @if (ProfileApp.State.IsAddressEditorOpen)
+                        {
+                            <div class="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/35 px-4 py-6 backdrop-blur-sm">
+                                <div class="w-full max-w-xl rounded-3xl border border-white/70 bg-white p-6 shadow-2xl sm:p-8">
+
+                                    <div class="mb-6 flex items-start justify-between gap-4">
+                                        <div>
+                                            <h4 class="font-serif text-lg font-bold text-stone-900">
+                                                @(ProfileApp.State.EditingAddress.IdDireccion > 0 ? "Editar dirección" : "Nueva dirección")
+                                            </h4>
+
+                                            <p class="mt-1 text-[11px] text-stone-500">
+                                                Completa los datos reales de entrega.
+                                            </p>
+                                        </div>
+
+                                        <button @onclick="ProfileApp.CerrarEditorDireccion"
+                                                type="button"
+                                                class="h-8 w-8 rounded-full bg-stone-100 text-stone-500 hover:bg-stone-200 transition cursor-pointer">
+                                            ×
+                                        </button>
                                     </div>
 
-                                    <div class="flex flex-col items-center opacity-40">
-                                        <div class="w-6 h-6 rounded-full bg-stone-200 text-stone-600 flex items-center justify-center font-bold text-[9px]">
-                                            3
+                                    <form @onsubmit="SaveAddressAsync"
+                                          @onsubmit:preventDefault
+                                          class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                                        <div class="space-y-1 sm:col-span-2">
+                                            <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">
+                                                Dirección
+                                            </label>
+
+                                            <input type="text"
+                                                   required
+                                                   @bind="ProfileApp.State.EditingAddress.DireccionTexto"
+                                                   placeholder="Av., calle, número, departamento"
+                                                   class="w-full bg-[#faf6f7]/60 border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
                                         </div>
-                                        <span class="text-[9px] font-black uppercase text-stone-800 tracking-wider mt-2 block">Entregado</span>
-                                        <span class="text-[8px] text-stone-400 font-mono">Pendiente</span>
+
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">
+                                                Ciudad
+                                            </label>
+
+                                            <input type="text"
+                                                   required
+                                                   @bind="ProfileApp.State.EditingAddress.Ciudad"
+                                                   placeholder="Ciudad"
+                                                   class="w-full bg-[#faf6f7]/60 border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                        </div>
+
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">
+                                                País
+                                            </label>
+
+                                            <input type="text"
+                                                   @bind="ProfileApp.State.EditingAddress.Pais"
+                                                   placeholder="Perú"
+                                                   class="w-full bg-[#faf6f7]/60 border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                        </div>
+
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">
+                                                Código postal
+                                            </label>
+
+                                            <input type="text"
+                                                   @bind="ProfileApp.State.EditingAddress.CodigoPostal"
+                                                   placeholder="Opcional"
+                                                   class="w-full bg-[#faf6f7]/60 border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                        </div>
+
+                                        <div class="space-y-1">
+                                            <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">
+                                                Referencia
+                                            </label>
+
+                                            <input type="text"
+                                                   @bind="ProfileApp.State.EditingAddress.Referencia"
+                                                   placeholder="Opcional"
+                                                   class="w-full bg-[#faf6f7]/60 border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                        </div>
+
+                                        <div class="mt-3 flex justify-end gap-2 sm:col-span-2">
+                                            <button type="button"
+                                                    @onclick="ProfileApp.CerrarEditorDireccion"
+                                                    class="border border-stone-200 bg-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-stone-500 transition hover:bg-stone-50 cursor-pointer">
+                                                Cancelar
+                                            </button>
+
+                                            <button type="submit"
+                                                    disabled="@ProfileApp.State.IsSavingAddress"
+                                                    class="bg-stone-950 hover:bg-[#C7346A] px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-white transition cursor-pointer disabled:opacity-60">
+                                                @(ProfileApp.State.IsSavingAddress ? "Guardando..." : "Guardar dirección")
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+
+                        @if (ProfileApp.State.AddressPendingDeletion is not null)
+                        {
+                            <div class="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/35 px-4 py-6 backdrop-blur-sm">
+                                <div class="w-full max-w-md rounded-3xl border border-white/70 bg-white p-6 shadow-2xl">
+                                    <h4 class="font-serif text-lg font-bold text-stone-900">
+                                        ¿Eliminar dirección?
+                                    </h4>
+
+                                    <p class="mt-2 text-xs leading-relaxed text-stone-500">
+                                        Esta acción eliminará la dirección seleccionada.
+                                        @if (ProfileApp.State.AddressPendingDeletion is not null &&
+                                                ProfileApp.EsDireccionPrincipal(ProfileApp.State.AddressPendingDeletion))
+                                        {
+                                            <span class="font-bold text-[#C7346A]">
+                                                También dejará de ser tu dirección principal.
+                                            </span>
+                                        }
+                                    </p>
+
+                                    <div class="mt-6 flex justify-end gap-2">
+                                        <button @onclick="ProfileApp.CancelarEliminacionDireccion"
+                                                class="border border-stone-200 bg-white px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-stone-500 hover:bg-stone-50 transition cursor-pointer">
+                                            Cancelar
+                                        </button>
+
+                                        <button @onclick="DeleteAddressAsync"
+                                                disabled="@ProfileApp.State.IsDeletingAddress"
+                                                class="bg-red-500 hover:bg-red-600 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider text-white transition cursor-pointer disabled:opacity-60">
+                                            @(ProfileApp.State.IsDeletingAddress ? "Eliminando..." : "Eliminar")
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-
-                        </div>
+                        }
                     </div>
                 }
-                else if (_activeTab == "favoritos")
+                else if (ProfileApp.State.ActiveTab == "pedidos")
+                {
+                    <div class="space-y-6 animate-in fade-in duration-300 text-left">
+                        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-4">
+                            <div>
+                                <h3 class="font-serif text-lg font-bold text-stone-900 uppercase text-xs tracking-widest text-[#C7346A]">
+                                    Historial de pedidos
+                                </h3>
+
+                                <p class="mt-1 text-[11px] font-medium text-stone-500">
+                                    Revisa el estado y total de tus pedidos registrados.
+                                </p>
+                            </div>
+
+                            <button @onclick="LoadOrdersAsync"
+                                    class="border border-stone-200 bg-white hover:bg-stone-50 px-3 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider text-stone-600 transition cursor-pointer">
+                                Actualizar
+                            </button>
+                        </div>
+
+                        @if (ProfileApp.State.IsLoadingOrders)
+                        {
+                            <p class="text-xs font-bold text-stone-400">
+                                Cargando pedidos...
+                            </p>
+                        }
+                        else if (ProfileApp.State.Orders.Count == 0)
+                        {
+                            <div class="rounded-2xl border border-dashed border-stone-200 bg-stone-50/70 p-8 text-center">
+                                <p class="text-xs font-bold text-stone-600">
+                                    Aún no tienes pedidos registrados.
+                                </p>
+
+                                <button @onclick='() => NavigateTo("/")'
+                                        class="mt-4 bg-[#FF76A5] hover:bg-[#C7346A] text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition cursor-pointer">
+                                    Ver catálogo
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="space-y-3">
+                                @foreach (var order in ProfileApp.State.Orders)
+                                {
+                                    <article class="rounded-2xl border border-stone-100 bg-white/70 p-5">
+                                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <p class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                                    Pedido
+                                                </p>
+
+                                                <p class="mt-1 text-sm font-bold text-stone-900">
+                                                    @(string.IsNullOrWhiteSpace(order.CodigoPedido)
+                                                        ? $"Pedido #{order.IdPedido}"
+                                                        : order.CodigoPedido)
+                                                </p>
+                                            </div>
+
+                                            <div class="flex flex-wrap items-center gap-3">
+                                                <span class="rounded-full bg-[#FFF0F3] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#C7346A]">
+                                                    @order.Estado
+                                                </span>
+
+                                                <p class="text-sm font-bold text-stone-900">
+                                                    S/ @order.Total.ToString("0.00")
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-4">
+                                            <p class="text-[11px] text-stone-500">
+                                                Productos registrados: @order.Detalles.Count
+                                            </p>
+
+                                            <button @onclick="() => OpenOrderDetailAsync(order)"
+                                                    class="rounded-xl border border-[#FCD1DB] bg-[#FFF0F3]/55 px-4 py-2 text-[9px] font-black uppercase tracking-wider text-[#C7346A] transition hover:bg-[#FF76A5] hover:text-white cursor-pointer">
+                                                Ver detalle y seguimiento
+                                            </button>
+                                        </div>
+                                    </article>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else if (ProfileApp.State.ActiveTab == "puntos")
+                {
+                    <div class="space-y-6 animate-in fade-in duration-300 text-left">
+
+                        <div class="flex flex-wrap items-start justify-between gap-4 border-b border-stone-100 pb-4">
+                            <div>
+                                <h3 class="font-serif text-lg font-bold text-stone-900 uppercase text-xs tracking-widest text-[#C7346A]">
+                                    Mis puntos Lumina
+                                </h3>
+
+                                <p class="mt-1 text-[11px] font-medium text-stone-500">
+                                    Consulta tu saldo actual y el historial real de movimientos.
+                                </p>
+                            </div>
+
+                            <span class="rounded-full border border-[#FCD1DB] bg-[#FFF0F3] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#C7346A]">
+                                @ProfileApp.State.CurrentClient?.NivelCliente
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <div class="rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/55 p-5">
+                                <p class="text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
+                                    Saldo disponible
+                                </p>
+
+                                <p class="mt-2 font-serif text-4xl font-semibold text-stone-900">
+                                    @ProfileApp.State.CurrentClient?.PuntosFidelidad
+                                </p>
+
+                                <p class="mt-1 text-[11px] text-stone-500">
+                                    Puntos Lumina acumulados.
+                                </p>
+                            </div>
+
+                            <div class="rounded-2xl border border-stone-100 bg-white/75 p-5">
+                                <p class="text-[9px] font-black uppercase tracking-widest text-stone-400">
+                                    Categoría actual
+                                </p>
+
+                                <p class="mt-2 font-serif text-2xl font-semibold text-stone-900">
+                                    @ProfileApp.State.CurrentClient?.NivelCliente
+                                </p>
+
+                                <p class="mt-1 text-[11px] text-stone-500">
+                                    Tu nivel se actualiza según tus puntos acumulados.
+                                </p>
+                            </div>
+                        </div>
+
+                        <section class="rounded-2xl border border-stone-100 bg-white/75 p-5">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                                        Historial de movimientos
+                                    </p>
+
+                                    <p class="mt-1 text-[11px] text-stone-500">
+                                        Acumulaciones, canjes y ajustes registrados en tu cuenta.
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if (ProfileApp.State.IsLoadingPoints)
+                            {
+                                <p class="py-8 text-center text-xs font-bold text-stone-400">
+                                    Cargando movimientos de puntos...
+                                </p>
+                            }
+                            else if (ProfileApp.State.PointMovements.Count == 0)
+                            {
+                                <div class="mt-5 rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/35 p-8 text-center">
+                                    <p class="text-xs font-bold text-stone-700">
+                                        Aún no tienes movimientos de puntos registrados.
+                                    </p>
+
+                                    <p class="mt-1 text-[11px] text-stone-500">
+                                        Tus acumulaciones y canjes aparecerán aquí cuando se registren.
+                                    </p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mt-5 space-y-3">
+                                    @foreach (var movement in ProfileApp.State.PointMovements)
+                                    {
+                                        var isPositive = movement.Puntos >= 0;
+
+                                        <article class="flex flex-col gap-3 rounded-2xl border border-stone-100 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+                                            <div class="flex items-start gap-3">
+                                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl @(isPositive
+                                                                                         ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                         : "bg-stone-100 text-stone-600")">
+                                                    @(isPositive ? "+" : "−")
+                                                </div>
+
+                                                <div>
+                                                    <p class="text-xs font-bold text-stone-800">
+                                                        @(string.IsNullOrWhiteSpace(movement.Motivo)
+                                                            ? movement.TipoMovimiento
+                                                            : movement.Motivo)
+                                                    </p>
+
+                                                    <p class="mt-1 text-[10px] font-medium uppercase tracking-wider text-stone-400">
+                                                        @movement.TipoMovimiento
+                                                        @if (movement.FechaCreacion.HasValue)
+                                                        {
+                                                            <span> · @movement.FechaCreacion.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                                                        }
+                                                    </p>
+
+                                                    @if (movement.Pedido is not null && movement.Pedido.IdPedido > 0)
+                                                    {
+                                                        <p class="mt-1 text-[10px] text-stone-400">
+                                                            Pedido relacionado: #@movement.Pedido.IdPedido
+                                                        </p>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            <div class="text-left sm:text-right">
+                                                <p class="text-sm font-bold @(isPositive ? "text-[#C7346A]" : "text-stone-700")">
+                                                    @(isPositive ? "+" : "")@movement.Puntos pts
+                                                </p>
+
+                                                <p class="mt-1 text-[10px] font-medium text-stone-400">
+                                                    Saldo: @movement.SaldoPosterior puntos
+                                                </p>
+                                            </div>
+                                        </article>
+                                    }
+                                </div>
+                            }
+                        </section>
+                    </div>
+                }
+                else if (ProfileApp.State.ActiveTab == "favoritos")
                 {
                     <div class="space-y-6 animate-in fade-in duration-300 text-left">
                         <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
@@ -277,6 +756,7 @@
                                 <p class="text-xs text-stone-400 font-bold mb-4">
                                     No tienes productos de culto guardados
                                 </p>
+
                                 <button @onclick='() => NavigateTo("/")'
                                         class="px-5 py-2.5 bg-[#FF76A5] hover:bg-[#C7346A] font-bold text-[10px] uppercase tracking-wider text-white rounded-xl transition cursor-pointer">
                                     Ver Catálogo
@@ -300,14 +780,17 @@
                                                      class="max-h-20 object-contain pointer-events-none"
                                                      referrerpolicy="no-referrer" />
                                             </div>
+
                                             <div class="text-left font-medium">
                                                 <span class="text-[8px] font-black uppercase tracking-wider text-[#c5a880] block">
                                                     @p.Brand
                                                 </span>
+
                                                 <h4 @onclick='() => NavigateTo($"/product/{p.Id}")'
                                                     class="text-[11px] font-bold text-stone-800 line-clamp-1 hover:text-[#C7346A] cursor-pointer transition">
                                                     @p.Name
                                                 </h4>
+
                                                 <span class="text-xs font-bold text-[#C7346A] font-mono block mt-1.5">
                                                     S/ @p.Price.ToString("0.00")
                                                 </span>
@@ -319,30 +802,238 @@
                         }
                     </div>
                 }
-
             </div>
+
+            @if (ProfileApp.State.IsOrderDetailOpen &&
+     ProfileApp.State.SelectedOrder is not null)
+            {
+                var selectedOrder = ProfileApp.State.SelectedOrder;
+                var shipment = ProfileApp.State.SelectedOrderShipment;
+                var shipmentState = shipment?.Estado?.ToUpperInvariant() ?? string.Empty;
+
+                <div class="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/40 px-4 py-6 backdrop-blur-sm">
+                    <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl border border-white/70 bg-white p-6 shadow-2xl sm:p-8">
+
+                        <div class="flex items-start justify-between gap-4 border-b border-stone-100 pb-5">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                                    Pedido
+                                </p>
+
+                                <h3 class="mt-1 font-serif text-xl font-semibold text-stone-900">
+                                    @(string.IsNullOrWhiteSpace(selectedOrder.CodigoPedido)
+                                        ? $"Pedido #{selectedOrder.IdPedido}"
+                                        : selectedOrder.CodigoPedido)
+                                </h3>
+
+                                <p class="mt-1 text-[11px] text-stone-500">
+                                    Detalle de compra y estado de entrega.
+                                </p>
+                            </div>
+
+                            <button @onclick="ProfileApp.CerrarDetallePedido"
+                                    class="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-lg text-stone-500 transition hover:bg-stone-200 cursor-pointer"
+                                    title="Cerrar">
+                                ×
+                            </button>
+                        </div>
+
+                        @if (ProfileApp.State.IsLoadingOrderDetail)
+                        {
+                            <p class="py-12 text-center text-xs font-bold text-stone-400">
+                                Cargando detalle y seguimiento...
+                            </p>
+                        }
+                        else
+                        {
+                            <div class="mt-6 space-y-6">
+
+                                <section class="rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/35 p-5">
+                                    <div class="flex flex-wrap items-start justify-between gap-4">
+                                        <div>
+                                            <p class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                                                Estado del envío
+                                            </p>
+
+                                            <p class="mt-2 text-lg font-semibold text-stone-900">
+                                                @(shipment is null
+                                                    ? "Envío aún no registrado"
+                                                    : shipment.Estado)
+                                            </p>
+                                        </div>
+
+                                        @if (shipment is not null &&
+                                             !string.IsNullOrWhiteSpace(shipment.NumeroSeguimiento))
+                                        {
+                                            <div class="rounded-xl border border-[#FCD1DB] bg-white px-4 py-3">
+                                                <p class="text-[8px] font-black uppercase tracking-widest text-stone-400">
+                                                    Código de seguimiento
+                                                </p>
+
+                                                <p class="mt-1 text-xs font-bold text-[#C7346A]">
+                                                    @shipment.NumeroSeguimiento
+                                                </p>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    @if (shipment is not null)
+                                    {
+                                        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                            <div class="rounded-xl bg-white/80 p-3">
+                                                <p class="text-[8px] font-black uppercase tracking-wider text-stone-400">
+                                                    Preparando
+                                                </p>
+
+                                                <p class="mt-1 text-[10px] font-bold @(shipmentState == "PREPARANDO" ? "text-[#C7346A]" : "text-stone-700")">
+                                                    @(shipmentState == "PREPARANDO" ? "Estado actual" : "Registrado")
+                                                </p>
+                                            </div>
+
+                                            <div class="rounded-xl bg-white/80 p-3">
+                                                <p class="text-[8px] font-black uppercase tracking-wider text-stone-400">
+                                                    En tránsito
+                                                </p>
+
+                                                <p class="mt-1 text-[10px] font-bold @(shipmentState == "DESPACHADO" || shipmentState == "EN_TRANSITO" || shipmentState == "ENTREGADO" ? "text-[#C7346A]" : "text-stone-400")">
+                                                    @if (shipment.FechaEnvio.HasValue)
+                                                    {
+                                                        @shipment.FechaEnvio.Value.ToString("dd/MM/yyyy HH:mm")
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Pendiente</span>
+                                                    }
+                                                </p>
+                                            </div>
+
+                                            <div class="rounded-xl bg-white/80 p-3">
+                                                <p class="text-[8px] font-black uppercase tracking-wider text-stone-400">
+                                                    Entrega
+                                                </p>
+
+                                                <p class="mt-1 text-[10px] font-bold @(shipmentState == "ENTREGADO" ? "text-[#C7346A]" : "text-stone-400")">
+                                                    @if (shipment.FechaEntregaReal.HasValue)
+                                                    {
+                                                        @shipment.FechaEntregaReal.Value.ToString("dd/MM/yyyy HH:mm")
+                                                    }
+                                                    else if (shipment.FechaEntregaEstimada.HasValue)
+                                                    {
+                                                        <span>Estimada: @shipment.FechaEntregaEstimada.Value.ToString("dd/MM/yyyy")</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Pendiente</span>
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-5 rounded-xl border border-white bg-white/70 p-4">
+                                            <p class="text-[9px] font-black uppercase tracking-widest text-stone-400">
+                                                Dirección de entrega
+                                            </p>
+
+                                            <p class="mt-2 text-xs font-semibold text-stone-800">
+                                                @shipment.DireccionEnvio
+                                            </p>
+
+                                            <p class="mt-1 text-[11px] text-stone-500">
+                                                @shipment.CiudadEnvio, @shipment.PaisEnvio
+                                                @if (!string.IsNullOrWhiteSpace(shipment.CodigoPostalEnvio))
+                                                {
+                                                    <span> · @shipment.CodigoPostalEnvio</span>
+                                                }
+                                            </p>
+
+                                            @if (!string.IsNullOrWhiteSpace(shipment.ReferenciaEnvio))
+                                            {
+                                                <p class="mt-1 text-[11px] text-stone-400">
+                                                    Referencia: @shipment.ReferenciaEnvio
+                                                </p>
+                                            }
+                                        </div>
+                                    }
+                                </section>
+
+                                <section>
+                                    <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                                        <h4 class="text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                                            Productos del pedido
+                                        </h4>
+
+                                        <span class="text-[10px] font-bold text-stone-400">
+                                            @selectedOrder.Detalles.Count producto(s)
+                                        </span>
+                                    </div>
+
+                                    <div class="mt-4 space-y-3">
+                                        @foreach (var detail in selectedOrder.Detalles)
+                                        {
+                                            <div class="flex items-center justify-between gap-4 rounded-xl border border-stone-100 bg-stone-50/60 p-4">
+                                                <div>
+                                                    <p class="text-xs font-bold text-stone-800">
+                                                        @(detail.Producto?.Nombre ?? "Producto")
+                                                    </p>
+
+                                                    <p class="mt-1 text-[10px] text-stone-500">
+                                                        Cantidad: @detail.Cantidad · S/ @detail.PrecioUnitario.ToString("0.00")
+                                                    </p>
+                                                </div>
+
+                                                <p class="text-xs font-bold text-stone-900">
+                                                    S/ @detail.Subtotal.ToString("0.00")
+                                                </p>
+                                            </div>
+                                        }
+                                    </div>
+                                </section>
+
+                                <section class="rounded-2xl border border-stone-100 bg-stone-50/70 p-5">
+                                    <div class="space-y-2 text-xs">
+                                        <div class="flex justify-between text-stone-500">
+                                            <span>Subtotal</span>
+                                            <span>S/ @selectedOrder.SubtotalProductos.ToString("0.00")</span>
+                                        </div>
+
+                                        <div class="flex justify-between text-stone-500">
+                                            <span>Envío</span>
+                                            <span>S/ @selectedOrder.CostoEnvio.ToString("0.00")</span>
+                                        </div>
+
+                                        @if (selectedOrder.Descuento > 0)
+                                        {
+                                            <div class="flex justify-between text-[#C7346A]">
+                                                <span>Descuento</span>
+                                                <span>- S/ @selectedOrder.Descuento.ToString("0.00")</span>
+                                            </div>
+                                        }
+
+                                        <div class="flex justify-between border-t border-stone-200 pt-3 text-sm font-bold text-stone-900">
+                                            <span>Total pagado</span>
+                                            <span>S/ @selectedOrder.Total.ToString("0.00")</span>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
         </div>
     }
 </div>
 
 @code {
-    private string _activeTab = "detalles";
-
     private readonly Dictionary<string, string> _profileTabs = new()
     {
-        ["detalles"] = "Detalles de Perfil",
-        ["pedidos"] = "Detalles de Pedidos",
-        ["favoritos"] = "Mis Favoritos"
+        ["detalles"] = "Mi Perfil",
+        ["direcciones"] = "Mis Direcciones",
+        ["pedidos"] = "Mis Pedidos",
+        ["favoritos"] = "Mis Favoritos",
+        ["puntos"] = "Mis Puntos"
     };
-
-    private Cliente? _currentClient;
-
-    private string _profileName = string.Empty;
-    private string _profileEmail = string.Empty;
-    private string _profilePhone = string.Empty;
-
-    private bool _isLoadingProfile = true;
-    private bool _isSavingProfile;
 
     protected override async Task OnInitializedAsync()
     {
@@ -352,50 +1043,61 @@
         Wishlist.OnChange += StateHasChanged;
         Auth.OnChange += StateHasChanged;
 
-        await LoadProfileAsync();
-    }
+        var result = await ProfileApp.InitializeAsync(Auth.CurrentClient);
 
-    private async Task LoadProfileAsync()
-    {
-        if (!Auth.IsLoggedIn || Auth.CurrentClient == null)
+        if (!result.Success)
         {
-            _isLoadingProfile = false;
-            return;
-        }
-
-        try
-        {
-            _isLoadingProfile = true;
-
-            _currentClient = await ClienteRest.BuscarClienteAsync(
-                Auth.CurrentClient.Id
-            );
-
-            if (_currentClient == null)
-            {
-                Toast.ShowToast("No se pudo cargar la información de tu perfil.");
-                return;
-            }
-
-            _profileName = GetFullName(_currentClient);
-            _profileEmail = _currentClient.Correo ?? string.Empty;
-            _profilePhone = _currentClient.Telefono ?? string.Empty;
-
-            await Auth.RefreshCurrentClientAsync(_currentClient);
-        }
-        catch
-        {
-            Toast.ShowToast("No se pudo cargar la información de tu perfil.");
-        }
-        finally
-        {
-            _isLoadingProfile = false;
+            Toast.ShowToast(result.Message);
         }
     }
 
-    private static string GetFullName(Cliente client)
+    private async Task SetActiveTabAsync(string code)
     {
-        return $"{client.Nombre} {client.Apellido}".Trim();
+        await ProfileApp.SetActiveTabAsync(code);
+    }
+
+    private async Task SaveDetailsAsync()
+    {
+        var result = await ProfileApp.GuardarPerfilAsync();
+        Toast.ShowToast(result.Message);
+    }
+
+    private async Task SaveAddressAsync()
+    {
+        var result = await ProfileApp.GuardarDireccionAsync();
+        Toast.ShowToast(result.Message);
+    }
+
+    private async Task MarkAsPrincipalAsync(Direccion address)
+    {
+        var result = await ProfileApp.MarcarPrincipalAsync(address);
+        Toast.ShowToast(result.Message);
+    }
+
+    private async Task DeleteAddressAsync()
+    {
+        var result = await ProfileApp.EliminarDireccionAsync();
+        Toast.ShowToast(result.Message);
+    }
+
+    private async Task LoadOrdersAsync()
+    {
+        var result = await ProfileApp.CargarPedidosAsync();
+
+        if (!result.Success)
+        {
+            Toast.ShowToast(result.Message);
+        }
+    }
+
+    private async Task OpenOrderDetailAsync(Pedido order)
+    {
+        var result = await ProfileApp.AbrirDetallePedidoAsync(order);
+
+        if (!result.Success)
+        {
+            Toast.ShowToast(result.Message);
+        }
     }
 
     private void NavigateTo(string path)
@@ -403,77 +1105,10 @@
         Navigator.NavigateTo(path);
     }
 
-    private void SetActiveTab(string code)
-    {
-        _activeTab = code;
-    }
-
-    private async Task SaveDetails()
-    {
-        if (_currentClient == null)
-        {
-            Toast.ShowToast("No se encontró una sesión de cliente válida.");
-            return;
-        }
-
-        try
-        {
-            _isSavingProfile = true;
-
-            var nameParts = _profileName.Trim().Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries
-            );
-
-            _currentClient.Nombre = nameParts.Length > 0
-                ? nameParts[0]
-                : string.Empty;
-
-            _currentClient.Apellido = nameParts.Length > 1
-                ? string.Join(" ", nameParts.Skip(1))
-                : string.Empty;
-
-            _currentClient.Correo = _profileEmail.Trim();
-            _currentClient.Telefono = _profilePhone.Trim();
-
-            var updatedClient = await ClienteRest.ActualizarClienteAsync(
-                _currentClient
-            );
-
-            if (updatedClient == null)
-            {
-                Toast.ShowToast("No se pudieron guardar los cambios de perfil.");
-                return;
-            }
-
-            _currentClient = updatedClient;
-            _profileName = GetFullName(updatedClient);
-            _profileEmail = updatedClient.Correo ?? string.Empty;
-            _profilePhone = updatedClient.Telefono ?? string.Empty;
-
-            await Auth.RefreshCurrentClientAsync(updatedClient);
-
-            Toast.ShowToast("¡Cambios de perfil guardados correctamente!");
-        }
-        catch
-        {
-            Toast.ShowToast("No se pudieron guardar los cambios de perfil.");
-        }
-        finally
-        {
-            _isSavingProfile = false;
-        }
-    }
-
-    private void TriggerPasswordReset()
-    {
-        Toast.ShowToast("¡Enlace de restauración enviado a tu correo!");
-    }
-
     private async Task LogOff()
     {
         await Auth.LogoutAsync();
-        Toast.ShowToast("Sesión VIP cerrada correctamente");
+        Toast.ShowToast("Sesión cerrada correctamente.");
         Navigator.NavigateTo("/");
     }
 

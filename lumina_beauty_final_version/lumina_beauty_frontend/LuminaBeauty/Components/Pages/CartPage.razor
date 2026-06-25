@@ -227,8 +227,8 @@
                     @if (!IsEligibleForFreeShipping() && Cart.GetSubtotal() > 0)
                     {
                       <div class="bg-[#FFF0F3]/40 border border-[#FCD1DB]/30 rounded-xl p-3 text-[10px] text-stone-500 font-medium tracking-normal leading-normal select-none">
-                        🎁 @(LangService.CurrentLanguage == "es" ? "Agrega" : "Add"){" "}
-                        <strong class="text-[#C7346A] font-bold font-mono">S/ @GetMissingForFreeShipping().ToString("0.00")</strong>{" "}
+                        🎁 @(LangService.CurrentLanguage == "es" ? "Agrega" : "Add")
+                        <strong class="text-[#C7346A] font-bold font-mono">S/ @GetMissingForFreeShipping().ToString("0.00")</strong>
                         @(LangService.CurrentLanguage == "es" ? "más para activar Envío Gratis." : "more to unlock Free Shipping.")
                       </div>
                     }

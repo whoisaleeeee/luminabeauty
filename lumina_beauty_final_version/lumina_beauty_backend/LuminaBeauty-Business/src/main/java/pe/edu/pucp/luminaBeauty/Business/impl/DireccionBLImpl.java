@@ -65,6 +65,15 @@ public class DireccionBLImpl implements DireccionBL {
                 throw new Exception("El cliente asociado a la dirección no existe.");
             }
 
+            if (direccionExistente.getCliente() == null ||
+                    direccionExistente.getCliente().getId_usuario()
+                            != direccion.getCliente().getId_usuario()) {
+
+                throw new Exception(
+                        "La dirección no pertenece al cliente indicado."
+                );
+            }
+
             if (direccion.getPais() == null || direccion.getPais().trim().isEmpty()) {
                 direccion.setPais("Peru");
             }
@@ -93,6 +102,32 @@ public class DireccionBLImpl implements DireccionBL {
 
             if (direccion == null) {
                 throw new Exception("La dirección no existe.");
+            }
+
+            if (direccion.getCliente() == null ||
+                    direccion.getCliente().getId_usuario() <= 0) {
+
+                throw new Exception(
+                        "La dirección no tiene un cliente asociado válido."
+                );
+            }
+
+            Cliente cliente = clienteDAO.buscarPorId(
+                    direccion.getCliente().getId_usuario()
+            );
+
+            if (cliente == null) {
+                throw new Exception(
+                        "El cliente asociado a la dirección no existe."
+                );
+            }
+
+            if (cliente.getDireccion_principal() != null &&
+                    cliente.getDireccion_principal().getId_direccion()
+                            == idDireccion) {
+
+                cliente.setDireccion_principal(null);
+                clienteDAO.actualizar(cliente);
             }
 
             direccionDAO.eliminar(direccion);
