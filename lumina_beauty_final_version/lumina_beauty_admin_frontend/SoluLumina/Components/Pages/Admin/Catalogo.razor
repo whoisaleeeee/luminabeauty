@@ -5,6 +5,7 @@
 @inject IProductoService ProductoService
 @inject ICategoriaService CategoriaService
 @inject IMarcaService MarcaService
+@inject IConfiguration Configuration
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -24,7 +25,7 @@
             </div>
 
             <div class="d-flex align-items-center gap-3">
-                <!-- Search input removed, only title and profile remain -->
+
                 <button class="btn btn-link text-secondary position-relative p-1">
                     <i class="bi bi-bell fs-5"></i>
                 </button>
@@ -110,6 +111,10 @@
             <!-- Filtros y Botón -->
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: #f7eff1 !important;">
                 <div class="d-flex flex-wrap gap-3">
+                    <div class="col-12 col-md-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Producto</label>
+                        <input type="text" class="form-control bg-light border-1" placeholder="Nombre" @bind="filtroProducto" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                    </div>
                     <div>
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
                         <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnCategoryChanged">
@@ -168,7 +173,7 @@
                     </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
                         @{ int rowNumber = 1; }
-                        @foreach (var p in FilteredProducts)
+                        @foreach (var p in PagedProducts)
                         {
                             <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
                                 <td class="text-center text-muted small" style="width: 1%;">@(rowNumber++)</td>
@@ -242,17 +247,29 @@
             </div>
 
             <!-- Paginación -->
-            <div class="d-flex justify-content-between align-items-center mt-4 border-top pt-3" style="border-color: #f7eff1 !important;">
-                <small class="text-muted" style="font-size: 0.85rem;">Mostrando 1 a @Productos.Count de @Productos.Count productos</small>
+            <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: #f7eff1 !important; background-color: #fbf8f9;">
+                <small class="text-muted" style="font-size: 0.85rem;">Mostrando @(total_filtered_products == 0 ? 0 : (paginaActual - 1) * prod_por_pagina + 1)-@(Math.Min(paginaActual * prod_por_pagina, total_filtered_products)) de @total_filtered_products productos</small>
                 <nav>
                     <ul class="pagination pagination-sm m-0 gap-1">
-                        <li class="page-item disabled"><a class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm"><i class="bi bi-chevron-left"></i></a></li>
-                        <li class="page-item"><a class="page-link rounded-2 active border-0 text-white shadow-sm" style="background-color: #6a3849;">1</a></li>
-                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">3</a></li>
-                        <li class="page-item disabled"><span class="px-1 text-muted">...</span></li>
-                        <li class="page-item"><a class="page-link rounded-2 border text-secondary bg-white shadow-sm" href="#">25</a></li>
-                        <li class="page-item"><a class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" href="#"><i class="bi bi-chevron-right"></i></a></li>
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <button class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual - 1)" disabled="@(paginaActual == 1)"><i class="bi bi-chevron-left"></i></button>
+                        </li>
+
+                        @for (int i = 1; i <= total_paginas; i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item">
+                                <button class="page-link rounded-2 @(paginaActual == pageNumber ? "active border-0 text-white" : "border text-secondary bg-white") shadow-sm"
+                                        style="@(paginaActual == pageNumber ? "background-color: #834a5d;" : "")"
+                                        @onclick="() => CambiarPagina(pageNumber)">
+                                    @pageNumber
+                                </button>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == total_paginas || total_paginas == 0 ? "disabled" : "")">
+                            <button class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual + 1)" disabled="@(paginaActual == total_paginas || total_paginas == 0)"><i class="bi bi-chevron-right"></i></button>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -273,14 +290,18 @@
     private List<Marca> Marcas = new();
     private List<string> Tipo_piel = new() { "TODOS", "NORMAL", "SECA", "GRASA", "MIXTA", "SENSIBLE" };
 
+    private int paginaActual = 1;
+    private int prod_por_pagina = 7;
     private int selectedCategoryId = 0;
     private int selectedBrandId = 0;
     private string selectedSkinType = string.Empty;
+    private string filtroProducto = "";
 
-    private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
+    private string URL_BASE;
 
     protected override async Task OnInitializedAsync()
     {
+        URL_BASE = Configuration["ApiSettings:URL_BASE"];
         await CargarDatos();
     }
 
@@ -334,8 +355,13 @@
 
     private IEnumerable<Producto> FilteredProducts => FilteredByCategory
         .Where(p => selectedBrandId == 0 || p.Marca?.Id_marca == selectedBrandId)
-        .Where(p => string.IsNullOrEmpty(selectedSkinType) || p.Tipo_piel == selectedSkinType);
+        .Where(p => string.IsNullOrEmpty(selectedSkinType) || p.Tipo_piel == selectedSkinType)
+        .Where(p => p.Nombre != null && p.Nombre.Contains(filtroProducto, StringComparison.OrdinalIgnoreCase));
 
+    private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
+
+    private int total_filtered_products => FilteredProducts.Count();
+    private int total_paginas => (int)Math.Ceiling(total_filtered_products / (double)prod_por_pagina);
     private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
 
     private async Task OnProductAdded(Producto newProduct)
@@ -368,6 +394,21 @@
         if (exito != 0)
         {
             await CargarDatos();
+        }
+    }
+
+    private void BuscarAutomatico()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void CambiarPagina(int nuevaPagina)
+    {
+        if (nuevaPagina >= 1 && nuevaPagina <= total_paginas)
+        {
+            paginaActual = nuevaPagina;
+            StateHasChanged();
         }
     }
 }
