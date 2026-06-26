@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Serialization;
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace SoluLumina.Services
 {
@@ -39,6 +40,25 @@ namespace SoluLumina.Services
                 sw.Write(jsonBody);
                 sw.Flush();
             }
+
+            using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
+            using (StreamReader sr = new StreamReader(resp.GetResponseStream()))
+            {
+                string json = sr.ReadToEnd();
+                T result = JsonConvert.DeserializeObject<T>(json);
+
+                return result;
+            }
+        }
+
+        public async Task<T> put(string url)
+        {
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create($"{url}");
+            req.Method = "PUT";
+            req.Accept = "application/json";
+            req.ContentType = "application/json";
+            req.Timeout = 30000;
+
 
             using (HttpWebResponse resp = (HttpWebResponse)req.GetResponse())
             using (StreamReader sr = new StreamReader(resp.GetResponseStream()))

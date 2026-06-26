@@ -71,7 +71,6 @@
                     <i class="bi bi-box position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <small class="text-muted fw-bold d-block" style="font-size: 0.8rem;">Total Productos</small>
-                        <span class="badge rounded-pill" style="background-color: #e2f3eb; color: #198754; font-size: 0.7rem;"><i class="bi bi-arrow-up"></i> @Productos.Count</span>
                     </div>
                     <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Productos.Count</h2>
                 </div>
@@ -98,7 +97,6 @@
                     <i class="bi bi-exclamation-triangle position-absolute opacity-25" style="font-size: 5rem; top: -10px; right: -10px; color: #d9557b;"></i>
                     <div class="d-flex justify-content-between align-items-start mb-1">
                         <small class="fw-bold d-block" style="font-size: 0.8rem; color: #d9557b;">Sin Stock</small>
-                        <span class="badge rounded-pill bg-white text-danger border border-danger-subtle" style="font-size: 0.65rem;">@ZeroStockCount</span>
                     </div>
                     <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #b02a37; line-height: 1;">@ZeroStockCount</h2>
                 </div>
@@ -118,7 +116,7 @@
                     <div>
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
                         <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnCategoryChanged">
-                            <option value="0" selected>Todas las categorías</option>
+                            <option value="0" selected>Todas las categorias</option>
                             @foreach (var cat in Categorias)
                             {
                                 <option value="@cat.Id_categoria">@cat.Nombre</option>
@@ -128,6 +126,7 @@
                     <div>
                         <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de Piel</label>
                         <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnSkinTypeChanged">
+                            <option value="0" selected>Todas las pieles</option>
                             @foreach (var tipo_piel in Tipo_piel)
                             {
                                 <option value="@tipo_piel">@tipo_piel </option>
@@ -176,7 +175,7 @@
                         @foreach (var p in PagedProducts)
                         {
                             <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
-                                <td class="text-center text-muted small" style="width: 1%;">@(rowNumber++)</td>
+                                <td class="text-center text-muted small" style="width: 1%;">@((paginaActual-1)*prod_por_pagina + rowNumber++)</td>
 
                                 <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
                                     <div class="d-flex align-items-center gap-2" style="max-width: 240px;">
@@ -197,7 +196,7 @@
                                                 @p.Nombre
                                             </span>
                                             <small class="text-muted font-monospace text-truncate" style="font-size: 0.65rem; letter-spacing: 0.2px;">
-                                                @p.Sku
+                                                @p.Marca.Nombre
                                             </small>
                                         </div>
 
@@ -218,8 +217,8 @@
                                     S/ @p.Precio.ToString("F2")
                                 </td>
 
-                                <td class="text-secondary" style="font-size: 0.85rem; width: 1%; white-space: nowrap;">
-                                    <span class="badge bg-light text-secondary border rounded-pill fw-medium" style="padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                    <span class="badge rounded-pill text-dark fw-medium" style="background-color: @GetStockBgColor(p.Stock); padding: 0.4em 0.8em; font-size: 0.75rem;">
                                         @p.Stock uds.
                                     </span>
                                 </td>
@@ -288,7 +287,7 @@
     private List<Producto> Productos = new List<Producto>();
     private List<CategoriaProducto> Categorias = new();
     private List<Marca> Marcas = new();
-    private List<string> Tipo_piel = new() { "TODOS", "NORMAL", "SECA", "GRASA", "MIXTA", "SENSIBLE" };
+    private List<string> Tipo_piel = new() { "Todos", "Normal", "Seca", "Grasa", "Mixta", "Sensible" };
 
     private int paginaActual = 1;
     private int prod_por_pagina = 7;
@@ -342,7 +341,7 @@
 
     private void OnSkinTypeChanged(ChangeEventArgs e)
     {
-        selectedSkinType = e.Value?.ToString() ?? "TODOS";
+        selectedSkinType = e.Value?.ToString() ?? "Todos";
     }
 
     private void OpenAddProductModal()
@@ -351,11 +350,10 @@
 
     }
 
-    private IEnumerable<Producto> FilteredByCategory => selectedCategoryId == 0 ? Productos : Productos.Where(p => p.Categoria?.Id_categoria == selectedCategoryId);
-
-    private IEnumerable<Producto> FilteredProducts => FilteredByCategory
+    private IEnumerable<Producto> FilteredProducts => Productos
+        .Where(p => selectedCategoryId == 0 || p.Categoria?.Id_categoria == selectedCategoryId)
         .Where(p => selectedBrandId == 0 || p.Marca?.Id_marca == selectedBrandId)
-        .Where(p => string.IsNullOrEmpty(selectedSkinType) || p.Tipo_piel == selectedSkinType)
+        .Where(p => string.IsNullOrEmpty(selectedSkinType) || selectedSkinType == "0" || p.Tipo_piel.Equals(selectedSkinType, StringComparison.OrdinalIgnoreCase))
         .Where(p => p.Nombre != null && p.Nombre.Contains(filtroProducto, StringComparison.OrdinalIgnoreCase));
 
     private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
@@ -410,5 +408,15 @@
             paginaActual = nuevaPagina;
             StateHasChanged();
         }
+    }
+
+    private string GetStockBgColor(int stockActual)
+    {
+        if (stockActual == 0)
+            return "#dc3545";
+        else if (stockActual <= 12)
+            return "#ffb703";
+        else
+            return "#e2e3e5";
     }
 }

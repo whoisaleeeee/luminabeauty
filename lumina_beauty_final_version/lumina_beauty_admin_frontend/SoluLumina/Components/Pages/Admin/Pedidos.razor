@@ -192,7 +192,7 @@
                                     </td>
 
                                     <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
-                                        <span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(pedido.Estado); padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                        <span class="badge rounded-pill text-dark fw-medium" style="background-color: @GetEstadoBgColor(pedido.Estado); padding: 0.4em 0.8em; font-size: 0.75rem;">
                                             @pedido.Estado
                                         </span>
                                     </td>
@@ -375,7 +375,7 @@
     private DateTime? filtroFecha;
 
     private int paginaActual = 1;
-    private int itemsPorPagina = 7;
+    private int itemsPorPagina = 10;
 
     private bool mostrarModal = false;
     private Pedido? pedidoSeleccionado;
