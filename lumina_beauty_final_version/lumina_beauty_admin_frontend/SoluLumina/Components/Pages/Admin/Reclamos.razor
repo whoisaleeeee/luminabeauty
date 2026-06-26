@@ -1,5 +1,8 @@
 @page "/Reclamos"
 @using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@using SoluLumina.Models
+@using Newtonsoft.Json
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -61,7 +64,7 @@
                         <i class="bi bi-exclamation-circle fs-5 text-danger"></i>
                     </div>
                     <div class="d-flex align-items-end gap-2 mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == EstadoReclamo.Pendiente)</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == "ABIERTO")</h2>
                     </div>
                 </div>
             </div>
@@ -69,11 +72,11 @@
             <div class="col-12 col-sm-6 col-xl-4">
                 <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100" style="border-left: 4px solid #fd7e14 !important;">
                     <div class="d-flex justify-content-between align-items-start mb-2">
-                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Asignados a Área</small>
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Asignados / En revisión</small>
                         <i class="bi bi-building-gear fs-5" style="color: #fd7e14;"></i>
                     </div>
                     <div class="d-flex flex-column justify-content-end mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == EstadoReclamo.Asignado)</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == "EN_PROCESO" || r.Estado == "EN_REVISION")</h2>
                     </div>
                 </div>
             </div>
@@ -85,7 +88,7 @@
                         <i class="bi bi-check-circle fs-5" style="color: #198754;"></i>
                     </div>
                     <div class="d-flex flex-column justify-content-end mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == EstadoReclamo.Atendido)</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == "RESUELTO" || r.Estado == "CERRADO")</h2>
                     </div>
                 </div>
             </div>
@@ -126,11 +129,11 @@
                         {
                             <tr class="border-bottom" style="border-color: #f7eff1 !important;">
                                 <td class="py-3 px-4 fw-bold text-dark font-monospace">@r.IdStr</td>
-                                <td class="text-secondary">@r.FechaRegistro.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-secondary">@r.Fecha_creacion.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="fw-bold text-dark">@r.ClienteNombre</span>
-                                        <span class="text-muted small font-monospace"><i class="bi bi-box-seam"></i> @r.PedidoIdStr</span>
+                                        <span class="fw-bold text-dark">@(r.Cliente != null ? $"{r.Cliente.Nombres} {r.Cliente.Apellidos}" : "Sin Cliente")</span>
+                                        <span class="text-muted small font-monospace"><i class="bi bi-box-seam"></i> @(r.Pedido != null ? r.Pedido.Codigo_pedido : "Sin Pedido")</span>
                                     </div>
                                 </td>
                                 <td>
@@ -184,9 +187,9 @@
                     <div>
                         <h4 class="modal-title fw-bold text-dark mb-1">Gestión de Reclamo @reclamoSeleccionado.IdStr</h4>
                         <div class="d-flex align-items-center gap-2 text-muted small">
-                            <span><i class="bi bi-person"></i> @reclamoSeleccionado.ClienteNombre</span>
+                            <span><i class="bi bi-person"></i> @(reclamoSeleccionado.Cliente != null ? $"{reclamoSeleccionado.Cliente.Nombres} {reclamoSeleccionado.Cliente.Apellidos}" : "Sin Cliente")</span>
                             <span>•</span>
-                            <span><i class="bi bi-calendar3"></i> @reclamoSeleccionado.FechaRegistro.ToString("dd MMM yyyy - HH:mm")</span>
+                            <span><i class="bi bi-calendar3"></i> @reclamoSeleccionado.Fecha_creacion.ToString("dd MMM yyyy - HH:mm")</span>
                         </div>
                     </div>
                     <button type="button" class="btn-close" @onclick="CerrarModal"></button>
@@ -221,21 +224,21 @@
                         <div class="mb-4 position-relative">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="fw-bold text-dark"><i class="bi bi-1-circle-fill text-danger me-2"></i> Paso 1: Asignar a Área Encargada</span>
-                                @if(reclamoSeleccionado.Estado != EstadoReclamo.Pendiente)
+                                @if(reclamoSeleccionado.Estado != "ABIERTO")
                                 {
                                     <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i> Asignado</span>
                                 }
                             </div>
                             
                             <div class="d-flex gap-3 align-items-center ms-4 ps-2">
-                                <select class="form-select border-1 shadow-sm" @bind="areaTemp" disabled="@(reclamoSeleccionado.Estado == EstadoReclamo.Atendido)" style="max-width: 250px;">
+                                <select class="form-select border-1 shadow-sm" @bind="areaTemp" disabled="@(reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")" style="max-width: 250px;">
                                     <option value="" disabled selected>Seleccione un área...</option>
                                     <option value="Logística (Envíos)">Logística (Envíos)</option>
                                     <option value="Ventas / Facturación">Ventas / Facturación</option>
                                     <option value="Almacén (Productos)">Almacén (Productos)</option>
                                     <option value="Soporte Técnico">Soporte Técnico</option>
                                 </select>
-                                <button class="btn btn-dark px-3 rounded-3 shadow-sm fw-medium" @onclick="AsignarArea" disabled="@(string.IsNullOrEmpty(areaTemp) || reclamoSeleccionado.Estado == EstadoReclamo.Atendido)">
+                                <button class="btn btn-dark px-3 rounded-3 shadow-sm fw-medium" @onclick="AsignarArea" disabled="@(string.IsNullOrEmpty(areaTemp) || reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")">
                                     Confirmar Asignación
                                 </button>
                             </div>
@@ -247,20 +250,20 @@
                         <div class="position-relative">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <span class="fw-bold text-dark"><i class="bi bi-2-circle-fill text-warning me-2"></i> Paso 2: Resolución por el Área</span>
-                                @if(reclamoSeleccionado.Estado == EstadoReclamo.Atendido)
+                                @if(reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")
                                 {
                                     <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i> Resuelto</span>
                                 }
                             </div>
                             
                             <div class="ms-4 ps-2">
-                                @if (reclamoSeleccionado.Estado == EstadoReclamo.Pendiente)
+                                @if (reclamoSeleccionado.Estado == "ABIERTO")
                                 {
                                     <div class="alert alert-light border text-muted small py-2">
                                         <i class="bi bi-info-circle"></i> Debes asignar un área primero.
                                     </div>
                                 }
-                                else if (reclamoSeleccionado.Estado == EstadoReclamo.Asignado)
+                                else if (reclamoSeleccionado.Estado == "EN_PROCESO" || reclamoSeleccionado.Estado == "EN_REVISION")
                                 {
                                     <div class="alert alert-warning border-warning bg-warning bg-opacity-10 py-3 mb-3">
                                         <div class="d-flex align-items-center gap-2 mb-2">
@@ -273,7 +276,7 @@
                                         <i class="bi bi-check2-circle fs-5"></i> Marcar Reclamo como Atendido
                                     </button>
                                 }
-                                else if (reclamoSeleccionado.Estado == EstadoReclamo.Atendido)
+                                else if (reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")
                                 {
                                     <div class="alert alert-success border-success bg-success bg-opacity-10 py-3 mb-0">
                                         <h6 class="fw-bold text-success mb-1"><i class="bi bi-check-circle-fill"></i> Problema Solucionado</h6>
@@ -319,22 +322,42 @@
     private bool showProfileDropdown = false;
     private Reclamo? reclamoSeleccionado;
     private List<Reclamo> listaReclamos = new();
+    private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
 
     private void ToggleProfileDropdown()
     {
         showProfileDropdown = !showProfileDropdown;
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Datos de ejemplo
-        listaReclamos = new List<Reclamo>
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        try
         {
-            new Reclamo { Id = 8842, PedidoIdStr = "ORD-45210", ClienteNombre = "Elena Rodríguez", Asunto = "Producto con envase dañado", Descripcion = "El serum hidratante llegó con la tapa rota y hubo derrame de contenido en la caja.", Estado = EstadoReclamo.Pendiente, FechaRegistro = DateTime.Today.AddHours(-2) },
-            new Reclamo { Id = 8841, PedidoIdStr = "ORD-45201", ClienteNombre = "Carlos Mejía", Asunto = "Demora en la entrega", Descripcion = "El pedido debió llegar ayer según la fecha estimada. Lo necesito urgente para un evento mañana.", Estado = EstadoReclamo.Asignado, AreaAsignada = "Logística (Envíos)", FechaRegistro = DateTime.Today.AddHours(-5) },
-            new Reclamo { Id = 8839, PedidoIdStr = "ORD-45199", ClienteNombre = "Ana Patricia", Asunto = "Ítem Faltante en caja", Descripcion = "Faltan los labiales matte de la orden. Solo me llegaron las sombras.", Estado = EstadoReclamo.Atendido, AreaAsignada = "Almacén (Productos)", FechaRegistro = DateTime.Today.AddDays(-1) },
-            new Reclamo { Id = 8835, PedidoIdStr = "ORD-45150", ClienteNombre = "Luisa Fer", Asunto = "Cobro duplicado de envío", Descripcion = "Se me cobró doble el cargo de envío por error en la pasarela de pagos. Solicito extorno.", Estado = EstadoReclamo.Pendiente, FechaRegistro = DateTime.Today.AddDays(-2) }
-        };
+            var clientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar");
+            var pedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar");
+            listaReclamos = await new HttpClientUtils<List<Reclamo>>().get(URL_BASE + "/ReclamoRS/listar") ?? new List<Reclamo>();
+
+            foreach (var r in listaReclamos)
+            {
+                if (r.Cliente != null && clientes != null)
+                {
+                    r.Cliente = clientes.FirstOrDefault(c => c.Id_usuario == r.Cliente.Id_usuario);
+                }
+                if (r.Pedido != null && pedidos != null)
+                {
+                    r.Pedido = pedidos.FirstOrDefault(p => p.Id_pedido == r.Pedido.Id_pedido);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private IEnumerable<Reclamo> ReclamosFiltrados
@@ -346,16 +369,25 @@
             if (!string.IsNullOrWhiteSpace(filtroBusqueda))
             {
                 var f = filtroBusqueda.ToLower();
-                query = query.Where(r => r.IdStr.ToLower().Contains(f) || r.ClienteNombre.ToLower().Contains(f) || r.PedidoIdStr.ToLower().Contains(f));
+                query = query.Where(r => r.IdStr.ToLower().Contains(f) || 
+                                         (r.Cliente != null && ((r.Cliente.Nombres != null && r.Cliente.Nombres.ToLower().Contains(f)) || (r.Cliente.Apellidos != null && r.Cliente.Apellidos.ToLower().Contains(f)))) || 
+                                         (r.Pedido != null && r.Pedido.Codigo_pedido != null && r.Pedido.Codigo_pedido.ToLower().Contains(f)) ||
+                                         r.Asunto.ToLower().Contains(f));
             }
 
             if (filtroEstado != "Todos")
             {
-                var estadoEnum = Enum.Parse<EstadoReclamo>(filtroEstado);
-                query = query.Where(r => r.Estado == estadoEnum);
+                var mappedEstado = filtroEstado switch
+                {
+                    "Pendiente" => "ABIERTO",
+                    "Asignado" => "EN_PROCESO",
+                    "Atendido" => "RESUELTO",
+                    _ => filtroEstado
+                };
+                query = query.Where(r => r.Estado.Equals(mappedEstado, StringComparison.OrdinalIgnoreCase));
             }
 
-            return query.OrderByDescending(r => r.FechaRegistro);
+            return query.OrderByDescending(r => r.Fecha_creacion);
         }
     }
 
@@ -370,22 +402,48 @@
         reclamoSeleccionado = null;
     }
 
-    private void AsignarArea()
+    private async Task AsignarArea()
     {
         if (reclamoSeleccionado != null && !string.IsNullOrEmpty(areaTemp))
         {
-            reclamoSeleccionado.AreaAsignada = areaTemp;
-            reclamoSeleccionado.Estado = EstadoReclamo.Asignado;
-            MostrarToast($"Reclamo asignado a {areaTemp}", "#fd7e14");
+            try
+            {
+                await new HttpClientUtils<Reclamo>().put(
+                    URL_BASE + $"/ReclamoRS/cambiarEstado/{reclamoSeleccionado.Id_reclamo}/EN_PROCESO",
+                    new object()
+                );
+
+                reclamoSeleccionado.AreaAsignada = areaTemp;
+                reclamoSeleccionado.Estado = "EN_PROCESO";
+                MostrarToast($"Reclamo asignado a {areaTemp}", "#fd7e14");
+                await CargarDatos();
+            }
+            catch (Exception ex)
+            {
+                MostrarToast($"Error: {ex.Message}", "#dc3545");
+            }
         }
     }
 
-    private void MarcarComoAtendido()
+    private async Task MarcarComoAtendido()
     {
         if (reclamoSeleccionado != null)
         {
-            reclamoSeleccionado.Estado = EstadoReclamo.Atendido;
-            MostrarToast("Reclamo marcado como Atendido exitosamente", "#198754");
+            try
+            {
+                await new HttpClientUtils<Reclamo>().put(
+                    URL_BASE + $"/ReclamoRS/cambiarEstado/{reclamoSeleccionado.Id_reclamo}/RESUELTO",
+                    new object()
+                );
+
+                reclamoSeleccionado.Estado = "RESUELTO";
+                MostrarToast("Reclamo marcado como Atendido exitosamente", "#198754");
+                await CargarDatos();
+            }
+            catch (Exception ex)
+            {
+                MostrarToast($"Error: {ex.Message}", "#dc3545");
+            }
         }
     }
 
@@ -399,48 +457,77 @@
         StateHasChanged();
     }
 
-    private string GetEstadoBgColor(EstadoReclamo estado) => estado switch
+    private string GetEstadoBgColor(string estado)
     {
-        EstadoReclamo.Pendiente => "#fff3cd",
-        EstadoReclamo.Asignado => "#ffe5d0",
-        EstadoReclamo.Atendido => "#e2f3eb",
-        _ => "#f8f9fa"
-    };
+        if (string.IsNullOrEmpty(estado)) return "#f8f9fa";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "#fff3cd",
+            "EN_REVISION" => "#ffe5d0",
+            "EN_PROCESO" => "#ffe5d0",
+            "RESUELTO" => "#e2f3eb",
+            _ => "#f8f9fa"
+        };
+    }
 
-    private string GetEstadoTextColor(EstadoReclamo estado) => estado switch
+    private string GetEstadoTextColor(string estado)
     {
-        EstadoReclamo.Pendiente => "#856404",
-        EstadoReclamo.Asignado => "#fd7e14",
-        EstadoReclamo.Atendido => "#198754",
-        _ => "#6c757d"
-    };
+        if (string.IsNullOrEmpty(estado)) return "#6c757d";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "#856404",
+            "EN_REVISION" => "#fd7e14",
+            "EN_PROCESO" => "#fd7e14",
+            "RESUELTO" => "#198754",
+            _ => "#6c757d"
+        };
+    }
 
-    private string GetEstadoBorderColor(EstadoReclamo estado) => estado switch
+    private string GetEstadoBorderColor(string estado)
     {
-        EstadoReclamo.Pendiente => "#ffecb5",
-        EstadoReclamo.Asignado => "#fecba1",
-        EstadoReclamo.Atendido => "#d1e7dd",
-        _ => "#dee2e6"
-    };
+        if (string.IsNullOrEmpty(estado)) return "#dee2e6";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "#ffecb5",
+            "EN_REVISION" => "#fecba1",
+            "EN_PROCESO" => "#fecba1",
+            "RESUELTO" => "#d1e7dd",
+            _ => "#dee2e6"
+        };
+    }
 
     public class Reclamo
     {
-        public int Id { get; set; }
-        public string PedidoIdStr { get; set; } = string.Empty;
-        public string ClienteNombre { get; set; } = string.Empty;
+        [JsonProperty("id_reclamo")]
+        public int Id_reclamo { get; set; }
+
+        [JsonProperty("tipo")]
+        public string Tipo { get; set; } = string.Empty;
+
+        [JsonProperty("asunto")]
         public string Asunto { get; set; } = string.Empty;
+
+        [JsonProperty("descripcion")]
         public string Descripcion { get; set; } = string.Empty;
+
+        [JsonProperty("estado")]
+        public string Estado { get; set; } = "ABIERTO";
+
+        [JsonProperty("prioridad")]
+        public string Prioridad { get; set; } = "MEDIA";
+
+        [JsonProperty("fecha_creacion")]
+        public DateTime Fecha_creacion { get; set; }
+
+        [JsonProperty("cliente")]
+        public Cliente? Cliente { get; set; }
+
+        [JsonProperty("pedido")]
+        public Pedido? Pedido { get; set; }
+
+        [JsonIgnore]
         public string AreaAsignada { get; set; } = string.Empty;
-        public EstadoReclamo Estado { get; set; }
-        public DateTime FechaRegistro { get; set; }
 
-        public string IdStr => $"#REC-{Id}";
-    }
-
-    public enum EstadoReclamo
-    {
-        Pendiente,
-        Asignado,
-        Atendido
+        public string IdStr => $"#REC-{Id_reclamo}";
     }
 }
