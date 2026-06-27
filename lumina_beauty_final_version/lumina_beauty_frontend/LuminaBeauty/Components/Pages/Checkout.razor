@@ -275,6 +275,23 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <label class="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3">
+                                            <input type="checkbox"
+                                                   @bind="_guardarNuevaDireccion"
+                                                   class="mt-0.5 h-4 w-4 accent-[#C7346A]" />
+
+                                            <span>
+                                                <span class="block text-xs font-semibold text-stone-700">
+                                                    Guardar esta dirección en mi perfil
+                                                </span>
+
+                                                <span class="mt-1 block text-[11px] leading-relaxed text-stone-500">
+                                                    Podrás usarla nuevamente en futuras compras desde Mi cuenta.
+                                                </span>
+                                            </span>
+                                        </label>
+
                                     </div>
                                 }
                             </div>
@@ -434,6 +451,7 @@
     private List<Direccion> _direcciones = new();
     private int? _direccionSeleccionadaId;
     private bool _usarOtraDireccion;
+    private bool _guardarNuevaDireccion;
 
     private bool _procesandoPedido;
     private string _paymentMethod = "card";
@@ -505,6 +523,7 @@
     {
         _direccionSeleccionadaId = null;
         _usarOtraDireccion = true;
+
 
         _address = string.Empty;
         _city = string.Empty;
