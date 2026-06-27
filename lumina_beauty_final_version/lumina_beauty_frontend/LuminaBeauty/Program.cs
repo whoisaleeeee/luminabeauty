@@ -63,6 +63,7 @@ builder.Services.AddScoped<MovimientoPuntosAppService>();
 builder.Services.AddScoped<EnvioAppService>();
 builder.Services.AddScoped<ValoracionAppService>();
 builder.Services.AddScoped<ShopAppService>();
+builder.Services.AddScoped<HeaderSearchAppService>();
 
 
 var app = builder.Build();
