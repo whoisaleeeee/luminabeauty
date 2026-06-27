@@ -12,6 +12,11 @@ namespace LuminaBeauty.Services.AppServices
             _envioRestService = envioRestService;
         }
 
+        public Task<Envio?> RegistrarAsync(Envio envio)
+        {
+            return _envioRestService.RegistrarAsync(envio);
+        }
+
         public Task<Envio?> BuscarPorPedidoAsync(int idPedido)
         {
             return _envioRestService.BuscarPorPedidoAsync(idPedido);

@@ -10,202 +10,415 @@
 @inject DireccionRestService DireccionService
 @implements IDisposable
 
-<PageTitle>Pagar Orden | Lumina Beauty</PageTitle>
+<PageTitle>Pago y envío | Lumina Beauty</PageTitle>
 
 <div class="max-w-7xl mx-auto px-1 sm:px-4 py-6 text-left">
-    <nav class="text-xs font-semibold text-stone-400 mb-8 flex items-center gap-2 select-none">
-        <span class="hover:text-[#FF76A5] transition cursor-pointer" @onclick='() => NavigateTo("/")'>Inicio</span>
+    <nav class="mb-8 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
+        <span class="cursor-pointer transition hover:text-[#C7346A]"
+              @onclick='() => Navigator.NavigateTo("/")'>
+            Inicio
+        </span>
+
         <span class="text-stone-300">/</span>
-        <span class="hover:text-[#FF76A5] transition cursor-pointer" @onclick='() => NavigateTo("/cart")'>Carrito de compras</span>
+
+        <span class="cursor-pointer transition hover:text-[#C7346A]"
+              @onclick='() => Navigator.NavigateTo("/cart")'>
+            Carrito de compras
+        </span>
+
         <span class="text-stone-300">/</span>
-        <span class="text-stone-600 font-bold">Checkout</span>
+
+        <span class="font-bold text-stone-600">
+            Pago y envío
+        </span>
     </nav>
 
     @if (_isOrderComplete)
     {
-        <div class="bg-white/70 backdrop-blur-md rounded-[32px] border border-[#FCD1DB]/50 p-8 sm:p-14 text-center max-w-2xl mx-auto shadow-2xl space-y-6 animate-in zoom-in-95 duration-500">
-            <div class="w-20 h-20 bg-green-50 rounded-full border border-green-200/50 flex items-center justify-center mx-auto text-[#FF76A5] text-3xl font-bold select-none animate-bounce">
-                <span>✓</span>
+        <div class="max-w-2xl mx-auto space-y-6 rounded-[32px] border border-[#FCD1DB]/50 bg-white/70 p-8 text-center shadow-2xl backdrop-blur-md sm:p-14">
+            <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-green-200/50 bg-green-50 text-3xl font-bold text-[#FF76A5]">
+                ✓
             </div>
 
             <div class="space-y-2">
-                <span class="text-[10px] font-black uppercase tracking-widest text-[#C7346A] bg-[#FFF0F3] px-3.5 py-1.5 rounded-full select-none">¡PAGO PROCESADO EXITOSAMENTE!</span>
-                <h1 class="font-serif text-3xl sm:text-4xl font-semibold text-stone-900 pt-3 leading-tight">Tu ritual está en camino</h1>
-                <p class="text-xs font-medium text-stone-500 max-w-md mx-auto leading-relaxed pt-1">
-                    Hemos registrado tu orden <strong class="font-mono text-stone-800">#LUM-@_generatedOrderNo</strong> de forma satisfactoria.
+                <span class="rounded-full bg-[#FFF0F3] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-widest text-[#C7346A]">
+                    Pago procesado exitosamente
+                </span>
+
+                <h1 class="pt-3 font-serif text-3xl font-semibold leading-tight text-stone-900 sm:text-4xl">
+                    Tu pedido fue registrado
+                </h1>
+
+                <p class="mx-auto max-w-md pt-1 text-xs font-medium leading-relaxed text-stone-500">
+                    Hemos registrado tu orden
+                    <strong class="font-mono text-stone-800">@_codigoPedidoGenerado</strong>.
                 </p>
             </div>
 
-            <div class="bg-[#FFF0F3]/40 border border-[#FFE3E8]/70 p-5 rounded-2xl max-w-md mx-auto text-left text-xs font-semibold space-y-1.5 font-sans select-none text-stone-700">
-                <p class="font-bold text-stone-900 border-b border-stone-100 pb-1.5 uppercase text-[9px] tracking-widest text-[#C7346A] mb-1">Resumen del Envío</p>
-                <p><span class="text-stone-400 font-bold text-[10px] uppercase block">Destinatario:</span> @_fullName</p>
-                <p><span class="text-stone-400 font-bold text-[10px] uppercase block">Dirección:</span> @_address, @_district, @_city</p>
-                <p><span class="text-stone-400 font-bold text-[10px] uppercase block">Contacto:</span> @_phone</p>
-                <p><span class="text-stone-400 font-bold text-[10px] uppercase block">Método de Pago:</span> <span class="capitalize">@_paymentMethod</span></p>
+            <div class="mx-auto max-w-md space-y-1.5 rounded-2xl border border-[#FFE3E8]/70 bg-[#FFF0F3]/40 p-5 text-left text-xs font-semibold text-stone-700">
+                <p class="mb-1 border-b border-stone-100 pb-1.5 text-[9px] font-bold uppercase tracking-widest text-[#C7346A]">
+                    Resumen de envío
+                </p>
+
+                <p>
+                    <span class="block text-[10px] font-bold uppercase text-stone-400">Destinatario:</span>
+                    @_fullName
+                </p>
+
+                <p>
+                    <span class="block text-[10px] font-bold uppercase text-stone-400">Dirección:</span>
+                    @_address, @_district, @_city
+                </p>
+
+                <p>
+                    <span class="block text-[10px] font-bold uppercase text-stone-400">Contacto:</span>
+                    @_phone
+                </p>
+
+                <p>
+                    <span class="block text-[10px] font-bold uppercase text-stone-400">Método de pago:</span>
+                    @GetPaymentLabel()
+                </p>
             </div>
 
-            <div class="pt-2 select-none">
-                <button @onclick='() => NavigateTo("/")' class="px-8 py-3.5 bg-stone-950 hover:bg-[#FF76A5] text-white font-bold text-xs uppercase tracking-widest rounded-xl transition duration-300 shadow cursor-pointer">
-                    Volver a la Tienda
+            <div class="pt-2">
+                <button @onclick='() => Navigator.NavigateTo("/shop")'
+                        class="cursor-pointer rounded-xl bg-stone-950 px-8 py-3.5 text-xs font-semibold uppercase tracking-widest text-white transition hover:bg-[#FF76A5]">
+                    Volver a la tienda
                 </button>
             </div>
         </div>
     }
     else
     {
-        <h1 class="font-serif text-3xl font-medium tracking-tight text-stone-900 mb-8 select-none">Checkout de Belleza</h1>
+        <div class="border-b border-stone-100 pb-6">
+            <h1 class="mt-2 font-serif text-2xl font-semibold text-stone-800 sm:text-xl">
+                Pago y envío
+            </h1>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div class="lg:col-span-8 space-y-6">
-                <form @onsubmit="PlaceOrder" @onsubmit:preventDefault class="space-y-6">
-                    <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-stone-100 p-6 sm:p-8 space-y-6 shadow-xs text-left">
-                        <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
-                            1. Datos de Despacho
-                        </h3>
+            <p class="mt-2 text-xs leading-relaxed text-stone-500">
+                Confirma tus datos de entrega y selecciona el método de pago para finalizar tu compra.
+            </p>
+        </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-1">
+        <div class="mt-5 grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+            <div class="space-y-6 lg:col-span-8">
+                <form @onsubmit="PlaceOrder"
+                      @onsubmit:preventDefault
+                      class="space-y-6">
+
+                    <section class="space-y-6 rounded-3xl border border-stone-100 bg-white/80 p-6 text-left shadow-xs backdrop-blur-md sm:p-8">
+                        <div class="border-b border-stone-100 pb-3">
+                            <h2 class="text-xs font-semibold uppercase tracking-widest text-[#C7346A]">
+                                1. Datos de despacho
+                            </h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-5 pt-1 sm:grid-cols-2">
                             <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Nombre de contacto</label>
-                                <input type="text" required placeholder="Nombre completo..." @bind="_fullName"
-                                       class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                    Nombre de contacto
+                                </label>
+
+                                <input type="text"
+                                       required
+                                       placeholder="Nombre completo..."
+                                       @bind="_fullName"
+                                       class="w-full rounded-xl border border-stone-200 bg-[#faf6f7]/60 px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition hover:bg-white focus:border-[#FF76A5] focus:bg-white focus:outline-none" />
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Celular</label>
-                                <input type="tel" required placeholder="999 999 999..." @bind="_phone"
-                                       class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                    Celular
+                                </label>
+
+                                <input type="tel"
+                                       required
+                                       placeholder="999 999 999..."
+                                       @bind="_phone"
+                                       class="w-full rounded-xl border border-stone-200 bg-[#faf6f7]/60 px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition hover:bg-white focus:border-[#FF76A5] focus:bg-white focus:outline-none" />
                             </div>
 
-                            <div class="col-span-1 sm:col-span-2 space-y-1">
-                                <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Dirección de entrega</label>
-                                <input type="text" required placeholder="Av. Primavera 1234, Dpto 402..." @bind="_address"
-                                       class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                            </div>
+                            <div class="col-span-1 space-y-3 sm:col-span-2">
+                                <div class="flex items-center justify-between gap-4">
+                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                        Dirección de entrega
+                                    </label>
 
-                            <div class="grid grid-cols-3 col-span-1 sm:col-span-2 gap-4">
-                                <div class="col-span-1 space-y-1">
-                                    <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Ciudad / Región</label>
-                                    <input type="text" required placeholder="Lima..." @bind="_city"
-                                           class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
+                                    @if (_direcciones.Count > 0 && !_usarOtraDireccion)
+                                    {
+                                        <button type="button"
+                                                @onclick="UsarOtraDireccion"
+                                                class="cursor-pointer text-[10px] font-semibold text-[#C7346A] transition hover:text-stone-800">
+                                            Agregar nueva dirección
+                                        </button>
+                                    }
                                 </div>
 
-                                <div class="col-span-1 space-y-1">
-                                    <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Distrito</label>
-                                    <input type="text" required placeholder="La Molina..." @bind="_district"
-                                           class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                                </div>
+                                @if (!_usarOtraDireccion && _direcciones.Count > 0)
+                                {
+                                    <div class="space-y-3">
+                                        @foreach (var direccion in _direcciones)
+                                        {
+                                            var isSelected = _direccionSeleccionadaId == direccion.IdDireccion;
+                                            var isPrincipal = Auth.CurrentClient?.DireccionPrincipal?.IdDireccion == direccion.IdDireccion;
 
-                                <div class="col-span-1 space-y-1">
-                                    <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider select-none">Código Postal</label>
-                                    <input type="text" placeholder="15024..." @bind="_zip"
-                                           class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                                </div>
+                                            <button type="button"
+                                                    @onclick="() => SeleccionarDireccion(direccion)"
+                                                    class="w-full cursor-pointer rounded-2xl border p-4 text-left transition @(isSelected
+                                                                                                            ? "border-[#FF76A5] bg-[#FFF0F3]/55"
+                                                                                                            : "border-stone-200 bg-white hover:border-[#FCD1DB]")">
+
+                                                <div class="flex items-start justify-between gap-4">
+                                                    <div>
+                                                        <p class="text-xs font-semibold text-stone-800">
+                                                            @direccion.DireccionTexto
+                                                        </p>
+
+                                                        <p class="mt-1 text-[11px] leading-relaxed text-stone-500">
+                                                            @direccion.Ciudad
+
+                                                            @if (!string.IsNullOrWhiteSpace(direccion.Referencia))
+                                                            {
+                                                                <span> · @direccion.Referencia</span>
+                                                            }
+
+                                                            @if (!string.IsNullOrWhiteSpace(direccion.CodigoPostal))
+                                                            {
+                                                                <span> · @direccion.CodigoPostal</span>
+                                                            }
+                                                        </p>
+                                                    </div>
+
+                                                    @if (isPrincipal)
+                                                    {
+                                                        <span class="shrink-0 rounded-full bg-stone-100 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide text-stone-500">
+                                                            Principal
+                                                        </span>
+                                                    }
+                                                </div>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/25 p-4">
+                                        <div class="mb-4 flex items-center justify-between gap-4">
+                                            <div>
+                                                <p class="text-xs font-semibold text-stone-800">
+                                                    Nueva dirección para este pedido
+                                                </p>
+
+                                                <p class="mt-1 text-[11px] leading-relaxed text-stone-500">
+                                                    Esta dirección se usará solo para esta compra y no modificará tus direcciones guardadas.
+                                                </p>
+                                            </div>
+
+                                            @if (_direcciones.Count > 0)
+                                            {
+                                                <button type="button"
+                                                        @onclick="VolverADireccionesGuardadas"
+                                                        class="cursor-pointer text-[10px] font-semibold text-[#C7346A] transition hover:text-stone-800">
+                                                    Ver direcciones guardadas
+                                                </button>
+                                            }
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div class="space-y-1">
+                                                <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                                    Dirección
+                                                </label>
+
+                                                <input type="text"
+                                                       required
+                                                       placeholder="Av. Primavera 1234, Dpto 402..."
+                                                       @bind="_address"
+                                                       class="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition focus:border-[#FF76A5] focus:outline-none" />
+                                            </div>
+
+                                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                                <div class="space-y-1">
+                                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                                        Ciudad o región
+                                                    </label>
+
+                                                    <input type="text"
+                                                           required
+                                                           placeholder="Lima..."
+                                                           @bind="_city"
+                                                           class="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition focus:border-[#FF76A5] focus:outline-none" />
+                                                </div>
+
+                                                <div class="space-y-1">
+                                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                                        Distrito o referencia
+                                                    </label>
+
+                                                    <input type="text"
+                                                           required
+                                                           placeholder="San Miguel..."
+                                                           @bind="_district"
+                                                           class="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition focus:border-[#FF76A5] focus:outline-none" />
+                                                </div>
+
+                                                <div class="space-y-1">
+                                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                                        Código postal
+                                                    </label>
+
+                                                    <input type="text"
+                                                           placeholder="15088..."
+                                                           @bind="_zip"
+                                                           class="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition focus:border-[#FF76A5] focus:outline-none" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-stone-100 p-6 sm:p-8 space-y-6 shadow-xs text-left">
-                        <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 uppercase text-xs tracking-widest text-[#C7346A] select-none">
-                            2. Método de Pago de Prestigio
-                        </h3>
+                    <section class="space-y-6 rounded-3xl border border-stone-100 bg-white/80 p-6 text-left shadow-xs backdrop-blur-md sm:p-8">
+                        <div class="border-b border-stone-100 pb-3">
+                            <h2 class="text-xs font-semibold uppercase tracking-widest text-[#C7346A]">
+                                2. Método de pago
+                            </h2>
+                        </div>
 
-                        <div class="grid grid-cols-3 gap-3 select-none">
+                        <div class="grid grid-cols-3 gap-3">
                             @foreach (var opt in _paymentMethodsList)
                             {
-                                var currentOpt = opt.Code;
-                                var isActive = _paymentMethod == currentOpt;
+                                var isActive = _paymentMethod == opt.Code;
 
-                                <button type="button" @onclick="() => SelectPaymentMethod(currentOpt)"
-                                        class="py-3 px-1 rounded-xl border text-xs font-bold uppercase transition flex flex-col items-center justify-center gap-1.5 cursor-pointer @(isActive ? "bg-[#FFF0F3] text-[#C7346A] border-[#FF76A5]" : "bg-stone-50 text-stone-500 border-stone-200 hover:text-stone-800")">
+                                <button type="button"
+                                        @onclick="() => SelectPaymentMethod(opt.Code)"
+                                        class="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border px-1 py-3 text-xs font-semibold uppercase transition @(isActive
+                                                                                    ? "border-[#FF76A5] bg-[#FFF0F3] text-[#C7346A]"
+                                                                                    : "border-stone-200 bg-stone-50 text-stone-500 hover:text-stone-800")">
                                     <span class="text-sm">@opt.Icon</span>
                                     <span>@opt.Label</span>
                                 </button>
                             }
                         </div>
 
-                        <div class="pt-2">
-                            @if (_paymentMethod == "card")
-                            {
-                                <div class="grid grid-cols-4 gap-4 animate-in fade-in duration-300">
-                                    <div class="col-span-4 space-y-1">
-                                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">Número de tarjeta de crédito</label>
-                                        <input type="text" required placeholder="XXXX XXXX XXXX XXXX..." @bind="_cardNumber"
-                                               class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                                    </div>
+                        @if (_paymentMethod == "card")
+                        {
+                            <div class="grid grid-cols-4 gap-4 pt-2">
+                                <div class="col-span-4 space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                        Número de tarjeta
+                                    </label>
 
-                                    <div class="col-span-2 space-y-1">
-                                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">Vencimiento</label>
-                                        <input type="text" required placeholder="MM/AA..." @bind="_cardExpiry"
-                                               class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                                    </div>
-
-                                    <div class="col-span-2 space-y-1">
-                                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-wider">CVV</label>
-                                        <input type="password" required maxlength="3" placeholder="123..." @bind="_cardCvv"
-                                               class="w-full bg-[#faf6f7]/60 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] text-xs font-bold rounded-xl px-3.5 py-2.5 transition" />
-                                    </div>
+                                    <input type="text"
+                                           required
+                                           placeholder="XXXX XXXX XXXX XXXX..."
+                                           @bind="_cardNumber"
+                                           class="w-full rounded-xl border border-stone-200 bg-[#faf6f7]/60 px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition hover:bg-white focus:border-[#FF76A5] focus:bg-white focus:outline-none" />
                                 </div>
-                            }
-                            else if (_paymentMethod == "plin" || _paymentMethod == "yape")
-                            {
-                                <div class="bg-[#FFF0F3]/40 border border-[#FCD1DB]/40 p-4 rounded-xl text-left text-xs font-semibold text-stone-700 leading-relaxed font-sans select-none">
-                                    <p class="font-bold text-[#C7346A] mb-1">📲 Depósito Rápido Directo</p>
-                                    <span>Realiza el abono móvil al número <strong>958-392-491</strong> de Lumina Beauty S.A.C. Luego, completa tu compra y validaremos la aprobación al instante.</span>
-                                </div>
-                            }
-                        </div>
-                    </div>
 
-                    <button type="submit" disabled="@_procesandoPedido"
-                            class="w-full bg-[#FF76A5] hover:bg-[#ff5f96] text-white font-black text-xs tracking-widest uppercase py-4 rounded-xl shadow-md transition disabled:opacity-60 disabled:cursor-not-allowed">
-                        @(_procesandoPedido ? "PROCESANDO PEDIDO..." : "✓ CONFIRMAR Y PAGAR ORDEN")
+                                <div class="col-span-2 space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                        Vencimiento
+                                    </label>
+
+                                    <input type="text"
+                                           required
+                                           placeholder="MM/AA..."
+                                           @bind="_cardExpiry"
+                                           class="w-full rounded-xl border border-stone-200 bg-[#faf6f7]/60 px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition hover:bg-white focus:border-[#FF76A5] focus:bg-white focus:outline-none" />
+                                </div>
+
+                                <div class="col-span-2 space-y-1">
+                                    <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                                        CVV
+                                    </label>
+
+                                    <input type="password"
+                                           required
+                                           maxlength="3"
+                                           placeholder="123..."
+                                           @bind="_cardCvv"
+                                           class="w-full rounded-xl border border-stone-200 bg-[#faf6f7]/60 px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition hover:bg-white focus:border-[#FF76A5] focus:bg-white focus:outline-none" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="rounded-xl border border-[#FCD1DB]/40 bg-[#FFF0F3]/40 p-4 text-xs font-semibold leading-relaxed text-stone-700">
+                                El pago será validado de acuerdo con el método seleccionado antes de procesar el pedido.
+                            </div>
+                        }
+                    </section>
+
+                    <button type="submit"
+                            disabled="@_procesandoPedido"
+                            class="w-full rounded-xl bg-[#FF76A5] py-4 text-xs font-semibold uppercase tracking-widest text-white shadow-md transition hover:bg-[#ff5f96] disabled:cursor-not-allowed disabled:opacity-60">
+                        @(_procesandoPedido ? "Procesando pedido..." : "Confirmar pedido")
                     </button>
                 </form>
             </div>
 
-            <div class="lg:col-span-4 sticky top-24 select-none">
-                <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-[#FCD1DB]/50 p-6 shadow-md relative overflow-hidden text-stone-800 text-left">
-                    <div class="absolute top-0 inset-x-0 h-1 bg-[#FF76A5]" />
-                    <h3 class="font-serif text-lg font-bold text-stone-900 border-b border-stone-100 pb-3 mb-4 uppercase text-xs tracking-widest text-[#C7346A]">
-                        Resumen de Compra
-                    </h3>
+            <aside class="sticky top-24 select-none lg:col-span-4">
+                <div class="relative overflow-hidden rounded-3xl border border-[#FCD1DB]/50 bg-white/80 p-6 text-left text-stone-800 shadow-md backdrop-blur-md">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-[#FF76A5]"></div>
 
-                    <div class="space-y-3.5 max-h-56 overflow-y-auto pr-1 pb-4 mb-4 border-b border-stone-100/60">
+                    <h2 class="mb-4 border-b border-stone-100 pb-3 text-xs font-semibold uppercase tracking-widest text-[#C7346A]">
+                        Resumen de compra
+                    </h2>
+
+                    <div class="mb-4 max-h-56 space-y-3.5 overflow-y-auto border-b border-stone-100/60 pb-4 pr-1">
                         @foreach (var item in Cart.GetItems())
                         {
                             <div class="flex items-center gap-3.5 text-xs text-stone-900">
-                                <img src="@item.Product.Image" alt="@item.Product.Name"
-                                     class="w-11 h-11 object-contain rounded-lg border border-stone-200/55 p-0.5 bg-stone-50"
+                                <img src="@item.Product.Image"
+                                     alt="@item.Product.Name"
+                                     class="h-11 w-11 rounded-lg border border-stone-200/55 bg-stone-50 object-contain p-0.5"
                                      referrerpolicy="no-referrer" />
-                                <div class="flex-1 min-w-0 font-medium">
-                                    <p class="font-bold text-stone-900 truncate">@item.Product.Name</p>
-                                    <p class="text-[10px] text-stone-400 font-bold uppercase tracking-wider">@item.Product.Brand x @item.Quantity</p>
+
+                                <div class="min-w-0 flex-1 font-medium">
+                                    <p class="truncate font-semibold text-stone-900">
+                                        @item.Product.Name
+                                    </p>
+
+                                    <p class="text-[10px] font-semibold uppercase tracking-wider text-stone-400">
+                                        @item.Product.Brand x @item.Quantity
+                                    </p>
                                 </div>
-                                <span class="font-bold font-mono text-stone-900">S/ @((item.Product.Price * item.Quantity).ToString("0.00"))</span>
+
+                                <span class="font-mono font-semibold text-stone-900">
+                                    S/ @((item.Product.Price * item.Quantity).ToString("0.00"))
+                                </span>
                             </div>
                         }
                     </div>
 
-                    <div class="space-y-3 text-xs font-semibold text-stone-500 font-sans">
-                        <div class="flex justify-between items-center text-stone-600">
+                    <div class="space-y-3 text-xs font-semibold text-stone-500">
+                        <div class="flex items-center justify-between text-stone-600">
                             <span>Subtotal:</span>
-                            <span class="font-extrabold font-mono text-stone-900">S/ @Cart.GetSubtotal().ToString("0.00")</span>
-                        </div>
-
-                        <div class="flex justify-between items-center">
-                            <span>Envío:</span>
-                            <span class="@(GetShippingCost() == 0 ? "text-green-600 font-bold font-mono" : "text-stone-900 font-bold font-mono")">
-                                @(GetShippingCost() == 0 ? "Gratis" : $"S/ {GetShippingCost().ToString("0.00")}")
+                            <span class="font-mono font-semibold text-stone-900">
+                                S/ @Cart.GetSubtotal().ToString("0.00")
                             </span>
                         </div>
 
-                        <div class="border-t border-stone-150 pt-3.5 mt-2 flex justify-between items-center text-sm font-bold text-stone-900">
+                        <div class="flex items-center justify-between">
+                            <span>Envío:</span>
+                            <span class="@(GetShippingCost() == 0 ? "font-mono font-semibold text-green-600" : "font-mono font-semibold text-stone-900")">
+                                @(GetShippingCost() == 0 ? "Gratis" : $"S/ {GetShippingCost():0.00}")
+                            </span>
+                        </div>
+
+                        <div class="mt-2 flex items-center justify-between border-t border-stone-150 pt-3.5 text-sm font-semibold text-stone-900">
                             <span>Importe total:</span>
-                            <span class="text-base font-extrabold text-[#C7346A] font-mono">S/ @((Cart.GetSubtotal() + GetShippingCost()).ToString("0.00"))</span>
+                            <span class="font-mono text-base font-semibold text-[#C7346A]">
+                                S/ @((Cart.GetSubtotal() + GetShippingCost()).ToString("0.00"))
+                            </span>
                         </div>
                     </div>
                 </div>
-            </div>
+            </aside>
         </div>
     }
 </div>
@@ -217,13 +430,19 @@
     private string _city = string.Empty;
     private string _district = string.Empty;
     private string _zip = string.Empty;
+
+    private List<Direccion> _direcciones = new();
+    private int? _direccionSeleccionadaId;
+    private bool _usarOtraDireccion;
+
     private bool _procesandoPedido;
     private string _paymentMethod = "card";
     private string _cardNumber = string.Empty;
     private string _cardExpiry = string.Empty;
     private string _cardCvv = string.Empty;
+
     private bool _isOrderComplete;
-    private int _generatedOrderNo;
+    private string _codigoPedidoGenerado = string.Empty;
 
     private class PaymentMethodOption
     {
@@ -234,9 +453,9 @@
 
     private readonly List<PaymentMethodOption> _paymentMethodsList = new()
     {
-        new PaymentMethodOption { Code = "card", Label = "Tarjeta", Icon = "💳" },
-        new PaymentMethodOption { Code = "plin", Label = "Plin", Icon = "📲" },
-        new PaymentMethodOption { Code = "yape", Label = "Yape", Icon = "⚡" }
+        new() { Code = "card", Label = "Tarjeta", Icon = "💳" },
+        new() { Code = "plin", Label = "Plin", Icon = "📲" },
+        new() { Code = "yape", Label = "Yape", Icon = "⚡" }
     };
 
     protected override async Task OnInitializedAsync()
@@ -246,41 +465,108 @@
 
         if (Auth.CurrentClient == null || Auth.CurrentClient.Id <= 0)
         {
+            Navigator.NavigateTo("/login");
             return;
         }
 
         _fullName = $"{Auth.CurrentClient.Nombre} {Auth.CurrentClient.Apellido}".Trim();
         _phone = Auth.CurrentClient.Telefono ?? string.Empty;
 
-        var direcciones = await DireccionService.ListarPorClienteAsync(Auth.CurrentClient.Id);
-        var direccion = direcciones.FirstOrDefault();
+        _direcciones = await DireccionService.ListarPorClienteAsync(Auth.CurrentClient.Id);
 
-        if (direccion != null)
+        var idDireccionPrincipal = Auth.CurrentClient.DireccionPrincipal?.IdDireccion ?? 0;
+
+        var direccionPrincipal = _direcciones.FirstOrDefault(
+            direccion => direccion.IdDireccion == idDireccionPrincipal)
+            ?? _direcciones.FirstOrDefault();
+
+        if (direccionPrincipal != null)
         {
-            _address = direccion.DireccionTexto ?? string.Empty;
-            _city = direccion.Ciudad ?? string.Empty;
-            _district = direccion.Referencia ?? string.Empty;
-            _zip = direccion.CodigoPostal ?? string.Empty;
+            SeleccionarDireccion(direccionPrincipal);
+        }
+        else
+        {
+            _usarOtraDireccion = true;
         }
     }
 
-    private void NavigateTo(string path) => Navigator.NavigateTo(path);
-    private void SelectPaymentMethod(string method) => _paymentMethod = method;
-    private decimal GetShippingCost() => Cart.GetSubtotal() >= 199m ? 0m : 15m;
+    private void SeleccionarDireccion(Direccion direccion)
+    {
+        _direccionSeleccionadaId = direccion.IdDireccion;
+        _usarOtraDireccion = false;
+
+        _address = direccion.DireccionTexto ?? string.Empty;
+        _city = direccion.Ciudad ?? string.Empty;
+        _district = direccion.Referencia ?? string.Empty;
+        _zip = direccion.CodigoPostal ?? string.Empty;
+    }
+
+    private void UsarOtraDireccion()
+    {
+        _direccionSeleccionadaId = null;
+        _usarOtraDireccion = true;
+
+        _address = string.Empty;
+        _city = string.Empty;
+        _district = string.Empty;
+        _zip = string.Empty;
+    }
+
+    private void VolverADireccionesGuardadas()
+    {
+        var direccionSeleccionada = _direcciones.FirstOrDefault(
+            direccion => direccion.IdDireccion == _direccionSeleccionadaId)
+            ?? _direcciones.FirstOrDefault(
+                direccion => direccion.IdDireccion == Auth.CurrentClient?.DireccionPrincipal?.IdDireccion)
+            ?? _direcciones.FirstOrDefault();
+
+        if (direccionSeleccionada != null)
+        {
+            SeleccionarDireccion(direccionSeleccionada);
+        }
+    }
+
+    private void SelectPaymentMethod(string method)
+    {
+        _paymentMethod = method;
+    }
+
+    private decimal GetShippingCost()
+    {
+        return Cart.GetSubtotal() >= 199m ? 0m : 15m;
+    }
+
+    private string GetPaymentLabel()
+    {
+        return _paymentMethodsList
+            .FirstOrDefault(method => method.Code == _paymentMethod)
+            ?.Label
+            ?? "No especificado";
+    }
 
     private async Task PlaceOrder()
     {
-        if (_procesandoPedido) return;
-
-        if (string.IsNullOrWhiteSpace(_fullName) || string.IsNullOrWhiteSpace(_phone) || string.IsNullOrWhiteSpace(_address) || string.IsNullOrWhiteSpace(_city) || string.IsNullOrWhiteSpace(_district))
+        if (_procesandoPedido)
         {
-            Toast.ShowToast("No se pudieron cargar tus datos de despacho. Completa tu dirección en el perfil.");
             return;
         }
 
-        if (_paymentMethod == "card" && (string.IsNullOrWhiteSpace(_cardNumber) || string.IsNullOrWhiteSpace(_cardExpiry) || string.IsNullOrWhiteSpace(_cardCvv)))
+        if (string.IsNullOrWhiteSpace(_fullName) ||
+            string.IsNullOrWhiteSpace(_phone) ||
+            string.IsNullOrWhiteSpace(_address) ||
+            string.IsNullOrWhiteSpace(_city) ||
+            string.IsNullOrWhiteSpace(_district))
         {
-            Toast.ShowToast("Completa los datos de tarjeta de crédito para validar la transacción.");
+            Toast.ShowToast("Completa los datos de despacho antes de continuar.");
+            return;
+        }
+
+        if (_paymentMethod == "card" &&
+            (string.IsNullOrWhiteSpace(_cardNumber) ||
+             string.IsNullOrWhiteSpace(_cardExpiry) ||
+             string.IsNullOrWhiteSpace(_cardCvv)))
+        {
+            Toast.ShowToast("Completa los datos de tarjeta para continuar.");
             return;
         }
 
@@ -295,7 +581,21 @@
 
         try
         {
-            var resultado = await CheckoutService.ProcesarPedidoAsync(Auth.CurrentClient, Cart.GetItems());
+            var datosDespacho = new DatosDespacho
+            {
+                NombreContacto = _fullName,
+                Telefono = _phone,
+                Direccion = _address,
+                Ciudad = _city,
+                Referencia = _district,
+                CodigoPostal = _zip,
+                Pais = "Peru"
+            };
+
+            var resultado = await CheckoutService.ProcesarPedidoAsync(
+                Auth.CurrentClient,
+                Cart.GetItems(),
+                datosDespacho);
 
             if (!resultado.Exitoso)
             {
@@ -303,14 +603,16 @@
                 return;
             }
 
-            _generatedOrderNo = resultado.IdPedido;
+            _codigoPedidoGenerado = resultado.CodigoPedido;
             _isOrderComplete = true;
+
             Toast.ShowToast(resultado.Mensaje);
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error al confirmar pedido:");
             Console.WriteLine(ex.Message);
+
             Toast.ShowToast("Ocurrió un error al registrar el pedido.");
         }
         finally
