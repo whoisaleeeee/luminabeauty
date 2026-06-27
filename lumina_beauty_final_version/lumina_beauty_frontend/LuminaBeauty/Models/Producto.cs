@@ -53,6 +53,12 @@ namespace LuminaBeauty.Servicios.Modelo
         [JsonPropertyName("estado")]
         public int Estado { get; set; }
 
+        [JsonPropertyName("promedio_calificacion")]
+        public double PromedioCalificacion { get; set; }
+
+        [JsonPropertyName("cantidad_valoraciones")]
+        public int CantidadValoraciones { get; set; }
+
         [JsonPropertyName("categoria")]
         public CategoriaProducto? Categoria { get; set; }
 

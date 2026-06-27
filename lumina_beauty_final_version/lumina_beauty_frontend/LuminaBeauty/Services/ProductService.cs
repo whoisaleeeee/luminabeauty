@@ -154,13 +154,8 @@ namespace LuminaBeauty.Services
                     ? meta.originalPrice
                     : Math.Round(bp.Precio * 1.3m, 2),
                 Image = ResolveProductImage(bp.Imagen),
-                Rating = id.StartsWith("fs-", StringComparison.OrdinalIgnoreCase) ||
-                         id.StartsWith("bs-", StringComparison.OrdinalIgnoreCase)
-                    ? 4.8
-                    : 4.5,
-                ReviewsCount = id.StartsWith("fs-", StringComparison.OrdinalIgnoreCase)
-                    ? 88
-                    : 65,
+                Rating = bp.PromedioCalificacion,
+                ReviewsCount = bp.CantidadValoraciones,
                 Discount = meta.discount,
                 DiscountBadge = meta.badge,
                 Stock = bp.Stock,

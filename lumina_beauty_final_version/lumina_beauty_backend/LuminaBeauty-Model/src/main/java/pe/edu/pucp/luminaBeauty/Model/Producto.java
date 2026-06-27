@@ -17,6 +17,8 @@ public class Producto {
     private int estado;
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
+    private Double promedio_calificacion;
+    private int cantidad_valoraciones;
 
     private CategoriaProducto categoria;
     private Marca marca;
@@ -136,5 +138,21 @@ public class Producto {
 
     public void setMarca(Marca marca) {
         this.marca = marca;
+    }
+
+    public Double getPromedio_calificacion() {
+        return promedio_calificacion;
+    }
+
+    public void setPromedio_calificacion(Double promedio_calificacion) {
+        this.promedio_calificacion = promedio_calificacion;
+    }
+
+    public int getCantidad_valoraciones() {
+        return cantidad_valoraciones;
+    }
+
+    public void setCantidad_valoraciones(int cantidad_valoraciones) {
+        this.cantidad_valoraciones = cantidad_valoraciones;
     }
 }

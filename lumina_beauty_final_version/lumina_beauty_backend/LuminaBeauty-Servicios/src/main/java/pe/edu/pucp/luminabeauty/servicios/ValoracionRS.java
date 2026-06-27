@@ -184,4 +184,21 @@ public class ValoracionRS {
 
         return resultado;
     }
+
+    @GET
+    @Path("listarPublicadasPorProducto/{idProducto}")
+    public ArrayList<Valoracion> listarPublicadasPorProducto(
+            @PathParam("idProducto") int idProducto
+    ) {
+        ArrayList<Valoracion> resultado = new ArrayList<>();
+
+        try {
+            resultado = valoracionBL
+                    .listarPublicadasPorProducto(idProducto);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
 }

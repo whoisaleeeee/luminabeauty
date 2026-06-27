@@ -973,7 +973,9 @@
                                             <div class="flex items-center justify-between gap-4 rounded-xl border border-stone-100 bg-stone-50/60 p-4">
                                                 <div>
                                                     <p class="text-xs font-bold text-stone-800">
-                                                        @(detail.Producto?.Nombre ?? "Producto")
+                                                        @(string.IsNullOrWhiteSpace(detail.NombreProducto)
+    ? detail.Producto?.Nombre ?? "Producto"
+    : detail.NombreProducto)
                                                     </p>
 
                                                     <p class="mt-1 text-[10px] text-stone-500">

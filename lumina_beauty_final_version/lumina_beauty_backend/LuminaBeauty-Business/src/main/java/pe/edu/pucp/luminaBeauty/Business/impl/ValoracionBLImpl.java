@@ -428,4 +428,26 @@ public class ValoracionBLImpl implements ValoracionBL {
             throw new Exception("Estado de valoración no válido.");
         }
     }
+
+    @Override
+    public ArrayList<Valoracion> listarPublicadasPorProducto(
+            int idProducto
+    ) throws Exception {
+        try {
+            if (idProducto <= 0) {
+                throw new Exception("El ID del producto no es válido.");
+            }
+
+            Producto producto = productoDAO.buscarPorId(idProducto);
+
+            if (producto == null) {
+                throw new Exception("El producto no existe.");
+            }
+
+            return valoracionDAO.listarPublicadasPorProducto(idProducto);
+
+        } finally {
+            TransactionContext.close();
+        }
+    }
 }

@@ -258,4 +258,47 @@ public class ValoracionDAOImpl implements ValoracionDAO {
 
         return valoracion;
     }
+
+    @Override
+    public ArrayList<Valoracion> listarPublicadasPorProducto(
+            int idProducto
+    ) throws Exception {
+        ArrayList<Valoracion> valoraciones = new ArrayList<>();
+
+        String sql = """
+            SELECT v.id_valoracion,
+                   v.id_cliente,
+                   v.id_producto,
+                   v.id_detalle_pedido,
+                   v.calificacion,
+                   v.comentario,
+                   v.estado,
+                   v.respuesta_tienda,
+                   v.respondido_por,
+                   v.respondido_en,
+                   v.creado_en,
+                   v.actualizado_en
+            FROM valoracion v
+            WHERE v.id_producto = ?
+              AND v.estado = 'PUBLICADA'
+            ORDER BY v.creado_en DESC, v.id_valoracion DESC
+            """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idProducto);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    valoraciones.add(mapearValoracion(rs));
+                }
+            }
+
+            return valoraciones;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

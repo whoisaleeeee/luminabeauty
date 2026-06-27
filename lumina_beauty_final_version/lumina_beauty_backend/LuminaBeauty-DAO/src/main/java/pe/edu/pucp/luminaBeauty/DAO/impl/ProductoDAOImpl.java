@@ -32,8 +32,10 @@ public class ProductoDAOImpl implements ProductoDAO {
 
         Connection connection = TransactionContext.getConnection();
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
+        try (PreparedStatement stmt = connection.prepareStatement(
+                sql,
+                Statement.RETURN_GENERATED_KEYS
+        )) {
             stmt.setInt(1, producto.getCategoria().getId_categoria());
             stmt.setInt(2, producto.getMarca().getId_marca());
             stmt.setString(3, producto.getNombre());
@@ -72,13 +74,15 @@ public class ProductoDAOImpl implements ProductoDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-
             stmt.setInt(1, producto.getId_producto());
 
             int filas = stmt.executeUpdate();
 
             if (filas == 0) {
-                throw new RuntimeException("No se encontró el producto con ID: " + producto.getId_producto());
+                throw new RuntimeException(
+                        "No se encontró el producto con ID: "
+                                + producto.getId_producto()
+                );
             }
 
         } catch (SQLException e) {
@@ -89,29 +93,40 @@ public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public Producto buscarPorId(Integer id) throws Exception {
         String sql = """
-                SELECT id_producto,
-                       id_categoria,
-                       id_marca,
-                       nombre,
-                       sku,
-                       slug,
-                       descripcion,
-                       precio,
-                       stock,
-                       tipo_piel,
-                       imagen_url,
-                       estado,
-                       creado_en,
-                       actualizado_en
-                FROM producto
-                WHERE id_producto = ?
-                  AND estado = 1
+                SELECT p.id_producto,
+                       p.id_categoria,
+                       p.id_marca,
+                       p.nombre,
+                       p.sku,
+                       p.slug,
+                       p.descripcion,
+                       p.precio,
+                       p.stock,
+                       p.tipo_piel,
+                       p.imagen_url,
+                       p.estado,
+                       p.creado_en,
+                       p.actualizado_en,
+                       COALESCE((
+                           SELECT ROUND(AVG(v.calificacion), 1)
+                           FROM valoracion v
+                           WHERE v.id_producto = p.id_producto
+                             AND v.estado = 'PUBLICADA'
+                       ), 0) AS promedio_calificacion,
+                       (
+                           SELECT COUNT(*)
+                           FROM valoracion v
+                           WHERE v.id_producto = p.id_producto
+                             AND v.estado = 'PUBLICADA'
+                       ) AS cantidad_valoraciones
+                FROM producto p
+                WHERE p.id_producto = ?
+                  AND p.estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-
             stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
@@ -148,7 +163,6 @@ public class ProductoDAOImpl implements ProductoDAO {
         Connection connection = TransactionContext.getConnection();
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-
             stmt.setInt(1, producto.getCategoria().getId_categoria());
             stmt.setInt(2, producto.getMarca().getId_marca());
             stmt.setString(3, producto.getNombre());
@@ -165,7 +179,10 @@ public class ProductoDAOImpl implements ProductoDAO {
             int filas = stmt.executeUpdate();
 
             if (filas == 0) {
-                throw new RuntimeException("No se encontró el producto con ID: " + producto.getId_producto());
+                throw new RuntimeException(
+                        "No se encontró el producto con ID: "
+                                + producto.getId_producto()
+                );
             }
 
             return producto;
@@ -180,22 +197,34 @@ public class ProductoDAOImpl implements ProductoDAO {
         ArrayList<Producto> productos = new ArrayList<>();
 
         String sql = """
-                SELECT id_producto,
-                       id_categoria,
-                       id_marca,
-                       nombre,
-                       sku,
-                       slug,
-                       descripcion,
-                       precio,
-                       stock,
-                       tipo_piel,
-                       imagen_url,
-                       estado,
-                       creado_en,
-                       actualizado_en
-                FROM producto
-                WHERE estado = 1
+                SELECT p.id_producto,
+                       p.id_categoria,
+                       p.id_marca,
+                       p.nombre,
+                       p.sku,
+                       p.slug,
+                       p.descripcion,
+                       p.precio,
+                       p.stock,
+                       p.tipo_piel,
+                       p.imagen_url,
+                       p.estado,
+                       p.creado_en,
+                       p.actualizado_en,
+                       COALESCE((
+                           SELECT ROUND(AVG(v.calificacion), 1)
+                           FROM valoracion v
+                           WHERE v.id_producto = p.id_producto
+                             AND v.estado = 'PUBLICADA'
+                       ), 0) AS promedio_calificacion,
+                       (
+                           SELECT COUNT(*)
+                           FROM valoracion v
+                           WHERE v.id_producto = p.id_producto
+                             AND v.estado = 'PUBLICADA'
+                       ) AS cantidad_valoraciones
+                FROM producto p
+                WHERE p.estado = 1
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -228,6 +257,14 @@ public class ProductoDAOImpl implements ProductoDAO {
         producto.setImagenUrl(rs.getString("imagen_url"));
         producto.setEstado(rs.getInt("estado"));
 
+        producto.setPromedio_calificacion(
+                rs.getDouble("promedio_calificacion")
+        );
+
+        producto.setCantidad_valoraciones(
+                rs.getInt("cantidad_valoraciones")
+        );
+
         CategoriaProducto categoria = new CategoriaProducto();
         categoria.setId_categoria(rs.getInt("id_categoria"));
         producto.setCategoria(categoria);
@@ -244,7 +281,9 @@ public class ProductoDAOImpl implements ProductoDAO {
         }
 
         if (fechaActualizacion != null) {
-            producto.setFecha_actualizacion(fechaActualizacion.toLocalDateTime());
+            producto.setFecha_actualizacion(
+                    fechaActualizacion.toLocalDateTime()
+            );
         }
 
         return producto;

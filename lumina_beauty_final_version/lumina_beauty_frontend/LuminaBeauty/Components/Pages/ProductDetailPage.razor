@@ -1,5 +1,7 @@
 @page "/product/{id}"
+@using LuminaBeauty.Servicios.Modelo
 @inject ProductService ProductCache
+@inject ValoracionAppService ValoracionApp
 @inject CartService Cart
 @inject WishlistService Wishlist
 @inject LanguageService LangService
@@ -142,7 +144,7 @@ else
                     }
                   </div>
                   <span class="text-xs font-semibold text-stone-500">
-                    (@(_reviews.Count + _product.ReviewsCount) Opiniones)
+                            (@_product.ReviewsCount Opiniones)
                   </span>
                   <span class="text-stone-300">|</span>
                   <span class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-600">
@@ -231,101 +233,97 @@ else
           </section>
 
           <!-- Customer thoughts & reviews list space (Bottom) -->
-          <section class="mt-8 bg-white/20 border border-white/50 backdrop-blur-md rounded-2xl p-6 sm:p-8 text-left">
-            <h3 class="text-sm uppercase font-extrabold tracking-widest text-[#C7346A] mb-4 select-none">
-              Opiniones de Clientes (@(_reviews.Count + _product.ReviewsCount))
-            </h3>
+        <section class="mt-8 bg-white/20 border border-white/50 backdrop-blur-md rounded-2xl p-6 sm:p-8 text-left">
+            <div class="flex flex-wrap items-start justify-between gap-4 border-b border-stone-100 pb-4">
+                <div>
+                    <h3 class="text-sm uppercase font-extrabold tracking-widest text-[#C7346A] select-none">
+                        Opiniones de clientes
+                    </h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              <!-- Review input form C# -->
-              <form @onsubmit="SubmitReview" @onsubmit:preventDefault class="space-y-3.5 bg-white/45 p-5 rounded-2xl border border-white/80 text-left">
-                <p class="text-xs font-bold text-[#C7346A] uppercase tracking-wider select-none">
-                  Añadir una opinión
-                </p>
-
-                <input type="text"
-                       placeholder="Tu nombre"
-                       @bind="_reviewName"
-                       required
-                       class="w-full bg-white/90 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#FF76A5] font-semibold text-stone-800 shadow-5xs" />
-
-                <!-- Star Rating selector in form -->
-                <div class="flex items-center gap-2 select-none">
-                  <span class="text-xs font-bold text-stone-500">Valoración:</span>
-                  <div class="flex items-center gap-1 text-amber-400 text-sm">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                      var value = i;
-                      <button type="button" @onclick="() => _reviewRating = value" class="hover:scale-110 transition cursor-pointer">
-                        <span>@(value <= _reviewRating ? "★" : "☆")</span>
-                      </button>
-                    }
-                  </div>
+                    <p class="mt-1 text-[11px] text-stone-500">
+                        Valoraciones publicadas por clientes de Lumina Beauty.
+                    </p>
                 </div>
 
-                <textarea rows="3"
-                          placeholder="Escribe tu opinión sobre el producto..."
-                          @bind="_reviewText"
-                          required
-                          class="w-full bg-white/90 border border-stone-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-[#FF76A5] font-semibold text-stone-800 resize-none shadow-5xs" />
+                <span class="rounded-full border border-[#FCD1DB] bg-[#FFF0F3] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#C7346A]">
+                    @_product.ReviewsCount opiniones
+                </span>
+            </div>
 
-                <button type="submit"
-                        class="bg-stone-900 hover:bg-[#C7346A] text-white text-[10px] uppercase font-bold tracking-widest py-2 px-5 rounded-xl transition duration-300 cursor-pointer select-none">
-                  Enviar opinión
-                </button>
-              </form>
-
-              <!-- Reviews Display lists -->
-              <div class="space-y-3 max-h-[260px] overflow-y-auto pr-1">
-                @if (_reviews.Count == 0)
-                {
-                  <div class="bg-white/30 rounded-xl p-4 text-center mt-3 select-none">
-                    <p class="text-xs font-medium text-stone-500 italic">
-                      Sé el primero en dejar una opinión estrellada
+            @if (_isLoadingReviews)
+            {
+                <p class="py-10 text-center text-xs font-bold text-stone-400">
+                    Cargando opiniones...
+                </p>
+            }
+            else if (_reviews.Count == 0)
+            {
+                <div class="mt-6 rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/35 p-8 text-center">
+                    <p class="text-xs font-bold text-stone-700">
+                        Aún no hay opiniones publicadas para este producto.
                     </p>
-                  </div>
-                }
 
-                @foreach (var r in _reviews)
-                {
-                  <div class="bg-white/60 p-4 rounded-xl border border-stone-100 text-left">
-                    <div class="flex items-center justify-between mb-1.5">
-                      <span class="text-xs font-black text-stone-900 uppercase tracking-wide">
-                        @r.Name
-                      </span>
-                      <span class="text-[9px] font-bold text-stone-400 font-mono">@r.Date</span>
-                    </div>
+                    <p class="mt-1 text-[11px] text-stone-500">
+                        Las valoraciones aprobadas aparecerán aquí.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="mt-6 space-y-3">
+                    @foreach (var review in _reviews)
+                    {
+                        <article class="rounded-2xl border border-stone-100 bg-white/65 p-5">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-bold text-stone-800">
+                                        Cliente Lumina
+                                    </p>
 
-                    <div class="flex items-center gap-0.5 mb-2.5 text-amber-400 text-xs">
-                        @for (int i = 1; i <= 5; i++)
+                                    <div class="mt-2 flex items-center gap-0.5 text-xs text-amber-400">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <span class="@(i <= review.Calificacion
+                                                                                          ? "text-amber-400"
+                                                                                          : "text-stone-200")">
+                                        ★
+                                    </span>
+                                }
+                            </div>
+                        </div>
+
+                        @if (review.FechaCreacion.HasValue)
                         {
-                            var s = i;
-                            <span>@(s <= r.Rating ? "★" : "☆")</span>
+                            <span class="text-[10px] font-medium text-stone-400">
+                                @review.FechaCreacion.Value.ToString("dd/MM/yyyy")
+                            </span>
                         }
                     </div>
 
-                    <p class="text-xs font-medium text-stone-600 italic">"@r.Comment"</p>
-                  </div>
-                }
+                    @if (!string.IsNullOrWhiteSpace(review.Comentario))
+                    {
+                        <p class="mt-4 text-xs leading-relaxed text-stone-600">
+                            “@review.Comentario”
+                        </p>
+                    }
 
-                <!-- Static mockup default feedback present in React -->
-                <div class="bg-white/40 p-4 rounded-xl border border-stone-100/50 text-left">
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="text-xs font-black text-stone-800">Alexandra A.</span>
-                    <span class="text-[9px] text-stone-400 font-mono">28/05/2026</span>
-                  </div>
-                  <div class="flex items-center gap-0.5 mb-1 text-amber-400 text-xs">
-                    <span>★</span><span>★</span><span>★</span><span>★</span><span class="text-stone-200">☆</span>
-                  </div>
-                  <p class="text-xs text-stone-600">
-                    "Producto increíble, lo recomiendo totalmente. ¡Un infaltable del día a día!"
-                  </p>
-                </div>
-              </div>
+                    @if (!string.IsNullOrWhiteSpace(review.RespuestaTienda))
+                    {
+                        <div class="mt-4 rounded-xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/45 p-4">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
+                                Respuesta de Lumina Beauty
+                            </p>
 
-            </div>
-          </section>
+                            <p class="mt-2 text-[11px] leading-relaxed text-stone-600">
+                                @review.RespuestaTienda
+                            </p>
+                        </div>
+                    }
+                </article>
+            }
+        </div>
+    }
+</section>
 
           <!-- Similar Recommended products strip slider row -->
           <section class="mt-16 space-y-8">
@@ -356,10 +354,8 @@ else
     private int _detailQty = 1;
 
     // Review Form fields
-    private string _reviewName = string.Empty;
-    private int _reviewRating = 5;
-    private string _reviewText = string.Empty;
-    private List<Review> _reviews = new();
+    private List<Valoracion> _reviews = new();
+    private bool _isLoadingReviews;
 
     protected override void OnInitialized()
     {
@@ -373,10 +369,12 @@ else
         _product = ProductCache.GetProductById(Id);
         _detailThumb = 0;
         _detailQty = 1;
-        _reviews.Clear();
+        _reviews = new();
+        _isLoadingReviews = false;
 
         if (_product != null)
         {
+            await CargarValoracionesAsync(_product.IdProducto);
             _related = ProductCache.GetAllProducts()
                 .Where(r => r.Id != _product.Id && r.Category == _product.Category)
                 .Take(4)
@@ -424,26 +422,23 @@ else
         }
     }
 
-    private void SubmitReview()
+    private async Task CargarValoracionesAsync(int idProducto)
     {
-        if (string.IsNullOrEmpty(_reviewName) || string.IsNullOrEmpty(_reviewText))
+        try
         {
-            return;
+            _isLoadingReviews = true;
+
+            _reviews = await ValoracionApp
+                .ListarPublicadasPorProductoAsync(idProducto);
         }
-
-        _reviews.Insert(0, new Review
+        catch
         {
-            Name = _reviewName,
-            Rating = _reviewRating,
-            Comment = _reviewText,
-            Date = DateTime.Now.ToString("dd/MM/yyyy")
-        });
-
-        _reviewName = string.Empty;
-        _reviewText = string.Empty;
-        _reviewRating = 5;
-
-        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "¡Gracias por tu reseña estrellada!" : "Thank you for your starred review!");
+            _reviews = new();
+        }
+        finally
+        {
+            _isLoadingReviews = false;
+        }
     }
 
     public void Dispose()

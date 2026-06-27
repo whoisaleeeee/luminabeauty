@@ -29,5 +29,10 @@ public interface ValoracionBL {
     Valoracion responderValoracion(int idValoracion,
                                    String respuestaTienda,
                                    int idEmpleado) throws Exception;
+
+    ArrayList<Valoracion> listarPublicadasPorProducto(
+            int idProducto
+    ) throws Exception;
+
 }
 

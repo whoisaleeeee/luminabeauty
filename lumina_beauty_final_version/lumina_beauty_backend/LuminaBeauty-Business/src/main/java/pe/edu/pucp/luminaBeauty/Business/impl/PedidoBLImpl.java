@@ -14,6 +14,9 @@ import pe.edu.pucp.luminaBeauty.Model.DetallePedido;
 import pe.edu.pucp.luminaBeauty.Model.Pedido;
 import pe.edu.pucp.luminaBeauty.Model.Producto;
 import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
+import pe.edu.pucp.luminaBeauty.DAO.EnvioDAO;
+import pe.edu.pucp.luminaBeauty.DAO.impl.EnvioDAOImpl;
+import pe.edu.pucp.luminaBeauty.Model.Envio;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,6 +29,7 @@ public class PedidoBLImpl implements PedidoBL {
     private final PedidoDAO pedidoDAO = new PedidoDAOImpl();
     private final DetallePedidoDAO detallePedidoDAO = new DetallePedidoDAOImpl();
     private final ClienteDAO clienteDAO = new ClienteDAOImpl();
+    private final EnvioDAO envioDAO = new EnvioDAOImpl();
 
     @Override
     public Pedido crearPedido(Pedido pedido) throws Exception {
@@ -208,6 +212,26 @@ public class PedidoBLImpl implements PedidoBL {
                         productoDAO.actualizar(productoBD);
                     }
                 }
+            }
+
+            Envio envioAsociado = null;
+
+            for (Envio envio : envioDAO.listarTodos()) {
+                if (envio.getPedido() != null &&
+                        envio.getPedido().getId_pedido() == idPedido) {
+                    envioAsociado = envio;
+                    break;
+                }
+            }
+
+            if (envioAsociado != null &&
+                    ("DESPACHADO".equalsIgnoreCase(envioAsociado.getEstado()) ||
+                            "EN_TRANSITO".equalsIgnoreCase(envioAsociado.getEstado()) ||
+                            "ENTREGADO".equalsIgnoreCase(envioAsociado.getEstado()))) {
+
+                throw new Exception(
+                        "No se puede cancelar un pedido que ya fue despachado, está en tránsito o fue entregado."
+                );
             }
 
             pedidoDAO.eliminar(pedido);
