@@ -58,3 +58,108 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+/* Marcas animadas en Home */
+.brand-marquee {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding: 0.75rem 0;
+}
+
+    .brand-marquee::before,
+    .brand-marquee::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        z-index: 2;
+        width: 110px;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .brand-marquee::before {
+        left: 0;
+        background: linear-gradient(to right, #fff7f9, transparent);
+    }
+
+    .brand-marquee::after {
+        right: 0;
+        background: linear-gradient(to left, #fff7f9, transparent);
+    }
+
+.brand-track {
+    display: flex;
+    align-items: center;
+    gap: 4.5rem;
+    width: max-content;
+    animation: move-brands 30s linear infinite;
+}
+
+.brand-item {
+    flex: 0 0 auto;
+    border: none;
+    background: transparent;
+    color: #d8ccd0;
+    font-family: Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+    .brand-item:hover {
+        color: #ff76a5;
+        transform: translateY(-2px);
+    }
+
+.brand-marquee:hover .brand-track {
+    animation-play-state: paused;
+}
+
+@keyframes move-brands {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+@media (max-width: 640px) {
+    .brand-track {
+        gap: 2.5rem;
+        animation-duration: 22s;
+    }
+
+    .brand-item {
+        font-size: 0.85rem;
+        letter-spacing: 0.18em;
+    }
+
+    .brand-marquee::before,
+    .brand-marquee::after {
+        width: 45px;
+    }
+}
+
+
+.brand-track {
+    animation: move-brands 30s linear infinite;
+    will-change: transform;
+}
+
+@keyframes move-brands {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}

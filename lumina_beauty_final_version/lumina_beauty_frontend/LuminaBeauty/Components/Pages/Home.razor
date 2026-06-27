@@ -4,6 +4,9 @@
 @inject HomeService HomeService
 @inject ProductService ProductCache
 @inject NavigationManager Navigator
+@inject NavigationManager Navigator
+@inject IJSRuntime JS
+
 @implements IDisposable
 
 <PageTitle>Lumina Beauty | Haute Cosmétique & Skincare</PageTitle>
@@ -67,20 +70,33 @@
         </div>
     </section>
 
-    <section class="py-6 select-none border-y border-stone-250/30">
-        <p class="text-[10px] text-center font-bold uppercase tracking-[0.2em] text-[#c5a880] mb-8">
+   
+    <section class="py-7 select-none border-y border-stone-250/30 overflow-hidden">
+        <p class="text-[10px] text-center font-bold uppercase tracking-[0.2em] text-[#c5a880] mb-6">
             Las mejores marcas a tu alcance
         </p>
-        <div class="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 md:justify-between px-6">
-            @foreach (var b in ProductCache.GetBrands())
-            {
-                <button @onclick="() => HomeService.FilterByBrand(b.Name)"
-                        class="font-serif text-base md:text-xl font-bold tracking-[0.3em] text-stone-300 hover:text-[#FF76A5] transition-colors duration-300 uppercase shrink-0 cursor-pointer">
-                    @b.Name
-                </button>
-            }
+
+        <div class="relative overflow-hidden">
+            <div class="brand-track flex items-center gap-14 w-max">
+                @foreach (var b in ProductCache.GetBrands())
+                {
+                    <button @onclick="() => HomeService.FilterByBrand(b.Name)"
+                            class="shrink-0 bg-transparent border-0 font-serif text-base md:text-xl font-bold tracking-[0.3em] text-stone-300 hover:text-[#FF76A5] transition-colors duration-300 uppercase cursor-pointer">
+                        @b.Name
+                    </button>
+                }
+
+                @foreach (var b in ProductCache.GetBrands())
+                {
+                    <button @onclick="() => HomeService.FilterByBrand(b.Name)"
+                            class="shrink-0 bg-transparent border-0 font-serif text-base md:text-xl font-bold tracking-[0.3em] text-stone-300 hover:text-[#FF76A5] transition-colors duration-300 uppercase cursor-pointer">
+                        @b.Name
+                    </button>
+                }
+            </div>
         </div>
     </section>
+
 
     <section id="catalog" class="scroll-mt-24">
         <div class="flex items-end justify-between mb-8 pb-5 border-b border-stone-100 select-none">
@@ -106,27 +122,73 @@
                 </button>
             }
         </div>
+        
+        <div class="relative -mx-4 md:-mx-8">
+            <button type="button"
+                    @onclick="() => MoveBestSellersAsync(-1)"
+                    class="absolute left-3 top-[205px] z-20 hidden h-11 w-11 items-center justify-center rounded-full bg-white text-3xl leading-none text-[#9f3758] shadow-md transition hover:scale-105 lg:flex">
+                ‹
+            </button>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @if (HomeService.GetFilteredCatalogue().Count > 0)
-            {
-                @foreach (var p in HomeService.GetFilteredCatalogue())
+            <div id="bestSellersCarousel"
+                 class="flex gap-9 overflow-x-auto cursor-grab active:cursor-grabbing px-[10vw] pb-6 snap-x snap-mandatory overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                @if (HomeService.GetFilteredCatalogue().Count > 0)
                 {
-                    <ProductCard Product="@p" />
+                    @foreach (var p in HomeService.GetFilteredCatalogue())
+                    {
+                        <article class="flex w-[78vw] max-w-[430px] shrink-0 flex-col snap-center md:w-[43vw] lg:w-[31vw]">
+                            <button type="button"
+                                    @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
+                                    class="h-[430px] w-full overflow-hidden bg-[#f1e9e2] p-8 cursor-pointer">
+                                <img src="@p.Image"
+                                     alt="@p.Name"
+                                     class="h-full w-full object-contain transition-transform duration-500 hover:scale-105" />
+                            </button>
+
+                            <div class="flex flex-1 flex-col pt-5">
+                                <span class="text-[9px] font-bold uppercase tracking-[0.22em] text-[#776e72]">
+                                    @p.Brand
+                                </span>
+
+                                <button type="button"
+                                        @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
+                                        class="mt-3 min-h-[58px] bg-transparent p-0 text-left font-serif text-[22px] leading-[1.05] text-stone-800 hover:text-[#C7346A] cursor-pointer">
+                                    @p.Name
+                                </button>
+
+                                <div class="mt-4 flex items-center gap-3">
+                                    <span class="h-8 w-8 rounded-full border-2 border-[#b55672] bg-[#e49aac]"></span>
+                                    <span class="h-8 w-8 rounded-full bg-[#d97e8e]"></span>
+                                    <span class="h-8 w-8 rounded-full bg-[#c86673]"></span>
+                                    <span class="h-8 w-8 rounded-full bg-[#a64c58]"></span>
+                                </div>
+
+                                <button type="button"
+                                        @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
+                                        class="mt-10 w-full border border-[#b55672] bg-transparent px-4 py-4 text-[10px] font-bold uppercase tracking-[0.32em] text-[#8d294d] transition hover:bg-[#8d294d] hover:text-white cursor-pointer">
+                                    Agregar a bolsa · S/ @p.Price.ToString("0.00")
+                                </button>
+                            </div>
+                        </article>
+                    }
                 }
-            }
-            else
-            {
-                <div class="col-span-full py-16 bg-white/40 border border-stone-100 rounded-3xl text-center px-4 select-none">
-                    <p class="text-sm text-stone-400 font-medium max-w-sm mx-auto mb-2">
-                        No se encontraron productos coincidentes.
-                    </p>
-                    <button @onclick="HomeService.ResetCatalogue" class="text-xs font-bold text-[#FF76A5] hover:underline cursor-pointer">
-                        Restaurar Filtros
-                    </button>
-                </div>
-            }
+                else
+                {
+                    <div class="w-full rounded-3xl border border-stone-100 bg-white/40 py-16 text-center">
+                        <p class="text-sm font-medium text-stone-400">
+                            No se encontraron productos coincidentes.
+                        </p>
+                    </div>
+                }
+            </div>
+
+            <button type="button"
+                    @onclick="() => MoveBestSellersAsync(1)"
+                    class="absolute right-3 top-[205px] z-20 hidden h-11 w-11 items-center justify-center rounded-full bg-white text-3xl leading-none text-[#9f3758] shadow-md transition hover:scale-105 lg:flex">
+                ›
+            </button>
         </div>
+        
     </section>
 
     <section class="grid grid-cols-1 md:grid-cols-12 rounded-3xl overflow-hidden shadow-md border border-white/60">
@@ -252,6 +314,15 @@
         LangService.OnChange += StateHasChanged;
         HomeService.OnChange += StateHasChanged;
         HomeService.StartCountdown(() => InvokeAsync(StateHasChanged));
+    }
+
+    private async Task MoveBestSellersAsync(int direction)
+    {
+        await JS.InvokeVoidAsync(
+            "luminaCarousel.move",
+            "bestSellersCarousel",
+            direction
+        );
     }
 
     public void Dispose()

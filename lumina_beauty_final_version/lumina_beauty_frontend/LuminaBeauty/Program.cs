@@ -77,7 +77,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
-
+    
 // Manténganlo solo si su frontend abre correctamente en HTTPS.
 // Si vuelve a generar problemas de redirección, comenten esta línea temporalmente.
 app.UseHttpsRedirection();
