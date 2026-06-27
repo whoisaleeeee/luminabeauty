@@ -42,6 +42,8 @@ builder.Services.AddScoped<DireccionRestService>();
 builder.Services.AddScoped<MovimientoPuntosFidelidadRestService>();
 builder.Services.AddScoped<EnvioRestService>();
 builder.Services.AddScoped<ValoracionRestService>();
+builder.Services.AddScoped<CuponRestService>();
+builder.Services.AddScoped<UsoCuponRestService>();
 
 // Servicios de aplicación: lógica de la interfaz
 builder.Services.AddScoped<LocalStorageService>();
@@ -64,6 +66,8 @@ builder.Services.AddScoped<EnvioAppService>();
 builder.Services.AddScoped<ValoracionAppService>();
 builder.Services.AddScoped<ShopAppService>();
 builder.Services.AddScoped<HeaderSearchAppService>();
+builder.Services.AddScoped<CuponAppService>();
+builder.Services.AddScoped<UsoCuponAppService>();
 
 
 var app = builder.Build();

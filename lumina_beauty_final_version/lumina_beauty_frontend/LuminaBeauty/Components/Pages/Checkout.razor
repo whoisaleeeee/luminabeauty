@@ -7,6 +7,7 @@
 @inject NavigationManager Navigator
 @inject AuthService Auth
 @inject CheckoutAppService CheckoutService
+@inject CuponAppService CuponApp
 @inject DireccionRestService DireccionService
 @implements IDisposable
 
@@ -427,12 +428,74 @@
                             </span>
                         </div>
 
+                        @if (_cuponAplicado != null)
+                        {
+                            <div class="flex items-center justify-between text-[#C7346A]">
+                                <span>Descuento:</span>
+
+                                <span class="font-mono font-semibold">
+                                    -S/ @GetDiscountAmount().ToString("0.00")
+                                </span>
+                            </div>
+                        }
+
                         <div class="mt-2 flex items-center justify-between border-t border-stone-150 pt-3.5 text-sm font-semibold text-stone-900">
                             <span>Importe total:</span>
                             <span class="font-mono text-base font-semibold text-[#C7346A]">
-                                S/ @((Cart.GetSubtotal() + GetShippingCost()).ToString("0.00"))
+                                S/ @GetOrderTotal().ToString("0.00")
                             </span>
                         </div>
+
+                        <div class="border-t border-stone-100 pt-4">
+                            @if (_cuponAplicado == null)
+                            {
+                                <form @onsubmit="AplicarCuponAsync"
+                                      @onsubmit:preventDefault
+                                      class="flex gap-2">
+
+                                    <input type="text"
+                                           placeholder="Código de cupón"
+                                           @bind="_codigoCupon"
+                                           class="min-w-0 flex-1 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-xs font-medium text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-[#FF76A5]" />
+
+                                    <button type="submit"
+                                            disabled="@_validandoCupon"
+                                            class="cursor-pointer rounded-xl bg-stone-900 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#C7346A] disabled:cursor-not-allowed disabled:opacity-60">
+                                        @(_validandoCupon ? "Validando..." : "Aplicar")
+                                    </button>
+                                </form>
+
+                                @if (!string.IsNullOrWhiteSpace(_mensajeCupon))
+                                {
+                                    <p class="mt-2 text-[10px] font-medium text-[#C7346A]">
+                                        @_mensajeCupon
+                                    </p>
+                                }
+                            }
+                            else
+                            {
+                                <div class="rounded-xl border border-[#FCD1DB]/60 bg-[#FFF8FA] px-3.5 py-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-xs font-semibold text-stone-800">
+                                                Cupón @_cuponAplicado.Codigo aplicado
+                                            </p>
+
+                                            <p class="mt-1 text-[10px] text-stone-500">
+                                                @GetCouponDescription()
+                                            </p>
+                                        </div>
+
+                                        <button type="button"
+                                                @onclick="QuitarCupon"
+                                                class="cursor-pointer text-[10px] font-semibold text-[#C7346A] transition hover:text-stone-800">
+                                            Quitar
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
                     </div>
                 </div>
             </aside>
@@ -462,6 +525,11 @@
     private bool _isOrderComplete;
     private string _codigoPedidoGenerado = string.Empty;
 
+    private string _codigoCupon = string.Empty;
+    private string _mensajeCupon = string.Empty;
+    private Cupon? _cuponAplicado;
+    private bool _validandoCupon;
+
     private class PaymentMethodOption
     {
         public string Code { get; set; } = string.Empty;
@@ -479,7 +547,9 @@
     protected override async Task OnInitializedAsync()
     {
         LangService.OnChange += StateHasChanged;
-        Cart.OnChange += StateHasChanged;
+        Cart.OnChange += OnCartChanged;
+
+        _cuponAplicado = Cart.GetAppliedCoupon();
 
         if (Auth.CurrentClient == null || Auth.CurrentClient.Id <= 0)
         {
@@ -508,10 +578,17 @@
         }
     }
 
+    private void OnCartChanged()
+    {
+        _cuponAplicado = Cart.GetAppliedCoupon();
+        StateHasChanged();
+    }
+
     private void SeleccionarDireccion(Direccion direccion)
     {
         _direccionSeleccionadaId = direccion.IdDireccion;
         _usarOtraDireccion = false;
+        _guardarNuevaDireccion = false;
 
         _address = direccion.DireccionTexto ?? string.Empty;
         _city = direccion.Ciudad ?? string.Empty;
@@ -523,7 +600,7 @@
     {
         _direccionSeleccionadaId = null;
         _usarOtraDireccion = true;
-
+        _guardarNuevaDireccion = false;
 
         _address = string.Empty;
         _city = string.Empty;
@@ -561,6 +638,94 @@
             .FirstOrDefault(method => method.Code == _paymentMethod)
             ?.Label
             ?? "No especificado";
+    }
+
+    private async Task AplicarCuponAsync()
+    {
+        if (_validandoCupon)
+        {
+            return;
+        }
+
+        var codigo = _codigoCupon.Trim();
+
+        if (string.IsNullOrWhiteSpace(codigo))
+        {
+            _mensajeCupon = "Ingresa un código de cupón.";
+            return;
+        }
+
+        _validandoCupon = true;
+        _mensajeCupon = string.Empty;
+
+        try
+        {
+            var cupon = await CuponApp.AplicarAsync(codigo);
+
+            if (cupon == null || cupon.IdCupon <= 0)
+            {
+                await Cart.RemoveAppliedCouponAsync();
+                _cuponAplicado = null;
+                _mensajeCupon = "El cupón no es válido o ya no está vigente.";
+                return;
+            }
+
+            await Cart.SetAppliedCouponAsync(cupon);
+
+            _cuponAplicado = Cart.GetAppliedCoupon();
+            _codigoCupon = cupon.Codigo;
+            _mensajeCupon = "Cupón aplicado correctamente.";
+        }
+        catch
+        {
+            await Cart.RemoveAppliedCouponAsync();
+            _cuponAplicado = null;
+            _mensajeCupon = "No se pudo validar el cupón.";
+        }
+        finally
+        {
+            _validandoCupon = false;
+        }
+    }
+
+    private async Task QuitarCupon()
+    {
+        _codigoCupon = string.Empty;
+        _mensajeCupon = string.Empty;
+
+        await Cart.RemoveAppliedCouponAsync();
+
+        _cuponAplicado = null;
+    }
+
+    private decimal GetDiscountAmount()
+    {
+        return _cuponAplicado == null
+            ? 0m
+            : CuponApp.CalcularDescuento(
+                _cuponAplicado,
+                Cart.GetSubtotal());
+    }
+
+    private decimal GetOrderTotal()
+    {
+        return Math.Max(
+            0m,
+            Cart.GetSubtotal() + GetShippingCost() - GetDiscountAmount());
+    }
+
+    private string GetCouponDescription()
+    {
+        if (_cuponAplicado == null)
+        {
+            return string.Empty;
+        }
+
+        return _cuponAplicado.TipoDescuento.Equals(
+            "PORCENTAJE",
+            StringComparison.OrdinalIgnoreCase)
+            ? $"{_cuponAplicado.ValorDescuento:0}% de descuento"
+            : $"S/ {_cuponAplicado.ValorDescuento:0.00} de descuento";
     }
 
     private async Task PlaceOrder()
@@ -614,7 +779,8 @@
             var resultado = await CheckoutService.ProcesarPedidoAsync(
                 Auth.CurrentClient,
                 Cart.GetItems(),
-                datosDespacho);
+                datosDespacho,
+                _cuponAplicado);
 
             if (!resultado.Exitoso)
             {
@@ -644,6 +810,6 @@
     public void Dispose()
     {
         LangService.OnChange -= StateHasChanged;
-        Cart.OnChange -= StateHasChanged;
+        Cart.OnChange -= OnCartChanged;
     }
 }
