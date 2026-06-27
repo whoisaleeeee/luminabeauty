@@ -40,7 +40,7 @@
             </button>
 
             <button @onclick='() => NavigateTo("/categories")' class="hover:text-[#FF76A5] transition-all duration-300 cursor-pointer @(IsActive("/categories") ? "text-[#FF76A5] font-extrabold" : "")">
-                @(LangService.CurrentLanguage == "es" ? "Categorías" : "Categories")
+                @(LangService.CurrentLanguage == "es" ? "Tienda" : "Shop")
             </button>
 
             <button @onclick='() => NavigateTo("/contact")' class="hover:text-[#FF76A5] transition-all duration-300 cursor-pointer @(IsActive("/contact") ? "text-[#FF76A5] font-extrabold" : "")">

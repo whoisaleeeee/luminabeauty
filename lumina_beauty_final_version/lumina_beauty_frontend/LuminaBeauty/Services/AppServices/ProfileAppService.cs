@@ -1,6 +1,7 @@
-﻿using LuminaBeauty.Servicios.Modelo;
+﻿using LuminaBeauty.Services.PageStates;
+using LuminaBeauty.Servicios.Modelo;
 
-namespace LuminaBeauty.Services
+namespace LuminaBeauty.Services.AppServices
 {
     public class ProfileAppService
     {

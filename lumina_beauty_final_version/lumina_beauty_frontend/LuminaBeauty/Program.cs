@@ -2,6 +2,7 @@ using LuminaBeauty.Components;
 using LuminaBeauty.Services;
 using LuminaBeauty.Servicios.REST;
 using LuminaBeauty.Servicios.Modelo;
+using LuminaBeauty.Services.AppServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +62,7 @@ builder.Services.AddScoped<CheckoutAppService>();
 builder.Services.AddScoped<MovimientoPuntosAppService>();
 builder.Services.AddScoped<EnvioAppService>();
 builder.Services.AddScoped<ValoracionAppService>();
+builder.Services.AddScoped<ShopAppService>();
 
 
 var app = builder.Build();

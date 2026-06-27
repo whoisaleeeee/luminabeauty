@@ -1,8 +1,8 @@
 ﻿using LuminaBeauty.Models;
 
-namespace LuminaBeauty.Services
+namespace LuminaBeauty.Services.PageStates
 {
-    public class CatalogPageState
+    public class ShopPageState
     {
         public List<Product> AllProducts { get; set; } = [];
 
@@ -24,6 +24,10 @@ namespace LuminaBeauty.Services
         public bool OnlyInStock { get; set; }
 
         public string SortBy { get; set; } = "relevance";
+
+        public int CurrentPage { get; set; } = 1;
+
+        public int PageSize { get; set; } = 21;
 
         public bool IsReady { get; set; }
     }

@@ -1,7 +1,7 @@
 ﻿using LuminaBeauty.Servicios.Modelo;
 using LuminaBeauty.Servicios.REST;
 
-namespace LuminaBeauty.Services
+namespace LuminaBeauty.Services.AppServices
 {
     public class PedidoAppService
     {

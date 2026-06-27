@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using LuminaBeauty.Models;
 using LuminaBeauty.Servicios.Modelo;
 
-namespace LuminaBeauty.Services
+namespace LuminaBeauty.Services.AppServices
 {
     public class CheckoutAppService
     {

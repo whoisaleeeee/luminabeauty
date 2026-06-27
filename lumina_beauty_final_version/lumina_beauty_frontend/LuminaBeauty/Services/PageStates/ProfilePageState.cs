@@ -1,6 +1,6 @@
 ﻿using LuminaBeauty.Servicios.Modelo;
 
-namespace LuminaBeauty.Services
+namespace LuminaBeauty.Services.PageStates
 {
     public class ProfilePageState
     {

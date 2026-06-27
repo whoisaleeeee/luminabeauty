@@ -1,0 +1,268 @@
+@page "/categories"
+@inject CatalogAppService Catalog
+@inject LanguageService LangService
+@inject NavigationManager Navigator
+@implements IDisposable
+
+<PageTitle>Tienda | Lumina Beauty</PageTitle>
+
+<div class="mx-auto w-full max-w-6xl space-y-7 text-left">
+
+    <nav class="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-stone-400 select-none">
+        <span class="cursor-pointer transition hover:text-[#FF76A5]"
+              @onclick="GoHome">
+            Inicio
+        </span>
+        <span>/</span>
+        <span class="font-bold text-[#C7346A]">Tienda</span>
+    </nav>
+
+    @if (!Catalog.State.IsReady)
+    {
+        <div class="rounded-3xl border border-[#FCD1DB]/50 bg-white/75 p-12 text-center shadow-sm">
+            <p class="text-xs font-bold text-stone-500">
+                Cargando catálogo...
+            </p>
+        </div>
+    }
+    else
+    {
+        var products = Catalog.GetVisibleProducts();
+        var pagedProducts = Catalog.GetPagedProducts();
+        var totalPages = Catalog.GetTotalPages();
+
+        <section class="rounded-[2rem] border border-white/70 bg-white/70 p-6 shadow-md backdrop-blur-md sm:p-8">
+
+            <div>
+                <p class="mb-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
+                    Categorías
+                </p>
+
+                <div class="flex gap-2 overflow-x-auto pb-2">
+                    <button @onclick="() => Catalog.SelectCategory(null)"
+                            class="shrink-0 rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider transition cursor-pointer @(string.IsNullOrWhiteSpace(Catalog.State.ActiveCategory)
+                                                            ? "bg-stone-950 text-white"
+                                                            : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                        Todos
+                        <span class="ml-1 text-[9px] opacity-70">
+                            (@Catalog.State.AllProducts.Count)
+                        </span>
+                    </button>
+
+                    @foreach (var category in Catalog.State.Categories)
+                    {
+                        var isActive = Catalog.State.ActiveCategory?.Equals(
+                            category.Name,
+                            StringComparison.OrdinalIgnoreCase
+                        ) == true;
+
+                        <button @onclick="() => Catalog.SelectCategory(category.Name)"
+                                class="shrink-0 rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider transition cursor-pointer @(isActive
+                                                                    ? "bg-stone-950 text-white"
+                                                                    : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                            @category.Name
+                            <span class="ml-1 text-[9px] opacity-70">
+                                (@category.ProductCount)
+                            </span>
+                        </button>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
+
+            <aside class="lg:col-span-1">
+                <div class="space-y-6 rounded-3xl border border-[#FCD1DB]/45 bg-white/75 p-5 shadow-sm backdrop-blur-md lg:sticky lg:top-24">
+
+                    <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-stone-800">
+                            Filtros
+                        </p>
+
+                        <button @onclick="Catalog.ResetFilters"
+                                class="text-[10px] font-bold uppercase tracking-wider text-[#C7346A] transition hover:text-[#FF76A5] cursor-pointer">
+                            Limpiar
+                        </button>
+                    </div>
+
+                    @if (Catalog.State.AvailableBrands.Count > 0)
+                    {
+                        <div class="space-y-3">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                                Marca
+                            </p>
+
+                            <div class="max-h-44 space-y-2 overflow-y-auto pr-1">
+                                @foreach (var brand in Catalog.State.AvailableBrands)
+                                {
+                                    var isSelected = Catalog.State.SelectedBrands.Contains(brand);
+
+                                    <label class="flex cursor-pointer items-center gap-2.5 text-xs font-medium text-stone-700">
+                                        <input type="checkbox"
+                                               checked="@isSelected"
+                                               @onchange="@(() => Catalog.ToggleBrand(brand))"
+                                               class="h-4 w-4 cursor-pointer rounded border-stone-300 accent-[#FF76A5]" />
+                                        @brand
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (Catalog.State.MaximumPrice > 0)
+                    {
+                        <div class="space-y-3 border-t border-stone-100 pt-5">
+                            <div class="flex items-center justify-between">
+                                <p class="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                                    Precio máximo
+                                </p>
+
+                                <span class="text-xs font-bold text-stone-800">
+                                    S/ @Catalog.State.SelectedMaximumPrice.ToString("0.00")
+                                </span>
+                            </div>
+
+                            <input type="range"
+                                   min="0"
+                                   max="@Catalog.State.MaximumPrice"
+                                   step="1"
+                                   @bind="Catalog.State.SelectedMaximumPrice"
+                                   @bind:event="oninput"
+                                   class="w-full cursor-pointer accent-[#FF76A5]" />
+                        </div>
+                    }
+
+                    <div class="space-y-3 border-t border-stone-100 pt-5">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                            Valoración mínima
+                        </p>
+
+                        @foreach (var rating in new[] { 4.5, 4.0, 3.5 })
+                        {
+                            var currentRating = rating;
+                            var isSelected = Catalog.State.MinimumRating == currentRating;
+
+                            <button @onclick="() => Catalog.ToggleMinimumRating(currentRating)"
+                                    class="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold transition cursor-pointer @(isSelected
+                                                                            ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                            : "text-stone-600 hover:bg-stone-50")">
+
+                                <span class="text-amber-400">★★★★★</span>
+                                <span>@currentRating.ToString("0.0")+</span>
+                            </button>
+                        }
+                    </div>
+
+                    <label class="flex cursor-pointer items-center gap-2.5 border-t border-stone-100 pt-5 text-xs font-semibold text-stone-700">
+                        <input type="checkbox"
+                               @bind="Catalog.State.OnlyInStock"
+                               class="h-4 w-4 cursor-pointer rounded border-stone-300 accent-[#FF76A5]" />
+                        Solo productos con stock
+                    </label>
+                </div>
+            </aside>
+
+            <section class="space-y-5 lg:col-span-3">
+
+                <div class="flex flex-col gap-3 rounded-2xl border border-[#FCD1DB]/45 bg-white/70 p-4 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs font-medium text-stone-500">
+                        Mostrando
+                        <strong class="text-stone-900">@products.Count</strong>
+                        producto(s).
+                    </p>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                            Ordenar
+                        </span>
+
+                        <select @bind="Catalog.State.SortBy"
+                                class="cursor-pointer rounded-xl border border-stone-200 bg-white px-3 py-2 text-xs font-bold text-stone-700 outline-none transition focus:border-[#FF76A5]">
+                            <option value="relevance">Relevancia</option>
+                            <option value="rating">Mejor valorados</option>
+                            <option value="price_asc">Precio: menor a mayor</option>
+                            <option value="price_desc">Precio: mayor a menor</option>
+                        </select>
+                    </div>
+                </div>
+
+                @if (products.Count == 0)
+                {
+                    <div class="rounded-3xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/35 p-12 text-center">
+                        <p class="text-sm font-bold text-stone-700">
+                            No hay productos con los filtros seleccionados.
+                        </p>
+
+                        <p class="mt-2 text-xs text-stone-500">
+                            Ajusta los filtros para explorar más productos.
+                        </p>
+
+                        <button @onclick="Catalog.ResetFilters"
+                                class="mt-5 rounded-xl bg-stone-950 px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-[#C7346A] cursor-pointer">
+                            Restaurar filtros
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        @foreach (var product in pagedProducts)
+                        {
+                            <ProductCard Product="@product" />
+                        }
+                    </div>
+
+                    @if (totalPages > 1)
+{
+    <div class="flex flex-wrap items-center justify-center gap-2 pt-3">
+        <button @onclick="() => Catalog.GoToPage(Catalog.State.CurrentPage - 1)"
+                disabled="@(Catalog.State.CurrentPage == 1)"
+                class="rounded-xl border border-stone-200 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">
+            Anterior
+        </button>
+
+        @for (int page = 1; page <= totalPages; page++)
+        {
+            var currentPage = page;
+            var isCurrent = Catalog.State.CurrentPage == currentPage;
+
+            <button @onclick="() => Catalog.GoToPage(currentPage)"
+                    class="h-9 min-w-9 rounded-xl px-3 text-[10px] font-bold transition cursor-pointer @(isCurrent
+                        ? "bg-stone-950 text-white"
+                        : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                @currentPage
+            </button>
+        }
+
+        <button @onclick="() => Catalog.GoToPage(Catalog.State.CurrentPage + 1)"
+                disabled="@(Catalog.State.CurrentPage == totalPages)"
+                class="rounded-xl border border-stone-200 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">
+            Siguiente
+        </button>
+    </div>
+}
+
+                }
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        LangService.OnChange += StateHasChanged;
+        await Catalog.InitializeAsync();
+    }
+
+    private void GoHome()
+    {
+        Navigator.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        LangService.OnChange -= StateHasChanged;
+    }
+}
