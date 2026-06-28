@@ -223,18 +223,25 @@ public class CuponBLImpl implements CuponBL {
         String tipoDescuento = cupon.getTipo_descuento().trim().toUpperCase();
 
         if (!tipoDescuento.equals("PORCENTAJE") &&
-                !tipoDescuento.equals("MONTO_FIJO")) {
-            throw new Exception("Tipo de descuento no válido.");
+                !tipoDescuento.equals("MONTO_FIJO") &&
+                !tipoDescuento.equals("ENVIO_GRATIS")) {
+            throw new Exception("Tipo de descuento no válido. Use: PORCENTAJE, MONTO_FIJO o ENVIO_GRATIS.");
         }
 
-        if (cupon.getValor_descuento() == null ||
-                cupon.getValor_descuento().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new Exception("El valor del descuento debe ser mayor a cero.");
-        }
+        // Envio gratis no requiere valor de descuento
+        if (!tipoDescuento.equals("ENVIO_GRATIS")) {
+            if (cupon.getValor_descuento() == null ||
+                    cupon.getValor_descuento().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new Exception("El valor del descuento debe ser mayor a cero.");
+            }
 
-        if (tipoDescuento.equals("PORCENTAJE") &&
-                cupon.getValor_descuento().compareTo(new BigDecimal("100")) > 0) {
-            throw new Exception("El descuento porcentual no puede ser mayor a 100.");
+            if (tipoDescuento.equals("PORCENTAJE") &&
+                    cupon.getValor_descuento().compareTo(new BigDecimal("100")) > 0) {
+                throw new Exception("El descuento porcentual no puede ser mayor a 100.");
+            }
+        } else {
+            // Para envio gratis, forzar valor 0
+            cupon.setValor_descuento(BigDecimal.ZERO);
         }
 
         if (cupon.getFecha_inicio() == null) {

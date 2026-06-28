@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Net;
 using System.Text.Json;
@@ -33,7 +33,8 @@ namespace SoluLumina.Services
             req.ContentType = "application/json";
             req.Timeout = 30000;
 
-            string jsonBody = JsonConvert.SerializeObject(data);
+            var settings = new JsonSerializerSettings { DateFormatString = "yyyy-MM-dd'T'HH:mm:ss" };
+            string jsonBody = JsonConvert.SerializeObject(data, settings);
 
             using (StreamWriter sw = new StreamWriter(req.GetRequestStream()))
             {
@@ -78,7 +79,8 @@ namespace SoluLumina.Services
             req.ContentType = "application/json";
             req.Timeout = 30000;
 
-            string jsonPayload = JsonConvert.SerializeObject(data);
+            var settings = new JsonSerializerSettings { DateFormatString = "yyyy-MM-dd'T'HH:mm:ss" };
+            string jsonPayload = JsonConvert.SerializeObject(data, settings);
 
             using (Stream reqStream = await req.GetRequestStreamAsync())
             {

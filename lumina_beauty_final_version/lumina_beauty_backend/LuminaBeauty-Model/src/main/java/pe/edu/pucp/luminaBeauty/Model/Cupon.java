@@ -2,6 +2,7 @@ package pe.edu.pucp.luminaBeauty.Model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import jakarta.json.bind.annotation.JsonbDateFormat;
 
 public class Cupon {
 
@@ -9,7 +10,9 @@ public class Cupon {
     private String codigo;
     private String tipo_descuento;
     private BigDecimal valor_descuento;
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fecha_inicio;
+    @JsonbDateFormat("yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime fecha_fin;
     private Integer limite_uso;
     private int estado;

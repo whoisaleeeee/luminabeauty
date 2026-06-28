@@ -1,5 +1,7 @@
 @page "/Configuracion"
 @using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Models
+@using SoluLumina.Services
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light position-relative">
@@ -214,23 +216,25 @@
                                                     <small class="text-muted d-block" style="font-size: 0.7rem; text-transform: uppercase;">Vence</small>
                                                     <span class="fw-medium text-dark" style="font-size: 0.85rem;">@cup.Vence.ToString("dd MMM yyyy")</span>
                                                 </div>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-light rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="width: 32px; height: 32px;">
-                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                <div class="d-flex gap-1">
+                                                    <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;" title="Editar" @onclick="() => OpenEditCouponModal(cup)">
+                                                        <i class="bi bi-pencil" style="font-size: 0.85rem;"></i>
                                                     </button>
-                                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3" style="font-size: 0.85rem;">
-                                                        <li><a class="dropdown-item py-2" style="cursor:pointer;"><i class="bi bi-pencil me-2 text-secondary"></i>Editar</a></li>
-                                                        @if (cup.Estado == "Activo" || cup.Estado == "Programado")
-                                                        {
-                                                            <li><a class="dropdown-item py-2" style="cursor:pointer;" @onclick="() => ToggleCouponStatus(cup)"><i class="bi bi-pause-circle me-2 text-warning"></i>Desactivar</a></li>
-                                                        }
-                                                        else
-                                                        {
-                                                            <li><a class="dropdown-item py-2" style="cursor:pointer;" @onclick="() => ToggleCouponStatus(cup)"><i class="bi bi-play-circle me-2 text-success"></i>Activar</a></li>
-                                                        }
-                                                        <li><hr class="dropdown-divider"></li>
-                                                        <li><a class="dropdown-item py-2 text-danger" style="cursor:pointer;" @onclick="() => DeleteCoupon(cup)"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
-                                                    </ul>
+                                                    @if (cup.Estado == "Activo" || cup.Estado == "Programado")
+                                                    {
+                                                        <button class="btn btn-sm btn-light text-warning rounded-circle" style="width: 32px; height: 32px;" title="Desactivar" @onclick="() => ToggleCouponStatus(cup)">
+                                                            <i class="bi bi-pause-fill" style="font-size: 0.85rem;"></i>
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-sm btn-light text-success rounded-circle" style="width: 32px; height: 32px;" title="Activar" @onclick="() => ToggleCouponStatus(cup)">
+                                                            <i class="bi bi-play-fill" style="font-size: 0.85rem;"></i>
+                                                        </button>
+                                                    }
+                                                    <button class="btn btn-sm btn-light text-danger rounded-circle" style="width: 32px; height: 32px;" title="Eliminar" @onclick="() => DeleteCoupon(cup)">
+                                                        <i class="bi bi-trash" style="font-size: 0.85rem;"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -365,8 +369,8 @@
                             <i class="bi bi-ticket-perforated-fill fs-5"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title fw-bold" style="color: #6a3849;">Nuevo Cupón de Descuento</h5>
-                            <p class="text-muted small m-0">Configura las reglas y condiciones del cupón.</p>
+                            <h5 class="modal-title fw-bold" style="color: #6a3849;">@(isEditingCoupon ? "Editar Cupón de Descuento" : "Nuevo Cupón de Descuento")</h5>
+                            <p class="text-muted small m-0">@(isEditingCoupon ? "Modifica las reglas y condiciones del cupón." : "Configura las reglas y condiciones del cupón.")</p>
                         </div>
                     </div>
                     <button type="button" class="btn-close mb-auto" @onclick="CloseAddCouponModal" aria-label="Close"></button>
@@ -408,7 +412,7 @@
                 <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
                     <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseAddCouponModal">Cancelar</button>
                     <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #6a3849;" @onclick="SaveCoupon">
-                        <i class="bi bi-check-circle"></i> Crear Cupón
+                        <i class="bi bi-check-circle"></i> @(isEditingCoupon ? "Guardar Cambios" : "Crear Cupón")
                     </button>
                 </div>
             </div>
@@ -489,6 +493,7 @@
     private bool showAddEmployeeModal = false;
     private bool showAddCouponModal = false;
     private bool showConfigPagoModal = false;
+    private bool isEditingCoupon = false;
 
     // Models
     public class Empleado
@@ -509,11 +514,13 @@
         public string Codigo { get; set; } = string.Empty;
         public string Tipo { get; set; } = "Porcentaje (%)";
         public string ValorStr { get; set; } = string.Empty;
+        public decimal ValorRaw { get; set; } = 0;
         public string Descripcion { get; set; } = string.Empty;
         public string Estado { get; set; } = "Activo";
         public int Usos { get; set; } = 0;
         public string LimiteUsos { get; set; } = string.Empty;
         public DateTime Vence { get; set; } = DateTime.Now.AddDays(30);
+        public DateTime FechaInicio { get; set; } = DateTime.Now;
     }
 
     public class MetodoPago
@@ -543,7 +550,9 @@
     private Cupon newCupon = new();
     private MetodoPago selectedPago = new();
 
-    protected override void OnInitialized()
+    private const string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
+
+    protected override async Task OnInitializedAsync()
     {
         empleados = new List<Empleado>
         {
@@ -552,12 +561,8 @@
             new Empleado { Id = 3, Nombre = "Isabella Ruiz", Email = "isabella.r@glamadmin.com", Rol = "Vendedor", Estado = "Inactivo", Iniciales = "IR", BgColor = "#e9ecef", TextColor = "#6c757d" }
         };
 
-        cupones = new List<Cupon>
-        {
-            new Cupon { Id = 1, Codigo = "BIENVENIDA20", Tipo = "Porcentaje", ValorStr = "20% de Descuento", Descripcion = "En la primera compra.", Estado = "Activo", Usos = 145, LimiteUsos = "", Vence = new DateTime(2026, 12, 31) },
-            new Cupon { Id = 2, Codigo = "FLASH50", Tipo = "Monto Fijo", ValorStr = "S/ 50.00 OFF", Descripcion = "Compras mayores a S/ 200.", Estado = "Inactivo", Usos = 50, LimiteUsos = "50", Vence = DateTime.Now.AddDays(-1) },
-            new Cupon { Id = 3, Codigo = "GLAMVIP", Tipo = "Envio", ValorStr = "Envío Gratis", Descripcion = "Para clientes VIP.", Estado = "Programado", Usos = 0, LimiteUsos = "100", Vence = new DateTime(2026, 8, 1) }
-        };
+        // Cargar cupones reales desde la base de datos
+        await CargarCuponesDesdeBackend();
 
         metodosPago = new List<MetodoPago>
         {
@@ -566,6 +571,62 @@
             new MetodoPago { Id = 3, Nombre = "Yape", Tipo = "Billetera Móvil (PE)", Descripcion = "Transferencias rápidas con QR para clientes en Perú.", IconoUrl = "https://seeklogo.com/images/Y/yape-logo-3E473EE7E5-seeklogo.com.png", IsActivo = true },
             new MetodoPago { Id = 4, Nombre = "Plin", Tipo = "Billetera Móvil (PE)", Descripcion = "Pagos interbancarios con número de celular en Perú.", IconoUrl = "https://upload.wikimedia.org/wikipedia/commons/4/43/Logo_Plin.png", IsActivo = false },
             new MetodoPago { Id = 5, Nombre = "Transferencia Bancaria", Tipo = "Offline", Descripcion = "Cuentas BCP, Interbank y BBVA. Requiere validación manual.", IconoUrl = "https://cdn-icons-png.flaticon.com/512/2830/2830284.png", IsActivo = true }
+        };
+    }
+
+    private async Task CargarCuponesDesdeBackend()
+    {
+        try
+        {
+            var listaBd = await new HttpClientUtils<List<SoluLumina.Models.Cupon>>().get(URL_BASE + "/CuponRS/listar");
+            if (listaBd != null)
+            {
+                cupones = listaBd.Select(c => MapearCuponLocal(c)).ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error al cargar cupones: " + ex.Message);
+        }
+    }
+
+    private Cupon MapearCuponLocal(SoluLumina.Models.Cupon c)
+    {
+        string tipo = c.Tipo_descuento switch
+        {
+            "PORCENTAJE"   => "Porcentaje (%)",
+            "MONTO_FIJO"   => "Monto Fijo (S/)",
+            "ENVIO_GRATIS" => "Envío Gratis",
+            _              => c.Tipo_descuento ?? "Porcentaje (%)"
+        };
+
+        string valorStr = c.Tipo_descuento switch
+        {
+            "PORCENTAJE"   => $"{c.Valor_descuento}% de Descuento",
+            "MONTO_FIJO"   => $"S/ {c.Valor_descuento:0.00} OFF",
+            "ENVIO_GRATIS" => "Envío Gratis",
+            _              => c.Valor_descuento.ToString()
+        };
+
+        string estado = "Activo";
+        if (c.Estado == 0)
+            estado = "Inactivo";
+        else if (c.Fecha_inicio.HasValue && c.Fecha_inicio.Value > DateTime.Now)
+            estado = "Programado";
+
+        return new Cupon
+        {
+            Id          = c.Id_cupon,
+            Codigo      = c.Codigo ?? "",
+            Tipo        = tipo,
+            ValorStr    = valorStr,
+            ValorRaw    = c.Valor_descuento,
+            Descripcion = "",  // el backend no tiene campo descripcion; se puede ampliar
+            Estado      = estado,
+            Usos        = c.Cantidad_usos ?? 0,
+            LimiteUsos  = c.Limite_uso.HasValue ? c.Limite_uso.Value.ToString() : "",
+            Vence       = c.Fecha_fin.HasValue ? c.Fecha_fin.Value : DateTime.Now.AddDays(30),
+            FechaInicio = c.Fecha_inicio.HasValue ? c.Fecha_inicio.Value : DateTime.Now
         };
     }
 
@@ -589,7 +650,32 @@
     private void OpenAddEmployeeModal() { newEmpleado = new Empleado(); showAddEmployeeModal = true; }
     private void CloseAddEmployeeModal() => showAddEmployeeModal = false;
 
-    private void OpenAddCouponModal() { newCupon = new Cupon(); showAddCouponModal = true; }
+    private void OpenAddCouponModal() 
+    { 
+        newCupon = new Cupon(); 
+        isEditingCoupon = false; 
+        showAddCouponModal = true; 
+    }
+
+    private void OpenEditCouponModal(Cupon cup) 
+    { 
+        newCupon = new Cupon
+        {
+            Id = cup.Id,
+            Codigo = cup.Codigo,
+            Tipo = cup.Tipo,
+            ValorStr = cup.ValorRaw.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            Descripcion = cup.Descripcion,
+            Estado = cup.Estado,
+            Usos = cup.Usos,
+            LimiteUsos = cup.LimiteUsos,
+            Vence = cup.Vence,
+            FechaInicio = cup.FechaInicio
+        }; 
+        isEditingCoupon = true; 
+        showAddCouponModal = true; 
+    }
+
     private void CloseAddCouponModal() => showAddCouponModal = false;
 
     private void OpenConfigPagoModal(MetodoPago pago) { selectedPago = pago; showConfigPagoModal = true; }
@@ -632,18 +718,96 @@
             return;
         }
 
-        newCupon.Id = cupones.Any() ? cupones.Max(c => c.Id) + 1 : 1;
-        newCupon.Estado = newCupon.Vence > DateTime.Now ? "Activo" : "Inactivo";
-        cupones.Add(newCupon);
-        CloseAddCouponModal();
-        ShowToast($"Cupón {newCupon.Codigo} creado.", "success");
-        await Task.CompletedTask;
+        if (string.IsNullOrWhiteSpace(newCupon.ValorStr) && newCupon.Tipo != "Envío Gratis")
+        {
+            ShowToast("Ingresa el valor del descuento.", "danger");
+            return;
+        }
+
+        try
+        {
+            // Mapear tipo visual → tipo backend
+            string tipoBackend = newCupon.Tipo switch
+            {
+                "Porcentaje (%)"  => "PORCENTAJE",
+                "Monto Fijo (S/)" => "MONTO_FIJO",
+                "Envío Gratis"    => "ENVIO_GRATIS",
+                _                 => "PORCENTAJE"
+            };
+
+            // Parsear valor numérico
+            decimal valorNum = 0;
+            if (!string.IsNullOrWhiteSpace(newCupon.ValorStr))
+                decimal.TryParse(newCupon.ValorStr.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out valorNum);
+
+            // Parsear límite de usos
+            int? limiteUso = null;
+            if (!string.IsNullOrWhiteSpace(newCupon.LimiteUsos) && int.TryParse(newCupon.LimiteUsos, out int limParsed))
+                limiteUso = limParsed;
+
+            var cuponBd = new SoluLumina.Models.Cupon
+            {
+                Id_cupon         = isEditingCoupon ? newCupon.Id : 0,
+                Codigo           = newCupon.Codigo.ToUpper().Trim(),
+                Tipo_descuento   = tipoBackend,
+                Valor_descuento  = valorNum,
+                Fecha_inicio     = isEditingCoupon ? newCupon.FechaInicio : DateTime.Now,
+                Fecha_fin        = newCupon.Vence,
+                Limite_uso       = limiteUso,
+                Estado           = 1
+            };
+
+            SoluLumina.Models.Cupon resultado;
+            if (isEditingCoupon)
+            {
+                resultado = await new HttpClientUtils<SoluLumina.Models.Cupon>().put(URL_BASE + "/CuponRS/actualizar", cuponBd);
+            }
+            else
+            {
+                resultado = await new HttpClientUtils<SoluLumina.Models.Cupon>().post(URL_BASE + "/CuponRS/registrar", cuponBd);
+            }
+
+            if (resultado != null && resultado.Id_cupon > 0)
+            {
+                await CargarCuponesDesdeBackend();
+                CloseAddCouponModal();
+                string actionStr = isEditingCoupon ? "actualizado" : "creado";
+                ShowToast($"Cupón '{resultado.Codigo}' {actionStr} correctamente.", "success");
+            }
+            else
+            {
+                string actionStr = isEditingCoupon ? "actualizar" : "crear";
+                ShowToast($"Error al {actionStr} el cupón. Verifica los datos.", "danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error SaveCoupon: " + ex.Message);
+            ShowToast("Error de conexión al guardar el cupón.", "danger");
+        }
     }
 
-    private void DeleteCoupon(Cupon cup)
+    private async void DeleteCoupon(Cupon cup)
     {
-        cupones.Remove(cup);
-        ShowToast($"Cupón eliminado.", "secondary");
+        try
+        {
+            var resultado = await new HttpClientUtils<int>().delete(URL_BASE + "/CuponRS/eliminar/" + cup.Id);
+            if (resultado == 1)
+            {
+                cupones.Remove(cup);
+                ShowToast($"Cupón '{cup.Codigo}' eliminado.", "secondary");
+                StateHasChanged();
+            }
+            else
+            {
+                ShowToast("No se pudo eliminar el cupón.", "danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error DeleteCoupon: " + ex.Message);
+            ShowToast("Error al eliminar el cupón.", "danger");
+        }
     }
 
     private void ToggleCouponStatus(Cupon cup)
