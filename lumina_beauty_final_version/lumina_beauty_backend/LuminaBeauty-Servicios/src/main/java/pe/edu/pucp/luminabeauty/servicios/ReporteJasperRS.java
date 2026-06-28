@@ -19,7 +19,9 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,15 +31,7 @@ public class ReporteJasperRS {
     private static final String PARAM_FECHA_INICIO = "FechaIni";
     private static final String PARAM_FECHA_FIN = "FechaFin";
 
-    private static final Map<String, ReporteConfig> REPORTES = Map.of(
-            "ventas-consolidadas",
-            new ReporteConfig(
-                    "ventas-consolidadas",
-                    "Ventas consolidadas",
-                    "VentasConsolidadas.jasper",
-                    "ventas_consolidadas"
-            )
-    );
+    private static final Map<String, ReporteConfig> REPORTES = crearReportes();
 
     @Context
     private ServletContext servletContext;
@@ -56,7 +50,7 @@ public class ReporteJasperRS {
             ));
         }
 
-        return reportes;
+        return reportes ;
     }
 
     @GET
@@ -67,6 +61,13 @@ public class ReporteJasperRS {
             @QueryParam("fechaFin") String fechaFin) {
 
         return generarReporte("ventas-consolidadas", fechaInicio, fechaFin);
+    }
+
+    @GET
+    @Path("inventarioGeneral")
+    @Produces("application/pdf")
+    public Response generarInventarioGeneral() {
+        return generarReporte("inventario-general", null, null);
     }
 
     @GET
@@ -88,11 +89,16 @@ public class ReporteJasperRS {
         try {
             ReporteConfig config = buscarReporte(codigoReporte);
 
-            LocalDate inicio = validarFecha(fechaInicio, "fechaInicio");
-            LocalDate fin = validarFecha(fechaFin, "fechaFin");
+            LocalDate inicio = null;
+            LocalDate fin = null;
 
-            if (fin.isBefore(inicio)) {
-                return badRequest("La fecha fin no puede ser menor que la fecha inicio.");
+            if (config.requiereFechas()) {
+                inicio = validarFecha(fechaInicio, "fechaInicio");
+                fin = validarFecha(fechaFin, "fechaFin");
+
+                if (fin.isBefore(inicio)) {
+                    return badRequest("La fecha fin no puede ser menor que la fecha inicio.");
+                }
             }
 
             String reportsPath = obtenerRutaReports();
@@ -107,8 +113,12 @@ public class ReporteJasperRS {
             }
 
             Map<String, Object> parametros = new HashMap<>();
-            parametros.put(PARAM_FECHA_INICIO, Date.valueOf(inicio));
-            parametros.put(PARAM_FECHA_FIN, Date.valueOf(fin));
+
+            if (config.requiereFechas()) {
+                parametros.put(PARAM_FECHA_INICIO, Date.valueOf(inicio));
+                parametros.put(PARAM_FECHA_FIN, Date.valueOf(fin));
+            }
+
             parametros.put("SUBREPORT_DIR", reportsPath + File.separator);
 
             byte[] pdf;
@@ -123,10 +133,7 @@ public class ReporteJasperRS {
                 pdf = JasperExportManager.exportReportToPdf(jasperPrint);
             }
 
-            String nombreArchivo = config.prefijoArchivo()
-                    + "_" + inicio
-                    + "_a_" + fin
-                    + ".pdf";
+            String nombreArchivo = construirNombreArchivo(config, inicio, fin);
 
             return Response.ok(pdf, "application/pdf")
                     .header("Content-Disposition", "attachment; filename=\"" + nombreArchivo + "\"")
@@ -190,11 +197,55 @@ public class ReporteJasperRS {
                 .build();
     }
 
+    private static Map<String, ReporteConfig> crearReportes() {
+        Map<String, ReporteConfig> reportes = new LinkedHashMap<>();
+
+        reportes.put(
+                "ventas-consolidadas",
+                new ReporteConfig(
+                        "ventas-consolidadas",
+                        "Ventas consolidadas",
+                        "VentasConsolidadas.jasper",
+                        "ventas_consolidadas",
+                        true
+                )
+        );
+
+        reportes.put(
+                "inventario-general",
+                new ReporteConfig(
+                        "inventario-general",
+                        "Inventario general",
+                        "InventarioGeneral.jasper",
+                        "inventario_general",
+                        false
+                )
+        );
+
+        return Collections.unmodifiableMap(reportes);
+    }
+
+    private String construirNombreArchivo(
+            ReporteConfig config,
+            LocalDate inicio,
+            LocalDate fin) {
+
+        if (config.requiereFechas()) {
+            return config.prefijoArchivo()
+                    + "_" + inicio
+                    + "_a_" + fin
+                    + ".pdf";
+        }
+
+        return config.prefijoArchivo() + ".pdf";
+    }
+
     private record ReporteConfig(
             String codigo,
             String nombre,
             String archivoJasper,
-            String prefijoArchivo) {
+            String prefijoArchivo,
+            boolean requiereFechas) {
     }
 
     public static class ReporteDisponible {
