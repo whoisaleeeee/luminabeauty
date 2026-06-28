@@ -204,7 +204,8 @@ namespace LuminaBeauty.Services
                 }
 
                 await ReloadAsync();
-                _loaded = true;
+
+                _loaded = _products.Count > 0;
             }
             finally
             {
@@ -319,13 +320,22 @@ namespace LuminaBeauty.Services
             var products = _products
                 .Where(p =>
                     p.Id.StartsWith("bs-", StringComparison.OrdinalIgnoreCase) ||
-                    p.Id.Equals("chubby-stick", StringComparison.OrdinalIgnoreCase)
-                )
+                    p.Id.Equals("chubby-stick", StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
-            return products.Count > 0
-                ? products
-                : _products.Skip(4).Take(4).ToList();
+            if (products.Count > 0)
+            {
+                return products;
+            }
+
+            var fallback = _products
+                .Skip(4)
+                .Take(4)
+                .ToList();
+
+            return fallback.Count > 0
+                ? fallback
+                : _products.Take(4).ToList();
         }
 
         public List<Product> GetNewArrivals()

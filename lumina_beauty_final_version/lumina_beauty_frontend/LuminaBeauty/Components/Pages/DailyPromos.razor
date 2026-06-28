@@ -1,0 +1,51 @@
+﻿@inject LanguageService LangService
+@inject LayoutStateService LayoutState
+@inject HomeService HomeService
+@inject ProductService ProductCache
+@inject NavigationManager Navigator
+
+<section>
+    <div class="flex items-center justify-between mb-8 pb-5 border-b border-stone-100 select-none">
+        <div class="text-left">
+            <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">Tiempo Limitado</span>
+            <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">Ofertas del Día</h2>
+        </div>
+
+        <div class="hidden sm:flex items-center gap-1.5 font-mono">
+            <div class="flex flex-col items-center">
+                <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FF76A5] text-white shadow-sm">
+                    @HomeService.TimeLeft.Days.ToString("00")
+                </div>
+                <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Días</span>
+            </div>
+            <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
+            <div class="flex flex-col items-center">
+                <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
+                    @HomeService.TimeLeft.Hours.ToString("00")
+                </div>
+                <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Horas</span>
+            </div>
+            <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
+            <div class="flex flex-col items-center">
+                <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
+                    @HomeService.TimeLeft.Minutes.ToString("00")
+                </div>
+                <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Min</span>
+            </div>
+            <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
+            <div class="flex flex-col items-center">
+                <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
+                    @HomeService.TimeLeft.Seconds.ToString("00")
+                </div>
+                <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Seg</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        @foreach (var p in ProductCache.GetFlashSaleProducts())
+        {
+            <ProductCard Product="@p" />
+        }
+    </div>
+</section>

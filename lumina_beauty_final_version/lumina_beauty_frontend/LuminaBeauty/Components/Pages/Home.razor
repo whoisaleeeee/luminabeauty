@@ -5,8 +5,6 @@
 @inject ProductService ProductCache
 @inject NavigationManager Navigator
 
-@inject IJSRuntime JS
-
 @implements IDisposable
 
 <PageTitle>Lumina Beauty | Haute Cosmétique & Skincare</PageTitle>
@@ -24,342 +22,26 @@
 
     <HeroSlider />
 
-    <section>
-        <div class="flex items-center justify-between mb-8 pb-5 border-b border-stone-100 select-none">
-            <div class="text-left">
-                <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">Tiempo Limitado</span>
-                <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">Ofertas del Día</h2>
-            </div>
+    @if (_catalogueReady)
+    {
+        <DailyPromos />
 
-            <div class="hidden sm:flex items-center gap-1.5 font-mono">
-                <div class="flex flex-col items-center">
-                    <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FF76A5] text-white shadow-sm">
-                        @HomeService.TimeLeft.Days.ToString("00")
-                    </div>
-                    <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Días</span>
-                </div>
-                <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
-                <div class="flex flex-col items-center">
-                    <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
-                        @HomeService.TimeLeft.Hours.ToString("00")
-                    </div>
-                    <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Horas</span>
-                </div>
-                <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
-                <div class="flex flex-col items-center">
-                    <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
-                        @HomeService.TimeLeft.Minutes.ToString("00")
-                    </div>
-                    <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Min</span>
-                </div>
-                <span class="text-[#FF76A5]/60 font-bold text-sm">:</span>
-                <div class="flex flex-col items-center">
-                    <div class="text-sm font-bold w-10 py-1.5 rounded-xl text-center bg-[#FFF0F3] border border-[#FFE3E8]/40 text-[#C7346A]">
-                        @HomeService.TimeLeft.Seconds.ToString("00")
-                    </div>
-                    <span class="text-[9px] text-stone-400 mt-1 uppercase tracking-widest font-bold">Seg</span>
-                </div>
-            </div>
-        </div>
+        <TopBrands />
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            @foreach (var p in ProductCache.GetFlashSaleProducts())
-            {
-                <ProductCard Product="@p" />
-            }
-        </div>
-    </section>
+        <BestSellers />
 
+        <FeaturedCategory />
 
-    <section class="py-10 border-y border-stone-200/60 overflow-hidden">
-        <div class="flex items-end justify-between mb-6">
-            <div>
-                <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c5a880]">
-                    Confianza y calidad
-                </span>
-
-                <h2 class="mt-2 font-serif text-2xl md:text-3xl text-stone-900">
-                    Marcas destacadas
-                </h2>
-            </div>
-
-            <span class="hidden md:block text-xs text-stone-400">
-                Seleccionadas para tu rutina
-            </span>
-        </div>
-
-        <div class="brand-marquee">
-            <div class="brand-track">
-                @foreach (var b in ProductCache.GetBrands())
-                {
-                    <article class="brand-card">
-                        <p>@b.Name</p>
-                        <div></div>
-                    </article>
-                }
-
-                @foreach (var b in ProductCache.GetBrands())
-                {
-                    <article class="brand-card">
-                        <p>@b.Name</p>
-                        <div></div>
-                    </article>
-                }
-            </div>
-        </div>
-    </section>
-   
-
-
-    <section id="catalog" class="scroll-mt-24">
-        <div class="flex items-end justify-between mb-8 pb-5 border-b border-stone-100 select-none">
-            <div class="text-left">
-                <span class="text-xs font-bold uppercase tracking-widest text-[#c5a880] block mb-1">Este Mes</span>
-                <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">
-                    @(!string.IsNullOrEmpty(HomeService.ActiveCategory) ? $"Colección: {HomeService.ActiveCategory}" : "Los Más Vendidos")
-                </h2>
-            </div>
-            <button @onclick="HomeService.ResetCatalogue"
-                    class="text-xs font-bold text-[#FF76A5] hover:text-[#C7346A] hover:underline flex items-center gap-1 cursor-pointer">
-                Ver todo <span>➔</span>
-            </button>
-        </div>
-
-        <div class="flex flex-wrap gap-2 mb-8 select-none">
-            @foreach (var cat in ProductCache.GetCategories())
-            {
-                var isSelected = HomeService.ActiveCategory == cat.Name;
-                <button @onclick="() => HomeService.SelectCategory(cat.Name)"
-                        class="px-4 py-2 rounded-full text-[10px] uppercase tracking-widest font-bold border transition cursor-pointer @(isSelected ? "bg-[#FF76A5] text-white border-[#FF76A5]" : "bg-white/70 text-stone-500 border-[#FFE3E8]/70 hover:text-[#C7346A]")">
-                    @cat.Name
-                </button>
-            }
-        </div>
-        
-        <div class="relative -mx-4 md:-mx-8">
-            <button type="button"
-                    @onclick="() => MoveBestSellersAsync(-1)"
-                    class="absolute left-3 top-[205px] z-20 hidden h-11 w-11 items-center justify-center rounded-full bg-white text-3xl leading-none text-[#9f3758] shadow-md transition hover:scale-105 lg:flex">
-                ‹
-            </button>
-
-            <div id="bestSellersCarousel"
-                 class="flex gap-9 overflow-x-auto cursor-grab active:cursor-grabbing px-[10vw] pb-6 snap-x snap-mandatory overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                @if (HomeService.GetFilteredCatalogue().Count > 0)
-                {
-                    @foreach (var p in HomeService.GetFilteredCatalogue())
-                    {
-                        <article class="w-[78vw] max-w-[390px] shrink-0 snap-center rounded-3xl border border-white bg-white/80 p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg md:w-[43vw] lg:w-[30vw]">
-                        <button type="button"
-                                @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
-                                class="relative flex h-[310px] w-full items-center justify-center overflow-hidden rounded-2xl bg-[#FFF7F9] p-6 cursor-pointer">
-                            @if (p.OriginalPrice != null && p.OriginalPrice > p.Price)
-                            {
-                                <span class="absolute left-4 top-4 rounded-full bg-[#FFF0F3] px-3 py-1 text-[9px] font-bold text-[#C7346A]">
-                                    Oferta
-                                </span>
-                            }
-
-                            <img src="@p.Image"
-                                 alt="@p.Name"
-                                 class="h-full w-full object-contain transition-transform duration-500 hover:scale-105" />
-                        </button>
-
-                        <div class="pt-5">
-                            <div class="flex items-center justify-between gap-3">
-                                <span class="text-[9px] font-bold uppercase tracking-[0.18em] text-[#c5a880]">
-                                    @p.Brand
-                                </span>
-
-                                <span class="rounded-full bg-[#FFF0F3] px-2.5 py-1 text-[9px] font-bold text-[#C7346A]">
-                                    @p.Category
-                                </span>
-                            </div>
-
-                            <button type="button"
-                                    @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
-                                    class="mt-3 h-[58px] overflow-hidden bg-transparent p-0 text-left font-serif text-[22px] leading-[1.08] text-stone-900 hover:text-[#C7346A] cursor-pointer">
-                                @p.Name
-                            </button>
-                        
-                        <div class="mt-3 h-[30px]">
-                                @if (p.ReviewsCount > 0)
-                                {
-                                    <div class="mt-3 flex items-center gap-1.5">
-                                        <span class="text-sm text-[#FF76A5]">★★★★★</span>
-                                        <span class="text-[11px] font-semibold text-stone-600">@p.Rating.ToString("0.0")</span>
-                                        <span class="text-[10px] text-stone-400">(@p.ReviewsCount)</span>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <span class="mt-3 inline-block rounded-full bg-[#FFF0F3] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#C7346A]">
-                                        Nuevo
-                                    </span>
-                                }
-
-                        </div>
-
-                        <div class="mt-5 min-h-[150px] border-t border-stone-100 pt-4 flex flex-col justify-between">
-                                <div class="flex items-end justify-between">
-                                    <div>
-                                        @if (p.OriginalPrice != null && p.OriginalPrice > p.Price)
-                                        {
-                                            <span class="block text-[11px] text-stone-400 line-through">
-                                                S/ @p.OriginalPrice.Value.ToString("0.00")
-                                            </span>
-                                        }
-
-                                        <span class="text-lg font-bold text-stone-900 font-mono">
-                                            S/ @p.Price.ToString("0.00")
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <button type="button"
-                                        @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
-                                        class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#111827] px-4 py-3.5 text-[10px] font-bold uppercase tracking-[0.08em] text-white transition-all hover:-translate-y-0.5 hover:bg-[#C7346A] hover:shadow-lg cursor-pointer">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                         viewBox="0 0 24 24"
-                                         fill="none"
-                                         stroke="currentColor"
-                                         stroke-width="1.8"
-                                         class="h-4 w-4"
-                                         aria-hidden="true">
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              d="M3 7h18l-1.4 13H4.4L3 7Z" />
-                                        <path stroke-linecap="round"
-                                              stroke-linejoin="round"
-                                              d="M8 7a4 4 0 0 1 8 0" />
-                                    </svg>
-
-                                    Añadir a mi beauty bag
-                                </button>
-                            </div>
-                        </div>
-                    </article>
-                    }
-                }
-                else
-                {
-                    <div class="w-full rounded-3xl border border-stone-100 bg-white/40 py-16 text-center">
-                        <p class="text-sm font-medium text-stone-400">
-                            No se encontraron productos coincidentes.
-                        </p>
-                    </div>
-                }
-            </div>
-
-            <button type="button"
-                    @onclick="() => MoveBestSellersAsync(1)"
-                    class="absolute right-3 top-[205px] z-20 hidden h-11 w-11 items-center justify-center rounded-full bg-white text-3xl leading-none text-[#9f3758] shadow-md transition hover:scale-105 lg:flex">
-                ›
-            </button>
-        </div>
-        
-    </section>
-
-    <section class="grid grid-cols-1 md:grid-cols-12 rounded-3xl overflow-hidden shadow-md border border-white/60">
-        <div class="md:col-span-5 bg-gradient-to-br from-[#faf6f7] via-[#fffbfd] to-[#fff3f5] p-10 md:p-14 flex flex-col justify-center text-left">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-[#FF76A5] mb-2 font-sans select-none">CATEGORÍAS</span>
-            <h2 class="font-serif text-3xl md:text-4xl font-light tracking-tight text-stone-900 leading-tight mb-4">
-                Descubre lo último en <strong class="font-bold text-[#C7346A]">K-Beauty</strong>
-            </h2>
-            <p class="text-xs text-stone-500 leading-relaxed mb-8 max-w-sm font-semibold">
-                Las icónicas marcas de Seúl: centella asiática, tónicos Anua 77 y sueros fermentados que transforman tu piel.
+        <NewArrivals />
+    }
+    else
+    {
+        <div class="rounded-3xl border border-white/70 bg-white/35 py-16 text-center shadow-sm backdrop-blur-xl">
+            <p class="text-sm text-stone-400">
+                Cargando productos...
             </p>
-            <button @onclick='() => HomeService.SelectCategory("Skincare")'
-                    class="w-fit bg-[#FF76A5] hover:bg-[#C7346A] font-bold uppercase tracking-wider text-[10px] text-white px-8 py-3.5 rounded-xl transition shadow-md cursor-pointer select-none">
-                ¡Lo quiero!
-            </button>
         </div>
-        <div class="md:col-span-7 h-[280px] md:h-auto min-h-[300px] relative overflow-hidden group select-none">
-            <div class="absolute inset-0 bg-black/5 z-10" />
-            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=1500"
-                 alt="K-Beauty"
-                 class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 pointer-events-none" />
-        </div>
-    </section>
-
-    <section class="bg-white/30 border border-white/60 p-6 md:p-8 rounded-3xl backdrop-blur-md">
-        <div class="mb-8 pb-5 border-b border-stone-100 select-none">
-            <span class="text-xs font-bold uppercase tracking-widest text-[#FF76A5] block mb-1">Novedades</span>
-            <h2 class="font-serif text-2xl md:text-3xl font-light text-stone-900">New Arrival</h2>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-6 bg-gradient-to-br from-[#FFF0F3]/20 via-white to-white border border-stone-100 rounded-3xl p-6 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 min-h-[460px] relative group">
-                <div class="relative z-10 text-left flex flex-col gap-3">
-                    <div class="select-none">
-                        <span class="inline-block text-[10px] font-bold uppercase text-white bg-[#FF76A5] px-3 py-1 rounded-full shadow tracking-wider">Exclusivo</span>
-                    </div>
-                    <div>
-                        <h3 class="font-serif text-3xl font-semibold text-stone-900 tracking-tight mb-1">Valentino</h3>
-                        <p class="text-xs text-stone-500 max-w-sm mb-4 leading-relaxed font-semibold">
-                            Born in Roma Intense – minitallas estelares de alta costura romana.
-                        </p>
-                        <div class="flex items-baseline gap-2 font-mono select-none">
-                            <span class="text-lg font-bold text-[#C7346A]">S/ 399.00</span>
-                            <span class="text-xs text-stone-400 line-through">S/ 480.00</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="relative h-60 w-full flex items-center justify-center select-none my-4">
-                    <img src="https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=600"
-                         alt="Valentino"
-                         class="max-h-56 object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-700 pointer-events-none" />
-                </div>
-                <div class="pt-4 border-t border-stone-100 flex items-center justify-between select-none">
-                    <button @onclick="HomeService.OpenConsultation"
-                            class="text-xs font-bold uppercase tracking-wider text-stone-900 hover:text-[#C7346A] transition flex items-center gap-1 cursor-pointer">
-                        Comprar Ahora <span>➔</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="col-span-1 sm:col-span-2 bg-[#FFF0F3]/50 border border-[#FFE3E8]/30 rounded-3xl p-6 flex flex-col justify-between overflow-hidden relative group min-h-[200px] text-left">
-                    <div class="absolute right-6 top-6 w-32 h-32 opacity-20 transform scale-150 rotate-12 bg-[#FF76A5] rounded-full blur-2xl group-hover:opacity-30 transition-opacity" />
-                    <div>
-                        <span class="text-[9px] font-bold tracking-widest text-[#c5a880] uppercase block mb-1">EDICIÓN EN ROSA</span>
-                        <h3 class="font-serif text-xl font-semibold text-stone-900 leading-snug max-w-xs mb-2">Infaltables de SHEGLAM</h3>
-                        <p class="text-[10px] text-stone-500 max-w-xs mb-4 leading-relaxed font-semibold">
-                            Polvos minerales y blushes virales para un contorno impecable con luz satinada.
-                        </p>
-                    </div>
-                    <button @onclick='() => HomeService.FilterByBrand("Sheglam")'
-                            class="bg-[#FF76A5] hover:bg-[#C7346A] text-white font-bold uppercase tracking-wider text-[9px] px-4 py-2.5 rounded-xl transition w-fit cursor-pointer select-none">
-                        ¡Quiero TODO! ➔
-                    </button>
-                </div>
-
-                @foreach (var p in ProductCache.GetBestSellers().Take(2))
-                {
-                    <div class="bg-white border border-stone-100 rounded-3xl p-5 flex flex-col justify-between hover:shadow-sm transition-all duration-300 text-left">
-                        <div @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
-                             class="aspect-square bg-stone-50 rounded-xl flex items-center justify-center p-3 mb-4 overflow-hidden group cursor-pointer select-none">
-                            <img src="@p.Image" alt="@p.Name" class="max-h-24 object-contain group-hover:scale-105 transition-transform pointer-events-none" />
-                        </div>
-                        <div>
-                            <span class="text-[8px] font-black text-[#c5a880] uppercase tracking-wider block">@p.Brand</span>
-                            <h4 @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
-                                class="text-xs font-bold text-stone-800 line-clamp-2 mt-1 hover:text-[#C7346A] cursor-pointer transition-colors">
-                                @p.Name
-                            </h4>
-                            <div class="flex items-center justify-between mt-3 font-mono">
-                                <span class="text-xs font-bold text-[#C7346A]">S/ @p.Price.ToString("0.00")</span>
-                                <button @onclick='() => Navigator.NavigateTo($"/product/{p.Id}")'
-                                        class="text-[9px] font-bold uppercase tracking-wider text-stone-400 hover:text-[#FF76A5] cursor-pointer">
-                                    Ver
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </section>
+    }
 
 </div>
 
@@ -376,13 +58,19 @@
 }
 
 @code {
+
+    private bool _catalogueReady;
+
     protected override async Task OnInitializedAsync()
     {
-        await ProductCache.EnsureLoadedAsync();
         LayoutState.OnChange += StateHasChanged;
         LangService.OnChange += StateHasChanged;
         HomeService.OnChange += StateHasChanged;
         HomeService.StartCountdown(() => InvokeAsync(StateHasChanged));
+
+        await ProductCache.EnsureLoadedAsync();
+
+        _catalogueReady = true;
     }
 
     private static string GetBrandCategory(string brandName)
@@ -399,15 +87,6 @@
             "NIVEA" => "Cuidado corporal",
             _ => "Belleza"
         };
-    }
-
-    private async Task MoveBestSellersAsync(int direction)
-    {
-        await JS.InvokeVoidAsync(
-            "luminaCarousel.move",
-            "bestSellersCarousel",
-            direction
-        );
     }
 
     public void Dispose()
