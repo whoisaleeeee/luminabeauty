@@ -71,6 +71,16 @@ public class ReporteJasperRS {
     }
 
     @GET
+    @Path("rendimientoPorMarca")
+    @Produces("application/pdf")
+    public Response generarRendimientoPorMarca(
+            @QueryParam("fechaInicio") String fechaInicio,
+            @QueryParam("fechaFin") String fechaFin) {
+
+        return generarReporte("rendimiento-por-marca", fechaInicio, fechaFin);
+    }
+
+    @GET
     @Path("generar/{codigoReporte}")
     @Produces("application/pdf")
     public Response generarReportePorCodigo(
@@ -219,6 +229,17 @@ public class ReporteJasperRS {
                         "InventarioGeneral.jasper",
                         "inventario_general",
                         false
+                )
+        );
+
+        reportes.put(
+                "rendimiento-por-marca",
+                new ReporteConfig(
+                        "rendimiento-por-marca",
+                        "Rendimiento por marca",
+                        "RendimientoPorMarca.jasper",
+                        "rendimiento_por_marca",
+                        true
                 )
         );
 
