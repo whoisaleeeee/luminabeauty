@@ -327,6 +327,12 @@ public class ReclamoBLImpl implements ReclamoBL {
                 throw new Exception("El reclamo no existe.");
             }
 
+            if (reclamo.getTipo() == null || reclamo.getTipo().trim().isEmpty()) {
+                reclamo.setTipo("OTRO");
+            } else {
+                reclamo.setTipo(reclamo.getTipo().trim().toUpperCase());
+            }
+
             reclamo.setArea_asignada(areaNueva.trim());
             reclamo.setEstado("EN_PROCESO");
             reclamo.setResuelto_en(null);
