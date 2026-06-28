@@ -13,6 +13,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://
 builder.Services.AddScoped<SoluLumina.Services.IProductoService, SoluLumina.Services.ProductoService>();
 builder.Services.AddScoped<SoluLumina.Services.ICategoriaService, SoluLumina.Services.CategoriaService>();
 builder.Services.AddScoped<SoluLumina.Services.IMarcaService, SoluLumina.Services.MarcaService>();
+builder.Services.AddScoped<SoluLumina.Services.ReporteJasperService>();
 
 var app = builder.Build();
 

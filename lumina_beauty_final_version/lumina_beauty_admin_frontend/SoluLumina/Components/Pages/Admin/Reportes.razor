@@ -3,6 +3,8 @@
 @using SoluLumina.Services
 @using SoluLumina.Models
 @inject IConfiguration Configuration
+@inject ReporteJasperService ReporteJasperService
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -81,26 +83,48 @@
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Desde</label>
-                    <input type="date" class="form-control border-1 text-secondary" @bind-value="fechaDesde" @bind-value:event="onchange" />
+                    <input type="date"
+                           class="form-control border-1 text-secondary"
+                           disabled="@(!ReporteSeleccionadoRequiereFechas)"
+                           @bind-value="fechaDesde"
+                           @bind-value:event="onchange" />
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Hasta</label>
-                    <input type="date" class="form-control border-1 text-secondary" @bind-value="fechaHasta" @bind-value:event="onchange" min="@fechaDesde.ToString("yyyy-MM-dd")" />
+                    <input type="date"
+                           class="form-control border-1 text-secondary"
+                           disabled="@(!ReporteSeleccionadoRequiereFechas)"
+                           @bind-value="fechaHasta"
+                           @bind-value:event="onchange"
+                           min="@fechaDesde.ToString("yyyy-MM-dd")" />
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Tipo de Reporte</label>
-                    <select class="form-select border-1 text-secondary">
-                        <option selected>Ventas Consolidadas</option>
-                        <option value="1">Inventario General</option>
-                        <option value="2">Rendimiento por Marca</option>
+                    <select class="form-select border-1 text-secondary"
+                            @bind="codigoReporteSeleccionado">
+                        @foreach (var reporte in reportesDisponibles)
+                        {
+                            <option value="@reporte.Codigo">@reporte.Nombre</option>
+                        }
                     </select>
                 </div>
                 <div class="col-12 col-md-3">
-                    <button class="btn w-100 text-white rounded-3 shadow-sm fw-medium d-flex justify-content-center align-items-center gap-2" style="background-color: #f1aeb5; padding: 0.55rem; color: #834a5d !important;">
-                        <i class="bi bi-bar-chart-steps"></i> Generar Reporte
+                    <button class="btn w-100 text-white rounded-3 shadow-sm fw-medium d-flex justify-content-center align-items-center gap-2"
+                            style="background-color: #f1aeb5; padding: 0.55rem; color: #834a5d !important;"
+                            disabled="@generandoReporte"
+                            @onclick="GenerarReporteAsync">
+                        <i class="bi @(generandoReporte ? "bi-hourglass-split" : "bi-bar-chart-steps")"></i>
+                        @(generandoReporte ? "Generando..." : "Generar Reporte")
                     </button>
                 </div>
             </div>
+
+            @if (!string.IsNullOrWhiteSpace(mensajeReporte))
+            {
+                <div class="alert alert-warning border-0 rounded-3 mt-3 mb-0 py-2 small">
+                    @mensajeReporte
+                </div>
+            }
         </div>
 
         <!-- KPI Cards -->
@@ -326,6 +350,16 @@
     private decimal ticketPromedio = 0;
     private int totalClientes = 0;
     private List<Pedido> ventasRecientes = new();
+    private IReadOnlyList<ReporteJasperOption> reportesDisponibles = Array.Empty<ReporteJasperOption>();
+    private string codigoReporteSeleccionado = "ventas-consolidadas";
+    private bool generandoReporte = false;
+    private string mensajeReporte = "";
+
+    private ReporteJasperOption? ReporteSeleccionado =>
+        reportesDisponibles.FirstOrDefault(r => r.Codigo == codigoReporteSeleccionado);
+
+    private bool ReporteSeleccionadoRequiereFechas =>
+        ReporteSeleccionado?.RequiereFechas ?? true;
 
     // Propiedades para almacenar y validar fechas de forma reactiva
     private DateTime _fechaDesde = new DateTime(2026, 06, 01);
@@ -363,7 +397,48 @@
     protected override async Task OnInitializedAsync()
     {
         URL_BASE = Configuration["ApiSettings:URL_BASE"];
+        reportesDisponibles = ReporteJasperService.ObtenerReportes();
+        codigoReporteSeleccionado = reportesDisponibles.FirstOrDefault()?.Codigo ?? codigoReporteSeleccionado;
+
         await CargarDatos();
+    }
+
+    private async Task GenerarReporteAsync()
+    {
+        mensajeReporte = "";
+
+        if (ReporteSeleccionado == null)
+        {
+            mensajeReporte = "Seleccione un reporte valido.";
+            return;
+        }
+
+        if (ReporteSeleccionado.RequiereFechas && fechaHasta < fechaDesde)
+        {
+            mensajeReporte = "La fecha hasta no puede ser menor que la fecha desde.";
+            return;
+        }
+
+        try
+        {
+            generandoReporte = true;
+
+            string url = ReporteJasperService.ConstruirUrlGeneracion(
+                codigoReporteSeleccionado,
+                ReporteSeleccionado.RequiereFechas ? fechaDesde : null,
+                ReporteSeleccionado.RequiereFechas ? fechaHasta : null
+            );
+
+            await JS.InvokeVoidAsync("open", url, "_blank");
+        }
+        catch (Exception ex)
+        {
+            mensajeReporte = $"No se pudo generar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            generandoReporte = false;
+        }
     }
 
     private async Task CargarDatos()
