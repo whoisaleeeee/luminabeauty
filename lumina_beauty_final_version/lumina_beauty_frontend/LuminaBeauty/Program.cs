@@ -1,7 +1,7 @@
 using LuminaBeauty.Components;
 using LuminaBeauty.Services;
 using LuminaBeauty.Servicios.REST;
-using LuminaBeauty.Servicios.Modelo;
+using LuminaBeauty.Models;
 using LuminaBeauty.Services.AppServices;
 
 var builder = WebApplication.CreateBuilder(args);

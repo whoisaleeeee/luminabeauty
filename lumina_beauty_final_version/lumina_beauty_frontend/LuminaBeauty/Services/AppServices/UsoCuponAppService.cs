@@ -1,4 +1,4 @@
-﻿using LuminaBeauty.Servicios.Modelo;
+﻿using LuminaBeauty.Models;
 using LuminaBeauty.Servicios.REST;
 
 namespace LuminaBeauty.Services.AppServices

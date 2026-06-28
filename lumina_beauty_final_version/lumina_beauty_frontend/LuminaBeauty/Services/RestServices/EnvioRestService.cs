@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using LuminaBeauty.Servicios.Modelo;
+using LuminaBeauty.Models;
 
 namespace LuminaBeauty.Servicios.REST
 {

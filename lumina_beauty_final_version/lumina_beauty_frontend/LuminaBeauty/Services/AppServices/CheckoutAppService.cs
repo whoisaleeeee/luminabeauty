@@ -1,5 +1,4 @@
 ﻿using LuminaBeauty.Models;
-using LuminaBeauty.Servicios.Modelo;
 
 namespace LuminaBeauty.Services.AppServices
 {

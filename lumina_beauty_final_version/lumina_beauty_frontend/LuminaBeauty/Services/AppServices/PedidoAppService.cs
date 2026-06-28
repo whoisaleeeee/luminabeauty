@@ -1,45 +1,48 @@
-﻿using LuminaBeauty.Servicios.Modelo;
+﻿using LuminaBeauty.Models;
 using LuminaBeauty.Servicios.REST;
 
-namespace LuminaBeauty.Services.AppServices
+namespace LuminaBeauty.Services.AppServices;
+
+public class PedidoAppService
 {
-    public class PedidoAppService
+    private readonly PedidoRestService _pedidoRestService;
+
+    public PedidoAppService(PedidoRestService pedidoRestService)
     {
-        private readonly PedidoRestService _pedidoRestService;
+        _pedidoRestService = pedidoRestService;
+    }
 
-        public PedidoAppService(PedidoRestService pedidoRestService)
-        {
-            _pedidoRestService = pedidoRestService;
-        }
+    public Task<Pedido?> CrearPedidoAsync(Pedido pedido)
+    {
+        return _pedidoRestService.CrearPedidoAsync(pedido);
+    }
 
-        public async Task<Pedido?> CrearPedidoAsync(Pedido pedido)
-        {
-            return await _pedidoRestService.CrearPedidoAsync(pedido);
-        }
+    public Task<Pedido?> BuscarPedidoAsync(int idPedido)
+    {
+        return _pedidoRestService.BuscarPedidoAsync(idPedido);
+    }
 
-        public async Task<Pedido?> BuscarPedidoAsync(int idPedido)
-        {
-            return await _pedidoRestService.BuscarPedidoAsync(idPedido);
-        }
+    public Task<List<Pedido>> ListarPedidosAsync()
+    {
+        return _pedidoRestService.ListarPedidosAsync();
+    }
 
-        public async Task<List<Pedido>> ListarPedidosAsync()
-        {
-            return await _pedidoRestService.ListarPedidosAsync();
-        }
+    public Task<List<Pedido>> ListarPedidosPorClienteAsync(int idCliente)
+    {
+        return _pedidoRestService.ListarPedidosPorClienteAsync(idCliente);
+    }
 
-        public async Task<List<Pedido>> ListarPedidosPorClienteAsync(int idCliente)
-        {
-            return await _pedidoRestService.ListarPedidosPorClienteAsync(idCliente);
-        }
+    public Task<int> CancelarPedidoAsync(int idPedido)
+    {
+        return _pedidoRestService.CancelarPedidoAsync(idPedido);
+    }
 
-        public async Task<int> CancelarPedidoAsync(int idPedido)
-        {
-            return await _pedidoRestService.CancelarPedidoAsync(idPedido);
-        }
-
-        public async Task<Pedido?> ActualizarEstadoPedidoAsync(int idPedido, string estadoNuevo)
-        {
-            return await _pedidoRestService.ActualizarEstadoPedidoAsync(idPedido, estadoNuevo);
-        }
+    public Task<Pedido?> ActualizarEstadoPedidoAsync(
+        int idPedido,
+        string estadoNuevo)
+    {
+        return _pedidoRestService.ActualizarEstadoPedidoAsync(
+            idPedido,
+            estadoNuevo);
     }
 }
