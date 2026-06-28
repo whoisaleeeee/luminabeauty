@@ -127,10 +127,9 @@
 
         <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
             <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: #f7eff1 !important;">
-                <h6 class="m-0 fw-bold text-dark">Listado de Existencias</h6>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-light btn-sm text-secondary border-0 bg-transparent"><i class="bi bi-filter"></i></button>
-                    <button class="btn btn-light btn-sm text-secondary border-0 bg-transparent"><i class="bi bi-list-task"></i></button>
+                <div class="col-12 col-md-3">
+                    <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Producto</label>
+                    <input type="text" class="form-control bg-light border-1" placeholder="Nombre" @bind="filtroProducto" @bind:event="oninput" @onkeyup="BuscarAutomatico">
                 </div>
             </div>
 
@@ -337,6 +336,7 @@
     private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
     private int paginaActual = 1;
     private int prod_por_pagina = 7;
+    private string filtroProducto = "";
     private string _textoBuscar = "";
     private string textoBuscar
     {
@@ -357,6 +357,7 @@
         }
     }
 
+    private bool showFilters = false;
     private bool productoSeleccionado = false;
     private string productoElegidoNombre = "";
     private List<Producto> Productos = new List<Producto>();
@@ -388,7 +389,8 @@
         valor_total /= 1000;//en miles de soles
     }
 
-    private IEnumerable<Producto> FilteredProducts => Productos;
+    private IEnumerable<Producto> FilteredProducts => Productos
+        .Where(p => p.Nombre != null && p.Nombre.Contains(filtroProducto, StringComparison.OrdinalIgnoreCase));
     private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
 
 
@@ -469,6 +471,17 @@
 
         NuevoMovimiento = new MovimientoInventario();
         showAddEntryModal = false;
+    }
+
+    private void BuscarAutomatico()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private async void ShowFilters()
+    {
+        showFilters = !showFilters;
     }
 }
 
