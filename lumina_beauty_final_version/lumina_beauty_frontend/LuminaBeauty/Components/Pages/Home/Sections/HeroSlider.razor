@@ -2,125 +2,127 @@
 @inject NavigationManager Navigator
 @implements IDisposable
 
-<div class="relative w-full h-[420px] md:h-[520px] rounded-3xl overflow-hidden shadow-lg select-none"
+<div class="relative h-[420px] w-full overflow-hidden rounded-3xl shadow-lg select-none md:h-[520px]"
      id="hero-carousel-container">
 
-    <!-- Background image -->
-    <img src="@_slides[_currentSlideIndex].Image"
-         alt="@_slides[_currentSlideIndex].Title"
-         class="absolute inset-0 w-full h-full object-cover" />
+    <img src="@CurrentSlide.Image"
+         alt="@CurrentSlide.Title"
+         class="absolute inset-0 h-full w-full object-cover" />
 
-    <!-- Overlay para legibilidad -->
-    <div class="absolute inset-0 bg-gradient-to-r from-[#fff4f7]/78 via-[#fff4f7]/28 to-transparent"></div>
-
-    <!-- Suavizado extra -->
+    <div class="absolute inset-0 bg-gradient-to-r from-[#fff4f7]/80 via-[#fff4f7]/30 to-transparent"></div>
     <div class="absolute inset-0 bg-black/5"></div>
 
-    <!-- Decorative subtle pattern -->
-    <div class="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-10 pointer-events-none"></div>
+    <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
-    <!-- Content -->
-    <div class="relative z-10 h-full flex items-center px-6 md:px-14">
-        <div class="max-w-xl bg-[#fff8fa]/70 backdrop-blur-sm rounded-3xl p-6 md:p-10 shadow-sm">
-            <div class="inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-white/80 py-1.5 px-3.5 rounded-full w-fit mb-5 shadow-sm">
+    <div class="relative z-10 flex h-full items-center px-6 md:px-14">
+        <div class="max-w-xl rounded-3xl bg-[#fff8fa]/70 p-6 shadow-sm backdrop-blur-sm md:p-10">
+            <div class="mb-5 inline-flex w-fit items-center gap-1.5 rounded-full border border-white/80 bg-white/80 px-3.5 py-1.5 shadow-sm backdrop-blur-md">
                 <span class="text-xs text-[#FF76A5]">✨</span>
-                <span class="text-[10px] font-bold tracking-widest text-[#C7346A] uppercase">
-                    @_slides[_currentSlideIndex].HighPromo
+
+                <span class="text-[10px] font-bold uppercase tracking-widest text-[#C7346A]">
+                    @CurrentSlide.HighPromo
                 </span>
             </div>
 
-            <h2 class="font-serif text-4xl md:text-6xl font-light text-[#111827] tracking-tight leading-[1.05] mb-5">
-                @_slides[_currentSlideIndex].Title
+            <h2 class="mb-5 font-serif text-4xl font-light leading-[1.05] tracking-tight text-[#111827] md:text-6xl">
+                @CurrentSlide.Title
             </h2>
 
-            <p class="text-sm md:text-base text-gray-700 max-w-md leading-relaxed mb-7">
-                @_slides[_currentSlideIndex].Subtitle
+            <p class="mb-7 max-w-md text-sm leading-relaxed text-gray-700 md:text-base">
+                @CurrentSlide.Subtitle
             </p>
 
             <button @onclick="ExploreClicked"
-                    class="w-fit bg-gray-900 hover:bg-[#FF76A5] hover:shadow-lg hover:shadow-pink-100 font-bold uppercase tracking-wider text-[10px] text-white px-8 py-4 rounded-xl transition-all duration-300 cursor-pointer hover:-translate-y-0.5">
-                @_slides[_currentSlideIndex].CtaText
+                    class="w-fit cursor-pointer rounded-xl bg-gray-900 px-8 py-4 text-[10px] font-bold uppercase tracking-wider text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FF76A5] hover:shadow-lg hover:shadow-pink-100">
+                @CurrentSlide.CtaText
             </button>
         </div>
     </div>
-<!-- Manual Arrow buttons -->
-<div class="absolute bottom-5 right-6 flex gap-3 z-20 select-none">
-    <button @onclick="PrevSlide"
-            aria-label="Slide anterior"
-            class="w-11 h-11 rounded-full bg-white/90 hover:bg-[#FF76A5] text-[#344054] hover:text-white border border-white/80 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center cursor-pointer hover:-translate-y-0.5">
-        <span class="text-lg leading-none">←</span>
-    </button>
 
-    <button @onclick="NextSlide"
-            aria-label="Siguiente slide"
-            class="w-11 h-11 rounded-full bg-white/90 hover:bg-[#FF76A5] text-[#344054] hover:text-white border border-white/80 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center cursor-pointer hover:-translate-y-0.5">
-        <span class="text-lg leading-none">→</span>
-    </button>
-</div>
+    <div class="absolute bottom-5 right-6 z-20 flex gap-3 select-none">
+        <button @onclick="PrevSlide"
+                aria-label="Slide anterior"
+                class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-[#344054] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FF76A5] hover:text-white hover:shadow-md">
+            <span class="text-lg leading-none">←</span>
+        </button>
 
-    <!-- Dots Indicators -->
-    <div class="absolute bottom-6 left-6 md:left-12 flex gap-1.5 z-20 select-none">
-        @for (int i = 0; i < _slides.Count; i++)
-        {
-          var idx = i;
-          <button @onclick="() => SetSlide(idx)"
-                  class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer @(idx == _currentSlideIndex ? "bg-[#FF76A5] w-6" : "bg-[#d6cbd0] hover:bg-[#bfaab2]")" />
-        }
+        <button @onclick="NextSlide"
+                aria-label="Siguiente slide"
+                class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-[#344054] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FF76A5] hover:text-white hover:shadow-md">
+            <span class="text-lg leading-none">→</span>
+        </button>
     </div>
 
+    <div class="absolute bottom-6 left-6 z-20 flex gap-1.5 select-none md:left-12">
+        @for (int i = 0; i < _slides.Count; i++)
+        {
+            var index = i;
+
+            <button @onclick="() => SetSlide(index)"
+                    aria-label="Ir al slide @(index + 1)"
+                    class="h-2.5 rounded-full transition-all duration-300 cursor-pointer @(index == _currentSlideIndex
+                                            ? "w-6 bg-[#FF76A5]"
+                                            : "w-2.5 bg-[#d6cbd0] hover:bg-[#bfaab2]")">
+    </button>
+}
+</div>
 </div>
 
 @code {
+    private const string BackendImagesBaseUrl =
+        "http://localhost:8080/LuminaBeauty-Servicios/images/banners";
+
     private int _currentSlideIndex;
     private System.Threading.Timer? _timer;
 
-    public class SlideItem
+    private SlideItem CurrentSlide => _slides[_currentSlideIndex];
+
+    private sealed class SlideItem
     {
-        public string Title { get; set; } = string.Empty;
-        public string Subtitle { get; set; } = string.Empty;
-        public string CtaText { get; set; } = string.Empty;
-        public string Image { get; set; } = string.Empty;
-        public string ColorTheme { get; set; } = string.Empty;
-        public string HighPromo { get; set; } = string.Empty;
+        public string HighPromo { get; init; } = string.Empty;
+        public string Title { get; init; } = string.Empty;
+        public string Subtitle { get; init; } = string.Empty;
+        public string CtaText { get; init; } = string.Empty;
+        public string Image { get; init; } = string.Empty;
+        public string Category { get; init; } = string.Empty;
     }
 
-    private readonly List<SlideItem> _slides = new()
-    {
-        new SlideItem
+    private readonly List<SlideItem> _slides =
+    [
+        new()
         {
-            HighPromo = "HASTA 20% EN LABIALES",
+            HighPromo = "HASTA 20% EN MAQUILLAJE",
             Title = "Brilla con tu mejor versión",
-            Subtitle = "Descubre labiales, maquillaje y productos de belleza que realzan tu estilo cada día.",
-            CtaText = "Comprar ahora",
-            Image = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=1500",
-            ColorTheme = "from-[#ffe8eb] via-[#fffbfb] to-[#fec8d1]/30"
+            Subtitle = "Labiales, bases y esenciales de maquillaje para acompañar tu estilo cada día.",
+            CtaText = "Explorar maquillaje",
+            Image = $"{BackendImagesBaseUrl}/banner-maquillaje.jpg",
+            Category = "Maquillaje"
         },
-        new SlideItem
+        new()
         {
             HighPromo = "SECRETOS DE RADIANCIA K-BEAUTY",
             Title = "Descubre el secreto del efecto glass",
-            Subtitle = "La rutina viral de extractos botánicos que calma, regenera y deja tu piel luminosa.",
+            Subtitle = "Rutinas inspiradas en Corea con activos que hidratan, calman y aportan luminosidad.",
             CtaText = "Explorar K-Beauty",
-            Image = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=1500",
-            ColorTheme = "from-[#fdf8f5] via-[#ffe8eb] to-[#fcf5f0]"
+            Image = $"{BackendImagesBaseUrl}/banner-kbeauty.jpg",
+            Category = "K-Beauty"
         },
-        new SlideItem
+        new()
         {
-            HighPromo = "FRAGANCIAS DE LUJO",
-            Title = "Sensualidad floral y oud misterioso",
-            Subtitle = "Esencias premium para dejar una impresión inolvidable.",
-            CtaText = "Ver fragancias",
-            Image = "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=1500",
-            ColorTheme = "from-[#ffe8eb] via-[#fffbfb] to-[#fec8d1]/20"
+            HighPromo = "CUIDADO ESENCIAL PARA TU PIEL",
+            Title = "Tu rutina empieza aquí",
+            Subtitle = "Limpieza, hidratación y tratamiento para cuidar tu piel todos los días.",
+            CtaText = "Explorar skincare",
+            Image = $"{BackendImagesBaseUrl}/banner-skincare.jpg",
+            Category = "Skincare"
         }
-    };
+    ];
 
     protected override void OnInitialized()
     {
         LangService.OnChange += StateHasChanged;
-        
-        // Setup slider autoplay
-        _timer = new System.Threading.Timer((_) =>
+
+        _timer = new System.Threading.Timer(_ =>
         {
             InvokeAsync(() =>
             {
@@ -132,7 +134,8 @@
 
     private void PrevSlide()
     {
-        _currentSlideIndex = (_currentSlideIndex - 1 + _slides.Count) % _slides.Count;
+        _currentSlideIndex =
+            (_currentSlideIndex - 1 + _slides.Count) % _slides.Count;
     }
 
     private void NextSlide()
@@ -140,11 +143,15 @@
         _currentSlideIndex = (_currentSlideIndex + 1) % _slides.Count;
     }
 
-    private void SetSlide(int index) => _currentSlideIndex = index;
+    private void SetSlide(int index)
+    {
+        _currentSlideIndex = index;
+    }
 
     private void ExploreClicked()
     {
-        Navigator.NavigateTo($"/category/{Uri.EscapeDataString("Makeup")}");
+        Navigator.NavigateTo(
+            $"/shop?category={Uri.EscapeDataString(CurrentSlide.Category)}");
     }
 
     public void Dispose()
