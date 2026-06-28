@@ -170,6 +170,21 @@ public class ReclamoRS {
     }
 
     @PUT
+    @Path("asignarArea/{idReclamo}/{areaNueva}")
+    public Reclamo asignarAreaReclamo(@PathParam("idReclamo") int idReclamo,
+                                      @PathParam("areaNueva") String areaNueva) {
+        Reclamo resultado = null;
+
+        try {
+            resultado = reclamoBL.asignarArea(idReclamo, areaNueva);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+
+        return resultado;
+    }
+
+    @PUT
     @Path("cambiarPrioridad/{idReclamo}/{prioridadNueva}")
     public Reclamo cambiarPrioridadReclamo(@PathParam("idReclamo") int idReclamo,
                                            @PathParam("prioridadNueva") String prioridadNueva) {

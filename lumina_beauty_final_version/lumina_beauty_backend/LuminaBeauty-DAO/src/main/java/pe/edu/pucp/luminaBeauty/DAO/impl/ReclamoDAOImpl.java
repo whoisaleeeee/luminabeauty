@@ -24,9 +24,10 @@ public class ReclamoDAOImpl implements ReclamoDAO {
                     descripcion,
                     estado,
                     prioridad,
+                    area_asignada,
                     resuelto_en
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         Connection connection = TransactionContext.getConnection();
@@ -52,11 +53,12 @@ public class ReclamoDAOImpl implements ReclamoDAO {
             stmt.setString(6, reclamo.getDescripcion());
             stmt.setString(7, reclamo.getEstado());
             stmt.setString(8, reclamo.getPrioridad());
+            stmt.setString(9, reclamo.getArea_asignada() != null ? reclamo.getArea_asignada() : "");
 
             if (reclamo.getResuelto_en() != null) {
-                stmt.setTimestamp(9, Timestamp.valueOf(reclamo.getResuelto_en()));
+                stmt.setTimestamp(10, Timestamp.valueOf(reclamo.getResuelto_en()));
             } else {
-                stmt.setNull(9, Types.TIMESTAMP);
+                stmt.setNull(10, Types.TIMESTAMP);
             }
 
             stmt.executeUpdate();
@@ -110,6 +112,7 @@ public class ReclamoDAOImpl implements ReclamoDAO {
                        descripcion,
                        estado,
                        prioridad,
+                       area_asignada,
                        resuelto_en,
                        creado_en,
                        actualizado_en
@@ -148,6 +151,7 @@ public class ReclamoDAOImpl implements ReclamoDAO {
                     descripcion = ?,
                     estado = ?,
                     prioridad = ?,
+                    area_asignada = ?,
                     resuelto_en = ?
                 WHERE id_reclamo = ?
                 """;
@@ -175,14 +179,15 @@ public class ReclamoDAOImpl implements ReclamoDAO {
             stmt.setString(6, reclamo.getDescripcion());
             stmt.setString(7, reclamo.getEstado());
             stmt.setString(8, reclamo.getPrioridad());
+            stmt.setString(9, reclamo.getArea_asignada() != null ? reclamo.getArea_asignada() : "");
 
             if (reclamo.getResuelto_en() != null) {
-                stmt.setTimestamp(9, Timestamp.valueOf(reclamo.getResuelto_en()));
+                stmt.setTimestamp(10, Timestamp.valueOf(reclamo.getResuelto_en()));
             } else {
-                stmt.setNull(9, Types.TIMESTAMP);
+                stmt.setNull(10, Types.TIMESTAMP);
             }
 
-            stmt.setInt(10, reclamo.getId_reclamo());
+            stmt.setInt(11, reclamo.getId_reclamo());
 
             int filas = stmt.executeUpdate();
 
@@ -211,6 +216,7 @@ public class ReclamoDAOImpl implements ReclamoDAO {
                        descripcion,
                        estado,
                        prioridad,
+                       area_asignada,
                        resuelto_en,
                        creado_en,
                        actualizado_en
@@ -242,6 +248,7 @@ public class ReclamoDAOImpl implements ReclamoDAO {
         reclamo.setDescripcion(rs.getString("descripcion"));
         reclamo.setEstado(rs.getString("estado"));
         reclamo.setPrioridad(rs.getString("prioridad"));
+        reclamo.setArea_asignada(rs.getString("area_asignada") != null ? rs.getString("area_asignada") : "");
 
         Cliente cliente = new Cliente();
         cliente.setId_usuario(rs.getInt("id_cliente"));

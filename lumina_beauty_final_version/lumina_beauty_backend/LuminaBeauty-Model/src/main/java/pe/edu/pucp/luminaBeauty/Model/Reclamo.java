@@ -10,6 +10,7 @@ public class Reclamo {
     private String descripcion;
     private String estado;
     private String prioridad;
+    private String area_asignada;
     private LocalDateTime resuelto_en;
     private LocalDateTime fecha_creacion;
     private LocalDateTime fecha_actualizacion;
@@ -21,6 +22,7 @@ public class Reclamo {
     public Reclamo() {
         this.estado = "ABIERTO";
         this.prioridad = "MEDIA";
+        this.area_asignada = "";
     }
 
     public int getId_reclamo() {
@@ -69,6 +71,14 @@ public class Reclamo {
 
     public void setPrioridad(String prioridad) {
         this.prioridad = prioridad;
+    }
+
+    public String getArea_asignada() {
+        return area_asignada;
+    }
+
+    public void setArea_asignada(String area_asignada) {
+        this.area_asignada = area_asignada;
     }
 
     public LocalDateTime getResuelto_en() {

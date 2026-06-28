@@ -151,7 +151,7 @@
                                 </td>
                                 <td>
                                     <span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(r.Estado); color: @GetEstadoTextColor(r.Estado); padding: 0.4em 0.8em; border: 1px solid @GetEstadoBorderColor(r.Estado)">
-                                        @r.Estado
+                                        @GetEstadoLabel(r.Estado)
                                     </span>
                                 </td>
                                 <td class="py-3 px-4 text-end">
@@ -224,7 +224,7 @@
                         <div class="mb-4 position-relative">
                             <div class="d-flex align-items-center justify-content-between mb-2">
                                 <span class="fw-bold text-dark"><i class="bi bi-1-circle-fill text-danger me-2"></i> Paso 1: Asignar a Área Encargada</span>
-                                @if(reclamoSeleccionado.Estado != "ABIERTO")
+                                @if(!string.IsNullOrEmpty(reclamoSeleccionado.AreaAsignada) || reclamoSeleccionado.Estado != "ABIERTO")
                                 {
                                     <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i> Asignado</span>
                                 }
@@ -408,15 +408,29 @@
         {
             try
             {
+                var idReclamo = reclamoSeleccionado.Id_reclamo;
+                var areaAsignada = areaTemp;
+
+                // Nuevo endpoint que guarda área + cambia estado EN_PROCESO de forma atómica
                 await new HttpClientUtils<Reclamo>().put(
-                    URL_BASE + $"/ReclamoRS/cambiarEstado/{reclamoSeleccionado.Id_reclamo}/EN_PROCESO",
+                    URL_BASE + $"/ReclamoRS/asignarArea/{idReclamo}/{Uri.EscapeDataString(areaAsignada)}",
                     new object()
                 );
 
-                reclamoSeleccionado.AreaAsignada = areaTemp;
+                // Actualizar localmente
+                reclamoSeleccionado.AreaAsignada = areaAsignada;
                 reclamoSeleccionado.Estado = "EN_PROCESO";
-                MostrarToast($"Reclamo asignado a {areaTemp}", "#fd7e14");
+
+                MostrarToast($"Reclamo asignado a {areaAsignada}", "#fd7e14");
+
                 await CargarDatos();
+
+                // Re-apuntar reclamoSeleccionado al objeto recargado de la lista
+                var reclamoCargado = listaReclamos.FirstOrDefault(r => r.Id_reclamo == idReclamo);
+                if (reclamoCargado != null)
+                {
+                    reclamoSeleccionado = reclamoCargado;
+                }
             }
             catch (Exception ex)
             {
@@ -431,14 +445,24 @@
         {
             try
             {
+                var idReclamo = reclamoSeleccionado.Id_reclamo;
+
                 await new HttpClientUtils<Reclamo>().put(
-                    URL_BASE + $"/ReclamoRS/cambiarEstado/{reclamoSeleccionado.Id_reclamo}/RESUELTO",
+                    URL_BASE + $"/ReclamoRS/cambiarEstado/{idReclamo}/RESUELTO",
                     new object()
                 );
 
                 reclamoSeleccionado.Estado = "RESUELTO";
                 MostrarToast("Reclamo marcado como Atendido exitosamente", "#198754");
+
                 await CargarDatos();
+
+                // Re-apuntar reclamoSeleccionado al objeto recargado (ya trae area_asignada del backend)
+                var reclamoCargado = listaReclamos.FirstOrDefault(r => r.Id_reclamo == idReclamo);
+                if (reclamoCargado != null)
+                {
+                    reclamoSeleccionado = reclamoCargado;
+                }
             }
             catch (Exception ex)
             {
@@ -455,6 +479,20 @@
         await Task.Delay(3000);
         mensajeToast = string.Empty;
         StateHasChanged();
+    }
+
+    private string GetEstadoLabel(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "SIN ESTADO";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "ABIERTO",
+            "EN_PROCESO" => "EN PROCESO",
+            "EN_REVISION" => "EN REVISIÓN",
+            "RESUELTO" => "RESUELTO",
+            "CERRADO" => "CERRADO",
+            _ => estado
+        };
     }
 
     private string GetEstadoBgColor(string estado)
@@ -525,7 +563,7 @@
         [JsonProperty("pedido")]
         public Pedido? Pedido { get; set; }
 
-        [JsonIgnore]
+        [JsonProperty("area_asignada")]
         public string AreaAsignada { get; set; } = string.Empty;
 
         public string IdStr => $"#REC-{Id_reclamo}";

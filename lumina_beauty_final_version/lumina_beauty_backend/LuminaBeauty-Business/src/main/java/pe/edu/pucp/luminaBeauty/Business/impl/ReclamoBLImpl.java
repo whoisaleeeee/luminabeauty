@@ -311,6 +311,40 @@ public class ReclamoBLImpl implements ReclamoBL {
     }
 
     @Override
+    public Reclamo asignarArea(int idReclamo, String areaNueva) throws Exception {
+        try {
+            if (idReclamo <= 0) {
+                throw new Exception("El ID del reclamo no es válido.");
+            }
+
+            if (areaNueva == null || areaNueva.trim().isEmpty()) {
+                throw new Exception("El área asignada es obligatoria.");
+            }
+
+            Reclamo reclamo = reclamoDAO.buscarPorId(idReclamo);
+
+            if (reclamo == null) {
+                throw new Exception("El reclamo no existe.");
+            }
+
+            reclamo.setArea_asignada(areaNueva.trim());
+            reclamo.setEstado("EN_PROCESO");
+            reclamo.setResuelto_en(null);
+
+            Reclamo reclamoActualizado = reclamoDAO.actualizar(reclamo);
+            TransactionContext.commit();
+
+            return reclamoActualizado;
+
+        } catch (Exception ex) {
+            TransactionContext.rollback();
+            throw new Exception("Error al asignar área del reclamo: " + ex.getMessage(), ex);
+        } finally {
+            TransactionContext.close();
+        }
+    }
+
+    @Override
     public Reclamo cambiarPrioridadReclamo(int idReclamo, String prioridadNueva) throws Exception {
         try {
             if (idReclamo <= 0) {

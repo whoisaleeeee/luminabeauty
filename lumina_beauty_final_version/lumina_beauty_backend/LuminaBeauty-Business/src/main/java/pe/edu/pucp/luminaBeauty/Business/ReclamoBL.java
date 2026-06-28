@@ -26,5 +26,7 @@ public interface ReclamoBL {
 
     Reclamo cambiarEstadoReclamo(int idReclamo, String estadoNuevo) throws Exception;
 
+    Reclamo asignarArea(int idReclamo, String areaNueva) throws Exception;
+
     Reclamo cambiarPrioridadReclamo(int idReclamo, String prioridadNueva) throws Exception;
 }
