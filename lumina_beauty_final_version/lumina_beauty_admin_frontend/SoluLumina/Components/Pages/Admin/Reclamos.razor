@@ -411,9 +411,9 @@
                 var idReclamo = reclamoSeleccionado.Id_reclamo;
                 var areaAsignada = areaTemp;
 
-                // Nuevo endpoint que guarda área + cambia estado EN_PROCESO de forma atómica
+                // Nuevo endpoint que guarda área + cambia estado EN_PROCESO usando query parameters
                 await new HttpClientUtils<Reclamo>().put(
-                    URL_BASE + $"/ReclamoRS/asignarArea/{idReclamo}/{Uri.EscapeDataString(areaAsignada)}",
+                    URL_BASE + $"/ReclamoRS/asignarArea/{idReclamo}?area={Uri.EscapeDataString(areaAsignada)}",
                     new object()
                 );
 

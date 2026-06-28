@@ -170,9 +170,9 @@ public class ReclamoRS {
     }
 
     @PUT
-    @Path("asignarArea/{idReclamo}/{areaNueva}")
+    @Path("asignarArea/{idReclamo}")
     public Reclamo asignarAreaReclamo(@PathParam("idReclamo") int idReclamo,
-                                      @PathParam("areaNueva") String areaNueva) {
+                                      @jakarta.ws.rs.QueryParam("area") String areaNueva) {
         Reclamo resultado = null;
 
         try {
