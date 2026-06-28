@@ -35,49 +35,82 @@
         var pagedProducts = ShopApp.GetPagedProducts();
         var totalPages = ShopApp.GetTotalPages();
 
-        <section class="rounded-[2rem] border border-white/70 bg-white/70 p-6 shadow-md backdrop-blur-md sm:p-8">
-
-            <div>
-                <p class="mb-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
-                    Categorías
-                </p>
-
-                <div class="flex gap-2 overflow-x-auto pb-2">
-                    <button @onclick="() => ShopApp.SelectCategory(null)"
-                            class="shrink-0 rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider transition cursor-pointer @(string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
-                                                            ? "bg-stone-950 text-white"
-                                                            : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
-                        Todos
-                        <span class="ml-1 text-[9px] opacity-70">
-                            (@ShopApp.State.AllProducts.Count)
-                        </span>
-                    </button>
-
-                    @foreach (var category in ShopApp.State.Categories)
-                    {
-                        var isActive = ShopApp.State.ActiveCategory?.Equals(
-                            category.Name,
-                            StringComparison.OrdinalIgnoreCase
-                        ) == true;
-
-                        <button @onclick="() => ShopApp.SelectCategory(category.Name)"
-                                class="shrink-0 rounded-xl px-4 py-2.5 text-[10px] font-bold uppercase tracking-wider transition cursor-pointer @(isActive
-                                                                    ? "bg-stone-950 text-white"
-                                                                    : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
-                            @category.Name
-                            <span class="ml-1 text-[9px] opacity-70">
-                                (@category.ProductCount)
-                            </span>
-                        </button>
-                    }
-                </div>
-            </div>
-        </section>
-
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-4">
 
             <aside class="lg:col-span-1">
                 <div class="space-y-6 rounded-3xl border border-[#FCD1DB]/45 bg-white/75 p-5 shadow-sm backdrop-blur-md lg:sticky lg:top-24">
+
+                    <div class="border-b border-stone-100 pb-5">
+                        <div class="mb-4 flex items-center justify-between">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-stone-800">
+                                Categorías
+                            </p>
+
+                            <span class="text-xs text-stone-400">⌄</span>
+                        </div>
+
+                        <div class="max-h-56 space-y-1 overflow-y-auto pr-1">
+                            <button @onclick="() => ShopApp.SelectCategory(null)"
+                                    class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition @(string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
+                                                                            ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                            : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
+
+                                <span>Todos los productos</span>
+
+                                <span class="flex items-center gap-2 text-[10px] font-bold">
+                                    <span class="text-stone-400">
+                                        @ShopApp.State.AllProducts.Count
+                                    </span>
+
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                         viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="2"
+                                         class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5">
+                                        <path stroke-linecap="round"
+                                              stroke-linejoin="round"
+                                              d="m9 18 6-6-6-6" />
+                                    </svg>
+                                </span>
+                            </button>
+
+                            @foreach (var category in ShopApp.State.Categories)
+                            {
+                                var isActive = ShopApp.State.ActiveCategory?.Equals(
+                                    category.Name,
+                                    StringComparison.OrdinalIgnoreCase
+                                ) == true;
+
+                                <button @onclick="() => ShopApp.SelectCategory(category.Name)"
+                                        class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-semibold transition @(isActive
+                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                    : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
+
+                                    <span class="truncate">
+                                        @category.Name
+                                    </span>
+
+                                    <span class="ml-3 flex shrink-0 items-center gap-2 text-[10px] font-bold">
+                                        <span class="text-stone-400">
+                                            @category.ProductCount
+                                        </span>
+
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             viewBox="0 0 24 24"
+                                             fill="none"
+                                             stroke="currentColor"
+                                             stroke-width="2"
+                                             class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5">
+                                            <path stroke-linecap="round"
+                                                  stroke-linejoin="round"
+                                                  d="m9 18 6-6-6-6" />
+                                        </svg>
+                                    </span>
+                                </button>
+                            }
+                        </div>
+                    </div>
 
                     <div class="flex items-center justify-between border-b border-stone-100 pb-3">
                         <p class="text-[10px] font-black uppercase tracking-widest text-stone-800">
@@ -85,7 +118,7 @@
                         </p>
 
                         <button @onclick="ShopApp.ResetFilters"
-                                class="text-[10px] font-bold uppercase tracking-wider text-[#C7346A] transition hover:text-[#FF76A5] cursor-pointer">
+                                class="cursor-pointer text-[10px] font-bold uppercase tracking-wider text-[#C7346A] transition hover:text-[#FF76A5]">
                             Limpiar
                         </button>
                     </div>
@@ -148,7 +181,7 @@
                             var isSelected = ShopApp.State.MinimumRating == currentRating;
 
                             <button @onclick="() => ShopApp.ToggleMinimumRating(currentRating)"
-                                    class="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold transition cursor-pointer @(isSelected
+                                    class="flex w-full cursor-pointer items-center gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold transition @(isSelected
                                                                             ? "bg-[#FFF0F3] text-[#C7346A]"
                                                                             : "text-stone-600 hover:bg-stone-50")">
 
@@ -203,7 +236,7 @@
                         </p>
 
                         <button @onclick="ShopApp.ResetFilters"
-                                class="mt-5 rounded-xl bg-stone-950 px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-[#C7346A] cursor-pointer">
+                                class="mt-5 cursor-pointer rounded-xl bg-stone-950 px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white transition hover:bg-[#C7346A]">
                             Restaurar filtros
                         </button>
                     </div>
@@ -218,38 +251,37 @@
                     </div>
 
                     @if (totalPages > 1)
-{
-    <div class="flex flex-wrap items-center justify-center gap-2 pt-3">
+                    {
+                        <div class="flex flex-wrap items-center justify-center gap-2 pt-3">
                             <button @onclick="() => ShopApp.GoToPage(ShopApp.State.CurrentPage - 1)"
                                     disabled="@(ShopApp.State.CurrentPage == 1)"
-                class="rounded-xl border border-stone-200 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">
-            Anterior
-        </button>
+                                    class="cursor-pointer rounded-xl border border-stone-200 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-40">
+                                Anterior
+                            </button>
 
-        @for (int page = 1; page <= totalPages; page++)
-        {
-            var currentPage = page;
+                            @for (int page = 1; page <= totalPages; page++)
+                            {
+                                var currentPage = page;
                                 var isCurrent = ShopApp.State.CurrentPage == currentPage;
 
                                 <button @onclick="() => ShopApp.GoToPage(currentPage)"
-                    class="h-9 min-w-9 rounded-xl px-3 text-[10px] font-bold transition cursor-pointer @(isCurrent
-                        ? "bg-stone-950 text-white"
-                        : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
-                @currentPage
-            </button>
-        }
+                                        class="h-9 min-w-9 cursor-pointer rounded-xl px-3 text-[10px] font-bold transition @(isCurrent
+                                                                                    ? "bg-stone-950 text-white"
+                                                                                    : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                            @currentPage
+                        </button>
+                    }
 
                     <button @onclick="() => ShopApp.GoToPage(ShopApp.State.CurrentPage + 1)"
                             disabled="@(ShopApp.State.CurrentPage == totalPages)"
-                class="rounded-xl border border-stone-200 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer">
-            Siguiente
-        </button>
-    </div>
-}
-
-                }
-            </section>
-        </div>
+                            class="cursor-pointer rounded-xl border border-stone-200 bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-40">
+                        Siguiente
+                    </button>
+                </div>
+            }
+        }
+    </section>
+</div>
     }
 </div>
 
@@ -258,11 +290,6 @@
     {
         LangService.OnChange += StateHasChanged;
         await ShopApp.InitializeAsync();
-    }
-
-    private void GoHome()
-    {
-        Navigator.NavigateTo("/");
     }
 
     public void Dispose()
