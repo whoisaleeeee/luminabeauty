@@ -1,5 +1,8 @@
 @page "/Reportes"
 @using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@using SoluLumina.Models
+@inject IConfiguration Configuration
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -70,9 +73,6 @@
                 <button class="btn bg-white border border-danger text-danger px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" style="font-size: 0.9rem;">
                     <i class="bi bi-file-earmark-pdf"></i> PDF
                 </button>
-                <button class="btn bg-white border border-success text-success px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" style="font-size: 0.9rem;">
-                    <i class="bi bi-file-earmark-excel"></i> Excel
-                </button>
             </div>
         </div>
 
@@ -81,11 +81,11 @@
             <div class="row g-3 align-items-end">
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Desde</label>
-                    <input type="date" class="form-control border-1 text-secondary" value="2023-10-01">
+                    <input type="date" class="form-control border-1 text-secondary" @bind-value="fechaDesde" @bind-value:event="onchange" />
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Hasta</label>
-                    <input type="date" class="form-control border-1 text-secondary" value="2023-10-31">
+                    <input type="date" class="form-control border-1 text-secondary" @bind-value="fechaHasta" @bind-value:event="onchange" min="@fechaDesde.ToString("yyyy-MM-dd")" />
                 </div>
                 <div class="col-12 col-md-3">
                     <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.75rem;">Tipo de Reporte</label>
@@ -109,7 +109,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-cash-stack position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ventas totales</small>
-                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ 28,450</h2>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @totalVentas.ToString("N2")</h2>
                     <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +12.5% vs mes ant.</small>
                 </div>
             </div>
@@ -118,7 +118,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-cart3 position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Pedidos</small>
-                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">312</h2>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@totalPedidos</h2>
                     <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +5.2% vs mes ant.</small>
                 </div>
             </div>
@@ -127,7 +127,7 @@
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-ticket-detailed position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
                     <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ticket promedio</small>
-                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ 91.20</h2>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @ticketPromedio.ToString("N2")</h2>
                     <small class="fw-semibold text-secondary d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-dash"></i> Estable</small>
                 </div>
             </div>
@@ -135,8 +135,8 @@
             <div class="col-12 col-sm-6 col-xl-3">
                 <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
                     <i class="bi bi-person-plus position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
-                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Clientes nuevos</small>
-                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">87</h2>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Clientes activos</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@totalClientes</h2>
                     <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +22.1% vs mes ant.</small>
                 </div>
             </div>
@@ -275,36 +275,31 @@
                         </tr>
                     </thead>
                     <tbody style="font-size: 0.85rem; color: #4f4f4f;">
-                        <!-- Fila 1 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 font-monospace text-muted">#ORD-2023-901</td>
-                            <td class="fw-medium text-dark">Lucía Fernández</td>
-                            <td class="fw-bold text-dark">S/ 245.00</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">Completado</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Fila 2 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 font-monospace text-muted">#ORD-2023-902</td>
-                            <td class="fw-medium text-dark">Mateo Rossi</td>
-                            <td class="fw-bold text-dark">S/ 120.50</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.4em 0.8em;">Completado</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></button>
-                            </td>
-                        </tr>
-                        <!-- Fila 3 -->
-                        <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                            <td class="py-3 px-4 font-monospace text-muted">#ORD-2023-903</td>
-                            <td class="fw-medium text-dark">Valentina Soto</td>
-                            <td class="fw-bold text-dark">S/ 430.00</td>
-                            <td><span class="badge rounded-pill fw-medium" style="background-color: #fdf5f5; color: #d9557b; padding: 0.4em 0.8em;">Procesando</span></td>
-                            <td class="py-3 px-4 text-end">
-                                <button class="btn btn-sm btn-light text-secondary rounded-circle" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></button>
-                            </td>
-                        </tr>
+                        @if (ventasRecientes != null && ventasRecientes.Any())
+                        {
+                            @foreach (var p in ventasRecientes.Take(5))
+                            {
+                                <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                                    <td class="py-3 px-4 font-monospace text-muted">#ORD-@p.Id_pedido</td>
+                                    <td class="fw-medium text-dark">@(p.Cliente != null ? $"{p.Cliente.Nombres} {p.Cliente.Apellidos}" : "Sin Cliente")</td>
+                                    <td class="fw-bold text-dark">S/ @p.Total.ToString("N2")</td>
+                                    <td>
+                                        <span class="badge rounded-pill fw-medium" style="background-color: @(p.Estado == "COMPLETADO" ? "#e2f3eb" : "#fdf5f5"); color: @(p.Estado == "COMPLETADO" ? "#198754" : "#d9557b"); padding: 0.4em 0.8em;">
+                                            @p.Estado
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-end">
+                                        <a href="/Pedidos" class="btn btn-sm btn-light text-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted fst-italic">No hay ventas registradas</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
@@ -324,9 +319,90 @@
 
 @code {
     private bool showProfileDropdown = false;
+    private string URL_BASE = "";
+    
+    private decimal totalVentas = 0;
+    private int totalPedidos = 0;
+    private decimal ticketPromedio = 0;
+    private int totalClientes = 0;
+    private List<Pedido> ventasRecientes = new();
+
+    // Propiedades para almacenar y validar fechas de forma reactiva
+    private DateTime _fechaDesde = new DateTime(2026, 06, 01);
+    private DateTime fechaDesde
+    {
+        get => _fechaDesde;
+        set
+        {
+            _fechaDesde = value;
+            if (fechaHasta < _fechaDesde)
+            {
+                fechaHasta = _fechaDesde;
+            }
+        }
+    }
+
+    private DateTime _fechaHasta = DateTime.Today;
+    private DateTime fechaHasta
+    {
+        get => _fechaHasta;
+        set
+        {
+            if (value >= fechaDesde)
+            {
+                _fechaHasta = value;
+            }
+        }
+    }
+
     private void ToggleProfileDropdown()
     {
         showProfileDropdown = !showProfileDropdown;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        URL_BASE = Configuration["ApiSettings:URL_BASE"];
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            // Cargar KPIs
+            totalVentas = await new HttpClientUtils<decimal>().get(URL_BASE + "/ReporteRS/totalVentasCompletadas");
+            
+            var pedidosCompletados = await new HttpClientUtils<int>().get(URL_BASE + "/ReporteRS/contarPedidosPorEstado/COMPLETADO");
+            var pedidosPendientes = await new HttpClientUtils<int>().get(URL_BASE + "/ReporteRS/contarPedidosPorEstado/PENDIENTE");
+            totalPedidos = pedidosCompletados + pedidosPendientes;
+
+            if (totalPedidos > 0)
+            {
+                ticketPromedio = totalVentas / totalPedidos;
+            }
+            
+            totalClientes = await new HttpClientUtils<int>().get(URL_BASE + "/ReporteRS/contarClientesActivos");
+
+            // Cargar Pedidos Recientes
+            var clientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar") ?? new List<Cliente>();
+            var pedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar") ?? new List<Pedido>();
+
+            foreach (var p in pedidos)
+            {
+                if (p.Cliente != null)
+                {
+                    p.Cliente = clientes.FirstOrDefault(c => c.Id_usuario == p.Cliente.Id_usuario);
+                }
+            }
+
+            // Ordenar por ID descendente para mostrar las más recientes
+            ventasRecientes = pedidos.OrderByDescending(p => p.Id_pedido).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar datos de reportes: {ex.Message}");
+        }
     }
 }
 
