@@ -48,33 +48,56 @@
                 @p.Name
               </h2>
 
-              <!-- Rating stars -->
-              <div class="flex items-center gap-1.5 mb-5 select-none">
-                <div class="flex text-amber-400">
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        var s = i;
-                        <span class="text-sm">
-                            <span class="@(s <= Math.Round(p.Rating) ? "text-amber-400" : "text-gray-300")">★</span>
-                        </span>
-                    }
-                </div>
-                <span class="text-sm font-semibold text-gray-700">@p.Rating</span>
-                <span class="text-xs text-gray-400">(@p.ReviewsCount opiniones)</span>
-              </div>
+              @if (p.ReviewsCount > 0)
+                {
+                    <div class="flex items-center gap-1.5 mb-5 select-none">
+                        <div class="flex">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                var s = i;
+                                <span class="text-sm @(s <= Math.Round(p.Rating) ? "text-[#FF76A5]" : "text-gray-200")">★</span>
+                            }
+                        </div>
 
-              <!-- Pricing -->
-              <div class="flex items-baseline gap-3 mb-6 font-mono select-none">
+                        <span class="text-sm font-semibold text-gray-700">
+                            @p.Rating.ToString("0.0")
+                        </span>
+
+                        <span class="text-xs text-gray-400">
+                            (@p.ReviewsCount opiniones)
+                        </span>
+                    </div>
+              }
+              else
+              {
+                    <div class="mb-5 flex items-center gap-2">
+                        <span class="rounded-full bg-[#FFF0F3] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-[#C7346A]">
+                            Nuevo
+                        </span>
+                        <span class="text-xs text-gray-400">
+                            Aún sin reseñas
+                        </span>
+                    </div>
+              }
+
+            <!-- Pricing -->
+
+            <div class="flex items-center gap-3 mb-6 font-mono select-none">
                 <span class="text-3xl font-bold text-[#C7346A]">
-                  S/ @p.Price.ToString("0.00")
+                    S/ @p.Price.ToString("0.00")
                 </span>
+
                 @if (p.OriginalPrice != null && p.OriginalPrice > p.Price)
                 {
-                  <span class="text-lg text-gray-400 line-through">
-                    S/ @p.OriginalPrice.Value.ToString("0.00")
-                  </span>
+                    <span class="text-lg text-gray-400 line-through">
+                        S/ @p.OriginalPrice.Value.ToString("0.00")
+                    </span>
+
+                    <span class="rounded-full bg-[#FFF0F3] px-2.5 py-1 text-[10px] font-bold text-[#C7346A]">
+                        -@GetDiscountPercent(p)%
+                    </span>
                 }
-              </div>
+            </div>
 
               <!-- Tab selector headers -->
               <div class="border-b border-gray-100 flex gap-6 mb-5 select-none">
@@ -130,14 +153,29 @@
             <!-- Add to Cart trigger -->
             <div class="mt-6 pt-5 border-t border-gray-100 flex items-center gap-4 select-none">
               <button @onclick="() => DirectAddToCart(p)"
-                      class="flex-1 flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 cursor-pointer @(_added ? "bg-green-600 hover:bg-green-700 text-white shadow-md" : "bg-[#FF76A5] hover:bg-[#C7346A] text-white shadow-lg")">
+                    class="flex-1 flex items-center justify-center gap-2.5 py-4 px-6 rounded-xl font-bold uppercase tracking-[0.08em] text-xs transition-all duration-300 cursor-pointer @(_added ? "bg-green-600 hover:bg-green-700 text-white shadow-md" : "bg-[#111827] hover:bg-[#C7346A] text-white shadow-lg hover:-translate-y-0.5")">
                 @if (_added)
                 {
-                    <span>✓ ¡Agregado al Carrito!</span>
+                    <span>✓ Añadido a mi beauty bag</span>
                 }
                 else
                 {
-                    <span>Añadir al Carrito</span>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            class="h-5 w-5"
+                            aria-hidden="true">
+                        <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M3 7h18l-1.4 13H4.4L3 7Z" />
+                        <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M8 7a4 4 0 0 1 8 0" />
+                    </svg>
+
+                    <span>Añadir a mi beauty bag</span>
                 }
               </button>
             </div>
@@ -168,6 +206,18 @@
     private void SetActiveTab(string code) => _activeTab = code;
 
     private void CloseModal() => LayoutState.SetQuickViewProduct(null);
+
+    private static int GetDiscountPercent(Product product)
+{
+    if (product.OriginalPrice == null || product.OriginalPrice <= product.Price)
+    {
+        return 0;
+    }
+
+    return (int)Math.Round(
+        ((product.OriginalPrice.Value - product.Price) / product.OriginalPrice.Value) * 100
+    );
+}
 
     private async Task DirectAddToCart(Product product)
     {

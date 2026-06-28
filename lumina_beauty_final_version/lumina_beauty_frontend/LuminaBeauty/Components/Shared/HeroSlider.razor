@@ -2,61 +2,61 @@
 @inject NavigationManager Navigator
 @implements IDisposable
 
-<div class="relative w-full h-[380px] md:h-[460px] rounded-3xl overflow-hidden glass-panel shadow-lg flex items-center select-none"
+<div class="relative w-full h-[420px] md:h-[520px] rounded-3xl overflow-hidden shadow-lg select-none"
      id="hero-carousel-container">
-    
-    <!-- Background Gradient Transition -->
-    <div class="absolute inset-0 bg-gradient-to-r @_slides[_currentSlideIndex].ColorTheme transition-colors duration-1000 -z-10" />
 
-    <!-- Decorative pattern overlay -->
-    <div class="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+    <!-- Background image -->
+    <img src="@_slides[_currentSlideIndex].Image"
+         alt="@_slides[_currentSlideIndex].Title"
+         class="absolute inset-0 w-full h-full object-cover" />
 
-    <div class="w-full h-full grid grid-cols-1 md:grid-cols-12 items-center relative gap-8 px-6 md:px-12">
-        
-        <!-- Typography description card content -->
-        <div class="md:col-span-7 z-10 flex flex-col justify-center text-left py-4">
-          <div class="inline-flex items-center gap-1.5 bg-white/75 backdrop-blur-md border border-white/80 py-1.5 px-3.5 rounded-full w-fit mb-4 shadow-sm">
-            <span class="text-xs text-[#FF76A5]">✨</span>
-            <span class="text-[10px] font-bold tracking-widest text-[#C7346A] uppercase">
-              @_slides[_currentSlideIndex].HighPromo
-            </span>
-          </div>
+    <!-- Overlay para legibilidad -->
+    <div class="absolute inset-0 bg-gradient-to-r from-[#fff4f7]/78 via-[#fff4f7]/28 to-transparent"></div>
 
-          <h2 class="font-serif text-3xl md:text-5xl font-light text-gray-900 tracking-tight leading-[1.1] mb-4">
-            @_slides[_currentSlideIndex].Title
-          </h2>
+    <!-- Suavizado extra -->
+    <div class="absolute inset-0 bg-black/5"></div>
 
-          <p class="text-xs md:text-sm text-gray-600 max-w-md leading-relaxed mb-6">
-            @_slides[_currentSlideIndex].Subtitle
-          </p>
+    <!-- Decorative subtle pattern -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-10 pointer-events-none"></div>
 
-          <button @onclick="ExploreClicked"
-                  class="w-fit bg-gray-900 hover:bg-[#FF76A5] hover:shadow-lg hover:shadow-pink-100 font-bold uppercase tracking-wider text-[10px] text-white px-7 py-3.5 rounded-xl transition-all duration-300 cursor-pointer hover:-translate-y-0.5">
-            @_slides[_currentSlideIndex].CtaText
-          </button>
-        </div>
+    <!-- Content -->
+    <div class="relative z-10 h-full flex items-center px-6 md:px-14">
+        <div class="max-w-xl bg-[#fff8fa]/70 backdrop-blur-sm rounded-3xl p-6 md:p-10 shadow-sm">
+            <div class="inline-flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-white/80 py-1.5 px-3.5 rounded-full w-fit mb-5 shadow-sm">
+                <span class="text-xs text-[#FF76A5]">✨</span>
+                <span class="text-[10px] font-bold tracking-widest text-[#C7346A] uppercase">
+                    @_slides[_currentSlideIndex].HighPromo
+                </span>
+            </div>
 
-        <!-- Render Image -->
-        <div class="hidden md:flex md:col-span-5 h-[340px] md:h-full relative overflow-hidden items-center justify-center">
-          <div class="absolute w-[280px] h-[280px] md:w-[340px] md:h-[340px] rounded-full bg-gradient-to-tr from-[#FFF0F3] to-amber-100/20 opacity-40 filter blur-2xl animate-spin-slow animate-pulse" />
-          
-          <img src="@_slides[_currentSlideIndex].Image"
-               alt="@_slides[_currentSlideIndex].Title"
-               class="relative z-10 max-h-[300px] md:max-h-[360px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-700 rounded-2xl pointer-events-none" />
+            <h2 class="font-serif text-4xl md:text-6xl font-light text-[#111827] tracking-tight leading-[1.05] mb-5">
+                @_slides[_currentSlideIndex].Title
+            </h2>
+
+            <p class="text-sm md:text-base text-gray-700 max-w-md leading-relaxed mb-7">
+                @_slides[_currentSlideIndex].Subtitle
+            </p>
+
+            <button @onclick="ExploreClicked"
+                    class="w-fit bg-gray-900 hover:bg-[#FF76A5] hover:shadow-lg hover:shadow-pink-100 font-bold uppercase tracking-wider text-[10px] text-white px-8 py-4 rounded-xl transition-all duration-300 cursor-pointer hover:-translate-y-0.5">
+                @_slides[_currentSlideIndex].CtaText
+            </button>
         </div>
     </div>
+<!-- Manual Arrow buttons -->
+<div class="absolute bottom-5 right-6 flex gap-3 z-20 select-none">
+    <button @onclick="PrevSlide"
+            aria-label="Slide anterior"
+            class="w-11 h-11 rounded-full bg-white/90 hover:bg-[#FF76A5] text-[#344054] hover:text-white border border-white/80 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center cursor-pointer hover:-translate-y-0.5">
+        <span class="text-lg leading-none">←</span>
+    </button>
 
-    <!-- Manual Arrow buttons -->
-    <div class="absolute bottom-5 right-6 flex gap-2 z-20 select-none">
-        <button @onclick="PrevSlide"
-                class="p-2 w-10 h-10 rounded-full bg-white/65 hover:bg-white text-gray-600 hover:text-[#FF76A5] transition-all flex items-center justify-center shadow cursor-pointer">
-          <span>←</span>
-        </button>
-        <button @onclick="NextSlide"
-                class="p-2 w-10 h-10 rounded-full bg-white/65 hover:bg-white text-gray-600 hover:text-[#FF76A5] transition-all flex items-center justify-center shadow cursor-pointer">
-          <span>➔</span>
-        </button>
-    </div>
+    <button @onclick="NextSlide"
+            aria-label="Siguiente slide"
+            class="w-11 h-11 rounded-full bg-white/90 hover:bg-[#FF76A5] text-[#344054] hover:text-white border border-white/80 shadow-sm hover:shadow-md transition-all duration-300 flex items-center justify-center cursor-pointer hover:-translate-y-0.5">
+        <span class="text-lg leading-none">→</span>
+    </button>
+</div>
 
     <!-- Dots Indicators -->
     <div class="absolute bottom-6 left-6 md:left-12 flex gap-1.5 z-20 select-none">
@@ -64,7 +64,7 @@
         {
           var idx = i;
           <button @onclick="() => SetSlide(idx)"
-                  class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer @(idx == _currentSlideIndex ? "bg-[#FF76A5] w-6" : "bg-gray-300 hover:bg-gray-400")" />
+                  class="w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer @(idx == _currentSlideIndex ? "bg-[#FF76A5] w-6" : "bg-[#d6cbd0] hover:bg-[#bfaab2]")" />
         }
     </div>
 
@@ -89,27 +89,27 @@
         new SlideItem
         {
             HighPromo = "HASTA 20% EN LABIALES",
-            Title = "Crea Luces Eternas En Tus Labios",
-            Subtitle = "Texturas aterciopeladas y brillos de culto con fórmulas nutritivas hidratantes.",
-            CtaText = "Ver Labiales",
+            Title = "Brilla con tu mejor versión",
+            Subtitle = "Descubre labiales, maquillaje y productos de belleza que realzan tu estilo cada día.",
+            CtaText = "Comprar ahora",
             Image = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&q=80&w=1500",
             ColorTheme = "from-[#ffe8eb] via-[#fffbfb] to-[#fec8d1]/30"
         },
         new SlideItem
         {
-            HighPromo = "K-BEAUTY RADIANCE SECRETS",
-            Title = "Descubre El Secreto del Efecto Glass",
-            Subtitle = "La rutina viral de extractos botánicos puros que calma, regenera y da brillo absoluto.",
+            HighPromo = "SECRETOS DE RADIANCIA K-BEAUTY",
+            Title = "Descubre el secreto del efecto glass",
+            Subtitle = "La rutina viral de extractos botánicos que calma, regenera y deja tu piel luminosa.",
             CtaText = "Explorar K-Beauty",
             Image = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=1500",
             ColorTheme = "from-[#fdf8f5] via-[#ffe8eb] to-[#fcf5f0]"
         },
         new SlideItem
         {
-            HighPromo = "LÉ GRANDE PARFUM LUXURY",
-            Title = "Sensualidad Floral y Oud Misterioso",
-            Subtitle = "Las esencias olfativas premium creadas por los perfumistas franceses más distinguidos.",
-            CtaText = "Ver Fragancias",
+            HighPromo = "FRAGANCIAS DE LUJO",
+            Title = "Sensualidad floral y oud misterioso",
+            Subtitle = "Esencias premium para dejar una impresión inolvidable.",
+            CtaText = "Ver fragancias",
             Image = "https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&q=80&w=1500",
             ColorTheme = "from-[#ffe8eb] via-[#fffbfb] to-[#fec8d1]/20"
         }
