@@ -3,6 +3,7 @@
 @using SoluLumina.Services
 @rendermode InteractiveServer
 @using SoluLumina.Models
+@inject IJSRuntime JS
 @inject IConfiguration Configuration
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -22,6 +23,7 @@
                     </span>
                 </button>
                 <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+
                 <div class="position-relative">
                     <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
                         <div class="text-end d-none d-md-block">
@@ -112,9 +114,6 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-light bg-white border text-secondary px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2" style="font-size: 0.85rem; font-weight: 500;">
-                            <i class="bi bi-download"></i> Exportar
-                        </button>
                         <button class="btn text-white px-4 py-2 rounded-3 shadow-sm border-0 d-flex align-items-center gap-2"
                                 style="background-color: #834a5d; font-size: 0.85rem; font-weight: 500;"
                                 @onclick="OpenAddEntryModal">
@@ -142,18 +141,23 @@
                             <th class="text-start py-3 px-3" style="width: 1%;">Categoria</th>
                             <th class="text-start py-3 px-3" style="width: 1%; white-space: nowrap;"> Precio</th>
                             <th class="text-start py-3 px-3" style="width: 1%;">Stock</th>
+                            <th class="text-end py-3 px-3" style="width: 1%;">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
-                        @{int rowNumber = 1;}
+                    <tbody>
+                        @{
+                            int i = 0;
+                        }
                         @foreach (var p in PagedProducts)
                         {
+                            var index = ++i;
+                            var rowNum = ((paginaActual - 1) * prod_por_pagina) + index;
+
                             <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
-                                <td class="text-center text-muted small" style="width: 0.2%;">@(rowNumber++)</td>
+                                <td class="text-center text-muted small" style="width: 0.2%;">@rowNum</td>
 
                                 <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
                                     <div class="d-flex align-items-center gap-2" style="max-width: 260px;">
-
                                         <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
                                             @if (!string.IsNullOrEmpty(p.Imagen_url))
                                             {
@@ -173,7 +177,6 @@
                                                 @p.Sku
                                             </small>
                                         </div>
-
                                     </div>
                                 </td>
 
@@ -190,6 +193,15 @@
                                         @p.Stock uds.
                                     </span>
                                 </td>
+
+                                <td class="py-2 px-3 text-end" style="width: 1%;">
+                                    <button class="btn btn-sm btn-light border-0 rounded-3 shadow-sm d-inline-flex align-items-center justify-content-center"
+                                            style="width: 32px; height: 32px; padding: 0; color: #4a6a5a; background-color: #f4f7f5;"
+                                            title="Reponer Stock"
+                                            @onclick="() => ReponerDirecto(p)">
+                                        <i class="bi bi-arrow-repeat fs-6"></i>
+                                    </button>
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -204,9 +216,9 @@
                             <button class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual - 1)" disabled="@(paginaActual == 1)"><i class="bi bi-chevron-left"></i></button>
                         </li>
 
-                        @for (int i = 1; i <= total_paginas; i++)
+                        @for (int pageIdx = 1; pageIdx <= total_paginas; pageIdx++)
                         {
-                            var pageNumber = i;
+                            var pageNumber = pageIdx;
                             <li class="page-item">
                                 <button class="page-link rounded-2 @(paginaActual == pageNumber ? "active border-0 text-white" : "border text-secondary bg-white") shadow-sm"
                                         style="@(paginaActual == pageNumber ? "background-color: #834a5d;" : "")"
@@ -225,7 +237,6 @@
         </div>
 
     </div>
-
 </div>
 
 @if (showAddEntryModal)
@@ -246,37 +257,37 @@
                     <button type="button" class="btn-close mb-auto" @onclick="CloseAddEntryModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-4">
-                    
+
                     <div class="mb-4">
                         <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Producto</label>
                         <div class="input-group shadow-sm rounded-3 position-relative">
                             <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control border-start-0 shadow-none" placeholder="Buscar por SKU o nombre de producto..." @bind="textoBuscar"@bind:event="oninput" />
-                                @if (ProductosEncontrados != null && ProductosEncontrados.Any())
-                                {
-                                    <div class="list-group position-absolute w-100 shadow rounded-3 start-0 bg-white"
-                                         style="top: 100%; z-index: 1050; max-height: 250px; overflow-y: auto; margin-top: 5px;">
+                            <input type="text" class="form-control border-start-0 shadow-none" placeholder="Buscar por SKU o nombre de producto..." @bind="textoBuscar" @bind:event="oninput" />
+                            @if (ProductosEncontrados != null && ProductosEncontrados.Any())
+                            {
+                                <div class="list-group position-absolute w-100 shadow rounded-3 start-0 bg-white"
+                                     style="top: 100%; z-index: 1050; max-height: 250px; overflow-y: auto; margin-top: 5px;">
 
-                                        @foreach (var prod in ProductosEncontrados)
-                                        {
-                                            <button type="button"
-                                                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 border-0 border-bottom"
-                                                    @onclick="() => SeleccionarProducto(prod)">
-                                                <div>
-                                                    <span class="fw-bold text-dark d-block" style="font-size: 0.85rem;">@prod.Nombre</span>
-                                                    <span class="text-muted font-monospace" style="font-size: 0.75rem;">SKU: @prod.Sku</span>
-                                                </div>
-                                            </button>
-                                        }
-                                    </div>
-                                }
+                                    @foreach (var prod in ProductosEncontrados)
+                                    {
+                                        <button type="button"
+                                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 border-0 border-bottom"
+                                                @onclick="() => SeleccionarProducto(prod)">
+                                            <div>
+                                                <span class="fw-bold text-dark d-block" style="font-size: 0.85rem;">@prod.Nombre</span>
+                                                <span class="text-muted font-monospace" style="font-size: 0.75rem;">SKU: @prod.Sku</span>
+                                            </div>
+                                        </button>
+                                    }
+                                </div>
+                            }
                             else if (!productoSeleccionado && !string.IsNullOrWhiteSpace(textoBuscar) && textoBuscar.Length >= 2)
-                                {
-                                    <div class="list-group position-absolute w-100 shadow rounded-3 start-0 bg-white p-3 text-center text-muted small"
-                                         style="top: 100%; z-index: 1050; margin-top: 5px;">
-                                        No se encontraron productos
-                                    </div>
-                                }
+                            {
+                                <div class="list-group position-absolute w-100 shadow rounded-3 start-0 bg-white p-3 text-center text-muted small"
+                                     style="top: 100%; z-index: 1050; margin-top: 5px;">
+                                    No se encontraron productos
+                                </div>
+                            }
                         </div>
                         <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">Ej. RF-LP-018 - Labial Matte Rojo Pasión</small>
                     </div>
@@ -299,11 +310,11 @@
                     </div>
 
                     <div class="mb-2">
-                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Motivo de entrada</label>
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de movimiento</label>
                         <select class="form-select shadow-sm border-1 rounded-3 text-secondary" @bind="NuevoMovimiento.Tipo_movimiento">
                             @foreach (var mot in TiposMovimientos)
                             {
-                                <option value="@mot" selected>@mot</option>
+                                <option value="@mot">@mot</option>
                             }
                         </select>
                     </div>
@@ -326,7 +337,7 @@
 }
 
 @code {
-    private string URL_BASE;
+    private string URL_BASE = string.Empty;
     private bool showProfileDropdown = false;
 
     private int IdProductoReabastecido;
@@ -338,6 +349,7 @@
     private int prod_por_pagina = 7;
     private string filtroProducto = "";
     private string _textoBuscar = "";
+
     private string textoBuscar
     {
         get => _textoBuscar;
@@ -368,35 +380,46 @@
 
     protected override async Task OnInitializedAsync()
     {
-        URL_BASE = Configuration["ApiSettings:URL_BASE"];
+        URL_BASE = Configuration["ApiSettings:URL_BASE"] ?? string.Empty;
         await CargarDatos();
     }
 
     private async Task CargarDatos()
     {
-        Productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar");
-        Categorias = await new HttpClientUtils<List<CategoriaProducto>>().get(URL_BASE + "/CategoriaProductoRS/listar");
-        alertas_totales = 0;
-        unidades_totales = 0;
-        valor_total = 0;
-        foreach (var p in Productos)
+        try
         {
-            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id_categoria == p.Categoria.Id_categoria);
-            valor_total += p.Stock * p.Precio;
-            unidades_totales += p.Stock;
-            if (p.Stock < 10) alertas_totales++;
+            Productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar") ?? new();
+            Categorias = await new HttpClientUtils<List<CategoriaProducto>>().get(URL_BASE + "/CategoriaProductoRS/listar") ?? new();
+
+            alertas_totales = 0;
+            unidades_totales = 0;
+            valor_total = 0;
+
+            foreach (var p in Productos)
+            {
+                if (p.Categoria != null)
+                {
+                    p.Categoria = Categorias.FirstOrDefault(c => c.Id_categoria == p.Categoria.Id_categoria);
+                }
+                valor_total += p.Stock * p.Precio;
+                unidades_totales += p.Stock;
+                if (p.Stock < 10) alertas_totales++;
+            }
+            valor_total /= 1000; // en miles de soles
         }
-        valor_total /= 1000;//en miles de soles
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando datos: {ex.Message}");
+        }
     }
 
     private IEnumerable<Producto> FilteredProducts => Productos
         .Where(p => p.Nombre != null && p.Nombre.Contains(filtroProducto, StringComparison.OrdinalIgnoreCase));
-    private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
 
+    private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
 
     private int total_paginas => (int)Math.Ceiling(total_filtered_products / (double)prod_por_pagina);
     private int total_filtered_products => FilteredProducts.Count();
-    private int total_paged_products => FilteredProducts.Count();
 
     private void ToggleProfileDropdown()
     {
@@ -406,12 +429,16 @@
 
     private void OpenAddEntryModal()
     {
+        NuevoMovimiento = new MovimientoInventario { Tipo_movimiento = "Entrada" };
         showAddEntryModal = true;
     }
 
     private void CloseAddEntryModal()
     {
         showAddEntryModal = false;
+        productoSeleccionado = false;
+        textoBuscar = string.Empty;
+        NuevoMovimiento = new MovimientoInventario();
     }
 
     private void CambiarPagina(int nuevaPagina)
@@ -455,22 +482,81 @@
         IdProductoReabastecido = producto.Id_producto;
 
         textoBuscar = producto.Nombre;
-        ProductosEncontrados.Clear(); // Limpieza absoluta de la lista
-
+        ProductosEncontrados.Clear();
     }
 
-    private async void SaveEntryInventory()
+    private async Task SaveEntryInventory()
     {
-        NuevoMovimiento.Producto = Productos.FirstOrDefault(p => p.Id_producto == IdProductoReabastecido);
-        NuevoMovimiento.Tipo_movimiento = NuevoMovimiento.Tipo_movimiento.ToUpper().Replace(" ", "_");
-        NuevoMovimiento.Stock_anterior = NuevoMovimiento.Producto.Stock;
-        NuevoMovimiento.Stock_posterior = NuevoMovimiento.Producto.Stock + NuevoMovimiento.Cantidad;
+        var targetProduct = Productos.FirstOrDefault(p => p.Id_producto == IdProductoReabastecido);
+        if (targetProduct == null) return;
 
-        MovimientoInventario mv = await new HttpClientUtils<MovimientoInventario>().post(URL_BASE + "/MovimientoInventarioRS/registrar", NuevoMovimiento);
-        int res = await new HttpClientUtils<int>().put(URL_BASE + "/ProductoRS/aumentarStock/" + IdProductoReabastecido + "/" + NuevoMovimiento.Cantidad);
+        NuevoMovimiento.Producto = targetProduct;
+        NuevoMovimiento.Tipo_movimiento = (NuevoMovimiento.Tipo_movimiento ?? "Entrada").ToUpper().Replace(" ", "_");
+        NuevoMovimiento.Stock_anterior = targetProduct.Stock;
+        NuevoMovimiento.Stock_posterior = targetProduct.Stock + NuevoMovimiento.Cantidad;
+
+        try
+        {
+            MovimientoInventario mv = await new HttpClientUtils<MovimientoInventario>().post(URL_BASE + "/MovimientoInventarioRS/registrar", NuevoMovimiento);
+            int res = await new HttpClientUtils<int>().put(URL_BASE + "/ProductoRS/aumentarStock/" + IdProductoReabastecido + "/" + NuevoMovimiento.Cantidad);
+
+            showAddEntryModal = false;
+
+            if (res > 0)
+            {
+                await JS.InvokeVoidAsync("Swal.fire", new
+                {
+                    toast = true,
+                    position = "top-end",
+                    showConfirmButton = false,
+                    timer = 3000,
+                    timerProgressBar = true,
+                    icon = "success",
+                    title = "Reposición exitosa"
+                });
+
+                await CargarDatos();
+            }
+            else
+            {
+                await MostrarErrorModal();
+            }
+        }
+        catch
+        {
+            showAddEntryModal = false;
+            await MostrarErrorModal();
+        }
 
         NuevoMovimiento = new MovimientoInventario();
-        showAddEntryModal = false;
+        productoSeleccionado = false;
+        textoBuscar = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task MostrarErrorModal()
+    {
+        await JS.InvokeVoidAsync("Swal.fire", new
+        {
+            title = "Error de Reposición",
+            text = "No se pudo conectar con el servidor.",
+            icon = "error",
+            confirmButtonColor = "#dc3545",
+            confirmButtonText = "Entendido"
+        });
+    }
+
+    private void ReponerDirecto(Producto producto)
+    {
+        productoSeleccionado = true;
+        productoElegidoNombre = producto.Nombre;
+        IdProductoReabastecido = producto.Id_producto;
+
+        textoBuscar = producto.Nombre;
+        ProductosEncontrados.Clear();
+
+        NuevoMovimiento = new MovimientoInventario { Tipo_movimiento = "Entrada" };
+        showAddEntryModal = true;
     }
 
     private void BuscarAutomatico()
@@ -479,10 +565,9 @@
         StateHasChanged();
     }
 
-    private async void ShowFilters()
+    private Task ShowFilters()
     {
         showFilters = !showFilters;
+        return Task.CompletedTask;
     }
 }
-
-

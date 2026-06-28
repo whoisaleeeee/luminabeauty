@@ -32,6 +32,16 @@
         {
             catId = Product.Categoria?.Id_categoria ?? 0;
             marcaId = Product.Marca?.Id_marca ?? 0;
+
+            if (!string.IsNullOrEmpty(Product.Tipo_piel))
+            {
+                var coincidencia = Tipo_piel.FirstOrDefault(t => t.Equals(Product.Tipo_piel, StringComparison.OrdinalIgnoreCase));
+
+                if (coincidencia != null)
+                {
+                    Product.Tipo_piel = coincidencia; // Le asigna el formato exacto de la lista (ej: "Mixta")
+                }
+            }
         }
     }
 
@@ -45,7 +55,7 @@
     {
         if (catId != 0) Product.Categoria = new CategoriaProducto { Id_categoria = catId };
         if (marcaId != 0) Product.Marca = new Marca { Id_marca = marcaId };
-
+        if (!string.IsNullOrEmpty(Product.Tipo_piel)) Product.Tipo_piel = Product.Tipo_piel.ToUpper();
         await OnProductUpdated.InvokeAsync(Product);
         Close();
     }
@@ -84,21 +94,29 @@
                                 <input type="text" class="form-control bg-light border-1" placeholder="1234567890" @bind="Product.Sku" />
                             </div>
                         </div>
-                        <div class="col-12 col-md-12">
-                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Descripción del producto</label>
-                            <input type="text" class="form-control bg-light border-1" @bind="Product.Descripcion" />
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-12">
+                        <div class="row g-3 mb-3">
+                            <div class="col-12 col-md-6">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
                                 <select class="form-select bg-light border-1 text-secondary" @bind="marcaId" required>
-                                    <option disabled selected hidden>Seleccionar marca...</option>
+                                    <option value="0" disabled selected hidden>Seleccionar marca...</option>
+
                                     @foreach (var m in Marcas)
                                     {
                                         <option value="@m.Id_marca">@m.Nombre</option>
                                     }
                                 </select>
                             </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted">S/</span>
+                                    <input type="number" class="form-control bg-light border-start-0" placeholder="0.00" min="0.00" step="0.01" @bind="Product.Precio" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-12">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Descripción del producto</label>
+                            <input type="text" class="form-control bg-light border-1" @bind="Product.Descripcion" />
                         </div>
                     </div>
 
@@ -122,7 +140,7 @@
                             <div class="col-12 col-md-4">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel</label>
                                 <select class="form-select bg-light border-1 text-secondary" @bind="Product.Tipo_piel" required>
-                                    <option value="" disabled selected hidden>Seleccionar tipo de piel...</option>
+                                    <option value="" disabled hidden>Seleccionar tipo de piel...</option>
                                     @foreach (var t in Tipo_piel)
                                     {
                                         <option value="@t">@t</option>
@@ -132,27 +150,10 @@
                         </div>
                     </div>
 
-                    <!-- 03 Precios y Stock -->
-                    <div class="mb-4">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">03</span>
-                            <h6 class="m-0 fw-semibold text-dark">Precios</h6>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-6 col-md-3">
-                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted">$</span>
-                                    <input type="number" class="form-control bg-light border-start-0" placeholder="0.00" min="0.00" @bind="Product.Precio" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 04 Imágenes -->
+                    <!-- 03 Imágenes -->
                     <div class="mb-2">
                         <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">04</span>
+                            <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">03</span>
                             <h6 class="m-0 fw-semibold text-dark">Imágenes</h6>
                         </div>
                         <div class="d-flex gap-3">

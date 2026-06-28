@@ -148,6 +148,7 @@
     {
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(false);
+        NewProduct = new Producto();
     }
 
     private async Task SaveProduct()
