@@ -8,6 +8,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 
 import pe.edu.pucp.luminaBeauty.Business.ReclamoBL;
@@ -172,7 +173,7 @@ public class ReclamoRS {
     @PUT
     @Path("asignarArea/{idReclamo}")
     public Reclamo asignarAreaReclamo(@PathParam("idReclamo") int idReclamo,
-                                      @jakarta.ws.rs.QueryParam("area") String areaNueva) {
+                                      @QueryParam("area") String areaNueva) {
         Reclamo resultado = null;
 
         try {
