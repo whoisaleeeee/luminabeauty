@@ -12,6 +12,8 @@
 
     <NavBar />
 
+    <LoadingPanel Visible="@isLoading" />
+
     <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
 
         <!-- Header Superior Estándar -->
@@ -295,13 +297,33 @@
     private int selectedBrandId = 0;
     private string selectedSkinType = string.Empty;
     private string filtroProducto = "";
+    private bool isLoading = true;
 
     private string URL_BASE;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         URL_BASE = Configuration["ApiSettings:URL_BASE"];
-        await CargarDatos();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            await Task.Yield();
+            await CargarDatos();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task CargarDatos()

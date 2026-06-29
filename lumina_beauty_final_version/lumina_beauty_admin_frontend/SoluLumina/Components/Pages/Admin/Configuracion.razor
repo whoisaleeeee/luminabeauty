@@ -8,6 +8,8 @@
 
     <NavBar />
 
+    <LoadingPanel Visible="@isLoading" />
+
     <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
 
         <!-- Header Superior Estándar -->
@@ -481,6 +483,7 @@
 
 @code {
     private bool showProfileDropdown = false;
+    private bool isLoading = true;
     private void ToggleProfileDropdown() => showProfileDropdown = !showProfileDropdown;
 
     private string activeTab = "Empleados";
@@ -552,7 +555,7 @@
 
     private const string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
         empleados = new List<Empleado>
         {
@@ -560,9 +563,6 @@
             new Empleado { Id = 2, Nombre = "Mateo López", Email = "mateo.l@glamadmin.com", Rol = "Almacén", Estado = "Activo", Iniciales = "ML", BgColor = "#e9ecef", TextColor = "#6c757d" },
             new Empleado { Id = 3, Nombre = "Isabella Ruiz", Email = "isabella.r@glamadmin.com", Rol = "Vendedor", Estado = "Inactivo", Iniciales = "IR", BgColor = "#e9ecef", TextColor = "#6c757d" }
         };
-
-        // Cargar cupones reales desde la base de datos
-        await CargarCuponesDesdeBackend();
 
         metodosPago = new List<MetodoPago>
         {
@@ -572,6 +572,27 @@
             new MetodoPago { Id = 4, Nombre = "Plin", Tipo = "Billetera Móvil (PE)", Descripcion = "Pagos interbancarios con número de celular en Perú.", IconoUrl = "https://upload.wikimedia.org/wikipedia/commons/4/43/Logo_Plin.png", IsActivo = false },
             new MetodoPago { Id = 5, Nombre = "Transferencia Bancaria", Tipo = "Offline", Descripcion = "Cuentas BCP, Interbank y BBVA. Requiere validación manual.", IconoUrl = "https://cdn-icons-png.flaticon.com/512/2830/2830284.png", IsActivo = true }
         };
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        try
+        {
+            await Task.Yield();
+            await CargarCuponesDesdeBackend();
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
     }
 
     private async Task CargarCuponesDesdeBackend()
