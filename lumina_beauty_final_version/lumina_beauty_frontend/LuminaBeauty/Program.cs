@@ -1,8 +1,9 @@
 using LuminaBeauty.Components;
-using LuminaBeauty.Services;
-using LuminaBeauty.Servicios.REST;
 using LuminaBeauty.Models;
+using LuminaBeauty.Services;
+using LuminaBeauty.Services.Admin;
 using LuminaBeauty.Services.AppServices;
+using LuminaBeauty.Servicios.REST;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,7 @@ builder.Services.AddScoped<EnvioRestService>();
 builder.Services.AddScoped<ValoracionRestService>();
 builder.Services.AddScoped<CuponRestService>();
 builder.Services.AddScoped<UsoCuponRestService>();
+builder.Services.AddScoped<ReclamoRestService>();
 
 // Servicios de aplicación: lógica de la interfaz
 builder.Services.AddScoped<LocalStorageService>();
@@ -68,6 +70,9 @@ builder.Services.AddScoped<ShopAppService>();
 builder.Services.AddScoped<HeaderSearchAppService>();
 builder.Services.AddScoped<CuponAppService>();
 builder.Services.AddScoped<UsoCuponAppService>();
+
+//Admin
+builder.Services.AddScoped<ReporteJasperService>();
 
 
 var app = builder.Build();

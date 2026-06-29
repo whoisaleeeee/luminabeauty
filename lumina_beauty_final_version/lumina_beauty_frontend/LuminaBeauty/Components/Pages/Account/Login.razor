@@ -208,15 +208,22 @@
         {
             _isSubmitting = true;
 
-            bool loggedIn = await Auth.LoginAsync(_email, _password);
+            TipoSesion tipoSesion = await Auth.LoginAsync(_email, _password);
 
-            if (!loggedIn)
+            if (tipoSesion == TipoSesion.Ninguna)
             {
                 Toast.ShowToast("No se pudo iniciar sesión. Verifica tus credenciales.");
                 return;
             }
 
             Toast.ShowToast("Sesión iniciada correctamente.");
+
+            if (tipoSesion == TipoSesion.Admin)
+            {
+                Navigator.NavigateTo("/admin/catalogo");
+                return;
+            }
+
             Navigator.NavigateTo("/profile");
         }
         finally

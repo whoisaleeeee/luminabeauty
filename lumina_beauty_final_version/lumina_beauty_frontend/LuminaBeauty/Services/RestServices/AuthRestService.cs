@@ -44,6 +44,35 @@ namespace LuminaBeauty.Servicios.REST
             }
         }
 
+        public async Task<Empleado?> LoginEmpleadoAsync(string correo, string contrasena)
+        {
+            var requestBody = new
+            {
+                correo,
+                contrasena
+            };
+
+            try
+            {
+                using var response = await _http.PostAsJsonAsync(
+                    "webresources/AuthRS/loginEmpleado",
+                    requestBody
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Empleado>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en AuthRS/loginEmpleado: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<bool> ValidarCredencialesAsync(string correo, string contrasena)
         {
             var cliente = await LoginClienteAsync(correo, contrasena);

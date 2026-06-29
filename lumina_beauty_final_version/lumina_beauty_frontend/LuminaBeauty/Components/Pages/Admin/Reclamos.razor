@@ -1,0 +1,561 @@
+@page "/admin/reclamos"
+@layout AdminLayout
+
+@using LuminaBeauty.Models
+@using LuminaBeauty.Services
+@using LuminaBeauty.Servicios.REST
+
+@inject ReclamoRestService ReclamoRestService
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<div class="admin-page">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #6a3849;">
+                Reclamos y atención al cliente
+            </h2>
+            <p class="text-muted mb-0">
+                Gestiona incidencias, asignaciones y estados de resolución.
+            </p>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje))
+    {
+        <div class="alert @(esError ? "alert-danger" : "alert-success") alert-dismissible fade show">
+            @mensaje
+
+            <button type="button"
+                    class="btn-close"
+                    @onclick="ClearMessage">
+            </button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <small class="text-muted fw-semibold">Nuevos</small>
+                <h2 class="fw-bold mt-2 mb-0" style="color: #b02a37;">
+                    @ListaReclamos.Count(r => r.Estado == "ABIERTO")
+                </h2>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <small class="text-muted fw-semibold">En proceso</small>
+                <h2 class="fw-bold mt-2 mb-0" style="color: #fd7e14;">
+                    @ListaReclamos.Count(r =>
+                        r.Estado == "EN_PROCESO"
+                        || r.Estado == "EN_REVISION")
+                </h2>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                <small class="text-muted fw-semibold">Resueltos</small>
+                <h2 class="fw-bold mt-2 mb-0" style="color: #198754;">
+                    @ListaReclamos.Count(r =>
+                        r.Estado == "RESUELTO"
+                        || r.Estado == "CERRADO")
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="p-4 border-bottom">
+            <div class="row g-3">
+                <div class="col-12 col-md-7">
+                    <label class="form-label text-muted small fw-bold text-uppercase">
+                        Buscar reclamo
+                    </label>
+
+                    <input type="text"
+                           class="form-control bg-light"
+                           placeholder="Código, cliente o asunto..."
+                           value="@FiltroBusqueda"
+                           @oninput="OnFiltroBusquedaChanged" />
+                </div>
+
+                <div class="col-12 col-md-5">
+                    <label class="form-label text-muted small fw-bold text-uppercase">
+                        Estado
+                    </label>
+
+                    <select class="form-select bg-light"
+                            @bind="FiltroEstado">
+                        <option value="">Todos los estados</option>
+                        <option value="ABIERTO">Abierto</option>
+                        <option value="EN_REVISION">En revisión</option>
+                        <option value="EN_PROCESO">En proceso</option>
+                        <option value="RESUELTO">Resuelto</option>
+                        <option value="CERRADO">Cerrado</option>
+                        <option value="RECHAZADO">Rechazado</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        @if (cargando)
+        {
+            <div class="text-center py-5 text-muted">
+                Cargando reclamos...
+            </div>
+        }
+        else if (!ReclamosFiltrados.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                No se encontraron reclamos.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Código</th>
+                            <th>Cliente</th>
+                            <th>Pedido</th>
+                            <th>Asunto</th>
+                            <th>Área</th>
+                            <th>Estado</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var reclamo in ReclamosFiltrados)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-semibold">
+                                    @reclamo.Codigo
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        @NombreCliente(reclamo.Cliente)
+                                    </div>
+
+                                    <small class="text-muted">
+                                        @(reclamo.Cliente?.Correo ?? "-")
+                                    </small>
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(reclamo.Pedido?.CodigoPedido)
+                                        ? "-"
+                                        : reclamo.Pedido.CodigoPedido)
+                                </td>
+
+                                <td>
+                                    <span class="d-inline-block text-truncate"
+                                          style="max-width: 240px;">
+                                        @reclamo.Asunto
+                                    </span>
+                                </td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(reclamo.AreaAsignada)
+                                        ? "Sin asignar"
+                                        : reclamo.AreaAsignada)
+                                </td>
+
+                                <td>
+                                    <span class="badge rounded-pill text-dark"
+                                          style="background-color: @GetEstadoBgColor(reclamo.Estado);">
+                                        @FormatoEstado(reclamo.Estado)
+                                    </span>
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            @onclick="() => AbrirReclamo(reclamo)">
+                                        Gestionar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@if (ReclamoSeleccionado != null)
+{
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         style="background-color: rgba(0,0,0,0.45);">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 px-4 pt-4">
+                    <div>
+                        <h5 class="modal-title fw-bold" style="color: #6a3849;">
+                            Gestión del reclamo @ReclamoSeleccionado.Codigo
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            @NombreCliente(ReclamoSeleccionado.Cliente)
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            @onclick="CerrarReclamo">
+                    </button>
+                </div>
+
+                <div class="modal-body px-4 py-3">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">
+                                Tipo
+                            </small>
+
+                            <div class="fw-semibold mt-1">
+                                @FormatoTipo(ReclamoSeleccionado.Tipo)
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-muted text-uppercase fw-bold">
+                                Prioridad
+                            </small>
+
+                            <div class="fw-semibold mt-1">
+                                @ReclamoSeleccionado.Prioridad
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <small class="text-muted text-uppercase fw-bold">
+                            Asunto
+                        </small>
+
+                        <div class="fw-semibold mt-1">
+                            @ReclamoSeleccionado.Asunto
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <small class="text-muted text-uppercase fw-bold">
+                            Descripción
+                        </small>
+
+                        <p class="text-secondary mt-1 mb-0">
+                            @ReclamoSeleccionado.Descripcion
+                        </p>
+                    </div>
+
+                    <div class="border rounded-4 p-3 bg-light">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Área encargada
+                                </label>
+
+                                <select class="form-select"
+                                        @bind="areaTemporal"
+                                        disabled="@EsFinal(ReclamoSeleccionado.Estado)">
+                                    <option value="">Seleccionar área...</option>
+                                    <option value="Logística">Logística</option>
+                                    <option value="Ventas">Ventas</option>
+                                    <option value="Almacén">Almacén</option>
+                                    <option value="Soporte">Soporte</option>
+                                </select>
+
+                                <button class="btn btn-outline-secondary btn-sm mt-2"
+                                        disabled="@string.IsNullOrWhiteSpace(areaTemporal)"
+                                        @onclick="AsignarAreaAsync">
+                                    Asignar área
+                                </button>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    Estado
+                                </label>
+
+                                <select class="form-select"
+                                        @bind="estadoTemporal">
+                                    <option value="ABIERTO">Abierto</option>
+                                    <option value="EN_REVISION">En revisión</option>
+                                    <option value="EN_PROCESO">En proceso</option>
+                                    <option value="RESUELTO">Resuelto</option>
+                                    <option value="CERRADO">Cerrado</option>
+                                    <option value="RECHAZADO">Rechazado</option>
+                                </select>
+
+                                <button class="btn btn-outline-secondary btn-sm mt-2"
+                                        @onclick="CambiarEstadoAsync">
+                                    Guardar estado
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top-0 px-4 pb-4">
+                    <button type="button"
+                            class="btn btn-light border"
+                            @onclick="CerrarReclamo">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Reclamo> ListaReclamos = new();
+
+    private Reclamo? ReclamoSeleccionado;
+
+    private bool cargando = true;
+
+    private string _filtroBusqueda = string.Empty;
+    private string _filtroEstado = string.Empty;
+
+    private string areaTemporal = string.Empty;
+    private string estadoTemporal = string.Empty;
+
+    private string mensaje = string.Empty;
+    private bool esError;
+
+    private string FiltroBusqueda
+    {
+        get => _filtroBusqueda;
+        set => _filtroBusqueda = value;
+    }
+
+    private string FiltroEstado
+    {
+        get => _filtroEstado;
+        set => _filtroEstado = value;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAdmin)
+        {
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
+
+        await CargarReclamosAsync();
+    }
+
+    private async Task CargarReclamosAsync()
+    {
+        cargando = true;
+
+        try
+        {
+            ListaReclamos = await ReclamoRestService.ListarReclamosAsync();
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"No se pudieron cargar los reclamos: {ex.Message}", true);
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private IEnumerable<Reclamo> ReclamosFiltrados =>
+        ListaReclamos
+            .Where(reclamo =>
+                string.IsNullOrWhiteSpace(FiltroBusqueda)
+                || reclamo.Codigo.Contains(
+                    FiltroBusqueda,
+                    StringComparison.OrdinalIgnoreCase
+                )
+                || reclamo.Asunto.Contains(
+                    FiltroBusqueda,
+                    StringComparison.OrdinalIgnoreCase
+                )
+                || NombreCliente(reclamo.Cliente).Contains(
+                    FiltroBusqueda,
+                    StringComparison.OrdinalIgnoreCase
+                ))
+            .Where(reclamo =>
+                string.IsNullOrWhiteSpace(FiltroEstado)
+                || string.Equals(
+                    reclamo.Estado,
+                    FiltroEstado,
+                    StringComparison.OrdinalIgnoreCase
+                ));
+
+    private void OnFiltroBusquedaChanged(ChangeEventArgs e)
+    {
+        FiltroBusqueda = e.Value?.ToString() ?? string.Empty;
+    }
+
+    private void AbrirReclamo(Reclamo reclamo)
+    {
+        ReclamoSeleccionado = reclamo;
+        areaTemporal = reclamo.AreaAsignada;
+        estadoTemporal = reclamo.Estado;
+    }
+
+    private void CerrarReclamo()
+    {
+        ReclamoSeleccionado = null;
+        areaTemporal = string.Empty;
+        estadoTemporal = string.Empty;
+    }
+
+    private async Task AsignarAreaAsync()
+    {
+        if (ReclamoSeleccionado == null
+            || string.IsNullOrWhiteSpace(areaTemporal))
+        {
+            return;
+        }
+
+        var actualizado = await ReclamoRestService.AsignarAreaAsync(
+            ReclamoSeleccionado.IdReclamo,
+            areaTemporal
+        );
+
+        if (actualizado == null)
+        {
+            ShowMessage("No se pudo asignar el área encargada.", true);
+            return;
+        }
+
+        ReclamoSeleccionado.AreaAsignada = actualizado.AreaAsignada;
+        ReclamoSeleccionado.Estado = actualizado.Estado;
+
+        ShowMessage("Área asignada correctamente.", false);
+
+        await CargarReclamosAsync();
+
+        ReclamoSeleccionado = ListaReclamos.FirstOrDefault(
+            reclamo => reclamo.IdReclamo == actualizado.IdReclamo
+        );
+
+        if (ReclamoSeleccionado != null)
+        {
+            areaTemporal = ReclamoSeleccionado.AreaAsignada;
+            estadoTemporal = ReclamoSeleccionado.Estado;
+        }
+    }
+
+    private async Task CambiarEstadoAsync()
+    {
+        if (ReclamoSeleccionado == null
+            || string.IsNullOrWhiteSpace(estadoTemporal))
+        {
+            return;
+        }
+
+        var actualizado = await ReclamoRestService.CambiarEstadoAsync(
+            ReclamoSeleccionado.IdReclamo,
+            estadoTemporal
+        );
+
+        if (actualizado == null)
+        {
+            ShowMessage("No se pudo actualizar el estado del reclamo.", true);
+            return;
+        }
+
+        ReclamoSeleccionado.Estado = actualizado.Estado;
+        ReclamoSeleccionado.AreaAsignada = actualizado.AreaAsignada;
+
+        ShowMessage("Estado del reclamo actualizado correctamente.", false);
+
+        await CargarReclamosAsync();
+
+        ReclamoSeleccionado = ListaReclamos.FirstOrDefault(
+            reclamo => reclamo.IdReclamo == actualizado.IdReclamo
+        );
+
+        if (ReclamoSeleccionado != null)
+        {
+            areaTemporal = ReclamoSeleccionado.AreaAsignada;
+            estadoTemporal = ReclamoSeleccionado.Estado;
+        }
+    }
+
+    private void ShowMessage(string texto, bool error)
+    {
+        mensaje = texto;
+        esError = error;
+    }
+
+    private void ClearMessage()
+    {
+        mensaje = string.Empty;
+    }
+
+    private static string NombreCliente(Cliente? cliente)
+    {
+        if (cliente == null)
+        {
+            return "Sin cliente";
+        }
+
+        return $"{cliente.Nombre} {cliente.Apellido}".Trim();
+    }
+
+    private static bool EsFinal(string estado)
+    {
+        return estado == "RESUELTO"
+            || estado == "CERRADO"
+            || estado == "RECHAZADO";
+    }
+
+    private static string FormatoEstado(string estado)
+    {
+        return estado switch
+        {
+            "ABIERTO" => "Abierto",
+            "EN_REVISION" => "En revisión",
+            "EN_PROCESO" => "En proceso",
+            "RESUELTO" => "Resuelto",
+            "CERRADO" => "Cerrado",
+            "RECHAZADO" => "Rechazado",
+            _ => estado
+        };
+    }
+
+    private static string FormatoTipo(string tipo)
+    {
+        return tipo switch
+        {
+            "PRODUCTO_DANADO" => "Producto dañado",
+            "PRODUCTO_INCORRECTO" => "Producto incorrecto",
+            "FALTANTE" => "Producto faltante",
+            "DEMORA_ENVIO" => "Demora de envío",
+            "COBRO_INCORRECTO" => "Cobro incorrecto",
+            "OTRO" => "Otro",
+            _ => tipo
+        };
+    }
+
+    private static string GetEstadoBgColor(string estado)
+    {
+        return estado switch
+        {
+            "ABIERTO" => "#f8d7da",
+            "EN_REVISION" => "#fff3cd",
+            "EN_PROCESO" => "#fff3cd",
+            "RESUELTO" => "#d1e7dd",
+            "CERRADO" => "#e2e3e5",
+            "RECHAZADO" => "#e2e3e5",
+            _ => "#f8f9fa"
+        };
+    }
+}

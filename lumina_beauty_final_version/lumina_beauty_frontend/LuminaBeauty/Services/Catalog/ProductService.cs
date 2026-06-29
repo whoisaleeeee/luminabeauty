@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using LuminaBeauty.Models;
-using LuminaBeauty.Models;
 using LuminaBeauty.Servicios.REST;
 
 namespace LuminaBeauty.Services

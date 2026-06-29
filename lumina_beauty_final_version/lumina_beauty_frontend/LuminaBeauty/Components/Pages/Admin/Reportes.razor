@@ -1,0 +1,449 @@
+@page "/admin/reportes"
+@layout AdminLayout
+
+@using LuminaBeauty.Models
+@using LuminaBeauty.Services
+@using LuminaBeauty.Servicios.REST
+
+@inject PedidoRestService PedidoRestService
+@inject ProductoRestService ProductoRestService
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
+<div class="admin-page">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: #6a3849;">
+                Reportes y métricas
+            </h2>
+
+            <p class="text-muted mb-0">
+                Resumen operativo basado en pedidos y productos registrados.
+            </p>
+        </div>
+
+        <button class="btn btn-outline-secondary px-4 py-2 rounded-3"
+                @onclick="CargarDatosAsync"
+                disabled="@cargando">
+            <i class="bi bi-arrow-clockwise"></i>
+            Actualizar datos
+        </button>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(mensaje))
+    {
+        <div class="alert @(esError ? "alert-danger" : "alert-success") alert-dismissible fade show">
+            @mensaje
+
+            <button type="button"
+                    class="btn-close"
+                    @onclick="LimpiarMensaje">
+            </button>
+        </div>
+    }
+
+    @if (cargando)
+    {
+        <div class="text-center py-5 text-muted">
+            Cargando métricas...
+        </div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <small class="text-muted fw-semibold">Ingresos registrados</small>
+
+                    <h2 class="fw-bold mt-2 mb-0">
+                        S/ @IngresosRegistrados.ToString("N2")
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <small class="text-muted fw-semibold">Pedidos activos</small>
+
+                    <h2 class="fw-bold mt-2 mb-0">
+                        @PedidosActivos.Count
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <small class="text-muted fw-semibold">Ticket promedio</small>
+
+                    <h2 class="fw-bold mt-2 mb-0">
+                        S/ @TicketPromedio.ToString("N2")
+                    </h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100"
+                     style="background-color: #fdf5f5;">
+                    <small class="fw-semibold" style="color: #b02a37;">
+                        Productos sin stock
+                    </small>
+
+                    <h2 class="fw-bold mt-2 mb-0" style="color: #b02a37;">
+                        @ProductosSinStock
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0">Pedidos por estado</h5>
+                            <small class="text-muted">
+                                Distribución actual de pedidos.
+                            </small>
+                        </div>
+
+                        <i class="bi bi-pie-chart fs-4" style="color: #6a3849;"></i>
+                    </div>
+
+                    @if (EstadosPedidos.Any())
+                    {
+                        @foreach (var estado in EstadosPedidos)
+                        {
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="fw-semibold">
+                                        @FormatoEstado(estado.Nombre)
+                                    </span>
+
+                                    <span class="text-muted">
+                                        @estado.Cantidad pedidos
+                                    </span>
+                                </div>
+
+                                <div class="progress"
+                                     style="height: 9px;">
+                                    <div class="progress-bar"
+                                         role="progressbar"
+                                         style="width: @estado.Porcentaje%; background-color: @GetEstadoColor(estado.Nombre);">
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">
+                            No hay pedidos registrados.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0">Estado del inventario</h5>
+                            <small class="text-muted">
+                                Productos según disponibilidad.
+                            </small>
+                        </div>
+
+                        <i class="bi bi-box-seam fs-4" style="color: #6a3849;"></i>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 h-100">
+                                <small class="text-muted d-block">
+                                    Disponibles
+                                </small>
+
+                                <h3 class="fw-bold mt-2 mb-0">
+                                    @ProductosDisponibles
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 h-100">
+                                <small class="text-muted d-block">
+                                    Stock bajo
+                                </small>
+
+                                <h3 class="fw-bold mt-2 mb-0" style="color: #fd7e14;">
+                                    @ProductosStockBajo
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="border rounded-4 p-3">
+                                <small class="text-muted d-block">
+                                    Valor estimado del inventario
+                                </small>
+
+                                <h3 class="fw-bold mt-2 mb-0">
+                                    S/ @ValorInventario.ToString("N2")
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
+                <div>
+                    <h5 class="fw-bold m-0">Pedidos recientes</h5>
+                    <small class="text-muted">
+                        Últimos pedidos registrados.
+                    </small>
+                </div>
+
+                <NavLink href="/admin/pedidos"
+                         class="btn btn-sm btn-outline-secondary">
+                    Ver pedidos
+                </NavLink>
+            </div>
+
+            @if (!PedidosRecientes.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    No hay pedidos registrados.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover m-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Pedido</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                                <th>Total</th>
+                                <th class="pe-4 text-end">Detalle</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var pedido in PedidosRecientes)
+                            {
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-semibold">
+                                            @(string.IsNullOrWhiteSpace(pedido.CodigoPedido)
+                                                ? $"Pedido #{pedido.IdPedido}"
+                                                : pedido.CodigoPedido)
+                                        </div>
+
+                                        <small class="text-muted">
+                                            ID: @pedido.IdPedido
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-semibold">
+                                            @NombreCliente(pedido.Cliente)
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @(pedido.Cliente?.Correo ?? "-")
+                                        </small>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge rounded-pill text-dark"
+                                              style="background-color: @GetEstadoBgColor(pedido.Estado);">
+                                            @FormatoEstado(pedido.Estado)
+                                        </span>
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        S/ @pedido.Total.ToString("F2")
+                                    </td>
+
+                                    <td class="pe-4 text-end">
+                                        <NavLink href="/admin/pedidos"
+                                                 class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-eye"></i>
+                                        </NavLink>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Pedido> Pedidos = new();
+    private List<Producto> Productos = new();
+
+    private bool cargando = true;
+
+    private string mensaje = string.Empty;
+    private bool esError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAdmin)
+        {
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
+
+        await CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        cargando = true;
+        mensaje = string.Empty;
+
+        try
+        {
+            Pedidos = await PedidoRestService.ListarPedidosAsync();
+            Productos = await ProductoRestService.ListarProductosTodosAsync();
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"No se pudieron cargar las métricas: {ex.Message}";
+            esError = true;
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private List<Pedido> PedidosActivos =>
+        Pedidos
+            .Where(pedido =>
+                !string.Equals(
+                    pedido.Estado,
+                    "CANCELADO",
+                    StringComparison.OrdinalIgnoreCase
+                ))
+            .ToList();
+
+    private decimal IngresosRegistrados =>
+        PedidosActivos.Sum(pedido => pedido.Total);
+
+    private decimal TicketPromedio =>
+        PedidosActivos.Count == 0
+            ? 0
+            : PedidosActivos.Sum(pedido => pedido.Total)
+                / PedidosActivos.Count;
+
+    private int ProductosSinStock =>
+        Productos.Count(producto => producto.Stock <= 0);
+
+    private int ProductosStockBajo =>
+        Productos.Count(producto =>
+            producto.Stock > 0
+            && producto.Stock <= 12);
+
+    private int ProductosDisponibles =>
+        Productos.Count(producto => producto.Stock > 12);
+
+    private decimal ValorInventario =>
+        Productos.Sum(producto => producto.Precio * producto.Stock);
+
+    private List<Pedido> PedidosRecientes =>
+        Pedidos
+            .OrderByDescending(pedido => pedido.IdPedido)
+            .Take(6)
+            .ToList();
+
+    private List<EstadoPedidoResumen> EstadosPedidos =>
+        Pedidos
+            .GroupBy(pedido =>
+                string.IsNullOrWhiteSpace(pedido.Estado)
+                    ? "SIN_ESTADO"
+                    : pedido.Estado.ToUpper())
+            .OrderByDescending(grupo => grupo.Count())
+            .Select(grupo => new EstadoPedidoResumen
+            {
+                Nombre = grupo.Key,
+                Cantidad = grupo.Count(),
+                Porcentaje = Pedidos.Count == 0
+                    ? 0
+                    : (grupo.Count() * 100.0) / Pedidos.Count
+            })
+            .ToList();
+
+    private void LimpiarMensaje()
+    {
+        mensaje = string.Empty;
+    }
+
+    private static string NombreCliente(Cliente? cliente)
+    {
+        if (cliente == null)
+        {
+            return "Sin cliente";
+        }
+
+        return $"{cliente.Nombre} {cliente.Apellido}".Trim();
+    }
+
+    private static string FormatoEstado(string estado)
+    {
+        return estado switch
+        {
+            "PENDIENTE" => "Pendiente",
+            "CONFIRMADO" => "Confirmado",
+            "EN_PROCESO" => "En proceso",
+            "ENVIADO" => "Enviado",
+            "ENTREGADO" => "Entregado",
+            "CANCELADO" => "Cancelado",
+            _ => estado
+        };
+    }
+
+    private static string GetEstadoBgColor(string estado)
+    {
+        return estado switch
+        {
+            "PENDIENTE" => "#f8d7da",
+            "CONFIRMADO" => "#fff3cd",
+            "EN_PROCESO" => "#fff3cd",
+            "ENVIADO" => "#cff4fc",
+            "ENTREGADO" => "#d1e7dd",
+            "CANCELADO" => "#e2e3e5",
+            _ => "#f8f9fa"
+        };
+    }
+
+    private static string GetEstadoColor(string estado)
+    {
+        return estado switch
+        {
+            "PENDIENTE" => "#dc3545",
+            "CONFIRMADO" => "#fd7e14",
+            "EN_PROCESO" => "#fd7e14",
+            "ENVIADO" => "#0d6efd",
+            "ENTREGADO" => "#198754",
+            "CANCELADO" => "#6c757d",
+            _ => "#6c757d"
+        };
+    }
+
+    private class EstadoPedidoResumen
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public int Cantidad { get; set; }
+        public double Porcentaje { get; set; }
+    }
+}
