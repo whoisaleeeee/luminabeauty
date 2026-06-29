@@ -3,146 +3,308 @@
 
 <PageTitle>Preguntas frecuentes | Lumina Beauty</PageTitle>
 
-<div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+<div class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
 
-    <nav class="mb-8 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
+    <nav class="mb-6 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
         <span class="cursor-pointer transition hover:text-[#C7346A]"
               @onclick='() => Navigator.NavigateTo("/")'>
             Inicio
         </span>
-
         <span class="text-stone-300">/</span>
-
-        <span class="font-bold text-stone-600">
-            Preguntas frecuentes
-        </span>
+        <span class="font-bold text-stone-600">Preguntas frecuentes</span>
     </nav>
 
-    <section class="mt-8 rounded-[2rem] border border-stone-200/70 bg-white/85 p-7 shadow-sm sm:p-10">
+    <section class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-sm">
 
-        <div class="border-b border-stone-100 pb-6">
-            <h1 class="mt-2 font-serif text-xl font-semibold text-stone-800 sm:text-xl">
-                Preguntas frecuentes
-            </h1>
+        <header class="border-b border-[#F6DDE5] bg-[#FFF7F9] px-6 py-8 sm:px-10 sm:py-10">
+            <span class="inline-flex items-center gap-2 rounded-full border border-[#F5C8D6] bg-white px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <path d="M9.5 9a2.7 2.7 0 1 1 4.4 2.1c-1 .8-1.9 1.3-1.9 2.9"></path>
+                    <path d="M12 17h.01"></path>
+                </svg>
+                Centro de ayuda Lumina
+            </span>
 
-            <p class="mt-2 text-xs leading-relaxed text-stone-500">
-                Encuentra información sobre pedidos, entregas, productos y tu cuenta Lumina.
-            </p>
-        </div>
+            <div class="mt-4 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="font-serif text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+                        Preguntas frecuentes
+                    </h1>
 
-        <div class="mt-8 space-y-4">
-            @for (int index = 0; index < _faqs.Count; index++)
-            {
-                var currentIndex = index;
-                var item = _faqs[currentIndex];
-                var isOpen = _openedFaqIndex == currentIndex;
+                    <p class="mt-2 max-w-2xl text-xs leading-relaxed text-stone-500">
+                        Respuestas rápidas sobre compras, productos y tu experiencia dentro de Lumina Beauty.
+                    </p>
+                </div>
 
-                <article class="overflow-hidden rounded-2xl border border-stone-200 bg-stone-50/45 transition">
-                    <button @onclick="() => ToggleFaq(currentIndex)"
-                            class="flex w-full items-center justify-between gap-5 px-5 py-5 text-left transition hover:bg-[#FFF0F3]/60 cursor-pointer">
+                <button type="button"
+                        @onclick='() => Navigator.NavigateTo("/contact")'
+                        class="inline-flex w-fit items-center gap-2 rounded-xl border border-[#F5C8D6] bg-white px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-[#C7346A] transition hover:border-[#E7A9BE] hover:bg-[#FFF0F3]">
+                    Centro de ayuda
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14"></path>
+                        <path d="m13 6 6 6-6 6"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
 
-                        <span class="text-sm font-semibold text-stone-800">
-                            @item.Question
+        <div class="grid grid-cols-1 gap-8 px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+
+            <aside class="lg:sticky lg:top-6 lg:self-start">
+                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">
+                    Accesos rápidos
+                </p>
+
+                <div class="mt-3 space-y-2">
+                    <button type="button"
+                            @onclick='() => Navigator.NavigateTo("/profile?tab=pedidos")'
+                            class="flex w-full items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-left shadow-sm transition-all duration-200 cursor-pointer hover:!-translate-y-0.5 hover:!border-[#E7A9BE] hover:!bg-[#FFF0F3] hover:!shadow-[0_8px_18px_rgba(199,52,106,0.12)] active:translate-y-0 active:scale-[0.99]">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 7h18"></path>
+                                <path d="M5 7l1-3h12l1 3"></path>
+                                <path d="M5 7v13h14V7"></path>
+                            </svg>
                         </span>
+                        <span>
+                            <span class="block text-[10px] font-black uppercase tracking-wider text-stone-800">Mis pedidos</span>
+                            <span class="mt-0.5 block text-[10px] text-stone-400">Seguimiento y detalle</span>
+                        </span>
+                    </button>
 
-                        <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition @(isOpen
-                                                          ? "border-[#FCD1DB] bg-[#FFF0F3] text-[#C7346A]"
-                                                          : "border-stone-200 bg-white text-stone-400")">
-            <svg class="h-4 w-4 transition-transform @(isOpen ? "rotate-45" : "")"
-                 viewBox="0 0 24 24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="1.8">
-                <path d="M12 5v14" />
-                <path d="M5 12h14" />
-            </svg>
-        </span>
-    </button>
+                    <button type="button"
+                            @onclick='() => Navigator.NavigateTo("/profile?tab=reclamos")'
+                            class="flex w-full items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-left shadow-sm transition-all duration-200 cursor-pointer hover:!-translate-y-0.5 hover:!border-[#E7A9BE] hover:!bg-[#FFF0F3] hover:!shadow-[0_8px_18px_rgba(199,52,106,0.12)] active:translate-y-0 active:scale-[0.99]">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 9v4"></path>
+                                <path d="M12 17h.01"></path>
+                                <circle cx="12" cy="12" r="9"></circle>
+                            </svg>
+                        </span>
+                        <span>
+                            <span class="block text-[10px] font-black uppercase tracking-wider text-stone-800">Reclamos</span>
+                            <span class="mt-0.5 block text-[10px] text-stone-400">Registrar y consultar estado</span>
+                        </span>
+                    </button>
 
-    @if (isOpen)
-    {
-        <div class="border-t border-stone-100 bg-white px-5 py-5 text-sm leading-relaxed text-stone-600">
-            @item.Answer
+                    <button type="button"
+                            @onclick='() => Navigator.NavigateTo("/profile?tab=puntos")'
+                            class="flex w-full items-center gap-3 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-left shadow-sm transition-all duration-200 cursor-pointer hover:!-translate-y-0.5 hover:!border-[#E7A9BE] hover:!bg-[#FFF0F3] hover:!shadow-[0_8px_18px_rgba(199,52,106,0.12)] active:translate-y-0 active:scale-[0.99]">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="m12 2 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9L12 2Z"></path>
+                            </svg>
+                        </span>
+                        <span>
+                            <span class="block text-[10px] font-black uppercase tracking-wider text-stone-800">Puntos Lumina</span>
+                            <span class="mt-0.5 block text-[10px] text-stone-400">Saldo y movimientos</span>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="mt-5 rounded-2xl border border-[#FCD1DB] bg-[#FFF7F9] p-4">
+                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-[#C7346A]">
+                        ¿Aún tienes dudas?
+                    </p>
+                    <p class="mt-1 text-[11px] leading-relaxed text-stone-500">
+                        Nuestro equipo puede orientarte por correo o WhatsApp.
+                    </p>
+                    <button type="button"
+                            @onclick='() => Navigator.NavigateTo("/contact")'
+                            class="mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#C7346A] transition hover:text-[#9E2B55]">
+                        Ir a contacto
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14"></path>
+                            <path d="m13 6 6 6-6 6"></path>
+                        </svg>
+                    </button>
+                </div>
+            </aside>
+
+            <main class="max-w-3xl">
+                <div class="mb-5 flex flex-wrap gap-2">
+                    @foreach (var category in _categories)
+                    {
+                        var isActive = _selectedCategory == category.Key;
+
+                        <button type="button"
+                                @onclick="() => SetCategory(category.Key)"
+                                class="rounded-full border px-3.5 py-2 text-[9px] font-black uppercase tracking-wider transition @(isActive
+                                                                                                    ? "border-[#D93470] bg-[#D93470] text-white shadow-[0_6px_14px_rgba(217,52,112,0.18)]"
+                                                                                                    : "border-stone-200 bg-white text-stone-500 hover:border-[#F2A9BF] hover:bg-[#FFF5F8] hover:text-[#C7346A]")">
+                            @category.Value
+                        </button>
+                    }
+                </div>
+
+                <div class="space-y-3">
+                    @foreach (var item in FilteredFaqs)
+                    {
+                        var isOpen = _openedFaqKey == item.Key;
+
+                        <article class="overflow-hidden rounded-2xl border transition @(isOpen
+                                                                                              ? "border-[#F3C7D5] bg-[#FFF9FA]"
+                                                                                              : "border-stone-200 bg-white hover:border-[#E9D4DA]")">
+
+                            <button type="button"
+                                    @onclick="() => ToggleFaq(item.Key)"
+                                    class="flex w-full items-center justify-between gap-5 px-5 py-4 text-left transition hover:bg-[#FFF5F8] sm:px-6 sm:py-5">
+
+                                <span class="flex min-w-0 items-center gap-3">
+                                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg @(isOpen
+                                                                                                                            ? "bg-[#FFE2EB] text-[#C7346A]"
+                                                                                                                            : "bg-stone-100 text-stone-500")">
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 5v14"></path>
+                                            <path d="M5 12h14"></path>
+                                        </svg>
+                                    </span>
+
+                                    <span class="text-[13px] font-bold leading-relaxed text-stone-800 sm:text-sm">
+                                        @item.Question
+                                    </span>
+                                </span>
+
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition @(isOpen
+                                                                                                                ? "border-[#F3C7D5] bg-white text-[#C7346A]"
+                                                                                                                : "border-stone-200 bg-white text-stone-400")">
+                                    <svg class="h-3.5 w-3.5 transition-transform @(isOpen ? "rotate-45" : "")"
+                                         viewBox="0 0 24 24"
+                                         fill="none"
+                                         stroke="currentColor"
+                                         stroke-width="1.8">
+                                        <path d="M12 5v14"></path>
+                                        <path d="M5 12h14"></path>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            @if (isOpen)
+                            {
+                                <div class="border-t border-[#F3E1E6] bg-white px-5 py-4 text-[13px] leading-7 text-stone-600 sm:px-6 sm:text-sm">
+                                    @item.Answer
+                                </div>
+                            }
+                        </article>
+                    }
+                </div>
+
+                @if (FilteredFaqs.Count == 0)
+                {
+                    <div class="rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF7F9] p-8 text-center">
+                        <p class="text-sm font-bold text-stone-700">
+                            No hay preguntas disponibles en esta categoría.
+                        </p>
+                        <button type="button"
+                                @onclick='() => SetCategory("todos")'
+                                class="mt-3 text-[10px] font-black uppercase tracking-wider text-[#C7346A] hover:underline">
+                            Ver todas las preguntas
+                        </button>
+                    </div>
+                }
+
+                <section class="mt-6 rounded-2xl border border-[#FCD1DB]/70 bg-[#FFF0F3]/45 p-5 sm:flex sm:items-center sm:justify-between sm:gap-5">
+                    <div>
+                        <p class="font-serif text-lg font-semibold text-stone-900">
+                            ¿No encontraste lo que buscabas?
+                        </p>
+                        <p class="mt-1 text-[11px] leading-relaxed text-stone-500">
+                            Registra una consulta y el equipo Lumina te responderá por el canal que prefieras.
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            @onclick='() => Navigator.NavigateTo("/contact")'
+                            class="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-stone-950 px-5 py-3 text-[10px] font-black uppercase tracking-wider text-white transition hover:bg-[#C7346A] sm:mt-0">
+                        Contactar soporte
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14"></path>
+                            <path d="m13 6 6 6-6 6"></path>
+                        </svg>
+                    </button>
+                </section>
+            </main>
         </div>
-    }
-</article>
-            }
-</div>
-
-<div class="mt-10 rounded-2xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/35 px-6 py-5 sm:flex sm:items-center sm:justify-between">
-    <div>
-        <p class="text-sm font-semibold text-stone-800">
-            ¿No encontraste la respuesta que necesitabas?
-        </p>
-
-        <p class="mt-1 text-xs text-stone-500">
-            Nuestro equipo puede orientarte sobre pedidos, entregas o tu cuenta.
-        </p>
-    </div>
-
-    <button @onclick='() => Navigator.NavigateTo("/contact")'
-            class="mt-4 rounded-xl bg-stone-950 px-5 py-3 text-[10px] font-bold uppercase tracking-[0.14em] text-white transition hover:bg-[#C7346A] cursor-pointer sm:mt-0">
-        Contactar soporte
-    </button>
-</div>
-</section>
+    </section>
 </div>
 
 @code {
-    private int _openedFaqIndex = -1;
+    private string _openedFaqKey = string.Empty;
+    private string _selectedCategory = "todos";
 
-    private class FaqItem
+    private readonly Dictionary<string, string> _categories = new()
     {
-        public string Question { get; set; } = string.Empty;
-        public string Answer { get; set; } = string.Empty;
-    }
+        ["todos"] = "Todas",
+        ["pedidos"] = "Pedidos",
+        ["cuenta"] = "Cuenta",
+        ["productos"] = "Productos",
+        ["beneficios"] = "Beneficios"
+    };
 
     private readonly List<FaqItem> _faqs = new()
     {
-        new()
-        {
-            Question = "¿Cómo puedo revisar el estado de mi pedido?",
-            Answer = "Ingresa a Mi cuenta, abre la sección Mis pedidos y selecciona el pedido que deseas consultar. Podrás revisar el detalle de compra, el estado registrado y la información de seguimiento disponible."
-        },
-        new()
-        {
-            Question = "¿Cuánto demora la entrega de un pedido?",
-            Answer = "El tiempo de entrega depende de la zona de envío y del estado de preparación del pedido. Cuando el envío haya sido registrado, podrás revisar la fecha estimada desde el detalle de tu pedido."
-        },
-        new()
-        {
-            Question = "¿Cómo actualizo mi dirección de entrega?",
-            Answer = "Desde Mi cuenta, en Mis direcciones, puedes registrar nuevas direcciones, editar las existentes, elegir una dirección principal o eliminar las que ya no utilizarás."
-        },
-        new()
-        {
-            Question = "¿Cómo aplico un código de descuento?",
-            Answer = "Cuando existan campañas activas, podrás ingresar el código durante el checkout. Antes de confirmar tu pedido, se mostrará si el cupón cumple las condiciones de vigencia, monto mínimo y disponibilidad."
-        },
-        new()
-        {
-            Question = "¿Los productos mostrados están disponibles?",
-            Answer = "La disponibilidad se actualiza según el stock registrado. En la tienda puedes usar el filtro de productos con stock para ver únicamente alternativas disponibles."
-        },
-        new()
-        {
-            Question = "¿Cómo guardo productos para revisarlos después?",
-            Answer = "Puedes usar el ícono de favoritos en cada producto. Los productos guardados aparecerán en Mi cuenta, dentro de la sección Mis favoritos."
-        },
-        new()
-        {
-            Question = "¿Cómo contacto a Lumina Beauty?",
-            Answer = "Puedes escribir a ayuda@luminabeauty.com o comunicarte al (+51) 993 579 975 durante el horario de atención indicado en el footer."
-        },
-        new()
-        {
-            Question = "¿Puedo modificar un pedido después de confirmarlo?",
-            Answer = "La modificación depende del estado operativo del pedido. Si necesitas ayuda, revisa primero el detalle del pedido y comunícate con soporte para evaluar las alternativas disponibles."
-        }
+        new("pedido-estado", "pedidos", "¿Cómo puedo revisar el estado de mi pedido?",
+            "Ingresa a Mi cuenta, abre la sección Mis pedidos y selecciona el pedido que deseas consultar. Podrás revisar el detalle de compra, el estado registrado y la información de seguimiento disponible."),
+
+        new("pedido-entrega", "pedidos", "¿Cuánto demora la entrega de un pedido?",
+            "El tiempo de entrega depende de la zona de envío y del estado de preparación del pedido. Cuando el envío haya sido registrado, podrás revisar la fecha estimada desde el detalle de tu pedido."),
+
+        new("pedido-modificar", "pedidos", "¿Puedo modificar un pedido después de confirmarlo?",
+            "La modificación depende del estado operativo del pedido. Revisa primero el detalle de la compra en Mis pedidos y, si necesitas ayuda adicional, comunícate con el Centro de ayuda."),
+
+        new("cuenta-direccion", "cuenta", "¿Cómo actualizo mi dirección de entrega?",
+            "Desde Mi cuenta, en Mis direcciones, puedes registrar nuevas direcciones, editar las existentes, elegir una dirección principal o eliminar las que ya no utilizarás."),
+
+        new("cuenta-favoritos", "cuenta", "¿Cómo guardo productos para revisarlos después?",
+            "Puedes usar el ícono de favoritos en cada producto. Los productos guardados aparecerán en Mi cuenta, dentro de la sección Mis favoritos."),
+
+        new("cuenta-puntos", "beneficios", "¿Dónde consulto mis puntos Lumina?",
+            "Ingresa a Mi cuenta y abre la sección Puntos. Ahí verás tu saldo disponible, nivel de membresía e historial de acumulaciones, canjes o ajustes."),
+
+        new("beneficios-categoria", "beneficios", "¿Qué beneficios tengo según mi categoría de comprador?",
+            "Tu categoría Lumina se muestra en Mi cuenta, dentro de Puntos. El nivel se actualiza según tus puntos acumulados y puede habilitar beneficios asociados a campañas vigentes, como acceso anticipado, promociones seleccionadas o ventajas de fidelidad. Revisa siempre las condiciones de cada campaña, ya que los beneficios pueden variar según su vigencia y disponibilidad."),
+
+        new("productos-stock", "productos", "¿Los productos mostrados están disponibles?",
+            "La disponibilidad se actualiza según el stock registrado. En la tienda puedes usar el filtro de productos con stock para ver únicamente alternativas disponibles."),
+
+        new("productos-cupon", "beneficios", "¿Cómo aplico un código de descuento?",
+            "Cuando existan campañas activas, podrás ingresar el código durante el checkout. Antes de confirmar tu pedido, se mostrará si el cupón cumple las condiciones de vigencia, monto mínimo y disponibilidad."),
+
+        new("contacto", "cuenta", "¿Cómo contacto a Lumina Beauty?",
+            "Puedes visitar el Centro de ayuda para registrar una consulta. Podrás indicar si prefieres recibir respuesta por correo electrónico o WhatsApp. También puedes llamar al +51 958 392 491, de lunes a sábado, de 9:00 AM a 8:00 PM.")
     };
 
-    private void ToggleFaq(int index)
+    private List<FaqItem> FilteredFaqs =>
+        _selectedCategory == "todos"
+            ? _faqs
+            : _faqs.Where(faq => faq.Category == _selectedCategory).ToList();
+
+    private void ToggleFaq(string key)
     {
-        _openedFaqIndex = _openedFaqIndex == index ? -1 : index;
+        _openedFaqKey = _openedFaqKey == key ? string.Empty : key;
+    }
+
+    private void SetCategory(string category)
+    {
+        _selectedCategory = category;
+        _openedFaqKey = string.Empty;
+    }
+
+    private sealed class FaqItem
+    {
+        public FaqItem(string key, string category, string question, string answer)
+        {
+            Key = key;
+            Category = category;
+            Question = question;
+            Answer = answer;
+        }
+
+        public string Key { get; }
+        public string Category { get; }
+        public string Question { get; }
+        public string Answer { get; }
     }
 }

@@ -36,18 +36,18 @@
         var pagedProducts = ShopApp.GetPagedProducts();
         var totalPages = ShopApp.GetTotalPages();
 
-        <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-[245px_minmax(0,1fr)]">
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[228px_minmax(0,1fr)]">
 
             <aside class="shop-sidebar">
-                <div class="space-y-5 rounded-[22px] border border-white/70 bg-white/60 p-4 shadow-[0_10px_28px_rgba(194,104,137,0.07)] backdrop-blur-md lg:sticky lg:top-20">
+                <div class="space-y-5 rounded-3xl border border-stone-200/80 bg-white/80 p-4 shadow-[0_12px_30px_rgba(194,104,137,0.06)] backdrop-blur-md lg:sticky lg:top-20">
 
                     <div>
-                        <div class="mb-4 flex items-center justify-between">
-                            <p class="text-xs font-black uppercase tracking-[0.16em] text-stone-800">
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="text-[10px] font-black uppercase tracking-[0.18em] text-stone-800">
                                 Categorías
                             </p>
 
-                            <span class="rounded-full bg-[#FFF0F3] px-2 py-1 text-[10px] font-bold text-[#C7346A]">
+                            <span class="rounded-full border border-[#F8D7E1] bg-[#FFF7F9] px-2 py-1 text-[9px] font-black text-[#C7346A]">
                                 @ShopApp.State.AllProducts.Count
                             </span>
                         </div>
@@ -55,12 +55,12 @@
                         <div class="space-y-1">
                             <button @onclick="() => ShopApp.SelectCategory(null)"
                                     class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition @(string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
-                                                                            ? "bg-[#FFF0F3] text-[#C7346A]"
-                                                                            : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
+                                                                                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                    : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
 
                                 <span>Todos los productos</span>
 
-                                <span class="text-xs font-bold text-stone-400">
+                                <span class="text-[10px] font-bold text-stone-400">
                                     @ShopApp.State.AllProducts.Count
                                 </span>
                             </button>
@@ -74,14 +74,14 @@
 
                                 <button @onclick="() => ShopApp.SelectCategory(category.Name)"
                                         class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition @(isActive
-                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
-                                                                                    : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
+                                                                                                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                                    : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
 
                                     <span class="truncate">
                                         @category.Name
                                     </span>
 
-                                    <span class="ml-3 shrink-0 text-xs font-bold text-stone-400">
+                                    <span class="ml-3 shrink-0 text-[10px] font-bold text-stone-400">
                                         @category.ProductCount
                                     </span>
                                 </button>
@@ -89,33 +89,34 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-stone-100 pt-4">
+                    <div class="border-t border-stone-100 pt-5">
                         <div class="mb-5 flex items-center justify-between">
-                            <p class="text-xs font-black uppercase tracking-[0.16em] text-stone-800">
+                            <p class="text-[10px] font-black uppercase tracking-[0.18em] text-stone-800">
                                 Filtros
                             </p>
 
                             <button @onclick="ShopApp.ResetFilters"
-                                    class="cursor-pointer text-[11px] font-bold uppercase tracking-wider text-[#C7346A] transition hover:text-[#FF76A5]">
+                                    disabled="@(!HasActiveFilters)"
+                                    class="cursor-pointer text-[10px] font-black uppercase tracking-wider text-[#C7346A] transition hover:text-[#9E2B55] disabled:cursor-default disabled:opacity-35">
                                 Limpiar
                             </button>
                         </div>
 
-                        <div class="space-y-6">
+                        <div class="space-y-5">
 
                             @if (ShopApp.State.AvailableBrands.Count > 0)
                             {
                                 <div class="space-y-3">
-                                    <p class="text-[11px] font-black uppercase tracking-[0.14em] text-stone-400">
+                                    <p class="text-[10px] font-black uppercase tracking-[0.16em] text-stone-400">
                                         Marca
                                     </p>
 
-                                    <div class="max-h-44 space-y-2 overflow-y-auto pr-1">
+                                    <div class="max-h-40 space-y-2 overflow-y-auto pr-1">
                                         @foreach (var brand in ShopApp.State.AvailableBrands)
                                         {
                                             var isSelected = ShopApp.State.SelectedBrands.Contains(brand);
 
-                                            <label class="flex cursor-pointer items-center gap-2.5 text-sm font-medium text-stone-700">
+                                            <label class="flex cursor-pointer items-center gap-2.5 rounded-lg px-1 py-0.5 text-[13px] font-medium text-stone-700 transition hover:bg-[#FFF9FA]">
                                                 <input type="checkbox"
                                                        checked="@isSelected"
                                                        @onchange="@(() => ShopApp.ToggleBrand(brand))"
@@ -132,7 +133,7 @@
                             {
                                 <div class="space-y-3">
                                     <div class="flex items-center justify-between">
-                                        <p class="text-[11px] font-black uppercase tracking-[0.14em] text-stone-400">
+                                        <p class="text-[10px] font-black uppercase tracking-[0.16em] text-stone-400">
                                             Precio máximo
                                         </p>
 
@@ -147,12 +148,12 @@
                                            step="1"
                                            @bind="ShopApp.State.SelectedMaximumPrice"
                                            @bind:event="oninput"
-                                           class="w-full cursor-pointer accent-[#FF76A5]" />
+                                           class="w-full cursor-pointer accent-[#FF76A5] [accent-color:#FF76A5]" />
                                 </div>
                             }
 
                             <div class="space-y-3">
-                                <p class="text-[11px] font-black uppercase tracking-[0.14em] text-stone-400">
+                                <p class="text-[10px] font-black uppercase tracking-[0.16em] text-stone-400">
                                     Valoración mínima
                                 </p>
 
@@ -163,10 +164,10 @@
 
                                     <button @onclick="() => ShopApp.ToggleMinimumRating(currentRating)"
                                             class="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition @(isSelected
-                                                                                            ? "bg-[#FFF0F3] text-[#C7346A]"
-                                                                                            : "text-stone-600 hover:bg-stone-50")">
+                                                                                                                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                                                    : "text-stone-600 hover:bg-stone-50")">
 
-                                        <span class="text-amber-400">★★★★★</span>
+                                        <span class="tracking-[0.08em] text-[#D88C2C]">★★★★★</span>
                                         <span>@currentRating.ToString("0.0")+ </span>
                                     </button>
                                 }
@@ -186,21 +187,28 @@
 
             <section class="space-y-3">
 
-                <div class="flex flex-col gap-3 rounded-2xl border border-white/70 bg-white/55 px-4 py-3 shadow-[0_10px_28px_rgba(194,104,137,0.06)] backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-col gap-4 rounded-3xl border border-stone-200/80 bg-white/80 px-5 py-4 shadow-[0_10px_26px_rgba(194,104,137,0.05)] backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <p class="text-sm font-bold text-stone-900">
+                        <p class="text-[10px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
+                            @GetCatalogEyebrow()
+                        </p>
+                        <p class="mt-1 text-sm font-bold text-stone-900">
                             @products.Count producto@(products.Count == 1 ? "" : "s") encontrado@(products.Count == 1 ? "" : "s")
+                        </p>
+                        <p class="mt-1 text-[11px] text-stone-500">
+                            Explora productos seleccionados para acompañar tu rutina.
                         </p>
                     </div>
 
-                    <div class="flex items-center rounded-xl border border-[#F7D7DF] bg-white/75 px-3 py-1.5 shadow-sm backdrop-blur-sm">
-                        <span class="mr-2 text-[10px] font-black uppercase tracking-[0.12em] text-stone-400">
+                    <div class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-[#FFFDFD] px-3.5 py-2.5 sm:w-auto sm:justify-start">
+                        <span class="mr-2 text-[9px] font-black uppercase tracking-[0.14em] text-stone-400">
                             Ordenar por
                         </span>
 
                         <select @bind="ShopApp.State.SortBy"
-                                class="cursor-pointer border-0 bg-transparent py-1 pr-7 text-sm font-semibold text-stone-700 outline-none focus:ring-0">
+                                class="min-w-0 cursor-pointer border-0 bg-transparent py-0.5 pr-7 text-[13px] font-bold text-stone-700 outline-none focus:ring-0">
                             <option value="relevance">Relevancia</option>
+                            <option value="best_sellers">Más vendidos</option>
                             <option value="rating">Mejor valorados</option>
                             <option value="price_asc">Menor precio</option>
                             <option value="price_desc">Mayor precio</option>
@@ -227,7 +235,7 @@
                 }
                 else
                 {
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                         @foreach (var product in pagedProducts)
                         {
                             <ProductCard Product="@product" />
@@ -250,8 +258,8 @@
 
                                 <button @onclick="() => ShopApp.GoToPage(currentPage)"
                                         class="h-10 min-w-10 cursor-pointer rounded-xl px-3 text-xs font-bold transition @(isCurrent
-                                                                                    ? "bg-stone-950 text-white"
-                                                                                    : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                                                                                                                                                                    ? "bg-stone-950 text-white"
+                                                                                                                                                                    : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
                             @currentPage
                         </button>
                     }
@@ -273,6 +281,9 @@
     [SupplyParameterFromQuery(Name = "category")]
     public string? CategoryFromUrl { get; set; }
 
+    [SupplyParameterFromQuery(Name = "sort")]
+    public string? SortFromUrl { get; set; }
+
     private bool _catalogInitialized;
 
     protected override void OnInitialized()
@@ -291,15 +302,40 @@
         if (string.IsNullOrWhiteSpace(CategoryFromUrl))
         {
             ShopApp.SelectCategory(null);
-            return;
+        }
+        else
+        {
+            var matchingCategory = ShopApp.State.Categories.FirstOrDefault(category =>
+                category.Name.Equals(
+                    CategoryFromUrl,
+                    StringComparison.OrdinalIgnoreCase));
+
+            ShopApp.SelectCategory(matchingCategory?.Name);
         }
 
-        var matchingCategory = ShopApp.State.Categories.FirstOrDefault(category =>
-            category.Name.Equals(
-                CategoryFromUrl,
-                StringComparison.OrdinalIgnoreCase));
+        ShopApp.State.SortBy = SortFromUrl?.Equals(
+            "mas-vendidos",
+            StringComparison.OrdinalIgnoreCase) == true
+                ? "best_sellers"
+                : "relevance";
+    }
 
-        ShopApp.SelectCategory(matchingCategory?.Name);
+    private bool HasActiveFilters =>
+        ShopApp.State.SelectedBrands.Count > 0 ||
+        ShopApp.State.MinimumRating.HasValue ||
+        ShopApp.State.OnlyInStock ||
+        ShopApp.State.SelectedMaximumPrice < ShopApp.State.MaximumPrice;
+
+    private string GetCatalogEyebrow()
+    {
+        if (ShopApp.State.SortBy == "best_sellers")
+        {
+            return "Más vendidos";
+        }
+
+        return string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
+            ? "Todo el catálogo"
+            : ShopApp.State.ActiveCategory;
     }
 
     public void Dispose()
