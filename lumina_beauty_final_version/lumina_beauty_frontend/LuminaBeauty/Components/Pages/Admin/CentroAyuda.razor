@@ -4,6 +4,7 @@
 @using LuminaBeauty.Services
 
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="admin-page">
     <div class="help-page-header">
@@ -184,17 +185,17 @@
         new("Mauricio Alfonso Morales Nuñez", "a20223237@pucp.edu.pe", "MM")
     ];
 
-    private void AbrirCorreo(ContactoAyuda contacto)
+    private async Task AbrirCorreo(ContactoAyuda contacto)
     {
         var asunto = Uri.EscapeDataString("Solicitud de ayuda - Lumina Beauty");
         var mensaje = Uri.EscapeDataString(
             "Hola,\n\nNecesito ayuda con el panel administrativo de Lumina Beauty.\n\nDetalle de la consulta:\n\n"
         );
 
-        Navigation.NavigateTo(
-            $"mailto:{contacto.Correo}?subject={asunto}&body={mensaje}",
-            forceLoad: true
-        );
+        var correoUrl =
+            $"mailto:{contacto.Correo}?subject={asunto}&body={mensaje}";
+
+        await JS.InvokeVoidAsync("open", correoUrl, "_blank");
     }
 
     private sealed record ContactoAyuda(
