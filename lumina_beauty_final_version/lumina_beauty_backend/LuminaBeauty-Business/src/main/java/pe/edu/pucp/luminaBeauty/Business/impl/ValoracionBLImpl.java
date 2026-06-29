@@ -34,6 +34,7 @@ public class ValoracionBLImpl implements ValoracionBL {
         try {
             validarDatosValoracion(valoracion);
             validarRelacionesValoracion(valoracion);
+            validarQueElClientePuedaValorar(valoracion);
 
             if (valoracion.getEstado() == null || valoracion.getEstado().trim().isEmpty()) {
                 valoracion.setEstado("PENDIENTE");
@@ -329,6 +330,64 @@ public class ValoracionBLImpl implements ValoracionBL {
             throw new Exception("Error al responder valoración: " + ex.getMessage(), ex);
         } finally {
             TransactionContext.close();
+        }
+    }
+
+    private void validarQueElClientePuedaValorar(
+            Valoracion valoracion
+    ) throws Exception {
+        if (valoracion.getDetallePedido() == null ||
+                valoracion.getDetallePedido().getId_detalle_pedido() <= 0) {
+            throw new Exception(
+                    "Debe indicar el detalle del pedido que desea valorar."
+            );
+        }
+
+        DetallePedido detallePedido = detallePedidoDAO.buscarPorId(
+                valoracion.getDetallePedido().getId_detalle_pedido()
+        );
+
+        if (detallePedido == null) {
+            throw new Exception("No se encontró el detalle del pedido.");
+        }
+
+        if (detallePedido.getPedido() == null ||
+                detallePedido.getPedido().getId_pedido() <= 0) {
+            throw new Exception(
+                    "El detalle no está asociado a un pedido válido."
+            );
+        }
+
+        if (detallePedido.getPedido().getCliente() == null ||
+                detallePedido.getPedido().getCliente().getId_usuario()
+                        != valoracion.getCliente().getId_usuario()) {
+            throw new Exception(
+                    "No puedes valorar productos de otro cliente."
+            );
+        }
+
+        String estadoPedido = detallePedido.getPedido().getEstado();
+
+        if (estadoPedido == null ||
+                !estadoPedido.trim().equalsIgnoreCase("ENTREGADO")) {
+            throw new Exception(
+                    "Solo puedes valorar productos de pedidos entregados."
+            );
+        }
+
+        if (detallePedido.getProducto() == null ||
+                detallePedido.getProducto().getId_producto()
+                        != valoracion.getProducto().getId_producto()) {
+            throw new Exception(
+                    "El producto no corresponde al detalle del pedido."
+            );
+        }
+
+        if (valoracionDAO.existePorDetallePedido(
+                detallePedido.getId_detalle_pedido())) {
+            throw new Exception(
+                    "Este producto ya fue valorado en este pedido."
+            );
         }
     }
 

@@ -7,4 +7,5 @@ public interface ValoracionDAO extends BaseDAO<Valoracion, Integer> {
 
     ArrayList<Valoracion> listarPublicadasPorProducto(int idProducto)
             throws Exception;
+    boolean existePorDetallePedido(int idDetallePedido) throws Exception;
 }

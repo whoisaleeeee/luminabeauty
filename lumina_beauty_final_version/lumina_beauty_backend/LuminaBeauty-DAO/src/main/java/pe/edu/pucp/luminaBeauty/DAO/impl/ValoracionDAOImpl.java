@@ -301,4 +301,26 @@ public class ValoracionDAOImpl implements ValoracionDAO {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public boolean existePorDetallePedido(int idDetallePedido) throws Exception {
+        String sql = """
+            SELECT 1
+            FROM valoracion
+            WHERE id_detalle_pedido = ?
+            LIMIT 1
+            """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idDetallePedido);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
