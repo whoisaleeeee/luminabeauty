@@ -43,6 +43,15 @@ public class EnvioBLImpl implements EnvioBL {
                 envio.setPais_envio("Peru");
             }
 
+            if (envio.getNumero_seguimiento() == null ||
+                    envio.getNumero_seguimiento().trim().isEmpty()) {
+                envio.setNumero_seguimiento(generarNumeroSeguimiento());
+            } else {
+                envio.setNumero_seguimiento(
+                        envio.getNumero_seguimiento().trim()
+                );
+            }
+
             validarZonaEnvio(envio.getZona_envio());
             validarEstadoEnvio(envio.getEstado());
             validarFechasSegunEstado(envio);
@@ -501,6 +510,10 @@ public class EnvioBLImpl implements EnvioBL {
         }
 
         return "BRONCE";
+    }
+
+    private String generarNumeroSeguimiento() {
+        return "LUM-" + System.currentTimeMillis();
     }
 
     private void validarDatosEnvio(Envio envio) throws Exception {
