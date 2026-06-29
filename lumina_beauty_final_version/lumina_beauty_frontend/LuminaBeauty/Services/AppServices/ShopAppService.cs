@@ -103,11 +103,7 @@ namespace LuminaBeauty.Services
                     .ThenBy(product => product.Name)
                     .ToList(),
 
-                "new_arrivals" => products
-                    .OrderByDescending(IsNewArrival)
-                    .ThenByDescending(product => product.Id)
-                    .ThenBy(product => product.Name)
-                    .ToList(),
+                "new_arrivals" => GetNewArrivalsFirst(products),
 
                 "rating" => products
                     .OrderByDescending(product => product.Rating)
@@ -127,6 +123,20 @@ namespace LuminaBeauty.Services
                     .ThenByDescending(product => product.Rating)
                     .ToList()
             };
+        }
+
+        private List<Product> GetNewArrivalsFirst(List<Product> filteredProducts)
+        {
+            var newArrivalIds = _productService
+                .GetNewArrivals()
+                .Select(product => product.Id)
+                .ToHashSet();
+
+            return filteredProducts
+                .OrderByDescending(product => newArrivalIds.Contains(product.Id))
+                .ThenByDescending(product => product.Id)
+                .ThenBy(product => product.Name)
+                .ToList();
         }
 
         public void SelectCategory(string? categoryName)
@@ -222,15 +232,6 @@ namespace LuminaBeauty.Services
                     StringComparison.OrdinalIgnoreCase
                 ))
                 .ToList();
-        }
-
-        private static bool IsNewArrival(Product product)
-        {
-            return !string.IsNullOrWhiteSpace(product.Id) &&
-                   product.Id.StartsWith(
-                       "na",
-                       StringComparison.OrdinalIgnoreCase
-                   );
         }
 
         private string? ResolveCategory(string? categoryName)
