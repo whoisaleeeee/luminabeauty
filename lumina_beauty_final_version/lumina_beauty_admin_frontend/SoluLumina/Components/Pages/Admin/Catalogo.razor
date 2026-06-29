@@ -6,6 +6,7 @@
 @inject ICategoriaService CategoriaService
 @inject IMarcaService MarcaService
 @inject IConfiguration Configuration
+@inject IJSRuntime JS
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
@@ -369,7 +370,6 @@
     private void OpenAddProductModal()
     {
         showAddProductModal = true;
-
     }
 
     private IEnumerable<Producto> FilteredProducts => Productos
@@ -386,9 +386,35 @@
 
     private async Task OnProductAdded(Producto newProduct)
     {
-        showAddProductModal = false;
         Producto newP = await new HttpClientUtils<Producto>().post(URL_BASE + "/ProductoRS/registrar", newProduct);
+        showAddProductModal = false;
         await CargarDatos();
+
+        if (newP != null)
+        {
+            // Toast pequeño arriba a la derecha (dura 3 segundos)
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                toast = true,
+                position = "top-end",
+                showConfirmButton = false,
+                timer = 3000,
+                timerProgressBar = true,
+                icon = "success",
+                title = "Producto registrado con éxito"
+            });
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                title = "Error de Registro",
+                text = "No se pudo conectar con el servidor o los datos son inválidos.",
+                icon = "error",
+                confirmButtonColor = "#dc3545",
+                confirmButtonText = "Entendido"
+            });
+        }
     }
 
     private bool showEditProductModal = false;
@@ -402,18 +428,83 @@
 
     private async Task OnProductUpdated(Producto updatedProduct)
     {
-        showEditProductModal = false;
         Producto actProducto = await new HttpClientUtils<Producto>().put(URL_BASE + "/ProductoRS/actualizar", updatedProduct);
+        showEditProductModal = false;
         await CargarDatos();
+
+        if (actProducto != null)
+        {
+            // Toast pequeño arriba a la derecha
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                toast = true,
+                position = "top-end",
+                showConfirmButton = false,
+                timer = 3000,
+                timerProgressBar = true,
+                icon = "success",
+                title = "Producto actualizado con éxito"
+            });
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                title = "Error de Actualización",
+                text = "No se pudo conectar con el servidor o los datos son inválidos.",
+                icon = "error",
+                confirmButtonColor = "#dc3545",
+                confirmButtonText = "Entendido"
+            });
+        }
     }
 
     private async Task DeleteProduct(Producto product)
     {
-        // En una app real, aquí se pondría un confirm de JS
-        var exito = await new HttpClientUtils<int>().delete(URL_BASE + "/ProductoRS/eliminar/" + product.Id_producto);
-        if (exito != 0)
+        // Alerta de confirmación previa para evitar borrados accidentales
+        var result = await JS.InvokeAsync<Dictionary<string, bool>>("Swal.fire", new
         {
-            await CargarDatos();
+            title = "¿Estás seguro?",
+            text = $"Vas a eliminar el producto '{product.Nombre}'. Esta acción no se puede deshacer.",
+            icon = "warning",
+            showCancelButton = true,
+            confirmButtonColor = "#6a3849",
+            cancelButtonColor = "#6c757d",
+            confirmButtonText = "Sí, eliminar",
+            cancelButtonText = "Cancelar"
+        });
+
+        // Verificamos si el usuario presionó el botón de confirmación
+        if (result != null && result.ContainsKey("isConfirmed") && result["isConfirmed"])
+        {
+            var exito = await new HttpClientUtils<int>().delete(URL_BASE + "/ProductoRS/eliminar/" + product.Id_producto);
+
+            if (exito != 0)
+            {
+                await CargarDatos();
+
+                // Notificación Toast de eliminación completada
+                await JS.InvokeVoidAsync("Swal.fire", new
+                {
+                    toast = true,
+                    position = "top-end",
+                    showConfirmButton = false,
+                    timer = 2500,
+                    timerProgressBar = true,
+                    icon = "success",
+                    title = "Producto eliminado"
+                });
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("Swal.fire", new
+                {
+                    title = "Error",
+                    text = "No se pudo eliminar el producto de la base de datos.",
+                    icon = "error",
+                    confirmButtonColor = "#dc3545"
+                });
+            }
         }
     }
 
