@@ -149,9 +149,9 @@ namespace LuminaBeauty.Services
                 Brand = marca?.Nombre ?? "Lumina",
                 Category = categoria?.Nombre ?? "Sin categoría",
                 Price = bp.Precio,
-                OriginalPrice = meta.originalPrice > 0
-                    ? meta.originalPrice
-                    : Math.Round(bp.Precio * 1.3m, 2),
+                OriginalPrice = meta.originalPrice > bp.Precio
+                ? meta.originalPrice
+                : null,
                 Image = ResolveProductImage(bp.Imagen),
                 Rating = bp.PromedioCalificacion,
                 ReviewsCount = bp.CantidadValoraciones,
