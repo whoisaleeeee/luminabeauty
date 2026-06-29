@@ -6,20 +6,77 @@
 @using LuminaBeauty.Servicios.REST
 @using LuminaBeauty.Services.Admin
 
-@inject IConfiguration Configuration
-@inject ReporteJasperService ReporteJasperService
-@inject IJSRuntime JS
-@inject AuthService Auth
 @inject PedidoRestService PedidoRestService
 @inject ProductoRestService ProductoRestService
 @inject ClienteRestService ClienteRestService
+@inject AuthService Auth
 @inject NavigationManager Navigation
+@inject ReporteJasperService ReporteJasperService
+@inject IJSRuntime JS
 
 <div class="admin-page">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <!-- Header Superior Estándar -->
+    <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+        <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Reportes</h3>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div class="input-group" style="width: 280px;">
+                <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control bg-light border-0 small" placeholder="Buscar reportes o métricas..." style="font-size: 0.9rem;">
+            </div>
+            <button class="btn btn-link text-secondary position-relative p-1">
+                <i class="bi bi-bell fs-5"></i>
+            </button>
+            <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+            <div class="position-relative">
+                <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                    <div class="text-end d-none d-md-block">
+                        <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@(Auth.CurrentEmployee?.Nombre ?? "Admin") @(Auth.CurrentEmployee?.Apellido ?? "")</h6>
+                        <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@(Auth.CurrentEmployee?.Rol ?? "ADMINISTRADOR")</small>
+                    </div>
+                    <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                </div>
+
+                @if (showProfileDropdown)
+                {
+                    <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                        <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                            <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                            <div class="overflow-hidden">
+                                <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@(Auth.CurrentEmployee?.Nombre ?? "Admin")</h6>
+                                <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@(Auth.CurrentEmployee?.Correo ?? "admin@luminabeauty.com")</small>
+                            </div>
+                        </div>
+                        <div class="py-2">
+                            <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                <i class="bi bi-person fs-5"></i> Ver Perfil
+                            </NavLink>
+                            <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                            <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                            </NavLink>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Subheader Reportes -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
         <div>
-            <h2 class="fw-bold m-0" style="color: #2d2d2d; font-size: 2rem;">Reportes y Métricas</h2>
-            <p class="text-muted mb-0">Resumen operativo basado en pedidos y productos registrados.</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1" style="font-size: 0.8rem; font-weight: 500;">
+                    <li class="breadcrumb-item"><a href="#" class="text-muted text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page" style="color: #834a5d;">Reportes</li>
+                </ol>
+            </nav>
+            <h2 class="fw-black m-0" style="color: #2d2d2d; font-size: 2rem;">Reportes y Métricas</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn bg-white border border-danger text-danger px-3 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2 fw-medium" style="font-size: 0.9rem;" @onclick="GenerarReporteAsync" disabled="@generandoReporte">
+                <i class="bi @(generandoReporte ? "bi-hourglass-split" : "bi-file-earmark-pdf")"></i> PDF
+            </button>
         </div>
     </div>
 
@@ -63,194 +120,194 @@
                 </button>
             </div>
         </div>
-
-        @if (!string.IsNullOrWhiteSpace(mensajeReporte))
-        {
-            <div class="alert alert-warning border-0 rounded-3 mt-3 mb-0 py-2 small">
-                @mensajeReporte
-            </div>
-        }
     </div>
 
-    @if (cargandoDatos)
-{
-    <div class="spinner-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.7); top:0; left:0;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
+    @if (!string.IsNullOrWhiteSpace(mensajeReporte))
+    {
+        <div class="alert alert-warning border-0 rounded-3 mt-3 mb-4 py-2 small">
+            @mensajeReporte
         </div>
-    </div>
-}
-<!-- KPI Cards -->
-    <div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
-            <i class="bi bi-cash-stack position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
-            <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ingresos registrados</small>
-            <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @totalVentas.ToString("N2")</h2>
-            <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;">
-                <i class="bi bi-graph-up-arrow"></i> +12.5% vs mes ant.
-            </small>
-        </div>
-    </div>
-        
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
-                <i class="bi bi-cart3 position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
-                <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Pedidos</small>
-                <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@totalPedidos</h2>
-                <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +5.2% vs mes ant.</small>
-            </div>
-        </div>
-        
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
-                <i class="bi bi-ticket-detailed position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
-                <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ticket promedio</small>
-                <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @ticketPromedio.ToString("N2")</h2>
-                <small class="fw-semibold text-secondary d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-dash"></i> Estable</small>
-            </div>
-        </div>
-        
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
-                <i class="bi bi-person-plus position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
-                <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Clientes distintos</small>
-                <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@totalClientes</h2>
-                <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +22.1% vs mes ant.</small>
-            </div>
-        </div>
-    </div>
+    }
 
-    <!-- Charts Row -->
-    <div class="row g-4 mb-4">
-        
-        <!-- Pseudo Chart: Ventas por categoría -->
-        <div class="col-12 col-lg-7">
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div>
-                        <h5 class="fw-bold m-0 text-dark">Ventas por categoría</h5>
-                        <small class="text-muted">Distribución de ingresos mensual</small>
+    @if (!string.IsNullOrWhiteSpace(mensaje))
+    {
+        <div class="alert @(esError ? "alert-danger" : "alert-success") alert-dismissible fade show mt-3 mb-4">
+            @mensaje
+            <button type="button" class="btn-close" @onclick="LimpiarMensaje"></button>
+        </div>
+    }
+
+    @if (cargando)
+    {
+        <div class="text-center py-5 text-muted">
+            Cargando métricas...
+        </div>
+    }
+    else
+    {
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-cash-stack position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ventas totales</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @IngresosRegistrados.ToString("N2")</h2>
+                    <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +12.5% vs mes ant.</small>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-cart3 position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Pedidos activos</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@PedidosActivos.Count</h2>
+                    <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +5.2% vs mes ant.</small>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-ticket-detailed position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Ticket promedio</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @TicketPromedio.ToString("N2")</h2>
+                    <small class="fw-semibold text-secondary d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-dash"></i> Estable</small>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-person-plus position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Clientes activos</small>
+                    <h2 class="fw-black m-0 mb-3" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@TotalClientes</h2>
+                    <small class="fw-semibold text-success d-flex align-items-center gap-1" style="font-size: 0.8rem;"><i class="bi bi-graph-up-arrow"></i> +22.1% vs mes ant.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            
+            <!-- Pseudo Chart: Ventas por categoría -->
+            <div class="col-12 col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0 text-dark">Ventas por categoría</h5>
+                            <small class="text-muted">Distribución de ingresos mensual</small>
+                        </div>
+                        <button class="btn btn-sm text-secondary bg-transparent border-0"><i class="bi bi-three-dots-vertical fs-5"></i></button>
+                    </div>
+                    
+                    <!-- CSS Bar Chart Simulation -->
+                    <div class="d-flex align-items-end justify-content-around mt-auto pt-4" style="height: 200px;">
+                        @if (ventasPorCategoria != null && ventasPorCategoria.Any())
+                        {
+                            @foreach (var cat in ventasPorCategoria.Take(5))
+                            {
+                                <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                                    <div class="w-100 rounded-top-2 mt-auto chart-bar" 
+                                         style="height: @(cat.Porcentaje.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%; background-color: @cat.Color; transition: all 0.3s; cursor: pointer;"
+                                         title="S/ @cat.Total.ToString("N2")"></div>
+                                    <small class="text-muted text-truncate w-100 text-center" style="font-size: 0.7rem;" title="@cat.Nombre">@cat.Nombre</small>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 w-100 text-muted fst-italic">No hay ventas registradas</div>
+                        }
                     </div>
                 </div>
-                
-                <!-- CSS Bar Chart Simulation -->
-                <div class="d-flex align-items-end justify-content-around mt-auto pt-4" style="height: 200px;">
-                    @if (ventasPorCategoria != null && ventasPorCategoria.Any())
-                    {
-                        @foreach (var cat in ventasPorCategoria.Take(5))
-                        {
-                            <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
-                                <div class="w-100 rounded-top-2 mt-auto chart-bar" 
-                                     style="height: @(cat.Porcentaje.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%; background-color: @cat.Color; transition: all 0.3s; cursor: pointer;"
-                                     title="S/ @cat.Total.ToString("N2")"></div>
-                                <small class="text-muted text-truncate w-100 text-center" style="font-size: 0.7rem;" title="@cat.Nombre">@cat.Nombre</small>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <div class="text-center py-4 w-100 text-muted fst-italic">No hay ventas registradas</div>
-                    }
-                </div>
             </div>
-        </div>
 
-        <!-- Horizontal Bars: Top Marcas -->
-        <div class="col-12 col-lg-5">
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div>
-                        <h5 class="fw-bold m-0 text-dark">Top marcas por ventas</h5>
-                        <small class="text-muted">Marcas con mayor rotación</small>
+            <!-- Horizontal Bars: Top Marcas -->
+            <div class="col-12 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <h5 class="fw-bold m-0 text-dark">Top marcas por ventas</h5>
+                            <small class="text-muted">Marcas con mayor rotación</small>
+                        </div>
+                        <i class="bi bi-graph-up text-secondary fs-5"></i>
                     </div>
-                    <i class="bi bi-graph-up text-secondary fs-5"></i>
-                </div>
 
-                <div class="d-flex flex-column justify-content-between flex-grow-1">
-                    @if (ventasPorMarca != null && ventasPorMarca.Any())
-                    {
-                        @foreach (var brand in ventasPorMarca.Take(5))
+                    <div class="d-flex flex-column justify-content-between flex-grow-1">
+                        @if (ventasPorMarca != null && ventasPorMarca.Any())
                         {
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="fw-medium text-dark text-truncate" style="font-size: 0.85rem; max-width: 70%;" title="@brand.Nombre">@brand.Nombre</span>
-                                    <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ @brand.Total.ToString("N2")</span>
+                            @foreach (var brand in ventasPorMarca.Take(5))
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-medium text-dark text-truncate" style="font-size: 0.85rem; max-width: 70%;" title="@brand.Nombre">@brand.Nombre</span>
+                                        <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ @brand.Total.ToString("N2")</span>
+                                    </div>
+                                    <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                        <div class="progress-bar" role="progressbar" style="width: @(brand.Porcentaje.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%; background-color: @brand.Color;"></div>
+                                    </div>
                                 </div>
-                                <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
-                                    <div class="progress-bar" role="progressbar" style="width: @(brand.Porcentaje.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%; background-color: @brand.Color;"></div>
-                                </div>
-                            </div>
+                            }
                         }
-                    }
-                    else
-                    {
-                        <div class="text-center py-4 w-100 text-muted fst-italic">No hay ventas registradas</div>
-                    }
+                        else
+                        {
+                            <div class="text-center py-4 w-100 text-muted fst-italic">No hay ventas registradas</div>
+                        }
+                    </div>
                 </div>
             </div>
+
         </div>
 
-    </div>
+        <!-- Tabla: Detalle de Ventas Recientes -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: #f7eff1 !important;">
+                <h5 class="fw-bold m-0 text-dark">Detalle de Ventas Recientes</h5>
+                <NavLink href="/admin/pedidos" class="text-decoration-none fw-medium" style="color: #834a5d; font-size: 0.9rem;">Ver todo</NavLink>
+            </div>
 
-    <!-- Tabla: Detalle de Ventas Recientes -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
-        <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: #f7eff1 !important;">
-            <h5 class="fw-bold m-0 text-dark">Detalle de Ventas Recientes</h5>
-            <a href="/admin/pedidos" class="text-decoration-none fw-medium" style="color: #834a5d; font-size: 0.9rem;">Ver todo</a>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table align-middle table-hover m-0">
-                <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                    <tr>
-                        <th class="py-3 px-4 border-bottom-0">ID Transacción</th>
-                        <th class="py-3 border-bottom-0">Cliente</th>
-                        <th class="py-3 border-bottom-0">Monto</th>
-                        <th class="py-3 border-bottom-0">Estado</th>
-                        <th class="py-3 px-4 border-bottom-0 text-end">Acción</th>
-                    </tr>
-                </thead>
-                <tbody style="font-size: 0.85rem; color: #4f4f4f;">
-                    @if (ventasRecientes != null && ventasRecientes.Any())
-                    {
-                        @foreach (var p in VentasPaginadas)
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="py-3 px-4 border-bottom-0">ID Transacción</th>
+                            <th class="py-3 border-bottom-0">Cliente</th>
+                            <th class="py-3 border-bottom-0">Monto</th>
+                            <th class="py-3 border-bottom-0">Estado</th>
+                            <th class="py-3 px-4 border-bottom-0 text-end">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        @if (PedidosRecientes != null && PedidosRecientes.Any())
                         {
-                            <tr class="border-bottom" style="border-color: #f7eff1 !important;">
-                                <td class="py-3 px-4 font-monospace text-muted">#ORD-@p.IdPedido</td>
-                                <td class="fw-medium text-dark">@(p.Cliente != null ? $"{p.Cliente.Nombre} {p.Cliente.Apellido}" : "Sin Cliente")</td>
-                                <td class="fw-bold text-dark">S/ @p.Total.ToString("N2")</td>
-                                <td>
-                                    <span class="badge rounded-pill fw-medium" style="background-color: @(p.Estado == "ENTREGADO" ? "#e2f3eb" : "#fdf5f5"); color: @(p.Estado == "ENTREGADO" ? "#198754" : "#d9557b"); padding: 0.4em 0.8em;">
-                                        @p.Estado
-                                    </span>
-                                </td>
-                                <td class="py-3 px-4 text-end">
-                                    <a href="/admin/pedidos" class="btn btn-sm btn-light text-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                </td>
+                            @foreach (var p in PedidosRecientes)
+                            {
+                                <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                                    <td class="py-3 px-4 font-monospace text-muted">
+                                        @(string.IsNullOrWhiteSpace(p.CodigoPedido) ? $"#ORD-{p.IdPedido}" : p.CodigoPedido)
+                                    </td>
+                                    <td class="fw-medium text-dark">@(p.Cliente != null ? $"{p.Cliente.Nombre} {p.Cliente.Apellido}" : "Sin Cliente")</td>
+                                    <td class="fw-bold text-dark">S/ @p.Total.ToString("N2")</td>
+                                    <td>
+                                        <span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(p.Estado); color: @GetEstadoColor(p.Estado); padding: 0.4em 0.8em;">
+                                            @FormatoEstado(p.Estado)
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4 text-end">
+                                        <NavLink href="/admin/pedidos" class="btn btn-sm btn-light text-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-eye"></i></NavLink>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted fst-italic">No hay ventas registradas</td>
                             </tr>
                         }
-                        <!-- Pagination Controls -->
-                        <tr>
-                            <td colspan="5" class="text-center py-2">
-                                <button class="btn btn-sm btn-outline-secondary me-2" @onclick="PrevPageVentas" disabled="@(paginaVentas == 1)"><i class="bi bi-chevron-left"></i></button>
-                                Página @paginaVentas de @totalPaginasVentas
-                                <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="NextPageVentas" disabled="@(paginaVentas == totalPaginasVentas)"><i class="bi bi-chevron-right"></i></button>
-                            </td>
-                        </tr>
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-muted fst-italic">No hay ventas registradas</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    }
 </div>
 
 <style>
@@ -260,62 +317,22 @@
         transform-origin: bottom;
     }
 </style>
-<style>
-    .spinner-overlay {
-        z-index: 1050;
-    }
-</style>
 
 @code {
-    private bool cargandoDatos = true;
-    private decimal totalVentas = 0;
-    private int totalPedidos = 0;
-    private decimal ticketPromedio = 0;
-    private int totalClientes = 0;
-    private List<Pedido> ventasRecientes = new();
-    private IReadOnlyList<ReporteJasperOption> reportesDisponibles = Array.Empty<ReporteJasperOption>();
+    private bool showProfileDropdown = false;
     private string codigoReporteSeleccionado = "ventas-consolidadas";
-    private bool generandoReporte = false;
-    private string mensajeReporte = "";
-
-    private List<CategoriaVenta> ventasPorCategoria = new();
-    private List<MarcaVenta> ventasPorMarca = new();
-
-    // Pagination for recent sales table
-    private int paginaVentas = 1;
-    private const int ventasPorPagina = 5;
-    private int totalPaginasVentas => Math.Max(1, (int)Math.Ceiling((double)ventasRecientes.Count / ventasPorPagina));
-    private IEnumerable<Pedido> VentasPaginadas => ventasRecientes.Skip((paginaVentas - 1) * ventasPorPagina).Take(ventasPorPagina);
-
-    private void NextPageVentas()
+    private IReadOnlyList<ReporteJasperOption> reportesDisponibles = Array.Empty<ReporteJasperOption>();
+    
+    private void ToggleProfileDropdown()
     {
-        if (paginaVentas < totalPaginasVentas) paginaVentas++;
-    }
-    private void PrevPageVentas()
-    {
-        if (paginaVentas > 1) paginaVentas--;
+        showProfileDropdown = !showProfileDropdown;
     }
 
-    public class CategoriaVenta
-    {
-        public string Nombre { get; set; } = "";
-        public decimal Total { get; set; }
-        public double Porcentaje { get; set; }
-        public string Color { get; set; } = "";
-    }
+    private ReporteJasperOption? ReporteSeleccionado =>
+        reportesDisponibles.FirstOrDefault(r => r.Codigo == codigoReporteSeleccionado);
 
-
-    public class MarcaVenta
-    {
-        public string Nombre { get; set; } = "";
-        public decimal Total { get; set; }
-        public double Porcentaje { get; set; }
-        public string Color { get; set; } = "";
-    }
-
-    private ReporteJasperOption? ReporteSeleccionado => reportesDisponibles.FirstOrDefault(r => r.Codigo == codigoReporteSeleccionado);
-
-    private bool ReporteSeleccionadoRequiereFechas => ReporteSeleccionado?.RequiereFechas ?? true;
+    private bool ReporteSeleccionadoRequiereFechas =>
+        ReporteSeleccionado?.RequiereFechas ?? true;
 
     private DateTime _fechaDesde = new DateTime(2026, 06, 01);
     private DateTime fechaDesde
@@ -344,6 +361,37 @@
         }
     }
 
+    private List<Pedido> Pedidos = new();
+    private List<Producto> Productos = new();
+    private List<CategoriaProducto> Categorias = new();
+    private List<Marca> Marcas = new();
+
+    private bool cargando = true;
+    private string mensaje = string.Empty;
+    private bool esError;
+
+    private List<CategoriaVenta> ventasPorCategoria = new();
+    private List<MarcaVenta> ventasPorMarca = new();
+
+    private bool generandoReporte = false;
+    private string mensajeReporte = "";
+
+    public class CategoriaVenta
+    {
+        public string Nombre { get; set; } = "";
+        public decimal Total { get; set; }
+        public double Porcentaje { get; set; }
+        public string Color { get; set; } = "";
+    }
+
+    public class MarcaVenta
+    {
+        public string Nombre { get; set; } = "";
+        public decimal Total { get; set; }
+        public double Porcentaje { get; set; }
+        public string Color { get; set; } = "";
+    }
+
     protected override async Task OnInitializedAsync()
     {
         if (!Auth.IsAdmin)
@@ -354,116 +402,73 @@
 
         reportesDisponibles = ReporteJasperService.ObtenerReportes();
         codigoReporteSeleccionado = reportesDisponibles.FirstOrDefault()?.Codigo ?? codigoReporteSeleccionado;
-        await CargarDatos();
+
+        await CargarDatosAsync();
     }
 
-    private async Task GenerarReporteAsync()
+    private async Task CargarDatosAsync()
     {
-        mensajeReporte = "";
-
-        if (ReporteSeleccionado == null)
-        {
-            mensajeReporte = "Seleccione un reporte valido.";
-            return;
-        }
-
-        if (ReporteSeleccionado.RequiereFechas && fechaHasta < fechaDesde)
-        {
-            mensajeReporte = "La fecha hasta no puede ser menor que la fecha desde.";
-            return;
-        }
+        cargando = true;
+        mensaje = string.Empty;
+        esError = false;
 
         try
         {
-            generandoReporte = true;
+            var pedidosRes = await PedidoRestService.ListarPedidosAsync();
+            Pedidos = pedidosRes ?? new List<Pedido>();
 
-            string url = ReporteJasperService.ConstruirUrlGeneracion(
-                codigoReporteSeleccionado,
-                ReporteSeleccionado.RequiereFechas ? fechaDesde : null,
-                ReporteSeleccionado.RequiereFechas ? fechaHasta : null
-            );
-
-            await JS.InvokeVoidAsync("open", url, "_blank");
-        }
-        catch (Exception ex)
-        {
-            mensajeReporte = $"No se pudo generar el reporte: {ex.Message}";
-        }
-        finally
-        {
-            generandoReporte = false;
-        }
-    }
-
-    private async Task CargarDatos()
-    {
-        cargandoDatos = true;
-
-        try
-        {
-            var pedidos = await PedidoRestService.ListarPedidosAsync() ?? new List<Pedido>();
-            var productos = await ProductoRestService.ListarProductosTodosAsync() ?? new List<Producto>();
-
-            // Cargar catálogos de categorías y marcas para hacer el join por ID
-            var categorias = await ProductoRestService.ListarCategoriasAsync() ?? new List<CategoriaProducto>();
-            var marcas = await ProductoRestService.ListarMarcasAsync() ?? new List<Marca>();
-
-            // Diccionarios de lookup: id -> nombre
-            var catPorId = categorias.ToDictionary(c => c.IdCategoria, c => c.Nombre);
-            var marcaPorId = marcas.ToDictionary(m => m.IdMarca, m => m.Nombre);
-
-            // Enriquecer datos de clientes
-            var clientesCache = new Dictionary<int, Cliente>();
-            foreach (var pedido in pedidos)
+            // Enriquecer clientes (el backend no incluye nombre/apellido en /listar)
+            var cacheClientes = new Dictionary<int, Cliente>();
+            foreach (var pedido in Pedidos)
             {
-                if (pedido.Cliente != null && pedido.Cliente.Id > 0 && string.IsNullOrEmpty(pedido.Cliente.Nombre))
-                {
-                    if (!clientesCache.TryGetValue(pedido.Cliente.Id, out var clienteCompleto))
-                    {
-                        clienteCompleto = await ClienteRestService.BuscarClienteAsync(pedido.Cliente.Id);
-                        if (clienteCompleto != null)
-                        {
-                            clientesCache[pedido.Cliente.Id] = clienteCompleto;
-                        }
-                    }
+                if (pedido.Cliente == null || pedido.Cliente.Id <= 0) continue;
+                if (!string.IsNullOrWhiteSpace(pedido.Cliente.Nombre)) continue;
 
-                    if (clienteCompleto != null)
-                    {
-                        pedido.Cliente.Nombre = clienteCompleto.Nombre;
-                        pedido.Cliente.Apellido = clienteCompleto.Apellido;
-                    }
+                int idCliente = pedido.Cliente.Id;
+                if (!cacheClientes.ContainsKey(idCliente))
+                {
+                    var c = await ClienteRestService.BuscarClienteAsync(idCliente);
+                    if (c != null) cacheClientes[idCliente] = c;
+                }
+                if (cacheClientes.TryGetValue(idCliente, out var cc))
+                {
+                    pedido.Cliente.Nombre = cc.Nombre;
+                    pedido.Cliente.Apellido = cc.Apellido;
+                    pedido.Cliente.Correo = cc.Correo;
+                }
+            }
+            
+            var productosRes = await ProductoRestService.ListarProductosTodosAsync();
+            Productos = productosRes ?? new List<Producto>();
+            
+            var categoriasRes = await ProductoRestService.ListarCategoriasAsync();
+            Categorias = categoriasRes ?? new List<CategoriaProducto>();
+            
+            var marcasRes = await ProductoRestService.ListarMarcasAsync();
+            Marcas = marcasRes ?? new List<Marca>();
+
+            foreach (var prod in Productos)
+            {
+                if (prod.Categoria != null)
+                {
+                    var cat = Categorias.FirstOrDefault(c => c.IdCategoria == prod.Categoria.IdCategoria);
+                    if (cat != null) prod.Categoria.Nombre = cat.Nombre;
+                }
+                if (prod.Marca != null)
+                {
+                    var m = Marcas.FirstOrDefault(brand => brand.IdMarca == prod.Marca.IdMarca);
+                    if (m != null) prod.Marca.Nombre = m.Nombre;
                 }
             }
 
-            // ... (rest of logic unchanged)
-
-
-            var pedidosActivos = pedidos.Where(p =>
-                !string.Equals(p.Estado, "CANCELADO", StringComparison.OrdinalIgnoreCase)).ToList();
-
-            totalPedidos = pedidosActivos.Count;
-            totalVentas = pedidosActivos.Sum(p => p.Total);
-                
-            totalClientes = pedidos.Where(p => p.Cliente != null).Select(p => p.Cliente!.Id).Distinct().Count();
-
-            if (totalPedidos > 0)
-            {
-                ticketPromedio = pedidosActivos.Sum(p => p.Total) / totalPedidos;
-            }
-
-            ventasRecientes = pedidos.OrderByDescending(p => p.IdPedido).ToList();
-
-            // Agrupar por categoría usando el lookup de IDs
             var salesByCategoryDict = new Dictionary<string, decimal>();
-            foreach (var p in pedidosActivos)
+            foreach (var p in PedidosActivos)
             {
                 if (p.Detalles == null) continue;
                 foreach (var d in p.Detalles)
                 {
-                    var prod = productos.FirstOrDefault(pr => pr.Sku == d.SkuProducto);
-                    string catName = "Sin Categoría";
-                    if (prod?.Categoria != null && catPorId.TryGetValue(prod.Categoria.IdCategoria, out var cn) && !string.IsNullOrWhiteSpace(cn))
-                        catName = cn;
+                    var prod = Productos.FirstOrDefault(pr => pr.Sku == d.SkuProducto);
+                    var catName = prod?.Categoria?.Nombre ?? "Sin Categoría";
                     var subtotal = d.Cantidad * d.PrecioUnitario;
                     if (salesByCategoryDict.ContainsKey(catName))
                         salesByCategoryDict[catName] += subtotal;
@@ -472,17 +477,14 @@
                 }
             }
 
-            // Agrupar por marca usando el lookup de IDs
             var salesByBrandDict = new Dictionary<string, decimal>();
-            foreach (var p in pedidosActivos)
+            foreach (var p in PedidosActivos)
             {
                 if (p.Detalles == null) continue;
                 foreach (var d in p.Detalles)
                 {
-                    var prod = productos.FirstOrDefault(pr => pr.Sku == d.SkuProducto);
-                    string brandName = "Sin Marca";
-                    if (prod?.Marca != null && marcaPorId.TryGetValue(prod.Marca.IdMarca, out var mn) && !string.IsNullOrWhiteSpace(mn))
-                        brandName = mn;
+                    var prod = Productos.FirstOrDefault(pr => pr.Sku == d.SkuProducto);
+                    var brandName = prod?.Marca?.Nombre ?? "Sin Marca";
                     var subtotal = d.Cantidad * d.PrecioUnitario;
                     if (salesByBrandDict.ContainsKey(brandName))
                         salesByBrandDict[brandName] += subtotal;
@@ -506,8 +508,8 @@
             if (maxCatTotal == 0) maxCatTotal = 1;
             foreach (var c in listCats)
             {
-                c.Porcentaje = (double)(c.Total / maxCatTotal) * 85.0;
-                if (c.Porcentaje < 10) c.Porcentaje = 10;
+                c.Porcentaje = (double)(c.Total / maxCatTotal) * 85.0; 
+                if (c.Porcentaje < 10) c.Porcentaje = 10; 
             }
             ventasPorCategoria = listCats;
 
@@ -526,16 +528,117 @@
             if (maxBrandTotal == 0) maxBrandTotal = 1;
             foreach (var b in listBrands)
             {
-                b.Porcentaje = (double)(b.Total / maxBrandTotal) * 90.0;
+                b.Porcentaje = (double)(b.Total / maxBrandTotal) * 90.0; 
                 if (b.Porcentaje < 10) b.Porcentaje = 10;
             }
             ventasPorMarca = listBrands;
-                cargandoDatos = false;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al cargar datos de reportes: {ex.Message}");
+            mensaje = $"No se pudieron cargar las métricas: {ex.Message}";
+            esError = true;
         }
-            cargandoDatos = false;
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+    private async Task GenerarReporteAsync()
+    {
+        mensajeReporte = "";
+
+        if (ReporteSeleccionado == null)
+        {
+            mensajeReporte = "Seleccione un reporte valido.";
+            return;
+        }
+
+        if (ReporteSeleccionado.RequiereFechas && fechaHasta < fechaDesde)
+        {
+            mensajeReporte = "La fecha hasta no puede ser menor que la fecha desde.";
+            return;
+        }
+
+        try
+        {
+            generandoReporte = true;
+            string url = ReporteJasperService.ConstruirUrlGeneracion(
+                codigoReporteSeleccionado,
+                ReporteSeleccionado.RequiereFechas ? fechaDesde : null,
+                ReporteSeleccionado.RequiereFechas ? fechaHasta : null
+            );
+            await JS.InvokeVoidAsync("open", url, "_blank");
+        }
+        catch (Exception ex)
+        {
+            mensajeReporte = $"No se pudo generar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            generandoReporte = false;
+        }
+    }
+
+    private List<Pedido> PedidosActivos =>
+        Pedidos.Where(pedido => !string.Equals(pedido.Estado, "CANCELADO", StringComparison.OrdinalIgnoreCase)).ToList();
+
+    private decimal IngresosRegistrados =>
+        PedidosActivos.Sum(pedido => pedido.Total);
+
+    private decimal TicketPromedio =>
+        PedidosActivos.Count == 0 ? 0 : PedidosActivos.Sum(pedido => pedido.Total) / PedidosActivos.Count;
+
+    private int TotalClientes =>
+        PedidosActivos.Where(p => p.Cliente != null).Select(p => p.Cliente!.Id).Distinct().Count();
+
+    private List<Pedido> PedidosRecientes =>
+        Pedidos.OrderByDescending(pedido => pedido.IdPedido).Take(6).ToList();
+
+    private void LimpiarMensaje()
+    {
+        mensaje = string.Empty;
+    }
+
+    private static string FormatoEstado(string estado)
+    {
+        return estado switch
+        {
+            "PENDIENTE" => "Pendiente",
+            "CONFIRMADO" => "Confirmado",
+            "EN_PROCESO" => "En proceso",
+            "ENVIADO" => "Enviado",
+            "ENTREGADO" => "Entregado",
+            "CANCELADO" => "Cancelado",
+            _ => estado
+        };
+    }
+
+    private static string GetEstadoBgColor(string estado)
+    {
+        return estado switch
+        {
+            "PENDIENTE" => "#f8d7da",
+            "CONFIRMADO" => "#fff3cd",
+            "EN_PROCESO" => "#fff3cd",
+            "ENVIADO" => "#cff4fc",
+            "ENTREGADO" => "#d1e7dd",
+            "CANCELADO" => "#e2e3e5",
+            _ => "#f8f9fa"
+        };
+    }
+
+    private static string GetEstadoColor(string estado)
+    {
+        return estado switch
+        {
+            "PENDIENTE" => "#dc3545",
+            "CONFIRMADO" => "#fd7e14",
+            "EN_PROCESO" => "#fd7e14",
+            "ENVIADO" => "#0d6efd",
+            "ENTREGADO" => "#198754",
+            "CANCELADO" => "#d9557b",
+            _ => "#6c757d"
+        };
     }
 }

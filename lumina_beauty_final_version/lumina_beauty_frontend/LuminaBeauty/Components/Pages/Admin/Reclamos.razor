@@ -355,6 +355,7 @@
             return;
         }
 
+        mensaje = string.Empty;
         await CargarReclamosAsync();
     }
 
@@ -366,47 +367,39 @@
         {
             ListaReclamos = await ReclamoRestService.ListarReclamosAsync();
 
-            // Mostrar la tabla inmediatamente sin esperar el enriquecimiento
-            cargando = false;
-            StateHasChanged();
+            // Enriquecer con datos del cliente (el backend no los incluye en /listar)
+            var idsVistos = new HashSet<int>();
+            var cacheClientes = new Dictionary<int, Cliente>();
 
-            // Recoger IDs únicos de clientes que necesitan nombre
-            var idsNecesarios = ListaReclamos
-                .Where(r => r.Cliente != null && r.Cliente.Id > 0 && string.IsNullOrEmpty(r.Cliente.Nombre))
-                .Select(r => r.Cliente!.Id)
-                .Distinct()
-                .ToList();
-
-            if (idsNecesarios.Any())
+            foreach (var reclamo in ListaReclamos)
             {
-                // Fetch de todos los clientes EN PARALELO (no secuencial)
-                var tareas = idsNecesarios.Select(id => ClienteRestService.BuscarClienteAsync(id));
-                var resultados = await Task.WhenAll(tareas);
+                if (reclamo.Cliente == null || reclamo.Cliente.Id <= 0) continue;
+                int idCliente = reclamo.Cliente.Id;
 
-                var clientesCache = idsNecesarios
-                    .Zip(resultados, (id, cli) => new { id, cli })
-                    .Where(x => x.cli != null)
-                    .ToDictionary(x => x.id, x => x.cli!);
+                // Si ya tiene nombre, no hace falta buscarlo
+                if (!string.IsNullOrWhiteSpace(reclamo.Cliente.Nombre)) continue;
 
-                foreach (var reclamo in ListaReclamos)
+                if (!cacheClientes.ContainsKey(idCliente))
                 {
-                    if (reclamo.Cliente != null
-                        && reclamo.Cliente.Id > 0
-                        && string.IsNullOrEmpty(reclamo.Cliente.Nombre)
-                        && clientesCache.TryGetValue(reclamo.Cliente.Id, out var c))
-                    {
-                        reclamo.Cliente.Nombre = c.Nombre;
-                        reclamo.Cliente.Apellido = c.Apellido;
-                    }
+                    var clienteCompleto = await ClienteRestService.BuscarClienteAsync(idCliente);
+                    if (clienteCompleto != null)
+                        cacheClientes[idCliente] = clienteCompleto;
                 }
 
-                // Re-render con los nombres de cliente ya cargados
-                StateHasChanged();
+                if (cacheClientes.TryGetValue(idCliente, out var c))
+                {
+                    reclamo.Cliente.Nombre = c.Nombre;
+                    reclamo.Cliente.Apellido = c.Apellido;
+                    reclamo.Cliente.Correo = c.Correo;
+                }
             }
         }
         catch (Exception ex)
         {
             ShowMessage($"No se pudieron cargar los reclamos: {ex.Message}", true);
+        }
+        finally
+        {
             cargando = false;
         }
     }
@@ -515,14 +508,12 @@
         }
 
         Reclamo? actualizado = null;
-        string estadoAnterior = ReclamoSeleccionado.Estado;
-
         try
         {
-            // Workaround: El endpoint cambiarEstado da 404 en el GlassFish actual
-            // Usamos actualizar() que sí funciona.
-            ReclamoSeleccionado.Estado = estadoTemporal;
-            actualizado = await ReclamoRestService.ActualizarReclamoAsync(ReclamoSeleccionado);
+            actualizado = await ReclamoRestService.CambiarEstadoAsync(
+                ReclamoSeleccionado.IdReclamo,
+                estadoTemporal
+            );
         }
         catch
         {
@@ -531,8 +522,9 @@
 
         if (actualizado == null)
         {
-            ReclamoSeleccionado.Estado = estadoAnterior;
-            ShowMessage("No se pudo actualizar el estado del reclamo. El servidor no respondió.", true);
+            // Actualizar localmente si el backend no responde correctamente
+            ReclamoSeleccionado.Estado = estadoTemporal;
+            ShowMessage("Estado actualizado localmente (el servidor no confirmó).", false);
             return;
         }
 
