@@ -266,9 +266,9 @@ namespace LuminaBeauty.Services
                 .Select(m => new Brand
                 {
                     Name = m.Nombre ?? string.Empty,
-                    Logo = string.IsNullOrEmpty(m.Logo)
-                        ? (m.Nombre ?? string.Empty).ToUpper()
-                        : m.Logo
+                    Logo = string.IsNullOrWhiteSpace(m.Logo)
+    ? string.Empty
+    : ResolveProductImage(m.Logo)
                 })
                 .ToList();
         }

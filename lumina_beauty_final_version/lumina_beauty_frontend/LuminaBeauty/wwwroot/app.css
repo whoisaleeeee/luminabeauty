@@ -70,13 +70,12 @@ h1:focus {
     text-align: start;
 }
 
-
-/* Marcas animadas en Home */
+/* Carrusel de marcas */
 .brand-marquee {
     position: relative;
-    overflow: hidden;
     width: 100%;
-    padding: 0.75rem 0;
+    overflow: hidden;
+    padding: 0.35rem 0 0.85rem;
 }
 
     .brand-marquee::before,
@@ -85,105 +84,24 @@ h1:focus {
         position: absolute;
         top: 0;
         z-index: 2;
-        width: 110px;
+        width: 100px;
         height: 100%;
         pointer-events: none;
     }
 
     .brand-marquee::before {
         left: 0;
-        background: linear-gradient(to right, #fff7f9, transparent);
+        background: linear-gradient(to right, #fff7f9 0%, rgba(255, 247, 249, 0) 100%);
     }
 
     .brand-marquee::after {
         right: 0;
-        background: linear-gradient(to left, #fff7f9, transparent);
+        background: linear-gradient(to left, #fff7f9 0%, rgba(255, 247, 249, 0) 100%);
     }
 
 .brand-track {
     display: flex;
     align-items: center;
-    gap: 4.5rem;
-    width: max-content;
-    animation: move-brands 30s linear infinite;
-}
-
-.brand-item {
-    flex: 0 0 auto;
-    border: none;
-    background: transparent;
-    color: #d8ccd0;
-    font-family: Georgia, serif;
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    cursor: pointer;
-    transition: color 0.25s ease, transform 0.25s ease;
-}
-
-    .brand-item:hover {
-        color: #ff76a5;
-        transform: translateY(-2px);
-    }
-
-.brand-marquee:hover .brand-track {
-    animation-play-state: paused;
-}
-
-@keyframes move-brands {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-@media (max-width: 640px) {
-    .brand-track {
-        gap: 2.5rem;
-        animation-duration: 22s;
-    }
-
-    .brand-item {
-        font-size: 0.85rem;
-        letter-spacing: 0.18em;
-    }
-
-    .brand-marquee::before,
-    .brand-marquee::after {
-        width: 45px;
-    }
-}
-
-
-.brand-track {
-    animation: move-brands 30s linear infinite;
-    will-change: transform;
-}
-
-@keyframes move-brands {
-    from {
-        transform: translateX(0);
-    }
-
-    to {
-        transform: translateX(-50%);
-    }
-}
-
-
-.brand-marquee {
-    overflow: hidden;
-    width: 100%;
-    padding: 0.2rem 0 0.8rem;
-}
-
-.brand-track {
-    display: flex;
     gap: 1.5rem;
     width: max-content;
     animation: move-brands 28s linear infinite;
@@ -195,33 +113,33 @@ h1:focus {
 }
 
 .brand-card {
+    display: flex;
     flex: 0 0 auto;
-    min-width: 240px;
-    padding: 2rem 2.4rem;
+    align-items: center;
+    justify-content: center;
+    width: 240px;
+    height: 132px;
+    padding: 1.25rem 1.75rem;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: 1.5rem;
     background: linear-gradient(135deg, #ffffff, #fff7f9);
     box-shadow: 0 4px 14px rgba(120, 70, 90, 0.06);
 }
 
-    .brand-card p {
-        margin: 0;
-        color: #1f2937;
-        font-family: Georgia, serif;
-        font-size: 1.35rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
+.brand-logo {
+    display: block;
+    width: 100%;
+    height: 60px;
+    object-fit: contain;
+    object-position: center;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+}
 
-    .brand-card div {
-        width: 4rem;
-        height: 2px;
-        margin-top: 1.6rem;
-        border-radius: 999px;
-        background: #ff9ab8;
-    }
+.brand-card:hover .brand-logo {
+    transform: scale(1.04);
+    opacity: 0.9;
+}
 
 @keyframes move-brands {
     from {
@@ -234,17 +152,23 @@ h1:focus {
 }
 
 @media (max-width: 640px) {
+    .brand-marquee::before,
+    .brand-marquee::after {
+        width: 45px;
+    }
+
     .brand-track {
         gap: 1rem;
         animation-duration: 20s;
     }
 
     .brand-card {
-        min-width: 210px;
-        padding: 1.5rem 1.7rem;
+        width: 210px;
+        height: 112px;
+        padding: 1.2rem 1.35rem;
     }
 
-        .brand-card p {
-            font-size: 1rem;
-        }
+    .brand-logo {
+        height: 48px;
+    }
 }

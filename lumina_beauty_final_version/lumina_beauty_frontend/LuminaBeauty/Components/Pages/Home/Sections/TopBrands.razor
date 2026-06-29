@@ -1,36 +1,48 @@
 ﻿@inject ProductService ProductCache
-@inject NavigationManager Navigator
 
-<section class="py-10 border-y border-stone-200/60 overflow-hidden">
-    <div class="flex items-end justify-between mb-6">
+<section class="py-10 overflow-hidden border-y border-stone-200/60">
+    <div class="mb-6 flex items-end justify-between">
         <div>
             <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#c5a880]">
                 Confianza y calidad
             </span>
 
-            <h2 class="mt-2 font-serif text-2xl md:text-3xl text-stone-900">
+            <h2 class="mt-2 font-serif text-2xl text-stone-900 md:text-3xl">
                 Marcas destacadas
             </h2>
         </div>
     </div>
 
-    <div class="brand-marquee">
-        <div class="brand-track">
-            @foreach (var b in ProductCache.GetBrands())
-            {
-                <article class="brand-card">
-                    <p>@b.Name</p>
-                    <div></div>
-                </article>
-            }
+    @{
+        var brands = ProductCache.GetBrands()
+            .Where(brand => !string.IsNullOrWhiteSpace(brand.Logo))
+            .ToList();
+    }
 
-            @foreach (var b in ProductCache.GetBrands())
-            {
-                <article class="brand-card">
-                    <p>@b.Name</p>
-                    <div></div>
-                </article>
-            }
+    @if (brands.Count > 0)
+    {
+        <div class="brand-marquee">
+            <div class="brand-track">
+                @foreach (var brand in brands)
+                {
+                    <article class="brand-card">
+                        <img src="@brand.Logo"
+                             alt="@brand.Name"
+                             class="brand-logo"
+                             referrerpolicy="no-referrer" />
+                    </article>
+                }
+
+                @foreach (var brand in brands)
+                {
+                    <article class="brand-card">
+                        <img src="@brand.Logo"
+                             alt="@brand.Name"
+                             class="brand-logo"
+                             referrerpolicy="no-referrer" />
+                    </article>
+                }
+            </div>
         </div>
-    </div>
+    }
 </section>
