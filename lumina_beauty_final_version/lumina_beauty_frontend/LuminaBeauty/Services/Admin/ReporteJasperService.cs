@@ -22,22 +22,20 @@ namespace LuminaBeauty.Services.Admin
         }
 
         public string ConstruirUrlGeneracion(
-            string codigoReporte,
-            DateTime? fechaInicio,
-            DateTime? fechaFin)
+    string codigoReporte,
+    DateTime? fechaInicio,
+    DateTime? fechaFin)
         {
-            string codigo = Uri.EscapeDataString(codigoReporte);
-            string url = $"{_urlBase}/ReporteJasperRS/generar/{codigo}";
+            const string backendBaseUrl =
+                "http://localhost:8080/LuminaBeauty-Servicios/webresources/";
 
-            ReporteJasperOption? reporte = ObtenerReportes()
-                .FirstOrDefault(r => r.Codigo == codigoReporte);
+            var url = $"{backendBaseUrl}ReporteJasperRS/generar/{codigoReporte}";
 
-            if (reporte?.RequiereFechas == true)
+            if (fechaInicio.HasValue && fechaFin.HasValue)
             {
-                string inicio = fechaInicio?.ToString("yyyy-MM-dd") ?? string.Empty;
-                string fin = fechaFin?.ToString("yyyy-MM-dd") ?? string.Empty;
-
-                url += $"?fechaInicio={Uri.EscapeDataString(inicio)}&fechaFin={Uri.EscapeDataString(fin)}";
+                url +=
+                    $"?fechaInicio={fechaInicio.Value:yyyy-MM-dd}" +
+                    $"&fechaFin={fechaFin.Value:yyyy-MM-dd}";
             }
 
             return url;

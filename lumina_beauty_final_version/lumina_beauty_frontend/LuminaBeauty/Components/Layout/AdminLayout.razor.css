@@ -192,11 +192,19 @@
     border: 1px solid transparent;
     border-radius: 14px;
     background: transparent;
-    color: #786d72;
     font-size: 0.94rem;
     font-weight: 600;
     text-align: left;
     transition: all 0.2s ease;
+}
+
+.admin-help-button {
+    color: #786d72;
+    text-decoration: none;
+}
+
+.admin-logout-button {
+    color: #bd526c;
 }
 
     .admin-help-button i,
@@ -206,19 +214,16 @@
         text-align: center;
     }
 
-    .admin-help-button:hover {
-        background: rgba(255, 255, 255, 0.65);
-        border-color: rgba(235, 216, 222, 0.75);
-    }
-
-.admin-logout-button {
-    color: #bd526c;
+.admin-help-button:hover {
+    color: #6a3849;
+    background: rgba(255, 255, 255, 0.65);
+    border-color: rgba(235, 216, 222, 0.75);
 }
 
-    .admin-logout-button:hover {
-        background: rgba(255, 236, 241, 0.78);
-        border-color: rgba(239, 186, 200, 0.7);
-    }
+.admin-logout-button:hover {
+    background: rgba(255, 236, 241, 0.78);
+    border-color: rgba(239, 186, 200, 0.7);
+}
 
 .admin-main {
     flex: 1;

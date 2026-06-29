@@ -1,0 +1,205 @@
+﻿@page "/admin/ayuda"
+@layout AdminLayout
+
+@using LuminaBeauty.Services
+
+@inject NavigationManager Navigation
+
+<div class="admin-page">
+    <div class="help-page-header">
+        <span class="help-kicker">Soporte administrativo</span>
+        <h2>Centro de ayuda</h2>
+        <p>Selecciona a la persona que deseas contactar y se abrirá tu aplicación de correo.</p>
+    </div>
+
+    <div class="help-card">
+        <div class="help-card-icon">
+            <i class="bi bi-envelope-paper-heart"></i>
+        </div>
+
+        <div>
+            <h5>¿Necesitas asistencia?</h5>
+            <p>Elige un integrante del equipo para enviar una consulta sobre el panel administrativo.</p>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+        @foreach (var contacto in Contactos)
+        {
+            <div class="col-12 col-md-6 col-xl-4">
+                <button class="help-contact-card" @onclick="() => AbrirCorreo(contacto)">
+                    <span class="help-contact-avatar">
+                        @contacto.Iniciales
+                    </span>
+
+                    <span class="help-contact-info">
+                        <strong>@contacto.Nombre</strong>
+                        <small>@contacto.Correo</small>
+                    </span>
+
+                    <i class="bi bi-arrow-up-right help-contact-arrow"></i>
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .help-page-header {
+        margin-bottom: 1.75rem;
+    }
+
+    .help-kicker {
+        display: block;
+        margin-bottom: 0.45rem;
+        color: #b87991;
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+    }
+
+    .help-page-header h2 {
+        margin: 0;
+        color: #6a3849;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .help-page-header p {
+        margin: 0.5rem 0 0;
+        color: #88797f;
+    }
+
+    .help-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+        padding: 1.25rem 1.4rem;
+        border: 1px solid rgba(235, 207, 217, 0.85);
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, #fff, #fff7fa);
+        box-shadow: 0 10px 24px rgba(106, 56, 73, 0.06);
+    }
+
+    .help-card-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        flex: 0 0 48px;
+        border-radius: 14px;
+        background: #f9e3ea;
+        color: #8c4a61;
+        font-size: 1.35rem;
+    }
+
+    .help-card h5 {
+        margin: 0 0 0.25rem;
+        color: #663449;
+        font-weight: 750;
+    }
+
+    .help-card p {
+        margin: 0;
+        color: #88797f;
+        font-size: 0.9rem;
+    }
+
+    .help-contact-card {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        min-height: 106px;
+        gap: 0.9rem;
+        padding: 1rem;
+        border: 1px solid rgba(238, 215, 223, 0.85);
+        border-radius: 1.1rem;
+        background: rgba(255, 255, 255, 0.86);
+        color: inherit;
+        text-align: left;
+        box-shadow: 0 7px 18px rgba(106, 56, 73, 0.045);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+        .help-contact-card:hover {
+            border-color: rgba(202, 125, 151, 0.55);
+            box-shadow: 0 12px 24px rgba(106, 56, 73, 0.1);
+            transform: translateY(-2px);
+        }
+
+    .help-contact-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        flex: 0 0 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f8dfe7, #efbaca);
+        color: #7d3f54;
+        font-size: 0.9rem;
+        font-weight: 800;
+    }
+
+    .help-contact-info {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 0.28rem;
+    }
+
+        .help-contact-info strong {
+            overflow: hidden;
+            color: #563542;
+            font-size: 0.92rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .help-contact-info small {
+            overflow: hidden;
+            color: #917f86;
+            font-size: 0.78rem;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+    .help-contact-arrow {
+        color: #bd7890;
+        font-size: 1.1rem;
+    }
+</style>
+
+@code {
+    private readonly List<ContactoAyuda> Contactos =
+    [
+        new("Alexandra Arrobas Campos", "alexandra.arrobas@pucp.edu.pe", "AA"),
+        new("Jesús Andrés Aquiles Brancacho Bartra", "jesus.brancacho@pucp.edu.pe", "JB"),
+        new("Matias Cristian Gonzalo Alanoca", "matias.gonzalo@pucp.edu.pe", "MA"),
+        new("Kristel Andrea Alfaro Arrospide", "kaalfaro@pucp.edu.pe", "KA"),
+        new("Mauricio Alfonso Morales Nuñez", "a20223237@pucp.edu.pe", "MM")
+    ];
+
+    private void AbrirCorreo(ContactoAyuda contacto)
+    {
+        var asunto = Uri.EscapeDataString("Solicitud de ayuda - Lumina Beauty");
+        var mensaje = Uri.EscapeDataString(
+            "Hola,\n\nNecesito ayuda con el panel administrativo de Lumina Beauty.\n\nDetalle de la consulta:\n\n"
+        );
+
+        Navigation.NavigateTo(
+            $"mailto:{contacto.Correo}?subject={asunto}&body={mensaje}",
+            forceLoad: true
+        );
+    }
+
+    private sealed record ContactoAyuda(
+        string Nombre,
+        string Correo,
+        string Iniciales
+    );
+}

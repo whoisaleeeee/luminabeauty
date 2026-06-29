@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Pages\Admin\" />
     <Folder Include="Components\Shared\Admin\" />
     <Folder Include="Data\" />
     <Folder Include="Services\Admin\" />
