@@ -35,24 +35,14 @@
     gap: 3px;
     width: fit-content;
     padding: 0;
-    border: 0;
-    background: transparent;
     color: #2f2528;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.72rem;
     font-weight: 300;
     letter-spacing: -0.8px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
+    cursor: default;
+    user-select: none;
 }
-
-    .admin-brand-button:hover {
-        transform: translateY(-1px);
-    }
-
-    .admin-brand-button:focus {
-        outline: none;
-    }
 
 .admin-brand-lumina {
     color: #ff76a5;
@@ -112,7 +102,7 @@
     padding: 0 2px;
 }
 
-.admin-nav-link {
+::deep .admin-nav-link {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -120,12 +110,19 @@
     padding: 9px 12px;
     border: 1px solid transparent;
     border-radius: 14px;
-    color: #665d62;
+    color: #665d62 !important;
     font-size: 0.95rem;
     font-weight: 600;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
+
+    ::deep .admin-nav-link:visited,
+    ::deep .admin-nav-link:focus,
+    ::deep .admin-nav-link:active {
+        color: #665d62 !important;
+        text-decoration: none !important;
+    }
 
 .admin-nav-icon {
     display: inline-flex;
@@ -145,28 +142,30 @@
         line-height: 1;
     }
 
-.admin-nav-link:hover {
-    color: #6a3849;
+::deep .admin-nav-link:hover {
+    color: #6a3849 !important;
+    text-decoration: none !important;
     background: rgba(255, 255, 255, 0.68);
     border-color: rgba(238, 204, 215, 0.82);
     box-shadow: 0 8px 18px rgba(106, 56, 73, 0.07);
     transform: translateX(2px);
 }
 
-    .admin-nav-link:hover .admin-nav-icon {
+    ::deep .admin-nav-link:hover .admin-nav-icon {
         color: #8c4a61;
         background: #fbe7ee;
         transform: scale(1.04);
     }
 
-.admin-nav-link.active {
-    color: #663449;
+::deep .admin-nav-link.active {
+    color: #663449 !important;
+    text-decoration: none !important;
     background: linear-gradient( 135deg, rgba(255, 255, 255, 0.72), rgba(252, 226, 235, 0.88) );
     border-color: rgba(226, 172, 191, 0.64);
     box-shadow: 0 9px 19px rgba(106, 56, 73, 0.1), inset 3px 0 0 #7d3f54;
 }
 
-    .admin-nav-link.active .admin-nav-icon {
+    ::deep .admin-nav-link.active .admin-nav-icon {
         color: #7d3f54;
         background: linear-gradient(135deg, #f7dce5, #eeb9c9);
         box-shadow: 0 5px 10px rgba(125, 63, 84, 0.13);
@@ -245,7 +244,7 @@
 
     .admin-logo-text,
     .admin-menu-label,
-    .admin-nav-link > span:last-child,
+    ::deep .admin-nav-link > span:last-child,
     .admin-help-button span,
     .admin-logout-button span {
         display: none;
@@ -256,14 +255,14 @@
         padding-top: 18px;
     }
 
-    .admin-nav-link,
+    ::deep .admin-nav-link,
     .admin-help-button,
     .admin-logout-button {
         justify-content: center;
         padding: 10px;
     }
 
-    .admin-nav-link {
+    ::deep .admin-nav-link {
         gap: 0;
     }
 
