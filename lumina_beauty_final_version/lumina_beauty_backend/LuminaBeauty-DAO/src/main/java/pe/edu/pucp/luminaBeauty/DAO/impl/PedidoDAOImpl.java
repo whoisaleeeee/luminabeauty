@@ -250,4 +250,44 @@ public class PedidoDAOImpl implements PedidoDAO {
 
         return pedido;
     }
+
+    @Override
+    public ArrayList<Pedido> listarPorCliente(int idCliente) throws Exception {
+        ArrayList<Pedido> pedidos = new ArrayList<>();
+
+        String sql = """
+            SELECT id_pedido,
+                   codigo_pedido,
+                   id_cliente,
+                   id_cupon,
+                   codigo_cupon_aplicado,
+                   subtotal_productos,
+                   costo_envio,
+                   descuento,
+                   total,
+                   estado,
+                   creado_en,
+                   actualizado_en
+            FROM pedido
+            WHERE id_cliente = ?
+            ORDER BY creado_en DESC, id_pedido DESC
+            """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    pedidos.add(mapearPedido(rs));
+                }
+            }
+
+            return pedidos;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

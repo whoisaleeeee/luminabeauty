@@ -10,8 +10,8 @@
 @inject ProductService ProductCache
 @implements IDisposable
 
-<header class="border-b border-[#F7E4EA] bg-white/85 backdrop-blur-xl">
-    <div class="mx-auto flex h-[92px] max-w-[1440px] items-center gap-8 px-6 lg:px-8">
+<header class="relative z-[150] border-b border-[#F7E4EA] bg-white/85 backdrop-blur-xl">
+    <div class="relative mx-auto flex h-[92px] max-w-[1440px] items-center gap-8 px-6 lg:px-8">
         
         <!-- Logo and search -->
         <div class="flex min-w-0 flex-1 items-center gap-7">
@@ -21,7 +21,7 @@
             </button>
 
             <!-- Search bar -->
-            <div class="relative ml-5 hidden w-full max-w-[25rem] lg:flex">
+            <div class="relative z-[80] ml-5 hidden w-full max-w-[25rem] lg:flex">
                 <input type="text"
                        value="@LayoutState.SearchQuery"
                        @oninput="OnSearchInputAsync"
@@ -47,7 +47,7 @@
 
                 @if (HeaderSearch.IsOpen)
                 {
-                    <div class="absolute left-0 right-0 top-[calc(100%+0.6rem)] z-50 overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-xl">
+                    <div class="absolute left-0 right-0 top-[calc(100%+0.6rem)] z-[120] overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-2xl">
                         @if (HeaderSearch.Results.Count == 0)
                         {
                             <div class="p-5 text-center">
@@ -73,7 +73,7 @@
                                 {
                                     <button @onclick="() => OpenProduct(product.Id)"
                                             class="flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition hover:bg-[#FFF0F3] cursor-pointer">
-                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-stone-50">
+                                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-stone-50">
                                             <img src="@product.Image"
                                                  alt="@product.Name"
                                                  class="h-full w-full object-contain p-1"

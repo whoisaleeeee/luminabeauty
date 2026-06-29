@@ -19,5 +19,16 @@ namespace LuminaBeauty.Services.AppServices
             return _valoracionRestService
                 .ListarPublicadasPorProductoAsync(idProducto);
         }
+
+        public Task<List<Valoracion>> ListarPorClienteAsync(int idCliente)
+        {
+            return _valoracionRestService
+                .ListarPorClienteAsync(idCliente);
+        }
+
+        public Task<Valoracion?> RegistrarAsync(Valoracion valoracion)
+        {
+            return _valoracionRestService.RegistrarAsync(valoracion);
+        }
     }
 }

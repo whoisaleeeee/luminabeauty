@@ -173,19 +173,15 @@ public class PedidoBLImpl implements PedidoBL {
                 throw new Exception("El cliente no existe.");
             }
 
-            ArrayList<Pedido> pedidos = pedidoDAO.listarTodos();
-            ArrayList<Pedido> resultado = new ArrayList<>();
+            ArrayList<Pedido> pedidos = pedidoDAO.listarPorCliente(idCliente);
 
             for (Pedido pedido : pedidos) {
-                if (pedido.getCliente() != null &&
-                        pedido.getCliente().getId_usuario() == idCliente) {
-
-                    pedido.setDetalles(listarDetallesPorPedido(pedido.getId_pedido()));
-                    resultado.add(pedido);
-                }
+                pedido.setDetalles(
+                        listarDetallesPorPedido(pedido.getId_pedido())
+                );
             }
 
-            return resultado;
+            return pedidos;
 
         } finally {
             TransactionContext.close();

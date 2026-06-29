@@ -317,7 +317,7 @@ public class ProfileAppService
 
     public async Task<ProfileActionResult> CargarPedidosAsync()
     {
-        if (State.CurrentClient is null)
+        if (State.CurrentClient is null || State.CurrentClient.Id <= 0)
         {
             return new ProfileActionResult(
                 false,
@@ -328,14 +328,24 @@ public class ProfileAppService
         {
             State.IsLoadingOrders = true;
 
-            State.Orders = await _pedidoAppService.ListarPedidosPorClienteAsync(
-                State.CurrentClient.Id);
+            int idClienteActual = State.CurrentClient.Id;
+
+            var pedidosRecibidos =
+                await _pedidoAppService.ListarPedidosPorClienteAsync(idClienteActual);
+
+            State.Orders = pedidosRecibidos
+                .Where(pedido =>
+                    pedido.Cliente is not null &&
+                    pedido.Cliente.Id == idClienteActual)
+                .ToList();
 
             foreach (var pedido in State.Orders)
             {
-                var envio = await _envioAppService.BuscarPorPedidoAsync(pedido.IdPedido);
+                var envio = await _envioAppService.BuscarPorPedidoAsync(
+                    pedido.IdPedido);
 
-                if (envio is not null && !string.IsNullOrWhiteSpace(envio.Estado))
+                if (envio is not null &&
+                    !string.IsNullOrWhiteSpace(envio.Estado))
                 {
                     pedido.Estado = envio.Estado.Trim();
                 }
@@ -357,6 +367,14 @@ public class ProfileAppService
 
     public async Task<ProfileActionResult> AbrirDetallePedidoAsync(Pedido order)
     {
+        if (State.CurrentClient is null ||
+             !State.Orders.Any(pedido => pedido.IdPedido == order.IdPedido))
+        {
+            return new ProfileActionResult(
+                false,
+                "No tienes permiso para ver este pedido.");
+        }
+
         try
         {
             State.IsLoadingOrderDetail = true;

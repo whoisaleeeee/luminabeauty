@@ -1,6 +1,4 @@
-﻿using LuminaBeauty.Models;
-
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace LuminaBeauty.Models
 {
@@ -19,7 +17,7 @@ namespace LuminaBeauty.Models
         public string Estado { get; set; } = string.Empty;
 
         [JsonPropertyName("respuesta_tienda")]
-        public string RespuestaTienda { get; set; } = string.Empty;
+        public string? RespuestaTienda { get; set; }
 
         [JsonPropertyName("respondido_en")]
         public DateTime? RespondidoEn { get; set; }
@@ -38,5 +36,8 @@ namespace LuminaBeauty.Models
 
         [JsonPropertyName("detallePedido")]
         public DetallePedido? DetallePedido { get; set; }
+
+        [JsonPropertyName("respondido_por")]
+        public Empleado? RespondidoPor { get; set; }
     }
 }

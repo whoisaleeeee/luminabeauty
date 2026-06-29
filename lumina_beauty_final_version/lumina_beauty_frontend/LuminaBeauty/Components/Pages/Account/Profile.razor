@@ -8,6 +8,7 @@
 @inject NavigationManager Navigator
 @inject ProfileAppService ProfileApp
 @inject ClienteRestService ClienteRest
+@inject ValoracionAppService ValoracionApp
 @implements IDisposable
 
 <PageTitle>Mi Cuenta VIP | Lumina Beauty</PageTitle>
@@ -1859,18 +1860,53 @@
                                     <div class="mt-4 space-y-3">
                                         @foreach (var detail in selectedOrder.Detalles)
                                         {
-                                            <div class="flex items-center justify-between gap-4 rounded-xl border border-stone-100 bg-stone-50/60 p-4">
-                                                <div>
-                                                    <p class="text-xs font-bold text-stone-800">
-                                                        @(string.IsNullOrWhiteSpace(detail.NombreProducto)
-                                                            ? detail.Producto?.Nombre ?? "Producto"
-                                                            : detail.NombreProducto)
-                                                    </p>
-                                                    <p class="mt-1 text-[10px] text-stone-500">
-                                                        Cantidad: @detail.Cantidad · S/ @detail.PrecioUnitario.ToString("0.00")
-                                                    </p>
+                                            var idDetalle = detail.IdDetallePedido;
+                                            var yaValorado = _valoracionesPorDetalle.ContainsKey(idDetalle);
+
+                                            <div class="rounded-xl border border-stone-100 bg-stone-50/60 p-4">
+                                                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div>
+                                                        <p class="text-xs font-bold text-stone-800">
+                                                            @(string.IsNullOrWhiteSpace(detail.NombreProducto)
+                                                                ? detail.Producto?.Nombre ?? "Producto"
+                                                                : detail.NombreProducto)
+                                                        </p>
+
+                                                        <p class="mt-1 text-[10px] text-stone-500">
+                                                            Cantidad: @detail.Cantidad · S/ @detail.PrecioUnitario.ToString("0.00")
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="flex items-center gap-3 sm:flex-col sm:items-end">
+                                                        <p class="text-xs font-bold text-stone-900">
+                                                            S/ @detail.Subtotal.ToString("0.00")
+                                                        </p>
+
+                                                        @if (IsDeliveredOrder(NormalizeOrderStatus(selectedOrder.Estado)))
+                                                        {
+                                                            @if (yaValorado)
+                                                            {
+                                                                <span class="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-emerald-700">
+                                                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                        <path d="m5 12 4 4L19 6"></path>
+                                                                    </svg>
+                                                                    Valoración enviada
+                                                                </span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <button type="button"
+                                                                        @onclick="() => AbrirValoracion(detail)"
+                                                                        class="inline-flex items-center gap-2 rounded-xl border border-[#F2B4C7] bg-[#FFF4F7] px-3 py-2 text-[9px] font-black uppercase tracking-wider text-[#C7346A] transition hover:border-[#D93470] hover:bg-[#FFE7EE] cursor-pointer">
+                                                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                                        <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2l-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path>
+                                                                    </svg>
+                                                                    Valorar producto
+                                                                </button>
+                                                            }
+                                                        }
+                                                    </div>
                                                 </div>
-                                                <p class="text-xs font-bold text-stone-900">S/ @detail.Subtotal.ToString("0.00")</p>
                                             </div>
                                         }
                                     </div>
@@ -1909,11 +1945,213 @@
     }
 </div>
 
+@if (_detalleParaValorar is not null)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/40 px-4 backdrop-blur-sm">
+        <div class="w-full max-w-lg rounded-[1.7rem] border border-[#F5D5DF] bg-white p-6 shadow-2xl">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[9px] font-black uppercase tracking-[0.18em] text-[#C7346A]">
+                        Compra entregada
+                    </p>
+
+                    <h3 class="mt-2 font-serif text-xl font-semibold text-stone-900">
+                        Valora tu producto
+                    </h3>
+
+                    <p class="mt-2 text-[11px] text-stone-500">
+                        @(string.IsNullOrWhiteSpace(_detalleParaValorar.NombreProducto)
+                            ? _detalleParaValorar.Producto?.Nombre ?? "Producto"
+                            : _detalleParaValorar.NombreProducto)
+                    </p>
+                </div>
+
+                <button type="button"
+                        @onclick="CerrarValoracion"
+                        class="flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition hover:bg-stone-200 cursor-pointer">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 6 12 12M18 6 6 18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mt-6">
+                <p class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                    Tu calificación
+                </p>
+
+                <div class="mt-3 flex gap-2">
+                    @for (var estrella = 1; estrella <= 5; estrella++)
+                    {
+                        var valorEstrella = estrella;
+
+                        <button type="button"
+                                @onclick="() => _calificacionSeleccionada = valorEstrella"
+                                class="transition hover:scale-110 cursor-pointer">
+                            <svg class="h-8 w-8 @(_calificacionSeleccionada >= valorEstrella ? "fill-[#FFB648] text-[#FFB648]" : "fill-transparent text-stone-300")"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor"
+                                 stroke-width="1.8">
+                                <path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.2l-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"></path>
+                            </svg>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="mt-5">
+                <label class="text-[10px] font-black uppercase tracking-wider text-stone-400">
+                    Comentario
+                </label>
+
+                <textarea @bind="_comentarioValoracion"
+                          maxlength="500"
+                          placeholder="Cuéntanos cómo fue tu experiencia con este producto..."
+                          class="mt-2 min-h-[110px] w-full resize-none rounded-xl border border-[#F1D6DE] bg-[#FFFDFE] p-3 text-xs text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-[#FF76A5] focus:ring-2 focus:ring-[#FCD1DB]/60"></textarea>
+            </div>
+
+            <div class="mt-6 flex justify-end gap-3">
+                <button type="button"
+                        @onclick="CerrarValoracion"
+                        disabled="@_guardandoValoracion"
+                        class="rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-stone-500 transition hover:bg-stone-50 cursor-pointer disabled:opacity-50">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        @onclick="GuardarValoracionAsync"
+                        disabled="@(_guardandoValoracion || _calificacionSeleccionada == 0)"
+                        class="rounded-xl bg-[#D93470] px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-white transition hover:bg-[#B62557] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50">
+                    @(_guardandoValoracion ? "Publicando..." : "Publicar valoración")
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
 
     private bool _profileInitialized;
+
+    private readonly Dictionary<int, Valoracion> _valoracionesPorDetalle = new();
+
+    private DetallePedido? _detalleParaValorar;
+    private int _calificacionSeleccionada;
+    private string _comentarioValoracion = string.Empty;
+    private bool _guardandoValoracion;
+
+    private async Task CargarValoracionesClienteAsync()
+    {
+        _valoracionesPorDetalle.Clear();
+
+        var idCliente = Auth.CurrentClient?.Id ?? 0;
+
+        if (idCliente <= 0)
+        {
+            return;
+        }
+
+        var valoraciones = await ValoracionApp.ListarPorClienteAsync(idCliente);
+
+        foreach (var valoracion in valoraciones)
+        {
+            var idDetalle = valoracion.DetallePedido?.IdDetallePedido ?? 0;
+
+            if (idDetalle > 0)
+            {
+                _valoracionesPorDetalle[idDetalle] = valoracion;
+            }
+        }
+    }
+
+    private void AbrirValoracion(DetallePedido detalle)
+    {
+        _detalleParaValorar = detalle;
+        _calificacionSeleccionada = 0;
+        _comentarioValoracion = string.Empty;
+    }
+
+    private void CerrarValoracion()
+    {
+        if (_guardandoValoracion)
+        {
+            return;
+        }
+
+        _detalleParaValorar = null;
+        _calificacionSeleccionada = 0;
+        _comentarioValoracion = string.Empty;
+    }
+
+    private async Task GuardarValoracionAsync()
+    {
+        if (_detalleParaValorar is null)
+        {
+            return;
+        }
+
+        if (_calificacionSeleccionada < 1 || _calificacionSeleccionada > 5)
+        {
+            Toast.ShowToast("Selecciona una calificación entre 1 y 5 estrellas.");
+            return;
+        }
+
+        var cliente = Auth.CurrentClient;
+        var producto = _detalleParaValorar.Producto;
+
+        if (cliente is null || cliente.Id <= 0 ||
+            producto is null || producto.IdProducto <= 0 ||
+            _detalleParaValorar.IdDetallePedido <= 0)
+        {
+            Toast.ShowToast("No se pudo identificar el producto para valorar.");
+            return;
+        }
+
+        try
+        {
+            _guardandoValoracion = true;
+
+            var idDetalleValorado = _detalleParaValorar.IdDetallePedido;
+
+            var valoracion = new Valoracion
+            {
+                Cliente = cliente,
+                Producto = producto,
+                DetallePedido = _detalleParaValorar,
+                Calificacion = _calificacionSeleccionada,
+                Comentario = _comentarioValoracion.Trim(),
+                Estado = "PENDIENTE"
+            };
+
+            var resultado = await ValoracionApp.RegistrarAsync(valoracion);
+
+            if (resultado is null || resultado.IdValoracion <= 0)
+            {
+                Toast.ShowToast("No se pudo registrar la valoración. Inténtalo nuevamente.");
+                return;
+            }
+
+            _valoracionesPorDetalle[idDetalleValorado] = resultado;
+
+            _guardandoValoracion = false;
+
+            _detalleParaValorar = null;
+            _calificacionSeleccionada = 0;
+            _comentarioValoracion = string.Empty;
+
+            Toast.ShowToast("Valoración enviada para revisión.");
+        }
+        catch
+        {
+            Toast.ShowToast("Ocurrió un error al publicar la valoración.");
+        }
+        finally
+        {
+            _guardandoValoracion = false;
+        }
+    }
 
     private bool _isDeactivateAccountOpen;
     private bool _isDeactivatingAccount;
@@ -2331,7 +2569,10 @@
         if (!result.Success)
         {
             Toast.ShowToast(result.Message);
+            return;
         }
+
+        await CargarValoracionesClienteAsync();
     }
 
     private void NavigateTo(string path)
