@@ -14,278 +14,290 @@
 
 @if (_product == null)
 {
-    <div class="text-center py-20 select-none">
-        <h2 class="text-2xl font-serif text-stone-900 mb-2">Producto no encontrado</h2>
-        <p class="text-xs text-stone-500 mb-8">El producto que buscas no existe o ha sido retirado.</p>
-        <button @onclick="GoBack" class="px-6 py-2.5 bg-stone-950 hover:bg-[#FF76A5] text-white rounded-xl text-xs font-bold uppercase transition">
-            Volver a la Tienda
+    <div class="py-20 text-center select-none">
+        <h2 class="mb-2 font-serif text-2xl text-stone-900">
+            Producto no encontrado
+        </h2>
+
+        <p class="mb-8 text-xs text-stone-500">
+            El producto que buscas no existe o ha sido retirado.
+        </p>
+
+        <button @onclick="GoBack"
+                class="rounded-xl bg-stone-950 px-6 py-2.5 text-xs font-bold uppercase text-white transition hover:bg-[#FF76A5]">
+            Volver a la tienda
         </button>
     </div>
 }
 else
 {
     <div class="space-y-8 text-left">
-          <!-- Breadcrumb Navigation -->
-          <div class="text-left text-[11px] sm:text-xs font-semibold text-stone-400 uppercase tracking-widest mb-10 flex flex-wrap items-center gap-1.5 leading-none select-none">
-            <span class="hover:text-[#FF76A5] cursor-pointer transition" @onclick="GoBack">
-              Inicio
+
+        <nav class="mb-10 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-stone-400 sm:text-xs select-none">
+            <button @onclick="GoBack"
+                    class="cursor-pointer transition hover:text-[#FF76A5]">
+                Inicio
+            </button>
+
+            <span>/</span>
+
+            <button @onclick="GoToCategory"
+                    class="cursor-pointer transition hover:text-[#FF76A5]">
+                @_product.Category
+            </button>
+
+            <span>/</span>
+
+            <span class="max-w-[220px] truncate font-bold text-[#FF76A5]">
+                @_product.Name
             </span>
-            <span>/</span>
-            <span class="cursor-pointer hover:underline" @onclick="GoToCategory">@_product.Category</span>
-            <span>/</span>
-            <span class="text-[#FF76A5] font-bold truncate max-w-[200px]">@_product.Name</span>
-          </div>
+        </nav>
 
-          <!-- Deluxe Main Grid Layout -->
-          <section class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 bg-white/35 backdrop-blur-xl border border-white/60 rounded-[32px] p-6 sm:p-10 shadow-2xl relative overflow-hidden">
-            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-[#FF76A5]/10 rounded-full filter blur-3xl pointer-events-none" />
+        <section class="relative grid grid-cols-1 gap-8 overflow-hidden rounded-[32px] border border-white/60 bg-white/35 p-6 shadow-2xl backdrop-blur-xl sm:p-10 lg:grid-cols-12 lg:gap-14">
 
-            <!-- Gallery Thumbnails (Left side on desktop) -->
-            <div class="lg:col-span-2 order-2 lg:order-1 flex flex-row lg:flex-col gap-3 sm:gap-4 overflow-x-auto lg:overflow-x-visible pb-3 lg:pb-0 items-center justify-center select-none">
-              @for (int i = 0; i < 3; i++)
-              {
-                var idx = i;
-                <button @onclick="() => _detailThumb = idx"
-                        class="w-16 h-16 sm:w-20 sm:h-20 bg-stone-50 rounded-xl overflow-hidden border-2 transition-all duration-300 relative shrink-0 cursor-pointer @(_detailThumb == idx ? "border-[#FF76A5] shadow-md scale-105" : "border-white/80 hover:border-stone-300")">
-                  <img src="@_product.Image" class="w-full h-full object-cover" alt="View @(idx + 1)" referrerpolicy="no-referrer" />
-                </button>
-              }
+            <div class="pointer-events-none absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF76A5]/10 blur-3xl"></div>
 
-              <!-- Clinical Formula Facts Tab (4th option shown in React mockup) -->
-              <button @onclick="() => _detailThumb = 3"
-                      class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl flex flex-col items-center justify-center border-2 transition-all duration-300 shrink-0 select-none bg-gradient-to-br from-[#FFF0F3] to-[#FCD1DB]/40 text-[#C7346A] relative cursor-pointer @(_detailThumb == 3 ? "border-[#FF76A5] shadow-md scale-105" : "border-white/80 hover:border-stone-300")">
-                <span class="text-md font-bold mb-1">📋</span>
-                <span class="text-[9px] font-black uppercase tracking-wider text-[#C7346A] text-center leading-none">
-                  Fórmula
-                </span>
-              </button>
-            </div>
+            <!-- Miniaturas reales -->
+            <div class="order-2 flex items-center justify-center gap-3 overflow-x-auto pb-3 select-none lg:order-1 lg:col-span-2 lg:flex-col lg:overflow-x-visible lg:pb-0">
 
-            <!-- Active product card displayed image (Center on desktop) -->
-            <div class="lg:col-span-5 order-1 lg:order-2 flex flex-col justify-center items-center rounded-2xl relative min-h-[300px] sm:min-h-[460px] max-w-full">
-                @if (_detailThumb != 3)
+                @for (int i = 0; i < _galleryImages.Count; i++)
                 {
-                    <div class="w-full h-full flex items-center justify-center relative rounded-3xl animate-in fade-in duration-300">
-                        <div class="absolute inset-0 bg-white/20 hover:bg-white/45 transition-all duration-500 rounded-3xl border border-white/50 -z-10 shadow-lg p-5" />
-                        <img src="@_product.Image" alt="@_product.Name" class="max-h-[320px] sm:max-h-[440px] md:max-h-[480px] w-auto object-contain select-none drop-shadow-2xl transition-transform duration-700 hover:scale-105 pointer-events-none" />
-                        @if (!string.IsNullOrEmpty(_product.DiscountBadge) || !string.IsNullOrEmpty(_product.Discount))
-                        {
-                          <span class="absolute top-4 left-4 bg-[#FF76A5] text-white text-xs font-black py-1 px-3 rounded-full shadow-lg border border-white/35 select-none">
-                            @(_product.DiscountBadge ?? _product.Discount) OFFER
-                          </span>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <!-- Formula details overlay (replaces image gallery on click) -->
-                    <div class="w-full h-full bg-white/60 backdrop-blur-md rounded-2xl border border-white/75 p-6 flex flex-col justify-between space-y-4 shadow-xl animate-in slide-in-from-bottom-4 duration-300 select-none">
-                        <div class="border-b border-[#FBC2CC]/30 pb-3">
-                          <h3 class="text-sm uppercase font-extrabold tracking-widest text-[#C7346A] flex items-center gap-2">
-                            <span>✨</span>
-                            <span>Datos de la fórmula</span>
-                          </h3>
-                          <p class="text-[11px] text-stone-500 font-medium pt-1 italic">
-                            @_product.Brand Clinical Formulation
-                          </p>
-                        </div>
+                    var index = i;
+                    var image = _galleryImages[index];
 
-                        <div class="space-y-4 pt-1 flex-1 text-left">
-                            <div class="flex items-center gap-3">
-                              <div class="bg-[#FFF0F3] p-1.5 rounded-full border border-emerald-100 text-emerald-600 font-bold text-xs">
-                                ✓
-                              </div>
-                              <div class="text-stone-800">
-                                <p class="text-xs font-bold leading-none">Probada por dermatólogos</p>
-                                <p class="text-[10px] text-stone-500 font-medium pt-0.5">Sometido a rigurosos controles clínicos por expertos.</p>
-                              </div>
-                            </div>
+                    <button @onclick="() => _detailThumb = index"
+                            aria-label="Ver imagen @(index + 1) del producto"
+                            class="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 bg-white p-1 transition-all duration-300 sm:h-20 sm:w-20 @(_detailThumb == index
+                                                            ? "scale-105 border-[#FF76A5] shadow-md"
+                                                            : "border-white/80 hover:border-stone-300")">
 
-                            <div class="flex items-center gap-3">
-                              <div class="bg-[#FFF0F3] p-1.5 rounded-full border border-emerald-100 text-emerald-600 font-bold text-xs">
-                                ✓
-                              </div>
-                              <div class="text-stone-800">
-                                <p class="text-xs font-bold leading-none">Sometida a pruebas de alergia</p>
-                                <p class="text-[10px] text-stone-500 font-medium pt-0.5">Fórmulas hipoalergénicas que reducen riesgos clínicos.</p>
-                              </div>
-                            </div>
-                        </div>
+                <img src="@image"
+                     alt="@($"{_product.Name} - imagen {index + 1}")"
+                     class="h-full w-full object-contain"
+                     referrerpolicy="no-referrer" />
+            </button>
+        }
+    </div>
 
-                        <button @onclick="() => _detailThumb = 0"
-                                class="w-full bg-stone-900 hover:bg-[#C7346A] text-white text-[10px] font-bold uppercase tracking-widest py-2 rounded-xl transition duration-300 cursor-pointer">
-                          Volver a la Galería
-                        </button>
-                    </div>
-                }
-            </div>
+    <!-- Imagen principal -->
+    <div class="relative order-1 flex min-h-[300px] max-w-full flex-col items-center justify-center rounded-2xl sm:min-h-[460px] lg:order-2 lg:col-span-5">
 
-            <!-- Description details and buy-actions (Right on desktop) -->
-            <div class="lg:col-span-5 order-3 flex flex-col justify-between space-y-6">
-              <div class="space-y-4">
-                <div class="space-y-1">
-                  <span class="text-xs font-black tracking-widest text-[#FF76A5] bg-[#FFF0F3] px-2.5 py-1 rounded-md border border-[#FCD1DB]/50 uppercase select-none">
+        <div class="absolute inset-0 -z-10 rounded-3xl border border-white/50 bg-white/20 p-5 shadow-lg transition-all duration-500"></div>
+
+        <img src="@CurrentGalleryImage"
+             alt="@_product.Name"
+             class="pointer-events-none w-auto max-h-[320px] select-none object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105 sm:max-h-[440px] md:max-h-[480px]"
+             referrerpolicy="no-referrer" />
+
+        @if (!string.IsNullOrWhiteSpace(_product.DiscountBadge) || !string.IsNullOrWhiteSpace(_product.Discount))
+        {
+            <span class="absolute left-4 top-4 rounded-full border border-white/35 bg-[#FF76A5] px-3 py-1 text-xs font-black text-white shadow-lg select-none">
+                @(_product.DiscountBadge ?? _product.Discount) de descuento
+            </span>
+        }
+    </div>
+
+    <!-- Información y compra -->
+    <div class="order-3 flex flex-col justify-between space-y-6 lg:col-span-5">
+
+        <div class="space-y-4">
+            <div class="space-y-2">
+                <span class="inline-flex rounded-md border border-[#FCD1DB]/50 bg-[#FFF0F3] px-2.5 py-1 text-xs font-black uppercase tracking-widest text-[#FF76A5] select-none">
                     @_product.Brand
-                  </span>
-                  <h1 class="text-3xl sm:text-4xl font-serif font-medium text-stone-900 leading-tight pt-2">
-                    @_product.Name
-                  </h1>
-                </div>
+                </span>
 
-                <!-- Stars rating -->
-                <div class="flex items-center gap-3 select-none">
-                  <div class="flex items-center text-amber-400">
+                <h1 class="pt-2 font-serif text-3xl font-medium leading-tight text-stone-900 sm:text-4xl">
+                    @_product.Name
+                </h1>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 select-none">
+
+                <div class="flex items-center text-amber-400">
                     @for (int i = 1; i <= 5; i++)
                     {
-                        var s = i;
-                        <span>
-                            <span class="@(s <= Math.Round(_product.Rating) ? "text-amber-400" : "text-stone-200 fill-stone-100")">★</span>
+                        <span class="@(i <= Math.Round(_product.Rating) ? "text-amber-400" : "text-stone-200")">
+                            ★
                         </span>
                     }
-                  </div>
-                  <span class="text-xs font-semibold text-stone-500">
-                            (@_product.ReviewsCount Opiniones)
-                  </span>
-                  <span class="text-stone-300">|</span>
-                  <span class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-600">
-                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                </div>
+
+                <span class="text-xs font-semibold text-stone-500">
+                    (@_product.ReviewsCount opiniones)
+                </span>
+
+                <span class="text-stone-300">|</span>
+
+                <span class="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-600">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
                     Disponible
-                  </span>
-                </div>
-
-                <!-- Price tag -->
-                <div class="py-2 font-mono select-none">
-                  <span class="font-serif text-3xl sm:text-4xl font-extrabold text-[#C7346A] tracking-wider">
-                    S/ @_product.Price.ToString("0.00")
-                  </span>
-                  @if (_product.OriginalPrice != null && _product.OriginalPrice > _product.Price)
-                  {
-                    <span class="text-sm text-stone-400 line-through ml-3">
-                      S/ @_product.OriginalPrice.Value.ToString("0.00")
-                    </span>
-                  }
-                </div>
-
-                @if (!string.IsNullOrEmpty(_product.Description))
-                {
-                  <p class="text-xs font-medium text-stone-600 leading-relaxed max-w-md">
-                    @_product.Description
-                  </p>
-                }
-              </div>
-
-              <!-- Quantity selector and buy triggers -->
-              <div class="space-y-4 pt-4 border-t border-[#FCD1DB]/30 text-left">
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 select-none">
-                  
-                  <!-- Quantity increments -->
-                  <div class="flex items-center justify-between border border-stone-200 bg-white/90 rounded-xl px-2 py-1.5 w-full sm:w-32">
-                    <button @onclick="() => ChangeQty(-1)"
-                            disabled="@(_detailQty <= 1)"
-                            class="p-1 hover:text-[#C7346A] transition text-stone-500 cursor-pointer disabled:opacity-30">
-                      <span>-</span>
-                    </button>
-                    <span class="text-sm font-extrabold text-stone-900 font-mono w-8 text-center bg-transparent border-none">
-                      @_detailQty
-                    </span>
-                    <button @onclick="() => ChangeQty(1)"
-                            class="p-1 hover:text-[#C7346A] transition text-stone-500 cursor-pointer">
-                      <span>+</span>
-                    </button>
-                  </div>
-
-                  <!-- Buy Now standard button -->
-                  <button @onclick="BuyNow"
-                          class="bg-[#FFA8BA] hover:bg-[#ff9bb0] text-[#C7346A] font-bold text-sm tracking-wider uppercase py-3.5 px-8 rounded-xl transition duration-300 shadow-lg active:scale-95 flex-1 flex items-center justify-center gap-2 select-none cursor-pointer">
-                    <span>🛍️</span>
-                    <span>Buy Now</span>
-                  </button>
-
-                  <!-- Favorite heart toggle -->
-                  <button @onclick="ToggleWishlist"
-                          class="p-3.5 bg-white border border-stone-200 rounded-xl transition flex items-center justify-center hover:scale-105 cursor-pointer @(Wishlist.IsInWishlist(_product.Id) ? "text-[#FF76A5] border-[#FF76A5]/50 bg-[#FFF0F3]" : "text-stone-400 hover:text-[#FF76A5]")">
-                    <span class="text-xs">❤️</span>
-                  </button>
-                </div>
-
-                <!-- Shipping policy banner -->
-                <div class="bg-white/80 border border-stone-100 rounded-2xl p-4 flex items-center gap-4 select-none">
-                  <div class="p-3 bg-[#FFF0F3] rounded-xl text-[#FF76A5] border border-[#FFE3E8]/80 text-xl font-bold">
-                    <span>🚚</span>
-                  </div>
-                  <div class="text-stone-800">
-                    <h4 class="text-xs uppercase font-extrabold text-stone-900 tracking-wider">
-                      DELIVERY GRATIS*
-                    </h4>
-                    <p class="text-[10px] text-stone-500 font-bold">
-                      Para compras mayores a 199 soles
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Back link -->
-                <button @onclick="GoBack"
-                        class="text-xs font-bold text-stone-400 hover:text-[#FF76A5] transition flex items-center gap-1.5 w-fit cursor-pointer select-none">
-                  ← Volver a la tienda
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Customer thoughts & reviews list space (Bottom) -->
-        <section class="mt-8 bg-white/20 border border-white/50 backdrop-blur-md rounded-2xl p-6 sm:p-8 text-left">
-            <div class="flex flex-wrap items-start justify-between gap-4 border-b border-stone-100 pb-4">
-                <div>
-                    <h3 class="text-sm uppercase font-extrabold tracking-widest text-[#C7346A] select-none">
-                        Opiniones de clientes
-                    </h3>
-
-                    <p class="mt-1 text-[11px] text-stone-500">
-                        Valoraciones publicadas por clientes de Lumina Beauty.
-                    </p>
-                </div>
-
-                <span class="rounded-full border border-[#FCD1DB] bg-[#FFF0F3] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#C7346A]">
-                    @_product.ReviewsCount opiniones
                 </span>
             </div>
 
-            @if (_isLoadingReviews)
+            <div class="py-2 select-none">
+                <span class="font-serif text-3xl font-extrabold tracking-wider text-[#C7346A] sm:text-4xl">
+                    S/ @_product.Price.ToString("0.00")
+                </span>
+
+                @if (_product.OriginalPrice != null && _product.OriginalPrice > _product.Price)
+                {
+                    <span class="ml-3 text-sm text-stone-400 line-through">
+                        S/ @_product.OriginalPrice.Value.ToString("0.00")
+                    </span>
+                }
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(_product.Description))
             {
-                <p class="py-10 text-center text-xs font-bold text-stone-400">
-                    Cargando opiniones...
+                <p class="max-w-md text-xs font-medium leading-relaxed text-stone-600">
+                    @_product.Description
                 </p>
             }
-            else if (_reviews.Count == 0)
-            {
-                <div class="mt-6 rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/35 p-8 text-center">
-                    <p class="text-xs font-bold text-stone-700">
-                        Aún no hay opiniones publicadas para este producto.
-                    </p>
+        </div>
 
-                    <p class="mt-1 text-[11px] text-stone-500">
-                        Las valoraciones aprobadas aparecerán aquí.
+        <div class="space-y-4 border-t border-[#FCD1DB]/30 pt-4">
+
+            <div class="flex flex-col items-stretch gap-3 select-none sm:flex-row sm:items-center">
+
+                <div class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white/90 px-2 py-1.5 sm:w-32">
+                    <button @onclick="() => ChangeQty(-1)"
+                            disabled="@(_detailQty <= 1)"
+                            aria-label="Reducir cantidad"
+                            class="cursor-pointer p-1 text-stone-500 transition hover:text-[#C7346A] disabled:opacity-30">
+                        −
+                    </button>
+
+                    <span class="w-8 text-center font-mono text-sm font-extrabold text-stone-900">
+                        @_detailQty
+                    </span>
+
+                    <button @onclick="() => ChangeQty(1)"
+                            aria-label="Aumentar cantidad"
+                            class="cursor-pointer p-1 text-stone-500 transition hover:text-[#C7346A]">
+                        +
+                    </button>
+                </div>
+
+                <button @onclick="BuyNow"
+                        class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#E99AB3] px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-[#9C3155] shadow-lg transition duration-300 hover:bg-[#E889A6] active:scale-95">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         class="h-4 w-4"
+                         aria-hidden="true">
+                        <path d="M3 7h18l-1 13H4L3 7Z" />
+                        <path d="M8 7a4 4 0 0 1 8 0" />
+                    </svg>
+
+                    <span>Añadir</span>
+                </button>
+
+                <button @onclick="ToggleWishlist"
+                        aria-label="Guardar en favoritos"
+                        class="flex cursor-pointer items-center justify-center rounded-xl border bg-white p-3.5 transition hover:scale-105 @(Wishlist.IsInWishlist(_product.Id)
+                                                            ? "border-[#FF76A5]/50 bg-[#FFF0F3] text-[#FF76A5]"
+                                                            : "border-stone-200 text-stone-400 hover:text-[#FF76A5]")">
+
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         class="h-4 w-4"
+                         aria-hidden="true">
+                        <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4 rounded-2xl border border-stone-100 bg-white/80 p-4 select-none">
+
+                <div class="rounded-xl border border-[#FFE3E8]/80 bg-[#FFF0F3] p-3 text-[#C7346A]">
+                    <svg viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         class="h-5 w-5"
+                         aria-hidden="true">
+                        <path d="M3 7h11v9H3z" />
+                        <path d="M14 10h3l4 4v2h-7z" />
+                        <path d="M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                        <path d="M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                    </svg>
+                </div>
+
+                <div class="text-stone-800">
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-stone-900">
+                        Envío gratuito
+                    </h4>
+
+                    <p class="text-[10px] font-bold text-stone-500">
+                        Para compras mayores a S/ 199.
                     </p>
                 </div>
-            }
-            else
-            {
-                <div class="mt-6 space-y-3">
-                    @foreach (var review in _reviews)
-                    {
-                        <article class="rounded-2xl border border-stone-100 bg-white/65 p-5">
-                            <div class="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <p class="text-xs font-bold text-stone-800">
-                                        Cliente Lumina
-                                    </p>
+            </div>
 
-                                    <div class="mt-2 flex items-center gap-0.5 text-xs text-amber-400">
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <span class="@(i <= review.Calificacion
-                                                                                          ? "text-amber-400"
-                                                                                          : "text-stone-200")">
+            <button @onclick="GoBack"
+                    class="flex w-fit cursor-pointer items-center gap-1.5 text-xs font-bold text-stone-400 transition hover:text-[#FF76A5]">
+                ← Volver a la tienda
+            </button>
+        </div>
+    </div>
+</section>
+
+<section class="rounded-2xl border border-white/50 bg-white/20 p-6 text-left backdrop-blur-md sm:p-8">
+
+    <div class="flex flex-wrap items-start justify-between gap-4 border-b border-stone-100 pb-4">
+        <div>
+            <h3 class="text-sm font-extrabold uppercase tracking-widest text-[#C7346A] select-none">
+                Opiniones de clientes
+            </h3>
+
+            <p class="mt-1 text-[11px] text-stone-500">
+                Valoraciones publicadas por clientes de Lumina Beauty.
+            </p>
+        </div>
+
+        <span class="rounded-full border border-[#FCD1DB] bg-[#FFF0F3] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#C7346A]">
+            @_product.ReviewsCount opiniones
+        </span>
+    </div>
+
+    @if (_isLoadingReviews)
+    {
+        <p class="py-10 text-center text-xs font-bold text-stone-400">
+            Cargando opiniones...
+        </p>
+    }
+    else if (_reviews.Count == 0)
+    {
+        <div class="mt-6 rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/35 p-8 text-center">
+            <p class="text-xs font-bold text-stone-700">
+                Aún no hay opiniones publicadas para este producto.
+            </p>
+
+            <p class="mt-1 text-[11px] text-stone-500">
+                Las valoraciones aprobadas aparecerán aquí.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="mt-6 space-y-3">
+            @foreach (var review in _reviews)
+            {
+                <article class="rounded-2xl border border-stone-100 bg-white/65 p-5">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <p class="text-xs font-bold text-stone-800">
+                                Cliente Lumina
+                            </p>
+
+                            <div class="mt-2 flex items-center gap-0.5 text-xs text-amber-400">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <span class="@(i <= review.Calificacion ? "text-amber-400" : "text-stone-200")">
                                         ★
                                     </span>
                                 }
@@ -325,37 +337,46 @@ else
     }
 </section>
 
-          <!-- Similar Recommended products strip slider row -->
-          <section class="mt-16 space-y-8">
-            <div class="flex items-center gap-3 text-left select-none">
-              <span class="w-4 h-6 bg-[#FF76A5] rounded-sm inline-block shadow-sm" />
-              <h2 class="text-[#C7346A] font-serif font-black text-lg tracking-wider uppercase">
-                Secretos Similares
-              </h2>
-            </div>
+@if (_related.Count > 0)
+{
+    <section class="mt-16 space-y-8">
+        <div class="flex items-center gap-3 text-left select-none">
+            <span class="inline-block h-6 w-1 rounded-full bg-[#FF76A5] shadow-sm"></span>
 
-            <!-- Product cards inline grid -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              @foreach (var rp in _related)
-              {
-                <ProductCard Product="@rp" />
-              }
-            </div>
-          </section>
-    </div>
+            <h2 class="font-serif text-lg font-black uppercase tracking-wider text-[#C7346A]">
+                Secretos similares
+            </h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
+            @foreach (var relatedProduct in _related)
+            {
+                <ProductCard Product="@relatedProduct" />
+            }
+        </div>
+    </section>
+}
+</div>
 }
 
 @code {
-    [Parameter] public string Id { get; set; } = string.Empty;
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
 
     private Product? _product;
     private List<Product> _related = new();
+    private List<string> _galleryImages = new();
+
     private int _detailThumb;
     private int _detailQty = 1;
 
-    // Review Form fields
     private List<Valoracion> _reviews = new();
     private bool _isLoadingReviews;
+
+    private string CurrentGalleryImage =>
+        _galleryImages.ElementAtOrDefault(_detailThumb)
+        ?? _product?.Image
+        ?? string.Empty;
 
     protected override void OnInitialized()
     {
@@ -366,20 +387,50 @@ else
     protected override async Task OnParametersSetAsync()
     {
         await ProductCache.EnsureLoadedAsync();
+
         _product = ProductCache.GetProductById(Id);
         _detailThumb = 0;
         _detailQty = 1;
         _reviews = new();
-        _isLoadingReviews = false;
+        _related = new();
+        _galleryImages = GetProductImages();
 
         if (_product != null)
         {
             await CargarValoracionesAsync(_product.IdProducto);
+
             _related = ProductCache.GetAllProducts()
-                .Where(r => r.Id != _product.Id && r.Category == _product.Category)
+                .Where(product =>
+                    product.Id != _product.Id &&
+                    product.Category == _product.Category)
                 .Take(4)
                 .ToList();
         }
+    }
+
+    private List<string> GetProductImages()
+    {
+        if (_product == null || string.IsNullOrWhiteSpace(_product.Image))
+        {
+            return new();
+        }
+
+        var imagePath = _product.Image;
+        var extension = Path.GetExtension(imagePath);
+
+        if (string.IsNullOrWhiteSpace(extension))
+        {
+            return new List<string> { imagePath };
+        }
+
+        var basePath = imagePath[..^extension.Length];
+
+        return new List<string>
+        {
+            imagePath,
+            $"{basePath}-2{extension}",
+            $"{basePath}-3{extension}"
+        };
     }
 
     private void GoBack()
@@ -391,35 +442,51 @@ else
     {
         if (_product != null)
         {
-            Navigator.NavigateTo($"/shop?category={Uri.EscapeDataString(_product.Category)}");
+            Navigator.NavigateTo(
+                $"/shop?category={Uri.EscapeDataString(_product.Category)}"
+            );
         }
     }
 
-    private void ChangeQty(int amt)
+    private void ChangeQty(int amount)
     {
-        _detailQty = Math.Max(1, _detailQty + amt);
+        _detailQty = Math.Max(1, _detailQty + amount);
     }
 
     private async Task BuyNow()
     {
-        if (_product != null)
+        if (_product == null)
         {
-            await Cart.AddToCartAsync(_product, _detailQty);
-            Toast.ShowToast(LangService.CurrentLanguage == "es" ? $"Agregado a la bolsa: {_product.Name}" : $"Added to bag: {_product.Name}");
-            LayoutState.SetCartDrawerOpen(true);
+            return;
         }
+
+        await Cart.AddToCartAsync(_product, _detailQty);
+
+        Toast.ShowToast(
+            LangService.CurrentLanguage == "es"
+                ? $"Agregado a la bolsa: {_product.Name}"
+                : $"Added to bag: {_product.Name}"
+        );
+
+        LayoutState.SetCartDrawerOpen(true);
     }
 
     private async Task ToggleWishlist()
     {
-        if (_product != null)
+        if (_product == null)
         {
-            await Wishlist.ToggleWishlistAsync(_product.Id);
-            var isSaved = Wishlist.IsInWishlist(_product.Id);
-            Toast.ShowToast(isSaved 
-                ? (LangService.CurrentLanguage == "es" ? "Guardado en favoritos" : "Saved to wishlist") 
-                : (LangService.CurrentLanguage == "es" ? "Removido de favoritos" : "Removed from wishlist"));
+            return;
         }
+
+        await Wishlist.ToggleWishlistAsync(_product.Id);
+
+        var isSaved = Wishlist.IsInWishlist(_product.Id);
+
+        Toast.ShowToast(
+            isSaved
+                ? "Guardado en favoritos"
+                : "Removido de favoritos"
+        );
     }
 
     private async Task CargarValoracionesAsync(int idProducto)
