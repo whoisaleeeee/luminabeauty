@@ -5,260 +5,313 @@
 @inject NavigationManager Navigator
 @implements IDisposable
 
-<PageTitle>Carrito de Compras | Lumina Beauty</PageTitle>
+<PageTitle>Carrito | Lumina Beauty</PageTitle>
 
-<div class="max-w-7xl mx-auto px-1 sm:px-4 py-6 text-left">
-    
-    <!-- Breadcrumb Row -->
-    <nav class="text-xs font-semibold text-stone-400 mb-8 flex items-center gap-2 select-none">
-        <span class="hover:text-[#FF76A5] transition cursor-pointer" @onclick='() => NavigateTo("/")'>
-          @(LangService.CurrentLanguage == "es" ? "Inicio" : "Home")
-        </span>
+<div class="mx-auto w-full max-w-7xl px-4 py-7 text-left sm:px-6 lg:px-8">
+    <nav class="mb-7 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
+        <button type="button"
+                @onclick='() => NavigateTo("/")'
+                class="cursor-pointer bg-transparent p-0 transition hover:text-[#C7346A]">
+            @(LangService.CurrentLanguage == "es" ? "Inicio" : "Home")
+        </button>
+
         <span class="text-stone-300">/</span>
-        <span class="text-stone-600 font-bold">
-          @(LangService.CurrentLanguage == "es" ? "Carrito de compras" : "Shopping cart")
+
+        <span class="font-bold text-stone-600">
+            @(LangService.CurrentLanguage == "es" ? "Carrito" : "Shopping cart")
         </span>
     </nav>
 
-    <div class="border-b border-stone-100 pb-6">
-        <h1 class="mt-2 font-serif text-2xl font-semibold text-stone-800 sm:text-xl">
-            Tu carrito de belleza
-        </h1>
+    <header class="mb-7 border-b border-[#F3E7EB] pb-6">
+        <span class="text-[10px] font-black uppercase tracking-[0.18em] text-[#C7346A]">
+            Tu selección
+        </span>
 
-        <p class="mt-2 text-xs leading-relaxed text-stone-500">
-            Confirma tus productos para procesar la etapa de pago.
-        </p>
-    </div>
+        <div class="mt-2 flex flex-wrap items-end justify-between gap-3">
+            <div>
+                <h1 class="font-serif text-3xl font-semibold tracking-tight text-stone-900">
+                    Tu carrito de belleza
+                </h1>
+
+                <p class="mt-2 text-sm text-stone-500">
+                    Revisa tus productos antes de continuar al pago.
+                </p>
+            </div>
+
+            <span class="rounded-full border border-[#F8D7E1] bg-[#FFF7F9] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-[#C7346A]">
+                @Cart.GetCount() @(Cart.GetCount() == 1 ? "producto" : "productos")
+            </span>
+        </div>
+    </header>
 
     @if (Cart.GetItems().Count == 0)
     {
-        <!-- EMPTY STATE -->
-        <div class="bg-white/70 backdrop-blur-md rounded-3xl border border-[#FCD1DB]/50 p-12 text-center max-w-lg mx-auto shadow-md">
-          <div class="w-16 h-16 bg-[#FFF2F4] rounded-full flex items-center justify-center mx-auto mb-6 text-[#FF76A5] text-xl font-bold select-none">
-            <span>🛍️</span>
-          </div>
-          <h2 class="font-serif text-2xl font-semibold text-stone-900 mb-2">
-            @(LangService.CurrentLanguage == "es" ? "Tu carrito está vacío" : "Your cart is empty")
-          </h2>
-          <p class="text-xs text-stone-500 max-w-sm mx-auto mb-8 leading-relaxed">
-            @(LangService.CurrentLanguage == "es"
-              ? "Añade increíbles productos cosméticos coreanos y fórmulas de lujo para empezar a sentir una piel radiante."
-              : "Add amazing Korean cosmetics and luxury formulas to start radiant skincare.")
-          </p>
-          <button @onclick='() => NavigateTo("/")'
-                  class="px-8 py-3.5 bg-stone-950 hover:bg-[#FF76A5] text-white font-bold text-xs uppercase tracking-widest rounded-xl transition duration-300 shadow cursor-pointer select-none">
-            @(LangService.CurrentLanguage == "es" ? "Explorar Catálogo" : "Explore Collections")
-          </button>
+        <div class="mx-auto max-w-lg rounded-3xl border border-[#FCD1DB]/60 bg-white/80 p-12 text-center shadow-[0_16px_40px_rgba(120,72,92,0.07)] backdrop-blur-md">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#FFF0F3] text-[#C7346A]">
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-1.3 2.5A1 1 0 0 0 7 17h10M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+                </svg>
+            </div>
+
+            <h2 class="mt-5 font-serif text-2xl font-semibold text-stone-900">
+                @(LangService.CurrentLanguage == "es" ? "Tu carrito está vacío" : "Your cart is empty")
+            </h2>
+
+            <p class="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-stone-500">
+                @(LangService.CurrentLanguage == "es"
+                    ? "Explora productos seleccionados para acompañar tu rutina de cuidado personal."
+                    : "Explore carefully selected products for your personal-care routine.")
+            </p>
+
+            <button type="button"
+                    @onclick='() => NavigateTo("/shop")'
+                    class="mt-7 cursor-pointer rounded-xl bg-stone-900 px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.14em] text-white transition hover:bg-[#C7346A]">
+                @(LangService.CurrentLanguage == "es" ? "Explorar tienda" : "Explore shop")
+            </button>
         </div>
     }
     else
     {
-        <!-- ACTIVE TABLE LIST AND SUMMARY -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            <!-- Left Products Listings Table -->
-            <div class="lg:col-span-8 space-y-6">
-                <!-- Desktop Table Headers -->
-                <div class="hidden sm:grid grid-cols-12 gap-4 px-6 py-4 bg-white/40 backdrop-blur-md border border-[#FCD1DB]/30 rounded-2xl text-stone-500 font-extrabold uppercase tracking-wider text-[10px] select-none text-left">
-                  <div class="col-span-6">@(LangService.CurrentLanguage == "es" ? "Producto" : "Product")</div>
-                  <div class="col-span-2 text-center">@(LangService.CurrentLanguage == "es" ? "Precio" : "Price")</div>
-                  <div class="col-span-2 text-center">@(LangService.CurrentLanguage == "es" ? "Cantidad" : "Quantity")</div>
-                  <div class="col-span-2 text-right">@(LangService.CurrentLanguage == "es" ? "Subtotal" : "Subtotal")</div>
+        <div class="grid grid-cols-1 items-start gap-7 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <section class="space-y-4">
+                <div class="hidden grid-cols-[minmax(0,1fr)_92px_140px_108px] items-center gap-5 rounded-2xl border border-[#F3E7EB] bg-white/55 px-6 py-4 text-[10px] font-black uppercase tracking-[0.12em] text-stone-400 sm:grid">
+                    <span>Producto</span>
+                    <span class="text-center">Precio</span>
+                    <span class="text-center">Cantidad</span>
+                    <span class="text-right">Subtotal</span>
                 </div>
 
-                <!-- Products Rows list -->
-                <div class="space-y-4">
-                  @foreach (var item in Cart.GetItems())
-                  {
-                    <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-stone-100 hover:border-[#FF76A5]/20 p-4 sm:p-5 shadow-xs transition-all duration-300 relative flex flex-col sm:grid sm:grid-cols-12 sm:items-center sm:gap-4 gap-3 text-stone-900">
-                      
-                      <!-- Row deletion standard cross button -->
-                      <div class="absolute top-3 right-3 sm:static sm:col-span-1 flex items-center justify-center select-none z-10 sm:justify-start">
-                        <button @onclick="() => RemoveItem(item.Product.Id)"
-                                class="w-6 h-6 rounded-full bg-red-50 hover:bg-red-100 text-red-500 border border-red-200 flex items-center justify-center transition cursor-pointer"
-                                title="@(LangService.CurrentLanguage == "es" ? "Quitar artículo" : "Remove item")">
-                          <span class="text-[10px] font-bold">✕</span>
-                        </button>
-                      </div>
+                <div class="space-y-3">
+                    @foreach (var item in Cart.GetItems())
+                    {
+                        <article class="group grid grid-cols-1 gap-4 rounded-3xl border border-stone-200/80 bg-white/85 p-4 shadow-[0_7px_20px_rgba(120,72,92,0.035)] transition hover:border-[#EAB3C5] sm:grid-cols-[minmax(0,1fr)_92px_140px_108px] sm:items-center sm:gap-5 sm:p-5">
+                            <div class="flex min-w-0 items-center gap-4">
+                                <div class="relative shrink-0">
+                                    <img src="@item.Product.Image"
+                                         alt="@item.Product.Name"
+                                         class="h-[82px] w-[82px] rounded-2xl border border-stone-200/80 bg-stone-50 object-contain p-1.5"
+                                         referrerpolicy="no-referrer" />
 
-                      <!-- Thumbnail & Brand metadata -->
-                      <div class="col-span-11 sm:col-span-5 flex items-center gap-3.5 pr-4 select-none text-left">
-                        <img src="@item.Product.Image" alt="@item.Product.Name" class="w-20 h-20 object-contain rounded-xl bg-stone-50 border border-stone-200/50 p-1 shrink-0" referrerpolicy="no-referrer" />
-                        <div class="min-w-0">
-                          <span class="text-[10px] text-[#C7346A] tracking-wider uppercase font-bold">
-                            @item.Product.Brand
-                          </span>
-                          <h3 class="text-xs font-bold text-stone-900 truncate pr-4">
-                            @item.Product.Name
-                          </h3>
-                          <p class="text-[10px] text-stone-400 font-semibold truncate capitalize">
-                            @item.Product.Category
-                          </p>
-                        </div>
-                      </div>
+                                    <button type="button"
+                                            @onclick="() => RemoveItem(item.Product.Id)"
+                                            title="@(LangService.CurrentLanguage == "es" ? "Quitar producto" : "Remove product")"
+                                            aria-label="@(LangService.CurrentLanguage == "es" ? "Quitar producto" : "Remove product")"
+                                            class="absolute -left-2 -top-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-stone-200 bg-white text-stone-400 shadow-sm transition hover:border-[#F4B5C7] hover:bg-[#FFF0F3] hover:text-[#C7346A]">
+                                        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                                            <path d="M3 6h18" />
+                                            <path d="M8 6V4h8v2" />
+                                            <path d="m19 6-1 14H6L5 6" />
+                                            <path d="M10 11v5M14 11v5" />
+                                        </svg>
+                                    </button>
+                                </div>
 
-                      <!-- Price cell -->
-                      <div class="col-span-6 sm:col-span-2 text-left sm:text-center text-xs font-bold font-mono">
-                        <span class="sm:hidden text-[10px] text-stone-400 font-extrabold block uppercase mb-0.5 select-none">Precio</span>
-                        S/ @item.Product.Price.ToString("0.00")
-                      </div>
+                                <div class="min-w-0">
+                                    <span class="text-[10px] font-black uppercase tracking-[0.14em] text-[#C7346A]">
+                                        @item.Product.Brand
+                                    </span>
 
-                      <!-- Double Arrow Quantity Picker block -->
-                      <div class="col-span-6 sm:col-span-2 flex items-center justify-start sm:justify-center">
-                        <div class="flex flex-col sm:items-center">
-                          <span class="sm:hidden text-[10px] text-stone-400 font-extrabold block uppercase mb-1 select-none">CANTIDAD</span>
-                          <div class="flex items-center justify-between gap-1 border border-stone-200 rounded-xl px-2.5 py-1.5 w-20 bg-[#faf6f7]/40 relative select-none">
-                            <span class="text-xs font-black font-mono text-stone-800 pr-1">
-                              @FormatQty(item.Quantity)
-                            </span>
-                            <div class="flex flex-col text-stone-500 scale-90 border-l border-stone-200/50 pl-1.5 -mr-1">
-                              <button @onclick="() => UpdateQty(item.Product.Id, item.Quantity + 1)"
-                                      class="hover:text-[#FF76A5] transition p-0 focus:outline-none cursor-pointer" title="Incrementar">
-                                <span>▲</span>
-                              </button>
-                              <button @onclick="() => UpdateQty(item.Product.Id, item.Quantity - 1)"
-                                      disabled="@(item.Quantity <= 1)"
-                                      class="hover:text-[#FF76A5] hover:disabled:text-stone-300 disabled:opacity-30 transition p-0 focus:outline-none cursor-pointer" title="Decrementar">
-                                <span>▼</span>
-                              </button>
+                                    <h2 class="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-stone-900">
+                                        @item.Product.Name
+                                    </h2>
+
+                                    <p class="mt-1 text-[11px] font-medium text-stone-400">
+                                        @item.Product.Category
+                                    </p>
+                                </div>
                             </div>
-                          </div>
+
+                            <div class="flex items-center justify-between gap-3 sm:block sm:text-center">
+                                <span class="text-[10px] font-black uppercase tracking-[0.12em] text-stone-400 sm:hidden">
+                                    Precio
+                                </span>
+
+                                <span class="font-mono text-sm font-semibold text-stone-800">
+                                    S/ @item.Product.Price.ToString("0.00")
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-3 sm:justify-center">
+                                <span class="text-[10px] font-black uppercase tracking-[0.12em] text-stone-400 sm:hidden">
+                                    Cantidad
+                                </span>
+
+                                <div class="flex items-center rounded-xl border border-stone-200 bg-[#FFFDFD] p-1">
+                                    <button type="button"
+                                            @onclick="() => UpdateQty(item.Product.Id, item.Quantity - 1)"
+                                            disabled="@(item.Quantity <= 1)"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-sm text-stone-500 transition hover:bg-[#FFF0F3] hover:text-[#C7346A] disabled:cursor-not-allowed disabled:opacity-30">
+                                        −
+                                    </button>
+
+                                    <span class="min-w-9 text-center font-mono text-sm font-semibold text-stone-800">
+                                        @item.Quantity
+                                    </span>
+
+                                    <button type="button"
+                                            @onclick="() => UpdateQty(item.Product.Id, item.Quantity + 1)"
+                                            class="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-sm text-stone-500 transition hover:bg-[#FFF0F3] hover:text-[#C7346A]">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-3 border-t border-stone-100 pt-3 sm:block sm:border-0 sm:pt-0 sm:text-right">
+                                <span class="text-[10px] font-black uppercase tracking-[0.12em] text-stone-400 sm:hidden">
+                                    Subtotal
+                                </span>
+
+                                <span class="font-mono text-sm font-semibold text-[#C7346A]">
+                                    S/ @((item.Product.Price * item.Quantity).ToString("0.00"))
+                                </span>
+                            </div>
+                        </article>
+                    }
+                </div>
+
+                <div class="pt-3">
+                    <button type="button"
+                            @onclick='() => NavigateTo("/shop")'
+                            class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-stone-200 bg-white px-5 py-3 text-[10px] font-black uppercase tracking-[0.13em] text-stone-600 transition hover:border-[#EAB3C5] hover:bg-[#FFF7F9] hover:text-[#C7346A]">
+                        <svg class="h-4 w-4"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2">
+                            <path d="M19 12H5"></path>
+                            <path d="m11 18-6-6 6-6"></path>
+                        </svg>
+
+                        Seguir comprando
+                    </button>
+                </div>
+            </section>
+
+            <aside class="h-fit self-start lg:sticky lg:top-24">
+                <div class="h-fit overflow-hidden rounded-3xl border border-[#F1DCE3] bg-white/90 shadow-[0_14px_35px_rgba(120,72,92,0.10)]">
+                    <div class="h-1 bg-[#FF76A5]"></div>
+
+                    <div class="p-5 sm:p-6">
+                        <div class="flex items-end justify-between border-b border-stone-100 pb-4">
+                            <div>
+                                <span class="text-[10px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
+                                    Resumen
+                                </span>
+
+                                <h2 class="mt-1 font-serif text-2xl font-semibold text-stone-900">
+                                    Total de compra
+                                </h2>
+                            </div>
                         </div>
-                      </div>
 
-                      <!-- Line Subtotal cell -->
-                      <div class="col-span-12 sm:col-span-2 text-right text-xs font-semibold font-mono text-[#C7346A] text-right">
-                        <span class="sm:hidden text-[10px] text-stone-400 font-extrabold text-left block uppercase mb-0.5 border-t border-dashed border-stone-100 pt-2 mt-1 select-none text-left">Subtotal</span>
-                        S/ @((item.Product.Price * item.Quantity).ToString("0.00"))
-                      </div>
+                        <div class="mt-5 space-y-2.5 text-sm text-stone-600">
+                            <div class="flex items-center justify-between">
+                                <span>Subtotal</span>
+                                <span class="font-mono font-semibold text-stone-900">
+                                    S/ @Cart.GetSubtotal().ToString("0.00")
+                                </span>
+                            </div>
 
-                    </div>
-                  }
-                </div>
+                            <div class="flex items-center justify-between">
+                                <span>Envío estimado</span>
+                                <span class="font-mono font-semibold text-stone-900">
+                                    @(GetShippingCost() == 0 ? (LangService.CurrentLanguage == "es" ? "Gratis" : "Free") : $"S/ {GetShippingCost():0.00}")
+                                </span>
+                            </div>
 
-                <!-- Footer back action buttons -->
-                <div class="flex flex-wrap items-center justify-between gap-4 pt-4 select-none">
-                  <button @onclick='() => NavigateTo("/")'
-                          class="px-6 py-3 border border-stone-200 hover:border-[#FF76A5] hover:text-[#C7346A] hover:bg-white text-xs font-bold uppercase tracking-widest text-[#78716C] bg-white/50 backdrop-blur-md rounded-xl transition cursor-pointer">
-                    @(LangService.CurrentLanguage == "es" ? "Seguir comprando" : "Continue Shopping")
-                  </button>
+                            @if (_discountPercent > 0)
+                            {
+                                <div class="flex items-center justify-between text-[#C7346A]">
+                                    <span>Descuento (@_discountPercent%)</span>
+                                    <span class="font-mono font-semibold">
+                                        -S/ @GetDiscountAmount().ToString("0.00")
+                                    </span>
+                                </div>
+                            }
 
-                  <button @onclick='() => Toast.ShowToast(LangService.CurrentLanguage == "es" ? "El carrito ya está al día" : "The cart is already up to date")'
-                          class="px-6 py-3 border border-stone-200 hover:border-stone-900 text-xs font-bold uppercase tracking-widest text-stone-600 bg-white/50 backdrop-blur-md rounded-xl transition cursor-pointer">
-                    @(LangService.CurrentLanguage == "es" ? "Actualizar carrito" : "Update Cart")
-                  </button>
-                </div>
-            </div>
+                            @if (!IsEligibleForFreeShipping() && Cart.GetSubtotal() > 0)
+                            {
+                                <p class="rounded-xl border border-[#F6D7E0] bg-[#FFF8FA] px-3.5 py-3 text-[11px] leading-relaxed text-stone-500">
+                                    Agrega <strong class="font-mono font-semibold text-[#C7346A]">S/ @GetMissingForFreeShipping().ToString("0.00")</strong>
+                                    para acceder a envío gratuito.
+                                </p>
+                            }
 
-            <!-- Right side Summary Form -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-[#FCD1DB]/50 p-6 shadow-md relative overflow-hidden">
-                  <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF76A5] to-[#FFA8BA]" />
-
-                  <h3 class="font-serif text-xl font-bold text-stone-900 border-b border-stone-100 pb-3 mb-4 select-none text-left">
-                    Total
-                  </h3>
-
-                  <!-- Coupon block -->
-                  <div class="pb-4 mb-4 border-b border-stone-100/60 text-left">
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-stone-400 block mb-2 select-none">
-                      @(LangService.CurrentLanguage == "es" ? "CÓDIGO DE CUPÓN" : "COUPON CODE")
-                    </span>
-                    @if (!string.IsNullOrEmpty(_couponAppliedCode))
-                    {
-                      <div class="bg-green-50/70 border border-green-200/50 rounded-xl p-3 flex justify-between items-center text-xs text-green-800 select-none">
-                        <div class="flex items-center gap-2">
-                          <span class="text-sm">🎁</span>
-                          <span class="text-[11px]">
-                            @(LangService.CurrentLanguage == "es" ? "Cupón" : "Coupon"){" "}
-                            <strong class="underline">@_couponAppliedCode</strong> (@_discountPercent% DCTO)
-                          </span>
+                            <div class="flex items-center justify-between border-t border-stone-200 pt-3.5 text-base font-semibold text-stone-900">
+                                <span>Total estimado</span>
+                                <span class="font-mono text-xl font-semibold text-[#C7346A]">
+                                    S/ @GetTotal().ToString("0.00")
+                                </span>
+                            </div>
                         </div>
-                        <button @onclick="RemoveCoupon"
-                                class="text-[10px] font-bold text-red-500 hover:underline cursor-pointer">
-                          @(LangService.CurrentLanguage == "es" ? "Eliminar" : "Remove")
+
+                        <div class="mt-4 border-t border-stone-100 pt-4">
+                            <label class="mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
+                                Código de cupón
+                            </label>
+
+                            @if (!string.IsNullOrEmpty(_couponAppliedCode))
+                            {
+                                <div class="flex items-center justify-between gap-3 rounded-xl border border-[#F5C7D5] bg-[#FFF8FA] px-3.5 py-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-stone-800">
+                                            Cupón @_couponAppliedCode aplicado
+                                        </p>
+                                        <p class="mt-0.5 text-[10px] text-[#C7346A]">
+                                            @_discountPercent% de descuento
+                                        </p>
+                                    </div>
+
+                                    <button type="button"
+                                            @onclick="RemoveCoupon"
+                                            class="cursor-pointer text-[10px] font-black uppercase tracking-wide text-[#C7346A] transition hover:text-stone-900">
+                                        Quitar
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <form @onsubmit="ApplyCoupon" @onsubmit:preventDefault class="flex gap-2">
+                                    <input type="text"
+                                           @bind="_couponInput"
+                                           placeholder="Ej. BIENVENIDA10"
+                                           class="min-w-0 flex-1 rounded-xl border border-stone-200 bg-[#FFFDFD] px-3.5 py-3 text-xs font-semibold text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-[#FF76A5]" />
+
+                                    <button type="submit"
+                                            class="cursor-pointer rounded-xl bg-stone-900 px-4 py-3 text-[10px] font-black uppercase tracking-[0.1em] text-white transition hover:bg-[#C7346A]">
+                                        Aplicar
+                                    </button>
+                                </form>
+
+                                <button type="button"
+                                        @onclick="ApplyDefaultCoupon"
+                                        class="mt-2 cursor-pointer bg-transparent p-0 text-left text-[10px] font-bold text-[#C7346A] transition hover:text-stone-900">
+                                    Aplicar cupón de demostración
+                                </button>
+                            }
+
+                            @if (!string.IsNullOrEmpty(_couponError))
+                            {
+                                <p class="mt-2 text-[10px] font-semibold text-red-500">
+                                    @_couponError
+                                </p>
+                            }
+                        </div>
+
+                        <button type="button"
+                                @onclick='() => NavigateTo("/checkout")'
+                                class="mt-5 w-full cursor-pointer rounded-xl bg-[#FF76A5] px-5 py-3.5 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_rgba(199,52,106,0.16)] transition hover:bg-[#C7346A]">
+                            Continuar al pago
                         </button>
-                      </div>
-                    }
-                    else
-                    {
-                      <form @onsubmit="ApplyCoupon" @onsubmit:preventDefault class="flex gap-2 select-none">
-                        <input type="text"
-                               @bind="_couponInput"
-                               placeholder="@(LangService.CurrentLanguage == "es" ? "e.g. MAMA50" : "e.g. MAMA50")"
-                               class="flex-1 bg-[#faf6f7]/80 hover:bg-white focus:bg-white border border-stone-200 focus:border-[#FF76A5] rounded-xl px-3 py-2 text-xs outline-none transition font-semibold" />
-                        <button type="submit"
-                                class="px-4 py-2 bg-[#FF76A5] hover:bg-[#C7346A] text-white hover:text-white rounded-xl text-xs font-bold uppercase tracking-widest transition duration-300 shadow-sm cursor-pointer">
-                          @(LangService.CurrentLanguage == "es" ? "Aplicar" : "Apply")
-                        </button>
-                      </form>
-                    }
-                    @if (string.IsNullOrEmpty(_couponAppliedCode))
-                    {
-                      <p @onclick="ApplyDefaultCoupon"
-                         class="text-[9px] text-[#C7346A] hover:underline cursor-pointer font-bold mt-2 text-left tracking-wide uppercase select-none">
-                        @(LangService.CurrentLanguage == "es" ? "💡 Clic para aplicar MAMA50 (50% Desc)" : "💡 Click to apply MAMA50 (50% Off)")
-                      </p>
-                    }
-                    @if (!string.IsNullOrEmpty(_couponError))
-                    {
-                      <p class="text-[10px] text-red-500 mt-1.5 font-semibold text-left">@_couponError</p>
-                    }
-                  </div>
 
-                  <!-- Calculations details -->
-                  <div class="space-y-3.5 text-xs font-semibold text-stone-600 text-left font-sans">
-                    <div class="flex justify-between items-center">
-                      <span>Subtotal:</span>
-                      <span class="text-stone-950 font-bold font-mono">S/ @Cart.GetSubtotal().ToString("0.00")</span>
+                        <p class="mt-2.5 text-center text-[10px] leading-relaxed text-stone-400">
+                            Confirmarás dirección y método de pago en el siguiente paso.
+                        </p>
                     </div>
-
-                    @if (_discountPercent > 0)
-                    {
-                      <div class="flex justify-between items-center text-green-600">
-                        <span>
-                          @(LangService.CurrentLanguage == "es" ? "Descuento" : "Discount") (@_discountPercent%):
-                        </span>
-                        <span class="font-bold font-mono">-S/ @GetDiscountAmount().ToString("0.00")</span>
-                      </div>
-                    }
-
-                    <div class="flex justify-between items-center">
-                      <span>@(LangService.CurrentLanguage == "es" ? "Envío:" : "Shipping:")</span>
-                      <span class="@(GetShippingCost() == 0 ? "text-green-600 font-bold font-mono" : "text-stone-950 font-bold font-mono")">
-                        @(GetShippingCost() == 0 ? (LangService.CurrentLanguage == "es" ? "Gratis" : "Free") : $"S/ {GetShippingCost().ToString("0.00")}")
-                      </span>
-                    </div>
-
-                    @if (!IsEligibleForFreeShipping() && Cart.GetSubtotal() > 0)
-                    {
-                      <div class="bg-[#FFF0F3]/40 border border-[#FCD1DB]/30 rounded-xl p-3 text-[10px] text-stone-500 font-medium tracking-normal leading-normal select-none">
-                        🎁 @(LangService.CurrentLanguage == "es" ? "Agrega" : "Add")
-                        <strong class="text-[#C7346A] font-bold font-mono">S/ @GetMissingForFreeShipping().ToString("0.00")</strong>
-                        @(LangService.CurrentLanguage == "es" ? "más para activar Envío Gratis." : "more to unlock Free Shipping.")
-                      </div>
-                    }
-
-                    <!-- Grand Total -->
-                    <div class="border-t border-stone-100 pt-4 mt-2.5 flex justify-between items-center text-sm font-bold text-stone-900">
-                      <span>Total:</span>
-                      <span class="text-lg font-bold font-mono text-[#C7346A]">
-                        S/ @GetTotal().ToString("0.00")
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Checkout Action -->
-                  <button @onclick='() => NavigateTo("/checkout")'
-                          class="w-full mt-6 bg-[#FF76A5] hover:bg-[#C7346A] active:scale-98 text-white text-xs font-bold uppercase tracking-widest py-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 block text-center cursor-pointer select-none">
-                    @(LangService.CurrentLanguage == "es" ? "Procesar para pago" : "Proceed to Checkout")
-                  </button>
-
                 </div>
-            </div>
+            </aside>
         </div>
     }
-
 </div>
 
 @code {
@@ -275,8 +328,6 @@
 
     private void NavigateTo(string path) => Navigator.NavigateTo(path);
 
-    private string FormatQty(int qty) => qty < 10 ? $"0{qty}" : $"{qty}";
-
     private async Task RemoveItem(string id)
     {
         await Cart.RemoveItemAsync(id);
@@ -288,35 +339,39 @@
         await Cart.UpdateQuantityAsync(id, qty);
     }
 
-    // Math builders
     private bool IsEligibleForFreeShipping() => Cart.GetSubtotal() >= 199m;
-    private decimal GetMissingForFreeShipping() => 199m - Cart.GetSubtotal();
-    private decimal GetShippingCost() => (Cart.GetSubtotal() > 0 && !IsEligibleForFreeShipping()) ? 15m : 0m;
+    private decimal GetMissingForFreeShipping() => Math.Max(0m, 199m - Cart.GetSubtotal());
+    private decimal GetShippingCost() => Cart.GetSubtotal() > 0 && !IsEligibleForFreeShipping() ? 15m : 0m;
     private decimal GetDiscountAmount() => Cart.GetSubtotal() * (_discountPercent / 100m);
     private decimal GetTotal() => Cart.GetSubtotal() - GetDiscountAmount() + GetShippingCost();
 
     private void ApplyCoupon()
     {
-        var clean = _couponInput.Trim().ToUpper();
+        var clean = _couponInput.Trim().ToUpperInvariant();
+
         if (clean == "MAMA50" || clean == "LUMINA50")
         {
             _discountPercent = 50;
             _couponAppliedCode = clean;
             _couponError = string.Empty;
-            Toast.ShowToast(LangService.CurrentLanguage == "es" ? "¡Cupón de 50% aplicado!" : "50% Coupon applied successfully!");
+            Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Cupón de 50% aplicado." : "50% coupon applied.");
         }
         else if (clean == "BIENVENIDA10")
         {
             _discountPercent = 10;
             _couponAppliedCode = clean;
             _couponError = string.Empty;
-            Toast.ShowToast(LangService.CurrentLanguage == "es" ? "¡Cupón de 10% aplicado!" : "10% Coupon applied successfully!");
+            Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Cupón de 10% aplicado." : "10% coupon applied.");
         }
         else
         {
-            _couponError = LangService.CurrentLanguage == "es" ? "Código inválido. Prueba MAMA50" : "Invalid code. Try MAMA50";
+            _couponError = LangService.CurrentLanguage == "es"
+                ? "Código inválido. Prueba BIENVENIDA10 o MAMA50."
+                : "Invalid code. Try BIENVENIDA10 or MAMA50.";
+
             _ = ClearCouponErrorDelay();
         }
+
         _couponInput = string.Empty;
     }
 
@@ -332,14 +387,15 @@
         _discountPercent = 50;
         _couponAppliedCode = "MAMA50";
         _couponError = string.Empty;
-        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "¡Cupón MAMA50 aplicado!" : "Coupon MAMA50 applied!");
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Cupón MAMA50 aplicado." : "MAMA50 coupon applied.");
     }
 
     private void RemoveCoupon()
     {
         _discountPercent = 0;
         _couponAppliedCode = string.Empty;
-        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Cupón de descuento removido" : "Discount coupon removed");
+        _couponError = string.Empty;
+        Toast.ShowToast(LangService.CurrentLanguage == "es" ? "Cupón eliminado." : "Coupon removed.");
     }
 
     public void Dispose()
