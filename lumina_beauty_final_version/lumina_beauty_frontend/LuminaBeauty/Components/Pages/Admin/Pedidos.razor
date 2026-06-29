@@ -6,6 +6,7 @@
 @using LuminaBeauty.Servicios.REST
 
 @inject PedidoRestService PedidoRestService
+@inject ClienteRestService ClienteRestService
 @inject AuthService Auth
 @inject NavigationManager Navigation
 
@@ -30,72 +31,73 @@
 
     <div class="row g-3 mb-4">
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                <small class="text-muted fw-semibold">Total de pedidos</small>
-                <h2 class="fw-bold mt-2 mb-0">@TodosLosPedidos.Count</h2>
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 position-relative" style="border-left: 4px solid #000 !important;">
+                <i class="bi bi-card-list position-absolute" style="top: 1.5rem; right: 1.5rem; font-size: 1.2rem; color: #000;"></i>
+                <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Total de Pedidos</small>
+                <h2 class="fw-bold mt-2 mb-0 text-dark">@TodosLosPedidos.Count</h2>
             </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                <small class="text-muted fw-semibold">Pendientes</small>
-                <h2 class="fw-bold mt-2 mb-0" style="color: #fd7e14;">
-                    @PedidosPendientes
-                </h2>
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 position-relative" style="border-left: 4px solid #fd7e14 !important;">
+                <i class="bi bi-clock-history position-absolute" style="top: 1.5rem; right: 1.5rem; font-size: 1.2rem; color: #fd7e14;"></i>
+                <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Pendientes</small>
+                <h2 class="fw-bold mt-2 mb-0 text-dark">@PedidosPendientes</h2>
             </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                <small class="text-muted fw-semibold">Enviados</small>
-                <h2 class="fw-bold mt-2 mb-0" style="color: #0d6efd;">
-                    @PedidosEnviados
-                </h2>
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 position-relative" style="border-left: 4px solid #0d6efd !important;">
+                <i class="bi bi-truck position-absolute" style="top: 1.5rem; right: 1.5rem; font-size: 1.2rem; color: #0d6efd;"></i>
+                <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Enviados</small>
+                <h2 class="fw-bold mt-2 mb-0 text-dark">@PedidosEnviados</h2>
             </div>
         </div>
 
         <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                <small class="text-muted fw-semibold">Ingresos registrados</small>
-                <h2 class="fw-bold mt-2 mb-0">
-                    S/ @IngresosRegistrados.ToString("N2")
-                </h2>
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100 position-relative" style="border-left: 4px solid #198754 !important;">
+                <i class="bi bi-cash-stack position-absolute" style="top: 1.5rem; right: 1.5rem; font-size: 1.2rem; color: #198754;"></i>
+                <small class="text-muted fw-bold text-uppercase" style="font-size: 0.75rem;">Ingresos Hoy</small>
+                <h2 class="fw-bold mt-2 mb-0 text-dark">S/ @IngresosRegistrados.ToString("N2")</h2>
             </div>
         </div>
     </div>
 
     <div class="card border-0 shadow-sm rounded-4 p-4">
-        <div class="row g-3 mb-4 pb-4 border-bottom">
-            <div class="col-12 col-md-4">
+        <div class="d-flex flex-wrap align-items-end gap-3 mb-4 pb-4 border-bottom">
+            <div style="min-width: 200px;">
                 <label class="form-label text-muted small fw-bold text-uppercase">
-                    Código o ID de pedido
+                    ID de Pedido
                 </label>
-
-                <input type="text"
-                       class="form-control bg-light"
-                       placeholder="Ej. ORD-0001 o 15"
-                       value="@FiltroPedido"
-                       @oninput="OnFiltroPedidoChanged" />
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-end-0 text-muted">#ORD-</span>
+                    <input type="text"
+                           class="form-control bg-white border-start-0 ps-0"
+                           placeholder="0001"
+                           value="@FiltroPedido"
+                           @oninput="OnFiltroPedidoChanged" />
+                </div>
             </div>
 
-            <div class="col-12 col-md-4">
+            <div style="min-width: 250px;">
                 <label class="form-label text-muted small fw-bold text-uppercase">
                     Cliente
                 </label>
-
-                <input type="text"
-                       class="form-control bg-light"
-                       placeholder="Buscar por nombre..."
-                       value="@FiltroCliente"
-                       @oninput="OnFiltroClienteChanged" />
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                    <input type="text"
+                           class="form-control bg-white border-start-0 ps-0"
+                           placeholder="Buscar..."
+                           value="@FiltroCliente"
+                           @oninput="OnFiltroClienteChanged" />
+                </div>
             </div>
 
-            <div class="col-12 col-md-4">
+            <div style="min-width: 200px;">
                 <label class="form-label text-muted small fw-bold text-uppercase">
                     Estado
                 </label>
-
-                <select class="form-select bg-light" @bind="FiltroEstado">
+                <select class="form-select bg-white shadow-sm" @bind="FiltroEstado">
                     <option value="">Todos los estados</option>
                     <option value="PENDIENTE">Pendiente</option>
                     <option value="CONFIRMADO">Confirmado</option>
@@ -104,6 +106,13 @@
                     <option value="ENTREGADO">Entregado</option>
                     <option value="CANCELADO">Cancelado</option>
                 </select>
+            </div>
+            
+            <div class="ms-auto" style="min-width: 150px;">
+                <label class="form-label text-muted small fw-bold text-uppercase">
+                    Fecha
+                </label>
+                <input type="date" class="form-control bg-white shadow-sm text-muted" />
             </div>
         </div>
 
@@ -123,14 +132,15 @@
         {
             <div class="table-responsive">
                 <table class="table align-middle table-hover">
-                    <thead class="table-light">
+                    <thead class="text-uppercase" style="font-size: 0.8rem; border-bottom: 2px solid #000;">
                         <tr>
-                            <th>#</th>
-                            <th>Pedido</th>
-                            <th>Cliente</th>
-                            <th>Estado</th>
-                            <th>Total</th>
-                            <th class="text-end">Acciones</th>
+                            <th class="fw-bold py-3 text-muted ps-4">No.</th>
+                            <th class="fw-bold py-3 text-muted pb-3">ID Pedido</th>
+                            <th class="fw-bold py-3 text-muted pb-3">Cliente</th>
+                            <th class="fw-bold py-3 text-muted pb-3">Fecha y Hora</th>
+                            <th class="fw-bold py-3 text-muted pb-3">Estado</th>
+                            <th class="fw-bold py-3 text-muted pb-3">Total</th>
+                            <th class="fw-bold py-3 text-muted pb-3 text-end pe-4">Acciones</th>
                         </tr>
                     </thead>
 
@@ -142,46 +152,42 @@
                         @foreach (var pedido in PedidosPaginados)
                         {
                             <tr>
-                                <td>@numeroFila</td>
+                                <td class="ps-4 fw-bold text-muted">@numeroFila</td>
 
-                                <td>
-                                    <div class="fw-semibold">
-                                        @(string.IsNullOrWhiteSpace(pedido.CodigoPedido)
-                                            ? $"Pedido #{pedido.IdPedido}"
-                                            : pedido.CodigoPedido)
-                                    </div>
-
-                                    <small class="text-muted">
-                                        ID: @pedido.IdPedido
-                                    </small>
+                                <td class="fw-bold text-dark">
+                                    @(string.IsNullOrWhiteSpace(pedido.CodigoPedido)
+                                        ? $"#ORD-{pedido.IdPedido}"
+                                        : pedido.CodigoPedido)
                                 </td>
 
                                 <td>
-                                    <div class="fw-semibold">
+                                    <div class="fw-bold text-dark">
                                         @NombreCliente(pedido.Cliente)
                                     </div>
-
-                                    <small class="text-muted">
-                                        @(pedido.Cliente?.Correo ?? "-")
+                                    <small class="text-muted d-flex align-items-center gap-1">
+                                        <i class="bi bi-envelope"></i> @(pedido.Cliente?.Correo ?? "-")
                                     </small>
                                 </td>
 
+                                <td class="text-muted fw-semibold" style="font-size: 0.85rem;">
+                                    29/06/2026 09:11
+                                </td>
+
                                 <td>
-                                    <span class="badge rounded-pill text-dark"
-                                          style="background-color: @GetEstadoBgColor(pedido.Estado);">
+                                    <span class="badge rounded-pill text-uppercase px-3 py-2"
+                                          style="background-color: @(GetEstadoBgColor(pedido.Estado))20; color: @GetEstadoBgColor(pedido.Estado); font-size: 0.75rem;">
                                         @FormatoEstado(pedido.Estado)
                                     </span>
                                 </td>
 
-                                <td class="fw-semibold">
-                                    S/ @pedido.Total.ToString("F2")
+                                <td class="fw-bold text-dark">
+                                    S/ @pedido.Total.ToString("N2")
                                 </td>
 
-                                <td class="text-end">
-                                    <button class="btn btn-sm btn-outline-secondary"
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-light border rounded-pill px-3 fw-semibold text-dark"
                                             @onclick="() => VerPedido(pedido)">
-                                        <i class="bi bi-eye"></i>
-                                        Detalles
+                                        Detalles <i class="bi bi-arrow-right ms-1"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -403,6 +409,28 @@
         try
         {
             TodosLosPedidos = await PedidoRestService.ListarPedidosAsync();
+
+            // Enriquecer clientes (el backend no incluye nombre/apellido en /listar)
+            var cacheClientes = new Dictionary<int, Cliente>();
+            foreach (var pedido in TodosLosPedidos)
+            {
+                if (pedido.Cliente == null || pedido.Cliente.Id <= 0) continue;
+                if (!string.IsNullOrWhiteSpace(pedido.Cliente.Nombre)) continue;
+
+                int idCliente = pedido.Cliente.Id;
+                if (!cacheClientes.ContainsKey(idCliente))
+                {
+                    var c = await ClienteRestService.BuscarClienteAsync(idCliente);
+                    if (c != null) cacheClientes[idCliente] = c;
+                }
+
+                if (cacheClientes.TryGetValue(idCliente, out var clienteCompleto))
+                {
+                    pedido.Cliente.Nombre = clienteCompleto.Nombre;
+                    pedido.Cliente.Apellido = clienteCompleto.Apellido;
+                    pedido.Cliente.Correo = clienteCompleto.Correo;
+                }
+            }
         }
         catch (Exception ex)
         {

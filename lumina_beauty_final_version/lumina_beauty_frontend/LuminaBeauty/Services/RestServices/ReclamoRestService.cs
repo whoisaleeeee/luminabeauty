@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using LuminaBeauty.Models;
 
 namespace LuminaBeauty.Servicios.REST
@@ -131,6 +131,29 @@ namespace LuminaBeauty.Servicios.REST
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al asignar área: {ex.Message}");
+                return null;
+            }
+        }
+
+        public async Task<Reclamo?> ActualizarReclamoAsync(Reclamo reclamo)
+        {
+            try
+            {
+                using var response = await _http.PutAsJsonAsync(
+                    "webresources/ReclamoRS/actualizar",
+                    reclamo
+                );
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Reclamo>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al actualizar reclamo: {ex.Message}");
                 return null;
             }
         }

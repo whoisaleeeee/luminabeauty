@@ -1,0 +1,422 @@
+@inject LayoutStateService LayoutState
+@inject CartService Cart
+@inject NavigationManager Navigator
+@inject CuponAppService CuponApp
+@implements IDisposable
+
+@if (LayoutState.IsCartDrawerOpen)
+{
+    <div class="fixed inset-0 z-50 flex justify-end bg-black/55 backdrop-blur-sm animate-in fade-in duration-300">
+        <div class="absolute inset-0 -z-10" @onclick="CloseDrawer"></div>
+
+        <aside id="cart-panel"
+               class="flex h-full w-full max-w-md flex-col overflow-hidden bg-white shadow-2xl animate-in slide-in-from-right duration-300">
+
+            <header class="flex items-center justify-between border-b border-stone-100 bg-[#FFF8FA] px-5 py-4">
+                <div class="flex items-center gap-3">
+                    <h2 class="font-serif text-lg font-semibold text-stone-800">
+                        Tu carrito
+                    </h2>
+
+                    <span class="rounded-full bg-[#FFF0F3] px-2 py-0.5 text-[10px] font-semibold text-[#C7346A]">
+                        @Cart.GetCount()
+                    </span>
+                </div>
+
+                <button @onclick="CloseDrawer"
+                        aria-label="Cerrar carrito"
+                        class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-stone-400 transition hover:bg-stone-100 hover:text-stone-700">
+                    <svg class="h-4 w-4"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8">
+                        <path d="m6 6 12 12" />
+                        <path d="M18 6 6 18" />
+                    </svg>
+                </button>
+            </header>
+
+            @if (Cart.GetItems().Count == 0)
+            {
+                <div class="flex flex-1 flex-col items-center justify-center px-8 text-center">
+                    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#FFF0F3] text-[#C7346A]">
+                        <svg class="h-7 w-7"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="1.7">
+                            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13 5.4 5M7 13l-1.3 2.5A1 1 0 0 0 7 17h10M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm9 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+                        </svg>
+                    </div>
+
+                    <h3 class="mt-5 font-serif text-lg font-semibold text-stone-800">
+                        Tu carrito está vacío
+                    </h3>
+
+                    <p class="mt-2 max-w-xs text-xs leading-relaxed text-stone-500">
+                        Explora la tienda y guarda tus productos favoritos para tu próxima rutina.
+                    </p>
+
+                    <button @onclick="CloseAndBrowse"
+                            class="mt-6 cursor-pointer rounded-xl bg-stone-900 px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.13em] text-white transition hover:bg-[#C7346A]">
+                        Explorar tienda
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="flex flex-1 flex-col overflow-hidden">
+                    <div class="flex-1 overflow-y-auto px-5 py-5">
+
+                        <section class="mb-5 rounded-2xl border border-[#FCD1DB]/50 bg-[#FFF8FA] p-4">
+                            <p class="text-xs font-medium text-stone-600">
+                                @if (IsEligibleForFreeShipping())
+                                {
+                                    <span class="font-semibold text-[#C7346A]">
+                                        Tu pedido accede a envío gratuito.
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        Te faltan
+                                        <strong class="font-semibold text-[#C7346A]">
+                                            S/ @GetMissingForFreeShipping().ToString("0.00")
+                                        </strong>
+                                        para acceder al envío gratuito.
+                                    </span>
+                                }
+                            </p>
+
+                            <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
+                                <div class="h-full rounded-full bg-[#FF76A5] transition-all duration-500"
+                                     style="width: @(Math.Min((Cart.GetSubtotal() / 199m) * 100m, 100m).ToString() + "%")">
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="space-y-3">
+                            @foreach (var item in Cart.GetItems())
+                            {
+                                <article class="flex gap-3 rounded-2xl border border-stone-100 bg-white p-3 text-left transition hover:border-[#FCD1DB]">
+                                    <img src="@item.Product.Image"
+                                         alt="@item.Product.Name"
+                                         class="h-16 w-16 rounded-xl border border-stone-100 bg-stone-50 object-contain p-1"
+                                         referrerpolicy="no-referrer" />
+
+                                    <div class="flex min-w-0 flex-1 flex-col justify-between">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <h4 class="truncate text-xs font-semibold text-stone-800">
+                                                    @item.Product.Name
+                                                </h4>
+
+                                                <p class="mt-1 text-[10px] font-semibold uppercase tracking-wide text-stone-400">
+                                                    @item.Product.Brand
+                                                </p>
+                                            </div>
+
+                                            <button @onclick="() => RemoveItem(item.Product.Id)"
+                                                    title="Eliminar producto"
+                                                    aria-label="Eliminar producto"
+                                                    class="cursor-pointer text-stone-400 transition hover:text-[#C7346A]">
+                                                <svg class="h-4 w-4"
+                                                     viewBox="0 0 24 24"
+                                                     fill="none"
+                                                     stroke="currentColor"
+                                                     stroke-width="1.7">
+                                                    <path d="M3 6h18" />
+                                                    <path d="M8 6V4h8v2" />
+                                                    <path d="M19 6l-1 14H6L5 6" />
+                                                    <path d="M10 11v5M14 11v5" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <div class="mt-3 flex items-center justify-between">
+                                            <div class="flex items-center rounded-lg border border-stone-200 bg-stone-50 p-1 text-xs">
+                                                <button @onclick="() => ChangeQuantity(item.Product.Id, item.Quantity - 1)"
+                                                        disabled="@(item.Quantity <= 1)"
+                                                        class="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-stone-500 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-30">
+                                                    −
+                                                </button>
+
+                                                <span class="min-w-7 text-center font-mono font-semibold text-stone-700">
+                                                    @item.Quantity
+                                                </span>
+
+                                                <button @onclick="() => ChangeQuantity(item.Product.Id, item.Quantity + 1)"
+                                                        class="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-stone-500 transition hover:bg-white">
+                                                    +
+                                                </button>
+                                            </div>
+
+                                            <span class="font-mono text-xs font-semibold text-stone-800">
+                                                S/ @((item.Product.Price * item.Quantity).ToString("0.00"))
+                                            </span>
+                                        </div>
+                                    </div>
+                                </article>
+                            }
+                        </section>
+                    </div>
+
+                    <section class="border-t border-stone-100 bg-stone-50/60 p-5">
+                        <div class="space-y-2 text-xs font-medium text-stone-500">
+                            <div class="flex justify-between">
+                                <span>Subtotal</span>
+
+                                <span class="font-mono font-semibold text-stone-800">
+                                    S/ @Cart.GetSubtotal().ToString("0.00")
+                                </span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span>Envío</span>
+
+                                <span class="font-mono font-semibold text-stone-800">
+                                    @(GetShippingCost() == 0 ? "Gratis" : $"S/ {GetShippingCost():0.00}")
+                                </span>
+                            </div>
+
+                            @if (_cuponAplicado != null)
+                            {
+                                <div class="flex justify-between text-[#C7346A]">
+                                    <span>Descuento</span>
+
+                                    <span class="font-mono font-semibold">
+                                        -S/ @GetDiscountAmount().ToString("0.00")
+                                    </span>
+                                </div>
+                            }
+
+                            <div class="mt-3 flex items-center justify-between border-t border-stone-200 pt-3 text-sm font-semibold text-stone-800">
+                                <span>Total estimado</span>
+
+                                <span class="font-mono text-base text-[#C7346A]">
+                                    S/ @GetTotal().ToString("0.00")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 border-t border-stone-200 pt-5">
+                            @if (_cuponAplicado == null)
+                            {
+                                <form @onsubmit="AplicarCuponAsync"
+                                      @onsubmit:preventDefault
+                                      class="flex gap-2">
+
+                                    <input type="text"
+                                           placeholder="Código de cupón"
+                                           @bind="_codigoCupon"
+                                           class="min-w-0 flex-1 rounded-xl border border-stone-200 bg-white px-3 py-2.5 text-xs font-medium text-stone-700 outline-none transition placeholder:text-stone-400 focus:border-[#FF76A5]" />
+
+                                    <button type="submit"
+                                            disabled="@_validandoCupon"
+                                            class="cursor-pointer rounded-xl bg-stone-900 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wide text-white transition hover:bg-[#C7346A] disabled:cursor-not-allowed disabled:opacity-60">
+                                        @(_validandoCupon ? "Validando..." : "Aplicar")
+                                    </button>
+                                </form>
+
+                                @if (!string.IsNullOrWhiteSpace(_mensajeCupon))
+                                {
+                                    <p class="mt-2 text-[10px] font-medium text-[#C7346A]">
+                                        @_mensajeCupon
+                                    </p>
+                                }
+                            }
+                            else
+                            {
+                                <div class="rounded-xl border border-[#FCD1DB]/60 bg-[#FFF8FA] px-3.5 py-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-xs font-semibold text-stone-800">
+                                                Cupón @_cuponAplicado.Codigo aplicado
+                                            </p>
+
+                                            <p class="mt-1 text-[10px] text-stone-500">
+                                                @GetCouponDescription()
+                                            </p>
+                                        </div>
+
+                                        <button type="button"
+                                                @onclick="QuitarCuponAsync"
+                                                class="cursor-pointer text-[10px] font-semibold text-[#C7346A] transition hover:text-stone-800">
+                                            Quitar
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+
+                            <button @onclick="GoToCartPage"
+                                    class="mt-4 w-full cursor-pointer rounded-xl bg-[#FF76A5] px-5 py-3.5 text-[10px] font-semibold uppercase tracking-[0.13em] text-white shadow-sm transition hover:bg-[#C7346A]">
+                                Ver carrito y finalizar compra
+                            </button>
+
+                            <p class="mt-3 text-center text-[10px] leading-relaxed text-stone-400">
+                                Revisa tus productos, dirección y método de pago antes de confirmar tu pedido.
+                            </p>
+                        </div>
+                    </section>
+                </div>
+            }
+        </aside>
+    </div>
+}
+
+@code {
+    private string _codigoCupon = string.Empty;
+    private string _mensajeCupon = string.Empty;
+    private Cupon? _cuponAplicado;
+    private bool _validandoCupon;
+
+    protected override void OnInitialized()
+    {
+        LayoutState.OnChange += StateHasChanged;
+        Cart.OnChange += OnCartChanged;
+
+        _cuponAplicado = Cart.GetAppliedCoupon();
+    }
+
+    private void OnCartChanged()
+    {
+        _cuponAplicado = Cart.GetAppliedCoupon();
+        StateHasChanged();
+    }
+
+    private void CloseDrawer()
+    {
+        LayoutState.SetCartDrawerOpen(false);
+    }
+
+    private void CloseAndBrowse()
+    {
+        CloseDrawer();
+        Navigator.NavigateTo("/shop");
+    }
+
+    private void GoToCartPage()
+    {
+        CloseDrawer();
+        Navigator.NavigateTo("/cart");
+    }
+
+    private async Task RemoveItem(string id)
+    {
+        await Cart.RemoveItemAsync(id);
+    }
+
+    private async Task ChangeQuantity(string id, int quantity)
+    {
+        await Cart.UpdateQuantityAsync(id, quantity);
+    }
+
+    private bool IsEligibleForFreeShipping()
+    {
+        return Cart.GetSubtotal() >= 199m;
+    }
+
+    private decimal GetMissingForFreeShipping()
+    {
+        return Math.Max(0m, 199m - Cart.GetSubtotal());
+    }
+
+    private decimal GetShippingCost()
+    {
+        return Cart.GetSubtotal() > 0 && !IsEligibleForFreeShipping()
+            ? 15m
+            : 0m;
+    }
+
+    private async Task AplicarCuponAsync()
+    {
+        if (_validandoCupon)
+        {
+            return;
+        }
+
+        var codigo = _codigoCupon.Trim();
+
+        if (string.IsNullOrWhiteSpace(codigo))
+        {
+            _mensajeCupon = "Ingresa un código de cupón.";
+            return;
+        }
+
+        _validandoCupon = true;
+        _mensajeCupon = string.Empty;
+
+        try
+        {
+            var cupon = await CuponApp.AplicarAsync(codigo);
+
+            if (cupon == null || cupon.IdCupon <= 0)
+            {
+                await Cart.RemoveAppliedCouponAsync();
+                _cuponAplicado = null;
+                _mensajeCupon = "El cupón no es válido o ya no está vigente.";
+                return;
+            }
+
+            await Cart.SetAppliedCouponAsync(cupon);
+
+            _cuponAplicado = Cart.GetAppliedCoupon();
+            _codigoCupon = cupon.Codigo;
+        }
+        catch
+        {
+            _mensajeCupon = "No se pudo validar el cupón.";
+        }
+        finally
+        {
+            _validandoCupon = false;
+        }
+    }
+
+    private async Task QuitarCuponAsync()
+    {
+        _codigoCupon = string.Empty;
+        _mensajeCupon = string.Empty;
+
+        await Cart.RemoveAppliedCouponAsync();
+
+        _cuponAplicado = null;
+    }
+
+    private decimal GetDiscountAmount()
+    {
+        return _cuponAplicado == null
+            ? 0m
+            : CuponApp.CalcularDescuento(
+                _cuponAplicado,
+                Cart.GetSubtotal());
+    }
+
+    private decimal GetTotal()
+    {
+        return Math.Max(
+            0m,
+            Cart.GetSubtotal() + GetShippingCost() - GetDiscountAmount());
+    }
+
+    private string GetCouponDescription()
+    {
+        if (_cuponAplicado == null)
+        {
+            return string.Empty;
+        }
+
+        return _cuponAplicado.TipoDescuento.Equals(
+            "PORCENTAJE",
+            StringComparison.OrdinalIgnoreCase)
+            ? $"{_cuponAplicado.ValorDescuento:0}% de descuento"
+            : $"S/ {_cuponAplicado.ValorDescuento:0.00} de descuento";
+    }
+
+    public void Dispose()
+    {
+        LayoutState.OnChange -= StateHasChanged;
+        Cart.OnChange -= OnCartChanged;
+    }
+}

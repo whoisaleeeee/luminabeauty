@@ -1,0 +1,31 @@
+@using Microsoft.AspNetCore.Components.Routing
+@using LuminaBeauty.Components.Layout
+
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData"
+                   DefaultLayout="@typeof(MainLayout)" />
+
+        <FocusOnNavigate RouteData="@routeData"
+                         Selector="h1" />
+    </Found>
+
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="py-20 text-center">
+                <h1 class="mb-4 font-serif text-4xl font-bold text-stone-900">
+                    404 - Página no encontrada
+                </h1>
+
+                <p class="mb-8 text-stone-500">
+                    Lo sentimos, la página de belleza que buscas no existe.
+                </p>
+
+                <a href="/"
+                   class="rounded-xl bg-[#FF76A5] px-6 py-3 text-xs font-bold uppercase text-white transition hover:bg-[#C7346A]">
+                    Volver al inicio
+                </a>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
