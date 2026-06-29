@@ -384,14 +384,14 @@ else
 
     private void GoBack()
     {
-        Navigator.NavigateTo("/");
+        Navigator.NavigateTo("/shop");
     }
 
     private void GoToCategory()
     {
         if (_product != null)
         {
-            Navigator.NavigateTo($"/category/{Uri.EscapeDataString(_product.Category)}");
+            Navigator.NavigateTo($"/shop?category={Uri.EscapeDataString(_product.Category)}");
         }
     }
 
