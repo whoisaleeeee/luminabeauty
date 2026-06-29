@@ -44,6 +44,7 @@ builder.Services.AddScoped<ReclamoRestService>();
 
 // Servicios de aplicación
 builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddScoped<SessionStorageService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<WishlistService>();

@@ -17,7 +17,8 @@ namespace LuminaBeauty.Services
         private const string ClientStorageKey = "lumina_current_client";
         private const string EmployeeStorageKey = "lumina_current_employee";
 
-        private readonly LocalStorageService _storage;
+        private readonly LocalStorageService _localStorage;
+        private readonly SessionStorageService _sessionStorage;
         private readonly AuthRestService _authRestService;
 
         private bool _isLoggedIn;
@@ -28,10 +29,12 @@ namespace LuminaBeauty.Services
         public event Action? OnChange;
 
         public AuthService(
-            LocalStorageService storage,
+            LocalStorageService localStorage,
+            SessionStorageService sessionStorage,
             AuthRestService authRestService)
         {
-            _storage = storage;
+            _localStorage = localStorage;
+            _sessionStorage = sessionStorage;
             _authRestService = authRestService;
         }
 
@@ -45,59 +48,84 @@ namespace LuminaBeauty.Services
 
         public async Task InitializeAsync()
         {
-            _isLoggedIn = await _storage.GetItemAsync<bool>(LoginStorageKey);
+            // Primero intenta recuperar una sesión de empleado.
+            var employeeIsLoggedIn =
+                await _sessionStorage.GetItemAsync<bool>(LoginStorageKey);
 
-            if (!_isLoggedIn)
+            if (employeeIsLoggedIn)
             {
-                OnChange?.Invoke();
-                return;
-            }
+                var employeeSessionType =
+                    await _sessionStorage.GetItemAsync<string>(SessionTypeStorageKey);
 
-            var tipoSesionGuardado =
-                await _storage.GetItemAsync<string>(SessionTypeStorageKey);
-
-            if (Enum.TryParse<TipoSesion>(
-                    tipoSesionGuardado,
-                    ignoreCase: true,
-                    out var tipoSesion))
-            {
-                _tipoSesion = tipoSesion;
-            }
-
-            if (_tipoSesion == TipoSesion.Admin)
-            {
-                _currentEmployee =
-                    await _storage.GetItemAsync<Empleado>(EmployeeStorageKey);
-
-                if (_currentEmployee == null || _currentEmployee.Id <= 0)
+                if (Enum.TryParse<TipoSesion>(
+                        employeeSessionType,
+                        ignoreCase: true,
+                        out var employeeType) &&
+                    employeeType == TipoSesion.Admin)
                 {
-                    await LogoutAsync();
-                    return;
-                }
-            }
-            else if (_tipoSesion == TipoSesion.Cliente)
-            {
-                _currentClient =
-                    await _storage.GetItemAsync<Cliente>(ClientStorageKey);
+                    var employee =
+                        await _sessionStorage.GetItemAsync<Empleado>(EmployeeStorageKey);
 
-                if (_currentClient == null || _currentClient.Id <= 0)
-                {
-                    await LogoutAsync();
-                    return;
+                    if (employee != null && employee.Id > 0)
+                    {
+                        _isLoggedIn = true;
+                        _tipoSesion = TipoSesion.Admin;
+                        _currentEmployee = employee;
+                        _currentClient = null;
+
+                        OnChange?.Invoke();
+                        return;
+                    }
                 }
+
+                await ClearEmployeeSessionAsync();
             }
-            else
+
+            // Luego intenta recuperar una sesión persistente de cliente.
+            var clientIsLoggedIn =
+                await _localStorage.GetItemAsync<bool>(LoginStorageKey);
+
+            if (clientIsLoggedIn)
             {
-                await LogoutAsync();
-                return;
+                var clientSessionType =
+                    await _localStorage.GetItemAsync<string>(SessionTypeStorageKey);
+
+                if (Enum.TryParse<TipoSesion>(
+                        clientSessionType,
+                        ignoreCase: true,
+                        out var clientType) &&
+                    clientType == TipoSesion.Cliente)
+                {
+                    var client =
+                        await _localStorage.GetItemAsync<Cliente>(ClientStorageKey);
+
+                    if (client != null && client.Id > 0)
+                    {
+                        _isLoggedIn = true;
+                        _tipoSesion = TipoSesion.Cliente;
+                        _currentClient = client;
+                        _currentEmployee = null;
+
+                        OnChange?.Invoke();
+                        return;
+                    }
+                }
+
+                await ClearClientSessionAsync();
             }
+
+            _isLoggedIn = false;
+            _tipoSesion = TipoSesion.Ninguna;
+            _currentClient = null;
+            _currentEmployee = null;
 
             OnChange?.Invoke();
         }
 
         public async Task<TipoSesion> LoginAsync(string correo, string contrasena)
         {
-            var empleado = await _authRestService.LoginEmpleadoAsync(correo, contrasena);
+            var empleado =
+                await _authRestService.LoginEmpleadoAsync(correo, contrasena);
 
             if (empleado != null && empleado.Id > 0)
             {
@@ -105,7 +133,8 @@ namespace LuminaBeauty.Services
                 return TipoSesion.Admin;
             }
 
-            var cliente = await _authRestService.LoginClienteAsync(correo, contrasena);
+            var cliente =
+                await _authRestService.LoginClienteAsync(correo, contrasena);
 
             if (cliente != null && cliente.Id > 0)
             {
@@ -147,7 +176,9 @@ namespace LuminaBeauty.Services
             }
 
             _currentClient = cliente;
-            await _storage.SetItemAsync(ClientStorageKey, cliente);
+
+            await _localStorage.SetItemAsync(ClientStorageKey, cliente);
+
             OnChange?.Invoke();
         }
 
@@ -158,14 +189,15 @@ namespace LuminaBeauty.Services
             _currentClient = cliente;
             _currentEmployee = null;
 
-            await _storage.SetItemAsync(LoginStorageKey, true);
-            await _storage.SetItemAsync(
+            await ClearEmployeeSessionAsync();
+
+            await _localStorage.SetItemAsync(LoginStorageKey, true);
+            await _localStorage.SetItemAsync(
                 SessionTypeStorageKey,
                 TipoSesion.Cliente.ToString()
             );
-            await _storage.SetItemAsync(ClientStorageKey, cliente);
-
-            await _storage.RemoveItemAsync(EmployeeStorageKey);
+            await _localStorage.SetItemAsync(ClientStorageKey, cliente);
+            await _localStorage.RemoveItemAsync(EmployeeStorageKey);
 
             OnChange?.Invoke();
         }
@@ -177,14 +209,14 @@ namespace LuminaBeauty.Services
             _currentEmployee = empleado;
             _currentClient = null;
 
-            await _storage.SetItemAsync(LoginStorageKey, true);
-            await _storage.SetItemAsync(
+            await ClearClientSessionAsync();
+
+            await _sessionStorage.SetItemAsync(LoginStorageKey, true);
+            await _sessionStorage.SetItemAsync(
                 SessionTypeStorageKey,
                 TipoSesion.Admin.ToString()
             );
-            await _storage.SetItemAsync(EmployeeStorageKey, empleado);
-
-            await _storage.RemoveItemAsync(ClientStorageKey);
+            await _sessionStorage.SetItemAsync(EmployeeStorageKey, empleado);
 
             OnChange?.Invoke();
         }
@@ -196,12 +228,26 @@ namespace LuminaBeauty.Services
             _currentClient = null;
             _currentEmployee = null;
 
-            await _storage.RemoveItemAsync(LoginStorageKey);
-            await _storage.RemoveItemAsync(SessionTypeStorageKey);
-            await _storage.RemoveItemAsync(ClientStorageKey);
-            await _storage.RemoveItemAsync(EmployeeStorageKey);
+            await ClearClientSessionAsync();
+            await ClearEmployeeSessionAsync();
 
             OnChange?.Invoke();
+        }
+
+        private async Task ClearClientSessionAsync()
+        {
+            await _localStorage.RemoveItemAsync(LoginStorageKey);
+            await _localStorage.RemoveItemAsync(SessionTypeStorageKey);
+            await _localStorage.RemoveItemAsync(ClientStorageKey);
+            await _localStorage.RemoveItemAsync(EmployeeStorageKey);
+        }
+
+        private async Task ClearEmployeeSessionAsync()
+        {
+            await _sessionStorage.RemoveItemAsync(LoginStorageKey);
+            await _sessionStorage.RemoveItemAsync(SessionTypeStorageKey);
+            await _sessionStorage.RemoveItemAsync(EmployeeStorageKey);
+            await _sessionStorage.RemoveItemAsync(ClientStorageKey);
         }
     }
 }
