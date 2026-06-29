@@ -1,4 +1,5 @@
 @page "/profile"
+@using Microsoft.AspNetCore.Components
 @inject LanguageService LangService
 @inject AuthService Auth
 @inject WishlistService Wishlist
@@ -1909,6 +1910,11 @@
 </div>
 
 @code {
+    [SupplyParameterFromQuery(Name = "tab")]
+    public string? Tab { get; set; }
+
+    private bool _profileInitialized;
+
     private bool _isDeactivateAccountOpen;
     private bool _isDeactivatingAccount;
     private string _deactivationConfirmation = string.Empty;
@@ -2247,7 +2253,36 @@
         if (!result.Success)
         {
             Toast.ShowToast(result.Message);
+            return;
         }
+
+        _profileInitialized = true;
+        await ApplyQueryTabAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_profileInitialized)
+        {
+            await ApplyQueryTabAsync();
+        }
+    }
+
+    private async Task ApplyQueryTabAsync()
+    {
+        var requestedTab = Tab?.Trim().ToLowerInvariant();
+
+        if (requestedTab is not ("pedidos" or "reclamos"))
+        {
+            return;
+        }
+
+        if (ProfileApp.State.ActiveTab == requestedTab)
+        {
+            return;
+        }
+
+        await ProfileApp.SetActiveTabAsync(requestedTab);
     }
 
     private async Task SetActiveTabAsync(string code)

@@ -3,136 +3,125 @@
 
 <PageTitle>Política de privacidad | Lumina Beauty</PageTitle>
 
-<div class="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+<div class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
 
-    <nav class="mb-8 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
+    <nav class="mb-6 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
         <span class="cursor-pointer transition hover:text-[#C7346A]"
               @onclick='() => Navigator.NavigateTo("/")'>
             Inicio
         </span>
-
         <span class="text-stone-300">/</span>
-
-        <span class="font-bold text-stone-600">
-            Política de privacidad
-        </span>
+        <span class="font-bold text-stone-600">Política de privacidad</span>
     </nav>
 
-    <section class="rounded-[2rem] border border-stone-200/70 bg-white/85 p-7 shadow-sm sm:p-10">
+    <section class="overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white shadow-sm">
+        <header class="border-b border-[#F6DDE5] bg-[#FFF7F9] px-6 py-8 sm:px-10 sm:py-10">
+            <span class="inline-flex items-center gap-2 rounded-full border border-[#F5C8D6] bg-white px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+                Transparencia y protección
+            </span>
 
-        <div class="border-b border-stone-100 pb-6">
-            <h1 class="mt-2 font-serif text-xl font-semibold text-stone-800 sm:text-xl">
-                Política de privacidad
-            </h1>
+            <div class="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                    <h1 class="font-serif text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">Política de privacidad</h1>
+                    <p class="mt-2 max-w-2xl text-xs leading-relaxed text-stone-500">
+                        Conoce qué información utilizamos, para qué la necesitamos y cómo protegemos tus datos dentro de Lumina Beauty.
+                    </p>
+                </div>
+                <span class="w-fit rounded-full border border-stone-200 bg-white px-3 py-1.5 text-[9px] font-bold text-stone-500">
+                    Última actualización: junio de 2026
+                </span>
+            </div>
+        </header>
 
-            <p class="mt-2 text-xs leading-relaxed text-stone-500">
-                Información sobre cómo utilizamos los datos proporcionados al crear una cuenta o realizar una compra.
-            </p>
-        </div>
+        <div class="grid grid-cols-1 gap-8 px-6 py-8 sm:px-10 sm:py-10 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <aside class="lg:sticky lg:top-6 lg:self-start">
+                <p class="text-[10px] font-black uppercase tracking-[0.18em] text-stone-400">En esta política</p>
+                <nav class="mt-3 space-y-1.5">
+                    <a href="/privacy#informacion" class="block rounded-xl px-3 py-2.5 text-[11px] font-bold tracking-[0.01em] text-stone-600 transition hover:bg-[#FFF0F3] hover:text-[#C7346A]">Información recopilada</a>
+                    <a href="/privacy#finalidad" class="block rounded-xl px-3 py-2.5 text-[11px] font-bold tracking-[0.01em] text-stone-600 transition hover:bg-[#FFF0F3] hover:text-[#C7346A]">Uso de los datos</a>
+                    <a href="/privacy#seguridad" class="block rounded-xl px-3 py-2.5 text-[11px] font-bold tracking-[0.01em] text-stone-600 transition hover:bg-[#FFF0F3] hover:text-[#C7346A]">Conservación y seguridad</a>
+                    <a href="/privacy#comparticion" class="block rounded-xl px-3 py-2.5 text-[11px] font-bold tracking-[0.01em] text-stone-600 transition hover:bg-[#FFF0F3] hover:text-[#C7346A]">Compartición</a>
+                    <a href="/privacy#derechos" class="block rounded-xl px-3 py-2.5 text-[11px] font-bold tracking-[0.01em] text-stone-600 transition hover:bg-[#FFF0F3] hover:text-[#C7346A]">Tus derechos</a>
+                </nav>
 
-        <div class="mt-8 space-y-8 text-sm leading-relaxed text-stone-600">
+                <div class="mt-5 rounded-2xl border border-[#FCD1DB] bg-[#FFF7F9] p-4">
+                    <p class="text-[10px] font-black uppercase tracking-[0.15em] text-[#C7346A]">¿Necesitas ayuda?</p>
+                    <p class="mt-1 text-[11px] leading-relaxed text-stone-500">Escríbenos para consultas sobre el tratamiento de tus datos.</p>
+                    <a href="mailto:ayuda@luminabeauty.com" class="mt-3 inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#C7346A] transition hover:text-[#9E2B55]">
+                        Contactar soporte
+                        <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+                    </a>
+                </div>
+            </aside>
 
-            <section>
-                <h2 class="text-sm font-semibold text-stone-800">
-                    Información que recopilamos
-                </h2>
+            <main class="max-w-3xl space-y-5 text-[13px] leading-7 text-stone-600 sm:text-[14px] sm:leading-8">
+                <section id="informacion" class="scroll-mt-8 rounded-2xl border border-stone-100 bg-white p-5 sm:p-6">
+                    <div class="flex gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.5"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0"></path></svg>
+                        </span>
+                        <div><p class="text-[10px] font-black uppercase tracking-[0.20em] text-[#C7346A]">01</p><h2 class="mt-1 font-serif text-[1.02rem] font-semibold tracking-tight text-stone-900">Información que recopilamos</h2></div>
+                    </div>
+                    <p class="mt-4">Lumina Beauty puede recopilar datos como nombres, apellidos, documento de identidad, correo electrónico, teléfono, direcciones de entrega y datos relacionados con pedidos, pagos, uso de cupones, favoritos y movimientos de fidelidad.</p>
+                    <p class="mt-3">También pueden registrarse datos técnicos básicos necesarios para el funcionamiento de la plataforma, como sesiones activas, preferencias de navegación y acciones realizadas dentro de la cuenta.</p>
+                </section>
 
-                <p class="mt-3">
-                    Lumina Beauty puede recopilar datos como nombres, apellidos, documento de identidad,
-                    correo electrónico, teléfono, direcciones de entrega y datos relacionados con pedidos,
-                    pagos, uso de cupones, favoritos y movimientos de fidelidad.
-                </p>
+                <section id="finalidad" class="scroll-mt-8 rounded-2xl border border-stone-100 bg-white p-5 sm:p-6">
+                    <div class="flex gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"></path><path d="M3 12h18"></path></svg>
+                        </span>
+                        <div><p class="text-[10px] font-black uppercase tracking-[0.20em] text-[#C7346A]">02</p><h2 class="mt-1 font-serif text-[1.02rem] font-semibold tracking-tight text-stone-900">Finalidad del tratamiento de datos</h2></div>
+                    </div>
+                    <p class="mt-4">Utilizamos la información proporcionada para crear y administrar cuentas, procesar pedidos, validar datos de entrega, gestionar pagos, aplicar beneficios disponibles, atender consultas y brindar seguimiento a las compras realizadas.</p>
+                    <p class="mt-3">Cuando existan comunicaciones comerciales habilitadas, estas podrán incluir novedades, campañas, lanzamientos o beneficios relacionados con Lumina Beauty. Las preferencias de comunicación estarán sujetas a las opciones disponibles dentro de la plataforma.</p>
+                </section>
 
-                <p class="mt-3">
-                    También pueden registrarse datos técnicos básicos necesarios para el funcionamiento de
-                    la plataforma, como sesiones activas, preferencias de navegación y acciones realizadas
-                    dentro de la cuenta.
-                </p>
-            </section>
+                <section id="seguridad" class="scroll-mt-8 rounded-2xl border border-stone-100 bg-white p-5 sm:p-6">
+                    <div class="flex gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path></svg>
+                        </span>
+                        <div><p class="text-[10px] font-black uppercase tracking-[0.20em] text-[#C7346A]">03</p><h2 class="mt-1 font-serif text-[1.02rem] font-semibold tracking-tight text-stone-900">Conservación y seguridad</h2></div>
+                    </div>
+                    <p class="mt-4">Conservamos la información durante el tiempo necesario para cumplir con las finalidades descritas, atender obligaciones operativas, resolver incidencias o mantener registros asociados a pedidos y transacciones.</p>
+                    <p class="mt-3">Aplicamos medidas razonables para proteger la información contra accesos no autorizados, alteraciones, pérdida o divulgación indebida. Sin embargo, ningún sistema digital puede garantizar seguridad absoluta.</p>
+                </section>
 
-            <section>
-                <h2 class="text-sm font-semibold text-stone-800">
-                    Finalidad del tratamiento de datos
-                </h2>
+                <section id="comparticion" class="scroll-mt-8 rounded-2xl border border-stone-100 bg-white p-5 sm:p-6">
+                    <div class="flex gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="3"></circle><circle cx="16" cy="7" r="3"></circle><circle cx="16" cy="17" r="3"></circle><path d="m10.6 10.6 2.8-2.1M10.6 13.4l2.8 2.1"></path></svg>
+                        </span>
+                        <div><p class="text-[10px] font-black uppercase tracking-[0.20em] text-[#C7346A]">04</p><h2 class="mt-1 font-serif text-[1.02rem] font-semibold tracking-tight text-stone-900">Compartición de información</h2></div>
+                    </div>
+                    <p class="mt-4">La información personal solo podrá ser utilizada por Lumina Beauty y por proveedores estrictamente necesarios para completar procesos de pago, entrega, soporte técnico o cumplimiento de obligaciones operativas.</p>
+                    <p class="mt-3">No comercializamos datos personales ni compartimos información con terceros para fines ajenos a la gestión de la compra, la entrega o la atención al cliente.</p>
+                </section>
 
-                <p class="mt-3">
-                    Utilizamos la información proporcionada para crear y administrar cuentas, procesar
-                    pedidos, validar datos de entrega, gestionar pagos, aplicar beneficios disponibles,
-                    atender consultas y brindar seguimiento a las compras realizadas.
-                </p>
+                <section id="derechos" class="scroll-mt-8 rounded-2xl border border-stone-100 bg-white p-5 sm:p-6">
+                    <div class="flex gap-3">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#FFF0F3] text-[#C7346A]">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16"></path><path d="M4 12h16"></path></svg>
+                        </span>
+                        <div><p class="text-[10px] font-black uppercase tracking-[0.20em] text-[#C7346A]">05</p><h2 class="mt-1 font-serif text-[1.02rem] font-semibold tracking-tight text-stone-900">Derechos del titular</h2></div>
+                    </div>
+                    <p class="mt-4">Puedes solicitar la actualización, corrección, acceso o eliminación de los datos vinculados a tu cuenta, siempre que no exista una obligación legal u operativa que requiera conservar determinados registros.</p>
+                    <div class="mt-4 rounded-xl border border-[#FCD1DB] bg-[#FFF7F9] p-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.15em] text-[#C7346A]">Solicitud de privacidad</p>
+                        <p class="mt-1 text-[11px] leading-relaxed text-stone-500">Para ejercer estos derechos, escríbenos a <a href="mailto:ayuda@luminabeauty.com" class="font-bold text-stone-700 transition hover:text-[#C7346A]">ayuda@luminabeauty.com</a>.</p>
+                    </div>
+                </section>
 
-                <p class="mt-3">
-                    Cuando existan comunicaciones comerciales habilitadas, estas podrán incluir novedades,
-                    campañas, lanzamientos o beneficios relacionados con Lumina Beauty. Las preferencias
-                    de comunicación estarán sujetas a las opciones disponibles dentro de la plataforma.
-                </p>
-            </section>
-
-            <section>
-                <h2 class="text-sm font-semibold text-stone-800">
-                    Conservación y seguridad
-                </h2>
-
-                <p class="mt-3">
-                    Conservamos la información durante el tiempo necesario para cumplir con las finalidades
-                    descritas, atender obligaciones operativas, resolver incidencias o mantener registros
-                    asociados a pedidos y transacciones.
-                </p>
-
-                <p class="mt-3">
-                    Aplicamos medidas razonables para proteger la información contra accesos no autorizados,
-                    alteraciones, pérdida o divulgación indebida. Sin embargo, ningún sistema digital puede
-                    garantizar seguridad absoluta.
-                </p>
-            </section>
-
-            <section>
-                <h2 class="text-sm font-semibold text-stone-800">
-                    Compartición de información
-                </h2>
-
-                <p class="mt-3">
-                    La información personal solo podrá ser utilizada por Lumina Beauty y por proveedores
-                    estrictamente necesarios para completar procesos de pago, entrega, soporte técnico o
-                    cumplimiento de obligaciones operativas.
-                </p>
-
-                <p class="mt-3">
-                    No comercializamos datos personales ni compartimos información con terceros para fines
-                    ajenos a la gestión de la compra, la entrega o la atención al cliente.
-                </p>
-            </section>
-
-            <section>
-                <h2 class="text-sm font-semibold text-stone-800">
-                    Derechos del titular
-                </h2>
-
-                <p class="mt-3">
-                    Puedes solicitar la actualización, corrección, acceso o eliminación de los datos
-                    vinculados a tu cuenta, siempre que no exista una obligación legal u operativa que
-                    requiera conservar determinados registros.
-                </p>
-
-                <p class="mt-3">
-                    Para ejercer estos derechos, escríbenos a:
-                    <a href="mailto:ayuda@luminabeauty.com"
-                       class="font-semibold text-stone-700 transition hover:text-[#C7346A]">
-                        ayuda@luminabeauty.com
-                    </a>.
-                </p>
-            </section>
-
-            <section class="rounded-2xl border border-stone-100 bg-stone-50/60 p-5">
-                <h2 class="text-sm font-semibold text-stone-800">
-                    Actualizaciones de esta política
-                </h2>
-
-                <p class="mt-3">
-                    Esta política puede actualizarse cuando cambien nuestros procesos, funcionalidades o
-                    requisitos aplicables. La versión vigente estará disponible en esta misma página.
-                </p>
-            </section>
+                <section class="rounded-2xl border border-stone-200 bg-stone-50/70 p-5 sm:p-6">
+                    <p class="text-[9px] font-black uppercase tracking-[0.16em] text-stone-500">Actualizaciones de esta política</p>
+                    <p class="mt-2 text-[12px] leading-relaxed text-stone-500">Esta política puede actualizarse cuando cambien nuestros procesos, funcionalidades o requisitos aplicables. La versión vigente estará disponible en esta misma página.</p>
+                </section>
+            </main>
         </div>
     </section>
 </div>
