@@ -125,16 +125,10 @@ namespace LuminaBeauty.Services
             };
         }
 
-        private List<Product> GetNewArrivalsFirst(List<Product> filteredProducts)
+        private static List<Product> GetNewArrivalsFirst(List<Product> filteredProducts)
         {
-            var newArrivalIds = _productService
-                .GetNewArrivals()
-                .Select(product => product.Id)
-                .ToHashSet();
-
             return filteredProducts
-                .OrderByDescending(product => newArrivalIds.Contains(product.Id))
-                .ThenByDescending(product => product.Id)
+                .OrderByDescending(product => product.IdProducto)
                 .ThenBy(product => product.Name)
                 .ToList();
         }
