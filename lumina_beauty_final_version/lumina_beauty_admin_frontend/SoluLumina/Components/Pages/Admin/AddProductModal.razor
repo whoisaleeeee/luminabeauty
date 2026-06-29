@@ -149,6 +149,7 @@
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(false);
         NewProduct = new Producto();
+        catId = 0; marcaId = 0; tipo_piel = null;
     }
 
     private async Task SaveProduct()
@@ -159,9 +160,6 @@
         NewProduct.Estado = 1; // Default status active
 
         await OnProductAdded.InvokeAsync(NewProduct);
-        // Reset form for next entry
-        NewProduct = new Producto();
-        catId = 0; marcaId = 0;
         await CloseModal();
     }
 }

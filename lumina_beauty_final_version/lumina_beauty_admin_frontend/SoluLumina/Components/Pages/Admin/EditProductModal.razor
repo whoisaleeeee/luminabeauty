@@ -2,27 +2,15 @@
 @using Microsoft.AspNetCore.Components
 
 @code {
-    [Parameter]
-    public bool IsVisible { get; set; }
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public Producto Product { get; set; } = new();
+    [Parameter] public EventCallback<Producto> OnProductUpdated { get; set; }
+    [Parameter] public List<CategoriaProducto> Categorias { get; set; } = new();
+    [Parameter] public List<Marca> Marcas { get; set; } = new();
+    [Parameter] public List<string> Tipo_piel { get; set; } = new();
 
-    [Parameter]
-    public EventCallback<bool> IsVisibleChanged { get; set; }
-
-    [Parameter]
-    public Producto Product { get; set; } = new();
-
-    [Parameter]
-    public EventCallback<Producto> OnProductUpdated { get; set; }
-
-    [Parameter]
-    public List<CategoriaProducto> Categorias { get; set; } = new();
-
-    [Parameter]
-    public List<Marca> Marcas { get; set; } = new();
-
-    [Parameter]
-    public List<string> Tipo_piel { get; set; } = new();
-
+    private Producto productToEdit = new();
     private int catId = 0;
     private int marcaId = 0;
 
@@ -30,18 +18,23 @@
     {
         if (Product != null)
         {
-            catId = Product.Categoria?.Id_categoria ?? 0;
-            marcaId = Product.Marca?.Id_marca ?? 0;
-
-            if (!string.IsNullOrEmpty(Product.Tipo_piel))
+            productToEdit = new Producto
             {
-                var coincidencia = Tipo_piel.FirstOrDefault(t => t.Equals(Product.Tipo_piel, StringComparison.OrdinalIgnoreCase));
+                Id_producto = Product.Id_producto,
 
-                if (coincidencia != null)
-                {
-                    Product.Tipo_piel = coincidencia; // Le asigna el formato exacto de la lista (ej: "Mixta")
-                }
-            }
+                Nombre = Product.Nombre,
+                Slug = Product.Slug,
+                Sku = Product.Sku,
+                Precio = Product.Precio,
+                Estado = 1,
+                Descripcion = Product.Descripcion,
+                Tipo_piel = Product.Tipo_piel?.ToUpper(),
+                Categoria = Product.Categoria,
+                Marca = Product.Marca
+            };
+
+            catId = productToEdit.Categoria?.Id_categoria ?? 0;
+            marcaId = productToEdit.Marca?.Id_marca ?? 0;
         }
     }
 
@@ -53,11 +46,24 @@
 
     private async Task Save()
     {
-        if (catId != 0) Product.Categoria = new CategoriaProducto { Id_categoria = catId };
-        if (marcaId != 0) Product.Marca = new Marca { Id_marca = marcaId };
-        if (!string.IsNullOrEmpty(Product.Tipo_piel)) Product.Tipo_piel = Product.Tipo_piel.ToUpper();
-        await OnProductUpdated.InvokeAsync(Product);
+        if (catId != 0) productToEdit.Categoria = new CategoriaProducto { Id_categoria = catId };
+        if (marcaId != 0) productToEdit.Marca = new Marca { Id_marca = marcaId };
+
+        if (!string.IsNullOrEmpty(productToEdit.Tipo_piel))
+        {
+            productToEdit.Tipo_piel = productToEdit.Tipo_piel.ToUpper();
+        }
+
+        await OnProductUpdated.InvokeAsync(productToEdit);
         Close();
+    }
+
+    private string FormatearTexto(string texto)
+    {
+        if (string.IsNullOrEmpty(texto)) return texto;
+
+        // Pone la primera letra en mayúscula y el resto en minúscula
+        return char.ToUpper(texto[0]) + texto.Substring(1).ToLower();
     }
 }
 
@@ -74,7 +80,6 @@
                     <button type="button" class="btn-close" @onclick="Close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body px-4 py-4">
-                    <!-- 01 Información Básica -->
                     <div class="mb-4">
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">01</span>
@@ -83,15 +88,15 @@
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-md-6">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nombre del producto</label>
-                                <input type="text" class="form-control bg-light border-1" @bind="Product.Nombre" />
+                                <input type="text" class="form-control bg-light border-1" @bind="productToEdit.Nombre" />
                             </div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Slug / Código</label>
-                                <input type="text" class="form-control bg-light border-1" @bind="Product.Slug" />
+                                <input type="text" class="form-control bg-light border-1" @bind="productToEdit.Slug" />
                             </div>
                             <div class="col-12 col-md-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">SKU</label>
-                                <input type="text" class="form-control bg-light border-1" placeholder="1234567890" @bind="Product.Sku" />
+                                <input type="text" class="form-control bg-light border-1" placeholder="1234567890" @bind="productToEdit.Sku" />
                             </div>
                         </div>
                         <div class="row g-3 mb-3">
@@ -110,17 +115,16 @@
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Precio Venta</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light border-end-0 text-muted">S/</span>
-                                    <input type="number" class="form-control bg-light border-start-0" placeholder="0.00" min="0.00" step="0.01" @bind="Product.Precio" />
+                                    <input type="number" class="form-control bg-light border-start-0" placeholder="0.00" min="0.00" step="0.01" @bind="productToEdit.Precio" />
                                 </div>
                             </div>
                         </div>
                         <div class="col-12 col-md-12">
                             <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Descripción del producto</label>
-                            <input type="text" class="form-control bg-light border-1" @bind="Product.Descripcion" />
+                            <input type="text" class="form-control bg-light border-1" @bind="productToEdit.Descripcion" />
                         </div>
                     </div>
 
-                    <!-- 02 Categorización -->
                     <div class="mb-4">
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">02</span>
@@ -139,18 +143,19 @@
                             </div>
                             <div class="col-12 col-md-4">
                                 <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel</label>
-                                <select class="form-select bg-light border-1 text-secondary" @bind="Product.Tipo_piel" required>
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel</label>
+                                <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de piel</label>
+                                <select class="form-select bg-light border-1 text-secondary" @bind="productToEdit.Tipo_piel" required>
                                     <option value="" disabled hidden>Seleccionar tipo de piel...</option>
                                     @foreach (var t in Tipo_piel)
                                     {
-                                        <option value="@t">@t</option>
+                                        <option value="@(t.ToUpper())">@FormatearTexto(t)</option>
                                     }
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 03 Imágenes -->
                     <div class="mb-2">
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <span class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 28px; height: 28px; background-color: #fcf0f4; color: #d9557b; font-size: 0.8rem;">03</span>
