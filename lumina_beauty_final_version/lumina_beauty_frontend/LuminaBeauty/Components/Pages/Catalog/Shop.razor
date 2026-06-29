@@ -55,8 +55,8 @@
                         <div class="space-y-1">
                             <button @onclick="() => ShopApp.SelectCategory(null)"
                                     class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition @(string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
-                                                                                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
-                                                                                                                                                    : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
+                                                                                                                                                                                        ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                                                        : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
 
                                 <span>Todos los productos</span>
 
@@ -74,8 +74,8 @@
 
                                 <button @onclick="() => ShopApp.SelectCategory(category.Name)"
                                         class="group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition @(isActive
-                                                                                                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
-                                                                                                                                                                    : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
+                                                                                                                                                                                                            ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                                                                            : "text-stone-600 hover:bg-stone-50 hover:text-[#C7346A]")">
 
                                     <span class="truncate">
                                         @category.Name
@@ -164,8 +164,8 @@
 
                                     <button @onclick="() => ShopApp.ToggleMinimumRating(currentRating)"
                                             class="flex w-full cursor-pointer items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition @(isSelected
-                                                                                                                                                                                    ? "bg-[#FFF0F3] text-[#C7346A]"
-                                                                                                                                                                                    : "text-stone-600 hover:bg-stone-50")">
+                                                                                                                                                                                                                                ? "bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                                                                                                : "text-stone-600 hover:bg-stone-50")">
 
                                         <span class="tracking-[0.08em] text-[#D88C2C]">★★★★★</span>
                                         <span>@currentRating.ToString("0.0")+ </span>
@@ -196,7 +196,7 @@
                             @products.Count producto@(products.Count == 1 ? "" : "s") encontrado@(products.Count == 1 ? "" : "s")
                         </p>
                         <p class="mt-1 text-[11px] text-stone-500">
-                            Explora productos seleccionados para acompañar tu rutina.
+                            @GetCatalogDescription()
                         </p>
                     </div>
 
@@ -209,6 +209,7 @@
                                 class="min-w-0 cursor-pointer border-0 bg-transparent py-0.5 pr-7 text-[13px] font-bold text-stone-700 outline-none focus:ring-0">
                             <option value="relevance">Relevancia</option>
                             <option value="best_sellers">Más vendidos</option>
+                            <option value="new_arrivals">Novedades</option>
                             <option value="rating">Mejor valorados</option>
                             <option value="price_asc">Menor precio</option>
                             <option value="price_desc">Mayor precio</option>
@@ -258,8 +259,8 @@
 
                                 <button @onclick="() => ShopApp.GoToPage(currentPage)"
                                         class="h-10 min-w-10 cursor-pointer rounded-xl px-3 text-xs font-bold transition @(isCurrent
-                                                                                                                                                                    ? "bg-stone-950 text-white"
-                                                                                                                                                                    : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
+                                                                                                                                                                                                            ? "bg-stone-950 text-white"
+                                                                                                                                                                                                            : "border border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
                             @currentPage
                         </button>
                     }
@@ -313,11 +314,12 @@
             ShopApp.SelectCategory(matchingCategory?.Name);
         }
 
-        ShopApp.State.SortBy = SortFromUrl?.Equals(
-            "mas-vendidos",
-            StringComparison.OrdinalIgnoreCase) == true
-                ? "best_sellers"
-                : "relevance";
+        ShopApp.State.SortBy = SortFromUrl?.Trim().ToLowerInvariant() switch
+        {
+            "mas-vendidos" => "best_sellers",
+            "novedades" => "new_arrivals",
+            _ => "relevance"
+        };
     }
 
     private bool HasActiveFilters =>
@@ -328,14 +330,24 @@
 
     private string GetCatalogEyebrow()
     {
-        if (ShopApp.State.SortBy == "best_sellers")
+        return ShopApp.State.SortBy switch
         {
-            return "Más vendidos";
-        }
+            "best_sellers" => "Más vendidos",
+            "new_arrivals" => "Novedades",
+            _ => string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
+                ? "Todo el catálogo"
+                : ShopApp.State.ActiveCategory
+        };
+    }
 
-        return string.IsNullOrWhiteSpace(ShopApp.State.ActiveCategory)
-            ? "Todo el catálogo"
-            : ShopApp.State.ActiveCategory;
+    private string GetCatalogDescription()
+    {
+        return ShopApp.State.SortBy switch
+        {
+            "best_sellers" => "Los favoritos de nuestra comunidad, ordenados por popularidad.",
+            "new_arrivals" => "Los últimos esenciales incorporados a Lumina Beauty.",
+            _ => "Explora productos seleccionados para acompañar tu rutina."
+        };
     }
 
     public void Dispose()

@@ -73,9 +73,7 @@ namespace LuminaBeauty.Services
             if (State.SelectedBrands.Count > 0)
             {
                 products = products
-                    .Where(product =>
-                        State.SelectedBrands.Contains(product.Brand)
-                    )
+                    .Where(product => State.SelectedBrands.Contains(product.Brand))
                     .ToList();
             }
 
@@ -86,9 +84,7 @@ namespace LuminaBeauty.Services
             if (State.MinimumRating.HasValue)
             {
                 products = products
-                    .Where(product =>
-                        product.Rating >= State.MinimumRating.Value
-                    )
+                    .Where(product => product.Rating >= State.MinimumRating.Value)
                     .ToList();
             }
 
@@ -101,6 +97,18 @@ namespace LuminaBeauty.Services
 
             return State.SortBy switch
             {
+                "best_sellers" => products
+                    .OrderByDescending(product => product.ReviewsCount)
+                    .ThenByDescending(product => product.Rating)
+                    .ThenBy(product => product.Name)
+                    .ToList(),
+
+                "new_arrivals" => products
+                    .OrderByDescending(IsNewArrival)
+                    .ThenByDescending(product => product.Id)
+                    .ThenBy(product => product.Name)
+                    .ToList(),
+
                 "rating" => products
                     .OrderByDescending(product => product.Rating)
                     .ThenByDescending(product => product.ReviewsCount)
@@ -141,7 +149,7 @@ namespace LuminaBeauty.Services
         {
             var products = GetVisibleProducts();
 
-            int totalPages = GetTotalPages();
+            var totalPages = GetTotalPages();
 
             if (State.CurrentPage > totalPages)
             {
@@ -156,7 +164,7 @@ namespace LuminaBeauty.Services
 
         public int GetTotalPages()
         {
-            int totalProducts = GetVisibleProducts().Count;
+            var totalProducts = GetVisibleProducts().Count;
 
             return Math.Max(
                 1,
@@ -166,7 +174,7 @@ namespace LuminaBeauty.Services
 
         public void GoToPage(int page)
         {
-            int totalPages = GetTotalPages();
+            var totalPages = GetTotalPages();
 
             State.CurrentPage = Math.Clamp(page, 1, totalPages);
         }
@@ -216,6 +224,15 @@ namespace LuminaBeauty.Services
                 .ToList();
         }
 
+        private static bool IsNewArrival(Product product)
+        {
+            return !string.IsNullOrWhiteSpace(product.Id) &&
+                   product.Id.StartsWith(
+                       "na",
+                       StringComparison.OrdinalIgnoreCase
+                   );
+        }
+
         private string? ResolveCategory(string? categoryName)
         {
             if (string.IsNullOrWhiteSpace(categoryName))
@@ -223,7 +240,7 @@ namespace LuminaBeauty.Services
                 return null;
             }
 
-            string decodedName = Uri.UnescapeDataString(categoryName);
+            var decodedName = Uri.UnescapeDataString(categoryName);
 
             return State.Categories
                 .FirstOrDefault(category => category.Name.Equals(
