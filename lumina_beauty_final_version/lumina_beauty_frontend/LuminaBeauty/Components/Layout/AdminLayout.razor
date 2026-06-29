@@ -10,17 +10,14 @@
     <aside class="admin-sidebar">
 
         <div class="admin-logo-section">
-            <div class="admin-logo-mark">
-                <img src="/images/logo-lumina.png"
-                     alt="Lumina Beauty"
-                     onerror="this.style.display='none'; this.parentElement.classList.add('logo-fallback');" />
-                <span>LB</span>
-            </div>
+            <button type="button"
+                    class="admin-brand-button"
+                    @onclick="GoHome">
+                <span class="admin-brand-lumina">Lumina</span><span>Beauty</span>
+                <span class="admin-brand-dot"></span>
+            </button>
 
-            <div class="admin-logo-text">
-                <strong>Lumina Beauty</strong>
-                <small>Portal Administrativo</small>
-            </div>
+            <span class="admin-brand-subtitle">Portal Administrativo</span>
         </div>
 
         <div class="admin-menu-label">GESTIÓN</div>
@@ -89,6 +86,12 @@
 </div>
 
 @code {
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
     private async Task CerrarSesionAsync()
     {
         await Auth.LogoutAsync();
