@@ -1,0 +1,65 @@
+@page "/test-rest"
+@using SoluLumina.Models
+@inject HttpClient Http
+@rendermode InteractiveServer
+
+<h3>Test de Conexión REST con Java</h3>
+
+<div class="mb-3">
+    <label for="productoId">ID del Producto:</label>
+    <input type="number" id="productoId" @bind="idProductoBuscado" class="form-control" style="width: 200px; display: inline-block;" />
+    <button class="btn btn-primary" @onclick="BuscarProducto">Buscar en Java Backend</button>
+</div>
+
+@if (cargando)
+{
+    <p><em>Buscando...</em></p>
+}
+else if (mensajeError != null)
+{
+    <div class="alert alert-danger">@mensajeError</div>
+}
+else if (producto != null)
+{
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">@producto.Nombre</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Stock: @producto.Stock</h6>
+            <p class="card-text">@producto.Descripcion</p>
+            <p class="card-text"><strong>Precio:</strong> $@producto.Precio</p>
+        </div>
+    </div>
+}
+
+@code {
+    private int idProductoBuscado = 1;
+    private Producto? producto;
+    private bool cargando = false;
+    private string? mensajeError;
+
+    private async Task BuscarProducto()
+    {
+        cargando = true;
+        mensajeError = null;
+        producto = null;
+
+        try
+        {
+            // Hace una petición GET a http://localhost:8080/LuminaBeauty-Servicios/webresources/ProductoRS/{id}
+            producto = await Http.GetFromJsonAsync<Producto>($"ProductoRS/{idProductoBuscado}");
+            
+            if (producto == null)
+            {
+                mensajeError = "No se encontró el producto (o el ID no existe en la BD).";
+            }
+        }
+        catch (Exception ex)
+        {
+            mensajeError = $"Error al conectar con el backend de Java: {ex.Message}";
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+}

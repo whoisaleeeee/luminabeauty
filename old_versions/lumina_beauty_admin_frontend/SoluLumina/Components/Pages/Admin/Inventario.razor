@@ -1,0 +1,575 @@
+@page "/Inventario"
+@using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@rendermode InteractiveServer
+@using SoluLumina.Models
+@inject IJSRuntime JS
+@inject IConfiguration Configuration
+@inject AdminUserService adminService
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+            <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Inventario</h3>
+
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                        <span class="visually-hidden">New alerts</span>
+                    </span>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+
+                <div class="position-relative">
+                    <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                        <div class="text-end d-none d-md-block">
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
+                        </div>
+                        <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                    </div>
+
+                    @if (showProfileDropdown)
+                    {
+                        <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                                <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                                <div class="overflow-hidden">
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-person fs-5"></i> Ver Perfil
+                                </NavLink>
+                                <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                                <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Unidades Totales</small>
+                    <div class="d-flex align-items-end justify-content-between mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@unidades_totales</h2>
+                        <span class="p-2 rounded-3 bg-light text-muted d-flex align-items-center justify-content-center" style="color: #f1aeb5 !important; width: 40px; height: 40px; background-color: #fef4f6 !important;"><i class="bi bi-box-seam fs-5"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden" style="border-right: 4px solid #dc3545 !important;">
+                    <small class="text-danger text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Alertas Activas</small>
+                    <div class="d-flex align-items-end justify-content-between mt-auto">
+                        <h2 class="fw-black m-0 text-danger" style="font-size: 2.2rem; line-height: 1;">@alertas_totales</h2>
+                        <span class="p-2 rounded-3 d-flex align-items-center justify-content-center" style="color: #dc3545; width: 40px; height: 40px; background-color: #fdf5f5;"><i class="bi bi-exclamation-triangle-fill fs-5"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Valor Inventario (S/)</small>
+                    <div class="d-flex align-items-end justify-content-between mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@valor_total.ToString("F2") k</h2>
+                        <span class="p-2 rounded-3 bg-light text-muted d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-cash-stack fs-5"></i></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <small class="text-muted text-uppercase fw-bold mb-2 d-block" style="font-size: 0.7rem; letter-spacing: 0.5px;">Sin Stock</small>
+                    <div class="d-flex align-items-end justify-content-between mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@ZeroStockCount</h2>
+                        <span class="p-2 rounded-3 bg-light text-muted d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-slash-circle fs-5"></i></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (ZeroStockCount > 0)
+        {
+            <div class="card border-0 shadow-sm rounded-4 p-3 px-4 bg-white mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="rounded-circle d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; background-color: #fdf5f5; color: #dc3545;">
+                            <i class="bi bi-bell fs-5"></i>
+                        </span>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <h6 class="m-0 fw-bold text-dark">Control de stock</h6>
+                                <span class="badge rounded-pill" style="background-color: #fdf5f5; color: #dc3545; font-size: 0.65rem;">URGENTE</span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.85rem;">@ZeroStockCount productos requieren reposición inmediata.</small>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn text-white px-4 py-2 rounded-3 shadow-sm border-0 d-flex align-items-center gap-2"
+                                style="background-color: #834a5d; font-size: 0.85rem; font-weight: 500;"
+                                @onclick="OpenAddEntryModal">
+                            <i class="bi bi-plus-lg"></i> Nueva Entrada
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom" style="border-color: #f7eff1 !important;">
+                <div class="col-12 col-md-3">
+                    <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Producto</label>
+                    <input type="text" class="form-control bg-light border-1" placeholder="Nombre" @bind="filtroProducto" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead class="bg-light">
+                        <tr class="align-middle text-muted small text-uppercase" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem;">
+                            <th class="text-center py-3 px-3" style="width: 0.2%;">No.</th>
+                            <th class="text-start py-3 px-3">Producto</th>
+                            <th class="text-start py-3 px-3" style="width: 1%;">Categoria</th>
+                            <th class="text-start py-3 px-3" style="width: 1%; white-space: nowrap;"> Precio</th>
+                            <th class="text-start py-3 px-3" style="width: 1%;">Stock</th>
+                            <th class="text-end py-3 px-3" style="width: 1%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int i = 0;
+                        }
+                        @foreach (var p in PagedProducts)
+                        {
+                            var index = ++i;
+                            var rowNum = ((paginaActual - 1) * prod_por_pagina) + index;
+
+                            <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
+                                <td class="text-center text-muted small" style="width: 0.2%;">@rowNum</td>
+
+                                <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                    <div class="d-flex align-items-center gap-2" style="max-width: 260px;">
+                                        <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
+                                            @if (!string.IsNullOrEmpty(p.Imagen_url))
+                                            {
+                                                <img src="@p.Imagen_url" alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-image text-muted opacity-50 d-flex justify-content-center align-items-center h-100 fs-5"></i>
+                                            }
+                                        </div>
+
+                                        <div class="d-flex flex-column justify-content-center overflow-hidden">
+                                            <span class="fw-bold text-dark lh-sm text-truncate" style="font-size: 0.85rem;" title="@p.Nombre">
+                                                @p.Nombre
+                                            </span>
+                                            <small class="text-muted font-monospace text-truncate" style="font-size: 0.65rem; letter-spacing: 0.2px;">
+                                                @p.Sku
+                                            </small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="text-secondary" style="font-size: 0.85rem; width: 1%; white-space: nowrap; padding-right: 1.5rem;">
+                                    @p.Categoria?.Nombre
+                                </td>
+
+                                <td class="fw-bold text-dark" style="font-size: 0.9rem; width: 1%; white-space: nowrap;">
+                                    S/ @p.Precio.ToString("F2")
+                                </td>
+
+                                <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                    <span class="badge rounded-pill text-dark fw-medium" style="background-color: @GetStockBgColor(p.Stock); padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                        @p.Stock uds.
+                                    </span>
+                                </td>
+
+                                <td class="py-2 px-3 text-end" style="width: 1%;">
+                                    <button class="btn btn-sm btn-light border-0 rounded-3 shadow-sm d-inline-flex align-items-center justify-content-center"
+                                            style="width: 32px; height: 32px; padding: 0; color: #4a6a5a; background-color: #f4f7f5;"
+                                            title="Reponer Stock"
+                                            @onclick="() => ReponerDirecto(p)">
+                                        <i class="bi bi-arrow-repeat fs-6"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: #f7eff1 !important; background-color: #fbf8f9;">
+                <small class="text-muted" style="font-size: 0.85rem;">Mostrando @(total_filtered_products == 0 ? 0 : (paginaActual - 1) * prod_por_pagina + 1)-@(Math.Min(paginaActual * prod_por_pagina, total_filtered_products)) de @total_filtered_products productos</small>
+                <nav>
+                    <ul class="pagination pagination-sm m-0 gap-1">
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <button class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual - 1)" disabled="@(paginaActual == 1)"><i class="bi bi-chevron-left"></i></button>
+                        </li>
+
+                        @for (int pageIdx = 1; pageIdx <= total_paginas; pageIdx++)
+                        {
+                            var pageNumber = pageIdx;
+                            <li class="page-item">
+                                <button class="page-link rounded-2 @(paginaActual == pageNumber ? "active border-0 text-white" : "border text-secondary bg-white") shadow-sm"
+                                        style="@(paginaActual == pageNumber ? "background-color: #834a5d;" : "")"
+                                        @onclick="() => CambiarPagina(pageNumber)">
+                                    @pageNumber
+                                </button>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == total_paginas || total_paginas == 0 ? "disabled" : "")">
+                            <button class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual + 1)" disabled="@(paginaActual == total_paginas || total_paginas == 0)"><i class="bi bi-chevron-right"></i></button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@if (showAddEntryModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.4);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #fcf0f4; color: #d9557b;">
+                            <i class="bi bi-box-arrow-in-down fs-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold" style="color: #6a3849;">Registrar Entrada</h5>
+                            <p class="text-muted small m-0">Ingreso de stock al inventario.</p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close mb-auto" @onclick="CloseAddEntryModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 py-4">
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Producto</label>
+                        <div class="input-group shadow-sm rounded-3 position-relative">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0 shadow-none" placeholder="Buscar por SKU o nombre de producto..." @bind="textoBuscar" @bind:event="oninput" />
+                            @if (ProductosEncontrados != null && ProductosEncontrados.Any())
+                            {
+                                <div class="list-group position-absolute w-100 shadow rounded-3 start-0 bg-white"
+                                     style="top: 100%; z-index: 1050; max-height: 250px; overflow-y: auto; margin-top: 5px;">
+
+                                    @foreach (var prod in ProductosEncontrados)
+                                    {
+                                        <button type="button"
+                                                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 border-0 border-bottom"
+                                                @onclick="() => SeleccionarProducto(prod)">
+                                            <div>
+                                                <span class="fw-bold text-dark d-block" style="font-size: 0.85rem;">@prod.Nombre</span>
+                                                <span class="text-muted font-monospace" style="font-size: 0.75rem;">SKU: @prod.Sku</span>
+                                            </div>
+                                        </button>
+                                    }
+                                </div>
+                            }
+                            else if (!productoSeleccionado && !string.IsNullOrWhiteSpace(textoBuscar) && textoBuscar.Length >= 2)
+                            {
+                                <div class="list-group position-absolute w-100 shadow rounded-3 start-0 bg-white p-3 text-center text-muted small"
+                                     style="top: 100%; z-index: 1050; margin-top: 5px;">
+                                    No se encontraron productos
+                                </div>
+                            }
+                        </div>
+                        <small class="text-muted d-block mt-2" style="font-size: 0.75rem;">Ej. RF-LP-018 - Labial Matte Rojo Pasión</small>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Lote (Batch)</label>
+                            <input type="text" class="form-control shadow-sm border-1 rounded-3" placeholder="Ej. L-2026X">
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Cantidad</label>
+                            <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                <span class="input-group-text bg-light border-end-0 text-muted">
+                                    <i class="bi bi-123"></i>
+                                </span>
+                                <input type="number" class="form-control border-start-0" placeholder="0" @bind="NuevoMovimiento.Cantidad">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de movimiento</label>
+                        <select class="form-select shadow-sm border-1 rounded-3 text-secondary" @bind="NuevoMovimiento.Tipo_movimiento">
+                            @foreach (var mot in TiposMovimientos)
+                            {
+                                <option value="@mot">@mot</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Motivo de entrada</label>
+                        <input type="text" class="form-control shadow-sm border-1 rounded-3" placeholder="Detalla el motivo del movimiento acá" @bind="NuevoMovimiento.Motivo">
+                    </div>
+
+                </div>
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+                    <button type="button" class="btn btn-light px-4 border rounded-3" @onclick="CloseAddEntryModal">Cancelar</button>
+                    <button type="button" class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d;" @onclick="SaveEntryInventory">
+                        <i class="bi bi-check2-circle"></i> Confirmar Entrada
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string URL_BASE = string.Empty;
+    private bool showProfileDropdown = false;
+
+    private int IdProductoReabastecido;
+    private int unidades_totales;
+    private decimal valor_total;
+    private int alertas_totales;
+    private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
+    private int paginaActual = 1;
+    private int prod_por_pagina = 7;
+    private string filtroProducto = "";
+    private string _textoBuscar = "";
+
+    private string textoBuscar
+    {
+        get => _textoBuscar;
+        set
+        {
+            if (_textoBuscar != value)
+            {
+                _textoBuscar = value;
+
+                if (productoSeleccionado && value != productoElegidoNombre)
+                {
+                    productoSeleccionado = false;
+                }
+
+                ActualizarBusqueda();
+            }
+        }
+    }
+
+    private bool showFilters = false;
+    private bool productoSeleccionado = false;
+    private string productoElegidoNombre = "";
+    private List<Producto> Productos = new List<Producto>();
+    private List<CategoriaProducto> Categorias = new List<CategoriaProducto>();
+    private List<Producto> ProductosEncontrados { get; set; } = new();
+    private MovimientoInventario NuevoMovimiento = new();
+    private List<string> TiposMovimientos = new() { "Entrada", "Ajuste positivo", "Devolucion cliente", "Merma" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        URL_BASE = Configuration["ApiSettings:URL_BASE"] ?? string.Empty;
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            Productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar") ?? new();
+            Categorias = await new HttpClientUtils<List<CategoriaProducto>>().get(URL_BASE + "/CategoriaProductoRS/listar") ?? new();
+
+            alertas_totales = 0;
+            unidades_totales = 0;
+            valor_total = 0;
+
+            foreach (var p in Productos)
+            {
+                if (p.Categoria != null)
+                {
+                    p.Categoria = Categorias.FirstOrDefault(c => c.Id_categoria == p.Categoria.Id_categoria);
+                }
+                valor_total += p.Stock * p.Precio;
+                unidades_totales += p.Stock;
+                if (p.Stock < 10) alertas_totales++;
+            }
+            valor_total /= 1000; // en miles de soles
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando datos: {ex.Message}");
+        }
+    }
+
+    private IEnumerable<Producto> FilteredProducts => Productos
+        .Where(p => p.Nombre != null && p.Nombre.Contains(filtroProducto, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
+
+    private int total_paginas => (int)Math.Ceiling(total_filtered_products / (double)prod_por_pagina);
+    private int total_filtered_products => FilteredProducts.Count();
+
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+    private bool showAddEntryModal = false;
+
+    private void OpenAddEntryModal()
+    {
+        NuevoMovimiento = new MovimientoInventario { Tipo_movimiento = "Entrada" };
+        showAddEntryModal = true;
+    }
+
+    private void CloseAddEntryModal()
+    {
+        showAddEntryModal = false;
+        productoSeleccionado = false;
+        textoBuscar = string.Empty;
+        NuevoMovimiento = new MovimientoInventario();
+    }
+
+    private void CambiarPagina(int nuevaPagina)
+    {
+        if (nuevaPagina >= 1 && nuevaPagina <= total_paginas)
+        {
+            paginaActual = nuevaPagina;
+            StateHasChanged();
+        }
+    }
+
+    private string GetStockBgColor(int stockActual)
+    {
+        if (stockActual == 0)
+            return "#dc3545";
+        else if (stockActual <= 12)
+            return "#ffb703";
+        else
+            return "#e2e3e5";
+    }
+
+    private void ActualizarBusqueda()
+    {
+        if (productoSeleccionado || string.IsNullOrWhiteSpace(textoBuscar) || textoBuscar.Length < 2)
+        {
+            ProductosEncontrados.Clear();
+            return;
+        }
+
+        ProductosEncontrados = Productos
+            .Where(p => (p.Nombre != null && p.Nombre.Contains(textoBuscar, StringComparison.OrdinalIgnoreCase)) ||
+                        (p.Sku != null && p.Sku.Contains(textoBuscar, StringComparison.OrdinalIgnoreCase)))
+            .Take(5)
+            .ToList();
+    }
+
+    private void SeleccionarProducto(Producto producto)
+    {
+        productoSeleccionado = true;
+        productoElegidoNombre = producto.Nombre;
+        IdProductoReabastecido = producto.Id_producto;
+
+        textoBuscar = producto.Nombre;
+        ProductosEncontrados.Clear();
+    }
+
+    private async Task SaveEntryInventory()
+    {
+        var targetProduct = Productos.FirstOrDefault(p => p.Id_producto == IdProductoReabastecido);
+        if (targetProduct == null) return;
+
+        NuevoMovimiento.Producto = targetProduct;
+        NuevoMovimiento.Tipo_movimiento = (NuevoMovimiento.Tipo_movimiento ?? "Entrada").ToUpper().Replace(" ", "_");
+        NuevoMovimiento.Stock_anterior = targetProduct.Stock;
+        NuevoMovimiento.Stock_posterior = targetProduct.Stock + NuevoMovimiento.Cantidad;
+
+        try
+        {
+            MovimientoInventario mv = await new HttpClientUtils<MovimientoInventario>().post(URL_BASE + "/MovimientoInventarioRS/registrar", NuevoMovimiento);
+            int res = await new HttpClientUtils<int>().put(URL_BASE + "/ProductoRS/aumentarStock/" + IdProductoReabastecido + "/" + NuevoMovimiento.Cantidad);
+
+            showAddEntryModal = false;
+
+            if (res > 0)
+            {
+                await JS.InvokeVoidAsync("Swal.fire", new
+                {
+                    toast = true,
+                    position = "top-end",
+                    showConfirmButton = false,
+                    timer = 3000,
+                    timerProgressBar = true,
+                    icon = "success",
+                    title = "Reposición exitosa"
+                });
+
+                await CargarDatos();
+            }
+            else
+            {
+                await MostrarErrorModal();
+            }
+        }
+        catch
+        {
+            showAddEntryModal = false;
+            await MostrarErrorModal();
+        }
+
+        NuevoMovimiento = new MovimientoInventario();
+        productoSeleccionado = false;
+        textoBuscar = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task MostrarErrorModal()
+    {
+        await JS.InvokeVoidAsync("Swal.fire", new
+        {
+            title = "Error de Reposición",
+            text = "No se pudo conectar con el servidor.",
+            icon = "error",
+            confirmButtonColor = "#dc3545",
+            confirmButtonText = "Entendido"
+        });
+    }
+
+    private void ReponerDirecto(Producto producto)
+    {
+        productoSeleccionado = true;
+        productoElegidoNombre = producto.Nombre;
+        IdProductoReabastecido = producto.Id_producto;
+
+        textoBuscar = producto.Nombre;
+        ProductosEncontrados.Clear();
+
+        NuevoMovimiento = new MovimientoInventario { Tipo_movimiento = "Entrada" };
+        showAddEntryModal = true;
+    }
+
+    private void BuscarAutomatico()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private Task ShowFilters()
+    {
+        showFilters = !showFilters;
+        return Task.CompletedTask;
+    }
+}

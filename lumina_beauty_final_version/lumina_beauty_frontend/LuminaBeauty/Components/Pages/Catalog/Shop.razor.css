@@ -1,0 +1,21 @@
+/* CSS for Shop component */
+.shop-page {
+    min-height: 70vh;
+}
+
+@media (max-width: 1023px) {
+    .shop-sidebar {
+        order: 2;
+    }
+}
+
+@media (max-width: 639px) {
+    .shop-page {
+        padding-top: 1.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    .shop-sidebar {
+        order: 2;
+    }
+}

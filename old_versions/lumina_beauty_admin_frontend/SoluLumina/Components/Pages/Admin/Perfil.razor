@@ -1,0 +1,179 @@
+@page "/Perfil"
+@using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@inject AdminUserService adminService
+@rendermode InteractiveServer
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header Superior Estándar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Mi Perfil</h3>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                <div class="position-relative">
+                    <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                        <div class="text-end d-none d-md-block">
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
+                        </div>
+                        <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                    </div>
+
+                    @if (showProfileDropdown)
+                    {
+                        <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                                <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                                <div class="overflow-hidden">
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-person fs-5"></i> Ver Perfil
+                                </NavLink>
+                                <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                                <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenido del Perfil -->
+        <div class="row g-4">
+            <!-- Tarjeta Izquierda: Resumen de Perfil -->
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+                    <div class="bg-light" style="height: 120px; background-image: linear-gradient(135deg, #fcf0f4 0%, #f7eff1 100%);"></div>
+                    <div class="card-body px-4 pb-4 pt-0 text-center position-relative">
+                        <div class="position-relative d-inline-block" style="margin-top: -50px;">
+                            <div class="rounded-circle shadow bg-white p-1" style="width: 100px; height: 100px;">
+                                <div class="rounded-circle w-100 h-100" style="background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80'); background-size: cover; background-position: center;"></div>
+                            </div>
+                            <button class="btn btn-sm btn-white border shadow-sm rounded-circle position-absolute bottom-0 end-0 d-flex justify-content-center align-items-center" style="width: 32px; height: 32px; color: #6a3849;">
+                                <i class="bi bi-camera"></i>
+                            </button>
+                        </div>
+                        <h4 class="fw-bold mt-3 mb-1 text-dark" style="color: #6a3849 !important;">@adminService.NombreCompleto</h4>
+                        <p class="text-muted small mb-3">@adminService.Rol</p>
+                        
+                        <div class="d-flex justify-content-center gap-2 mb-4">
+                            <span class="badge rounded-pill fw-medium" style="background-color: #e2f3eb; color: #198754; padding: 0.5em 1em;">Activo</span>
+                            <span class="badge rounded-pill fw-medium" style="background-color: #fcf0f4; color: #d9557b; padding: 0.5em 1em;">Soporte N1</span>
+                        </div>
+
+                        <div class="text-start border-top pt-4" style="border-color: #f7eff1 !important;">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle bg-light d-flex justify-content-center align-items-center text-muted" style="width: 36px; height: 36px;"><i class="bi bi-envelope"></i></div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">Correo Electrónico</small>
+                                    <span class="text-dark fw-medium small">@adminService.Correo</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-circle bg-light d-flex justify-content-center align-items-center text-muted" style="width: 36px; height: 36px;"><i class="bi bi-telephone"></i></div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">Teléfono</small>
+                                    <span class="text-dark fw-medium small">@(adminService.AdminActual?.Telefono ?? "+51 ---")</span>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-light d-flex justify-content-center align-items-center text-muted" style="width: 36px; height: 36px;"><i class="bi bi-geo-alt"></i></div>
+                                <div>
+                                    <small class="text-muted d-block" style="font-size: 0.75rem;">Ubicación</small>
+                                    <span class="text-dark fw-medium small">Lima, Perú</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta Derecha: Detalles de Configuración -->
+            <div class="col-12 col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 h-100">
+                    <h5 class="fw-bold mb-4" style="color: #6a3849;">Información Personal</h5>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nombres</label>
+                            <input type="text" class="form-control bg-light border-1" value="@adminService.AdminActual?.Nombres" readonly>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Apellidos</label>
+                            <input type="text" class="form-control bg-light border-1" value="@adminService.AdminActual?.Apellidos" readonly>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Correo Electrónico</label>
+                            <input type="email" class="form-control bg-light border-1" value="@adminService.Correo" readonly>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Teléfono</label>
+                            <input type="text" class="form-control bg-light border-1" value="@(adminService.AdminActual?.Telefono ?? "")" readonly>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-4 mt-5" style="color: #6a3849;">Seguridad</h5>
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Contraseña Actual</label>
+                            <input type="password" class="form-control bg-light border-1" placeholder="••••••••">
+                        </div>
+                        <div class="col-12 col-md-6"></div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nueva Contraseña</label>
+                            <input type="password" class="form-control bg-light border-1" placeholder="Nueva contraseña">
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-muted small fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Confirmar Contraseña</label>
+                            <input type="password" class="form-control bg-light border-1" placeholder="Confirmar contraseña">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-auto pt-4 border-top" style="border-color: #f7eff1 !important;">
+                        <button class="btn btn-light px-4 border rounded-3 me-2">Cancelar</button>
+                        <button class="btn text-white px-4 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d;">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+    private bool showProfileDropdown = false;
+
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await adminService.CargarAdminAsync();
+    }
+}

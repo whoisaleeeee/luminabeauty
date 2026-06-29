@@ -1,0 +1,515 @@
+@page "/"
+@using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Models
+@using SoluLumina.Services
+@inject IProductoService ProductoService
+@inject ICategoriaService CategoriaService
+@inject IMarcaService MarcaService
+@inject IConfiguration Configuration
+@inject IJSRuntime JS
+@inject AdminUserService adminService
+@rendermode InteractiveServer
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header Superior Estándar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Catálogo</h3>
+
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                <div class="position-relative">
+                    <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                        <div class="text-end d-none d-md-block">
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
+                        </div>
+                        <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                    </div>
+
+                    @if (showProfileDropdown)
+                    {
+                        <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                                <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                                <div class="overflow-hidden">
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-person fs-5"></i> Ver Perfil
+                                </NavLink>
+                                <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                                <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-box position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <small class="text-muted fw-bold d-block" style="font-size: 0.8rem;">Total Productos</small>
+                    </div>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Productos.Count</h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-tag position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Marcas Activas</small>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Marcas.Count</h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-light shadow-sm rounded-4 p-4 bg-white h-100 position-relative overflow-hidden">
+                    <i class="bi bi-layers position-absolute text-light opacity-50" style="font-size: 5rem; top: -10px; right: -10px;"></i>
+                    <small class="text-muted fw-bold d-block mb-1" style="font-size: 0.8rem;">Categorías</small>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@Categorias.Count</h2>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border border-danger-subtle shadow-sm rounded-4 p-4 h-100 position-relative overflow-hidden" style="background-color: #fdf5f5;">
+                    <i class="bi bi-exclamation-triangle position-absolute opacity-25" style="font-size: 5rem; top: -10px; right: -10px; color: #d9557b;"></i>
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <small class="fw-bold d-block" style="font-size: 0.8rem; color: #d9557b;">Sin Stock</small>
+                    </div>
+                    <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #b02a37; line-height: 1;">@ZeroStockCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+
+            <!-- Filtros y Botón -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: #f7eff1 !important;">
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="col-12 col-md-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Producto</label>
+                        <input type="text" class="form-control bg-light border-1" placeholder="Nombre" @bind="filtroProducto" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Categoría</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnCategoryChanged">
+                            <option value="0" selected>Todas las categorias</option>
+                            @foreach (var cat in Categorias)
+                            {
+                                <option value="@cat.Id_categoria">@cat.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Tipo de Piel</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnSkinTypeChanged">
+                            <option value="0" selected>Todas las pieles</option>
+                            @foreach (var tipo_piel in Tipo_piel)
+                            {
+                                <option value="@tipo_piel">@tipo_piel </option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Marca</label>
+                        <select class="form-select bg-light border-1 text-secondary rounded-3" style="min-width: 150px;" @onchange="OnBrandChanged">
+                            <option value="0" selected>Todas las marcas</option>
+                            @foreach (var marca in Marcas)
+                            {
+                                <option value="@marca.Id_marca">@marca.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-auto">
+                    <button class="btn text-white d-flex align-items-center gap-2 px-4 py-2 rounded-3 shadow-sm"
+                            style="background-color: #6a3849; font-size: 0.9rem; font-weight: 500;"
+                            @onclick="OpenAddProductModal">
+                        + Nuevo Producto
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Productos Mejorada -->
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <tr class="align-middle text-muted small text-uppercase" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem;">
+                                <th class="text-center py-3 px-3" style="width: 1%;">No.</th>
+                                <th class="text-start py-3 px-3">Producto</th>
+                                <th class="text-start py-3 px-3" style="width: 1%;">Categoría</th>
+                                <th class="text-start py-3 px-3" style="width: 1%;">Piel</th>
+                                <th class="text-start py-3 px-3" style="width: 1%; white-space: nowrap;">Precio</th>
+                                <th class="text-start py-3 px-3" style="width: 1%;">Stock</th>
+                                <th class="text-end py-3 px-3" style="width: 1%;">Acciones</th>
+                            </tr>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        @{ int rowNumber = 1; }
+                        @foreach (var p in PagedProducts)
+                        {
+                            <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
+                                <td class="text-center text-muted small" style="width: 1%;">@((paginaActual-1)*prod_por_pagina + rowNumber++)</td>
+
+                                <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                    <div class="d-flex align-items-center gap-2" style="max-width: 240px;">
+
+                                        <div class="rounded-3 overflow-hidden shadow-sm border" style="width: 48px; height: 48px; flex-shrink: 0; background-color: #f8f9fa;">
+                                            @if (!string.IsNullOrEmpty(p.Imagen_url))
+                                            {
+                                                <img src="@p.Imagen_url" alt="Producto" class="w-100 h-100 object-fit-cover" />
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-image text-muted opacity-50 d-flex justify-content-center align-items-center h-100 fs-5"></i>
+                                            }
+                                        </div>
+
+                                        <div class="d-flex flex-column justify-content-center overflow-hidden">
+                                            <span class="fw-bold text-dark lh-sm text-truncate" style="font-size: 0.85rem;" title="@p.Nombre">
+                                                @p.Nombre
+                                            </span>
+                                            <small class="text-muted font-monospace text-truncate" style="font-size: 0.65rem; letter-spacing: 0.2px;">
+                                                @p.Marca.Nombre
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+                                <td class="text-secondary" style="font-size: 0.85rem; width: 1%; white-space: nowrap; padding-right: 1.5rem;">
+                                    @p.Categoria?.Nombre
+                                </td>
+
+                                <td class="text-muted" style="font-size: 0.85rem; width: 1%; white-space: nowrap; padding-right: 1.5rem;">
+                                    <span class="badge bg-light text-dark border fw-normal" style="font-size: 0.75rem; padding: 0.35em 0.7em;">
+                                        @p.Tipo_piel
+                                    </span>
+                                </td>
+
+                                <td class="fw-bold text-dark" style="font-size: 0.9rem; width: 1%; white-space: nowrap; padding-right: 1.5rem;">
+                                    S/ @p.Precio.ToString("F2")
+                                </td>
+
+                                <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                    <span class="badge rounded-pill text-dark fw-medium" style="background-color: @GetStockBgColor(p.Stock); padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                        @p.Stock uds.
+                                    </span>
+                                </td>
+
+                                <td class="py-2 px-3 text-end" style="width: 1%;">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <button class="btn btn-sm btn-light text-primary border-0 rounded-3"
+                                                style="width: 30px; height: 30px; padding: 0;"
+                                                title="Modificar"
+                                                @onclick="() => EditProduct(p)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light text-danger border-0 rounded-3"
+                                                style="width: 30px; height: 30px; padding: 0;"
+                                                title="Eliminar"
+                                                @onclick="() => DeleteProduct(p)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: #f7eff1 !important; background-color: #fbf8f9;">
+                <small class="text-muted" style="font-size: 0.85rem;">Mostrando @(total_filtered_products == 0 ? 0 : (paginaActual - 1) * prod_por_pagina + 1)-@(Math.Min(paginaActual * prod_por_pagina, total_filtered_products)) de @total_filtered_products productos</small>
+                <nav>
+                    <ul class="pagination pagination-sm m-0 gap-1">
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <button class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual - 1)" disabled="@(paginaActual == 1)"><i class="bi bi-chevron-left"></i></button>
+                        </li>
+
+                        @for (int i = 1; i <= total_paginas; i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item">
+                                <button class="page-link rounded-2 @(paginaActual == pageNumber ? "active border-0 text-white" : "border text-secondary bg-white") shadow-sm"
+                                        style="@(paginaActual == pageNumber ? "background-color: #834a5d;" : "")"
+                                        @onclick="() => CambiarPagina(pageNumber)">
+                                    @pageNumber
+                                </button>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == total_paginas || total_paginas == 0 ? "disabled" : "")">
+                            <button class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual + 1)" disabled="@(paginaActual == total_paginas || total_paginas == 0)"><i class="bi bi-chevron-right"></i></button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<AddProductModal @bind-IsVisible="showAddProductModal" OnProductAdded="OnProductAdded" Categorias="Categorias" Marcas="Marcas" Tipo_piel="Tipo_piel" />
+<EditProductModal @bind-IsVisible="showEditProductModal" Product="selectedProduct" OnProductUpdated="OnProductUpdated" Categorias="Categorias" Marcas="Marcas" Tipo_piel="Tipo_piel"/>
+
+@code {
+    private bool showAddProductModal = false;
+    private bool showProfileDropdown = false;
+    private List<Producto> Productos = new List<Producto>();
+    private List<CategoriaProducto> Categorias = new();
+    private List<Marca> Marcas = new();
+    private List<string> Tipo_piel = new() { "Todos", "Normal", "Seca", "Grasa", "Mixta", "Sensible" };
+
+    private int paginaActual = 1;
+    private int prod_por_pagina = 7;
+    private int selectedCategoryId = 0;
+    private int selectedBrandId = 0;
+    private string selectedSkinType = string.Empty;
+    private string filtroProducto = "";
+
+    private string URL_BASE;
+
+    protected override async Task OnInitializedAsync()
+    {
+        URL_BASE = Configuration["ApiSettings:URL_BASE"];
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        Productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar");
+        Marcas = await new HttpClientUtils<List<Marca>>().get(URL_BASE + "/MarcaRS/listar");
+        Categorias = await new HttpClientUtils<List<CategoriaProducto>>().get(URL_BASE + "/CategoriaProductoRS/listar");
+
+        foreach (var p in Productos)
+        {
+            if (p.Categoria != null) p.Categoria = Categorias.FirstOrDefault(c => c.Id_categoria == p.Categoria.Id_categoria);
+            if (p.Marca != null) p.Marca = Marcas.FirstOrDefault(m => m.Id_marca == p.Marca.Id_marca);
+            if (string.IsNullOrEmpty(p.Tipo_piel)) p.Tipo_piel = "TODOS";
+        }
+    }
+
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+
+    private void OnCategoryChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedCategoryId = id;
+        }
+    }
+
+    private void OnBrandChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedBrandId = id;
+        }
+    }
+
+    private void OnSkinTypeChanged(ChangeEventArgs e)
+    {
+        selectedSkinType = e.Value?.ToString() ?? "Todos";
+    }
+
+    private void OpenAddProductModal()
+    {
+        showAddProductModal = true;
+    }
+
+    private IEnumerable<Producto> FilteredProducts => Productos
+        .Where(p => selectedCategoryId == 0 || p.Categoria?.Id_categoria == selectedCategoryId)
+        .Where(p => selectedBrandId == 0 || p.Marca?.Id_marca == selectedBrandId)
+        .Where(p => string.IsNullOrEmpty(selectedSkinType) || selectedSkinType == "0" || p.Tipo_piel.Equals(selectedSkinType, StringComparison.OrdinalIgnoreCase))
+        .Where(p => p.Nombre != null && p.Nombre.Contains(filtroProducto, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Producto> PagedProducts => FilteredProducts.Skip((paginaActual - 1) * prod_por_pagina).Take(prod_por_pagina);
+
+    private int total_filtered_products => FilteredProducts.Count();
+    private int total_paginas => (int)Math.Ceiling(total_filtered_products / (double)prod_por_pagina);
+    private int ZeroStockCount => Productos.Count(p => p.Stock == 0);
+
+    private async Task OnProductAdded(Producto newProduct)
+    {
+        Producto newP = await new HttpClientUtils<Producto>().post(URL_BASE + "/ProductoRS/registrar", newProduct);
+        showAddProductModal = false;
+        await CargarDatos();
+
+        if (newP != null)
+        {
+            // Toast pequeño arriba a la derecha (dura 3 segundos)
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                toast = true,
+                position = "top-end",
+                showConfirmButton = false,
+                timer = 3000,
+                timerProgressBar = true,
+                icon = "success",
+                title = "Producto registrado con éxito"
+            });
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                title = "Error de Registro",
+                text = "No se pudo conectar con el servidor o los datos son inválidos.",
+                icon = "error",
+                confirmButtonColor = "#dc3545",
+                confirmButtonText = "Entendido"
+            });
+        }
+    }
+
+    private bool showEditProductModal = false;
+    private Producto selectedProduct = new Producto();
+
+    private void EditProduct(Producto product)
+    {
+        selectedProduct = product;
+        showEditProductModal = true;
+    }
+
+    private async Task OnProductUpdated(Producto updatedProduct)
+    {
+        Producto actProducto = await new HttpClientUtils<Producto>().put(URL_BASE + "/ProductoRS/actualizar", updatedProduct);
+        showEditProductModal = false;
+        await CargarDatos();
+
+        if (actProducto != null)
+        {
+            // Toast pequeño arriba a la derecha
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                toast = true,
+                position = "top-end",
+                showConfirmButton = false,
+                timer = 3000,
+                timerProgressBar = true,
+                icon = "success",
+                title = "Producto actualizado con éxito"
+            });
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("Swal.fire", new
+            {
+                title = "Error de Actualización",
+                text = "No se pudo conectar con el servidor o los datos son inválidos.",
+                icon = "error",
+                confirmButtonColor = "#dc3545",
+                confirmButtonText = "Entendido"
+            });
+        }
+    }
+
+    private async Task DeleteProduct(Producto product)
+    {
+        // Alerta de confirmación previa para evitar borrados accidentales
+        var result = await JS.InvokeAsync<Dictionary<string, bool>>("Swal.fire", new
+        {
+            title = "¿Estás seguro?",
+            text = $"Vas a eliminar el producto '{product.Nombre}'. Esta acción no se puede deshacer.",
+            icon = "warning",
+            showCancelButton = true,
+            confirmButtonColor = "#6a3849",
+            cancelButtonColor = "#6c757d",
+            confirmButtonText = "Sí, eliminar",
+            cancelButtonText = "Cancelar"
+        });
+
+        // Verificamos si el usuario presionó el botón de confirmación
+        if (result != null && result.ContainsKey("isConfirmed") && result["isConfirmed"])
+        {
+            var exito = await new HttpClientUtils<int>().delete(URL_BASE + "/ProductoRS/eliminar/" + product.Id_producto);
+
+            if (exito != 0)
+            {
+                await CargarDatos();
+
+                // Notificación Toast de eliminación completada
+                await JS.InvokeVoidAsync("Swal.fire", new
+                {
+                    toast = true,
+                    position = "top-end",
+                    showConfirmButton = false,
+                    timer = 2500,
+                    timerProgressBar = true,
+                    icon = "success",
+                    title = "Producto eliminado"
+                });
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("Swal.fire", new
+                {
+                    title = "Error",
+                    text = "No se pudo eliminar el producto de la base de datos.",
+                    icon = "error",
+                    confirmButtonColor = "#dc3545"
+                });
+            }
+        }
+    }
+
+    private void BuscarAutomatico()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void CambiarPagina(int nuevaPagina)
+    {
+        if (nuevaPagina >= 1 && nuevaPagina <= total_paginas)
+        {
+            paginaActual = nuevaPagina;
+            StateHasChanged();
+        }
+    }
+
+    private string GetStockBgColor(int stockActual)
+    {
+        if (stockActual == 0)
+            return "#dc3545";
+        else if (stockActual <= 12)
+            return "#ffb703";
+        else
+            return "#e2e3e5";
+    }
+}

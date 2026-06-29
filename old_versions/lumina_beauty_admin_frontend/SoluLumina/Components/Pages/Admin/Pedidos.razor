@@ -1,0 +1,552 @@
+@page "/Pedidos"
+@using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@using SoluLumina.Models
+@rendermode InteractiveServer
+@inject IConfiguration Configuration
+@inject AdminUserService adminService
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+            <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Pedidos</h3>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                <div class="position-relative">
+                    <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                        <div class="text-end d-none d-md-block">
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
+                        </div>
+                        <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                    </div>
+
+                    @if (showProfileDropdown)
+                    {
+                        <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                                <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                                <div class="overflow-hidden">
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-person fs-5"></i> Ver Perfil
+                                </NavLink>
+                                <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                                <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Pedidos Hoy</small>
+                        <i class="bi bi-receipt fs-5" style="color: #834a5d;"></i>
+                    </div>
+                    <div class="d-flex align-items-end gap-2 mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@pedidosHoy</h2>
+                        <small class="fw-semibold pb-1" style="color: #198754; font-size: 0.8rem;">+12%</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100" style="border-left: 4px solid #fd7e14 !important;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Pendientes</small>
+                        <i class="bi bi-clipboard-pulse fs-5" style="color: #fd7e14;"></i>
+                    </div>
+                    <div class="d-flex flex-column justify-content-end mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@pedidosPendientesCount</h2>
+                        <small class="fw-semibold mt-1" style="color: #fd7e14; font-size: 0.75rem;">Atención requerida</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100" style="border-left: 4px solid #0d6efd !important;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">En Camino</small>
+                        <i class="bi bi-truck fs-5" style="color: #0d6efd;"></i>
+                    </div>
+                    <div class="d-flex flex-column justify-content-end mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@pedidosEnCaminoCount</h2>
+                        <small class="fw-semibold mt-1" style="color: #0d6efd; font-size: 0.75rem;">En tránsito</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Ingresos Hoy</small>
+                        <i class="bi bi-cash-stack fs-5" style="color: #834a5d;"></i>
+                    </div>
+                    <div class="d-flex flex-column justify-content-end mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @ingresosHoy.ToString("N2")</h2>
+                        <small class="fw-semibold mt-1" style="color: #198754; font-size: 0.75rem;">Meta alcanzada</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">ID de Pedido</label>
+                    <div class="input-group shadow-sm rounded-3">
+                        <span class="input-group-text bg-white border-1 text-secondary fw-bold" style="font-size: 0.85rem; border-right: 0;">#ORD-</span>
+                        <input type="text" class="form-control bg-white border-1" style="border-left: 0;" placeholder="Ej: 9012" @bind="filtroId" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                    </div>
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Cliente</label>
+                    <input type="text" class="form-control bg-light border-1" placeholder="Nombre" @bind="filtroCliente" @bind:event="oninput" @onkeyup="BuscarAutomatico">
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Estado</label>
+                    <select class="form-select bg-light border-1 text-secondary" @bind="filtroEstado" @bind:after="Buscar">
+                        <option value="Todos">Todos</option>
+                        <option value="PENDIENTE">Pendiente</option>
+                        <option value="CONFIRMADO">Confirmado</option>
+                        <option value="EN_PROCESO">En Proceso</option>
+                        <option value="ENVIADO">Enviado</option>
+                        <option value="ENTREGADO">Entregado</option>
+                        <option value="CANCELADO">Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <label class="form-label text-muted small fw-bold" style="font-size: 0.75rem;">Fecha</label>
+                    <input type="date" class="form-control bg-light border-1 text-secondary" @bind="filtroFecha" @bind:after="Buscar">
+                </div>
+                <div class="col-12 col-md-3 d-flex justify-content-end gap-2">
+                    <button class="btn btn-light px-3 border rounded-3 text-secondary shadow-sm" style="font-size: 0.9rem; font-weight: 500;" @onclick="LimpiarFiltros">
+                        Limpiar
+                    </button>
+                    <!-- Improved action button: Replaced Exportar with Buscar -->
+                    <button class="btn text-white px-3 d-flex align-items-center gap-2 rounded-3 shadow-sm" style="background-color: #834a5d; font-size: 0.9rem; font-weight: 500;" @onclick="Buscar">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Pedidos Mejorada -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr class="align-middle text-muted small text-uppercase border-bottom-0" style="background-color: #f8f9fa; letter-spacing: 0.5px; font-size: 0.75rem;">
+                            <th class="py-3 px-3 text-center" style="width: 0.2%;">No.</th>
+                            <th class="py-3 px-3 text-start" style="width: 1%; white-space: nowrap;">ID Pedido</th>
+                            <th class="py-3 px-3 text-start">Cliente</th>
+                            <th class="py-3 px-3 text-center" style="width: 1%; white-space: nowrap;">Fecha y Hora</th>
+                            <th class="py-3 px-3 text-start" style="width: 1%;">Estado</th>
+                            <th class="py-3 px-3 text-center" style="width: 1%;">Total</th>
+                            <th class="py-3 px-3 text-center    " style="width: 1%;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        @{ int rowNumber = 1; }
+                        @if (PedidosPaginados.Any())
+                        {
+                            @foreach (var pedido in PedidosPaginados)
+                            {
+                                <tr class="border-bottom align-middle" style="border-color: #f7eff1 !important;">
+                                    <td class="text-center text-muted small" style="width: 0.2%;">@(((paginaActual - 1) * itemsPorPagina) + rowNumber++)</td>
+
+                                    <td class="py-2 px-3 font-monospace text-secondary fw-bold" style="width: 1%; white-space: nowrap; font-size: 0.85rem;">
+                                        @pedido.Codigo_pedido
+                                    </td>
+
+                                    <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;" title="@(pedido.Cliente != null ? $"{pedido.Cliente.Nombres} {pedido.Cliente.Apellidos}" : "")">
+                                            @(pedido.Cliente != null ? $"{pedido.Cliente.Nombres} {pedido.Cliente.Apellidos}" : "Sin Cliente")
+                                        </div>
+                                    </td>
+
+                                    <td class="py-2 px-3 text-center" style="width: 1%; white-space: nowrap;">
+                                        <div class="fw-bold text-dark text-truncate" style="font-size: 0.85rem; max-width: 220px;">
+                                            @pedido.Fecha_creacion.ToString("dd/MM/yyyy HH:mm:ss")
+                                        </div>
+                                    </td>
+
+                                    <td class="py-2 px-3" style="width: 1%; white-space: nowrap;">
+                                        <span class="badge rounded-pill text-dark fw-medium" style="background-color: @GetEstadoBgColor(pedido.Estado); padding: 0.4em 0.8em; font-size: 0.75rem;">
+                                            @pedido.Estado
+                                        </span>
+                                    </td>
+
+                                    <td class="fw-bold text-dark py-2 px-3" style="font-size: 0.9rem; width: 1%; white-space: nowrap;">
+                                        S/ @pedido.Total.ToString("F2")
+                                    </td>
+
+                                    <td class="py-2 px-3 text-end" style="width: 1%;">
+                                        <button class="btn btn-sm btn-light text-secondary border border-1 rounded-3 px-3 fw-medium"
+                                                style="height: 30px; line-height: 1.2; font-size: 0.75rem;"
+                                                @onclick="() => VerDetalles(pedido)">
+                                            <i class="bi bi-eye me-1"></i> Detalles
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">No se encontraron pedidos con los filtros aplicados.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="d-flex justify-content-between align-items-center p-4 border-top" style="border-color: #f7eff1 !important; background-color: #fbf8f9;">
+                <small class="text-muted" style="font-size: 0.85rem;">Mostrando @(TotalPedidosFiltrados == 0 ? 0 : (paginaActual - 1) * itemsPorPagina + 1)-@(Math.Min(paginaActual * itemsPorPagina, TotalPedidosFiltrados)) de @TotalPedidosFiltrados pedidos</small>
+                <nav>
+                    <ul class="pagination pagination-sm m-0 gap-1">
+                        <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                            <button class="page-item btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual - 1)" disabled="@(paginaActual == 1)"><i class="bi bi-chevron-left"></i></button>
+                        </li>
+                        
+                        @for (int i = 1; i <= TotalPaginas; i++)
+                        {
+                            var pageNumber = i;
+                            <li class="page-item">
+                                <button class="page-link rounded-2 @(paginaActual == pageNumber ? "active border-0 text-white" : "border text-secondary bg-white") shadow-sm" 
+                                        style="@(paginaActual == pageNumber ? "background-color: #834a5d;" : "")"
+                                        @onclick="() => CambiarPagina(pageNumber)">
+                                    @pageNumber
+                                </button>
+                            </li>
+                        }
+
+                        <li class="page-item @(paginaActual == TotalPaginas || TotalPaginas == 0 ? "disabled" : "")">
+                            <button class="page-link btn btn-white border bg-white text-secondary btn-sm p-1 px-2 rounded-2 shadow-sm" @onclick="() => CambiarPagina(paginaActual + 1)" disabled="@(paginaActual == TotalPaginas || TotalPaginas == 0)"><i class="bi bi-chevron-right"></i></button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+    <!-- Toast Notification -->
+    @if (!string.IsNullOrEmpty(mensajeExito))
+    {
+        <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1055">
+            <div class="toast show align-items-center text-white border-0 shadow-lg rounded-4" style="background-color: #198754;" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex p-1">
+                    <div class="toast-body d-flex align-items-center fw-medium" style="font-size: 0.95rem;">
+                        <i class="bi bi-check-circle-fill fs-4 me-3"></i> @mensajeExito
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="() => mensajeExito = string.Empty" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Modal Detalles -->
+    @if (mostrarModal && pedidoSeleccionado != null)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 rounded-4 shadow">
+                    <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
+                        <h5 class="modal-title fw-bold" style="color: #6a3849;">Detalles del Pedido @pedidoSeleccionado.Id_pedido</h5>
+                        <button type="button" class="btn-close" @onclick="CerrarModal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body px-4 py-3">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <p class="mb-1 text-muted small fw-bold text-uppercase">Cliente</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary fw-bold" style="width: 40px; height: 40px; font-size: 0.8rem;"></div>
+                                    <div>
+                                        <p class="m-0 fw-bold text-dark">@(pedidoSeleccionado.Cliente != null ? $"{pedidoSeleccionado.Cliente.Nombres} {pedidoSeleccionado.Cliente.Apellidos}" : "Sin Cliente")</p>
+                                        <small class="text-muted">@(pedidoSeleccionado.Cliente?.Correo ?? "")</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                                <p class="mb-1 text-muted small fw-bold text-uppercase">Estado actual</p>
+                                <span class="badge rounded-pill fw-medium fs-6" style="background-color: @GetEstadoBgColor(pedidoSeleccionado.Estado); padding: 0.5em 1em;">@pedidoSeleccionado.Estado</span>
+                                <p class="mt-2 mb-0 small text-muted">Fecha: @pedidoSeleccionado.Fecha_creacion</p>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-3" style="color: #4f4f4f;">Productos</h6>
+                        <div class="table-responsive">
+                            <table class="table align-middle">
+                                <thead style="background-color: #fbf8f9; font-size: 0.8rem; color: #6c757d;">
+                                    <tr>
+                                        <th class="border-0 rounded-start">Producto</th>
+                                        <th class="border-0 text-center">Cant.</th>
+                                        <th class="border-0 text-end">Precio Un.</th>
+                                        <th class="border-0 text-end rounded-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @if (pedidoSeleccionado.Detalles != null)
+                                    {
+                                        @foreach (var prod in pedidoSeleccionado.Detalles)
+                                        {
+                                            <tr>
+                                                <td class="border-0">@prod.Nombre_producto</td>
+                                                <td class="border-0 text-center">@prod.Cantidad</td>
+                                                <td class="border-0 text-end">S/ @prod.PrecioUnitario.ToString("F2")</td>
+                                                <td class="border-0 text-end">S/ @prod.Subtotal.ToString("F2")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end border-0 pt-3 fw-bold text-muted">Subtotal:</td>
+                                        <td class="text-end border-0 pt-3 fw-bold">S/ @pedidoSeleccionado.Subtotal_productos.ToString("F2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end border-0 pb-3 fw-bold text-muted">Envío:</td>
+                                        <td class="text-end border-0 pb-3 fw-bold">S/ @pedidoSeleccionado.Costo_envio.ToString("F2")</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-end border-0 pt-2 fw-black fs-5" style="color: #6a3849;">Total:</td>
+                                        <td class="text-end border-0 pt-2 fw-black fs-5" style="color: #6a3849;">S/ @pedidoSeleccionado.Total.ToString("F2")</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0 px-4 pb-4 d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3 bg-light p-2 px-3 rounded-4 border">
+                            <label class="fw-bold small text-muted text-uppercase m-0" style="letter-spacing: 0.5px; font-size: 0.75rem;">Cambiar Estado:</label>
+                            <select class="form-select form-select-sm shadow-none border-0 fw-bold text-dark" style="width: 140px; background-color: transparent;" @bind="nuevoEstadoTemp">
+                                <option value="PENDIENTE">Pendiente</option>
+                                <option value="CONFIRMADO">Confirmado</option>
+                                <option value="EN_PROCESO">En Proceso</option>
+                                <option value="ENVIADO">Enviado</option>
+                                <option value="ENTREGADO">Entregado</option>
+                                <option value="CANCELADO">Cancelado</option>
+                            </select>
+                            <button type="button" class="btn text-white rounded-3 px-3 shadow-sm btn-sm fw-medium d-flex align-items-center gap-1" style="background-color: #834a5d;" @onclick="GuardarEstado">
+                                <i class="bi bi-check2-circle"></i> Guardar
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-white border rounded-3 px-4 shadow-sm fw-medium text-secondary" @onclick="CerrarModal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+@code {
+    private bool showProfileDropdown = false;
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+
+    private string filtroId = "";
+    private string filtroCliente = "";
+    private string filtroEstado = "Todos";
+    private DateTime? filtroFecha;
+
+    private int paginaActual = 1;
+    private int itemsPorPagina = 10;
+
+    private bool mostrarModal = false;
+    private Pedido? pedidoSeleccionado;
+    private string nuevoEstadoTemp = "";
+    private string mensajeExito = "";
+
+    private List<Pedido> todosLosPedidos = new List<Pedido>();
+    private List<Cliente> todosLosClientes = new List<Cliente>();
+
+    private string URL_BASE;
+
+    private int pedidosHoy = 0;
+    private int pedidosPendientesCount = 0;
+    private int pedidosEnCaminoCount = 0;
+    private decimal ingresosHoy = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        URL_BASE = Configuration["ApiSettings:URL_BASE"];
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        todosLosClientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar") ?? new List<Cliente>();
+        todosLosPedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar") ?? new List<Pedido>();
+
+        foreach (var pedido in todosLosPedidos)
+        {
+            if (pedido.Cliente != null) pedido.Cliente = todosLosClientes.FirstOrDefault(c => c.Id_usuario == pedido.Cliente.Id_usuario);
+        }
+
+        if (todosLosPedidos != null)
+        {
+            pedidosHoy = todosLosPedidos.Count(p => p.Fecha_creacion.Date == DateTime.Today);
+            pedidosPendientesCount = todosLosPedidos.Count(p => p.Estado == "PENDIENTE");
+            pedidosEnCaminoCount = todosLosPedidos.Count(p => p.Estado == "ENVIADO");
+            ingresosHoy = todosLosPedidos
+                .Where(p => p.Fecha_creacion.Date == DateTime.Today && !string.Equals(p.Estado, "CANCELADO", StringComparison.OrdinalIgnoreCase))
+                .Sum(p => p.Total);
+        }
+    }
+
+    private IEnumerable<Pedido> PedidosFiltrados
+    {
+        get
+        {
+            var query = todosLosPedidos.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(filtroId))
+            {
+                var fId = filtroId.Replace("#ORD-", "").Trim();
+                query = query.Where(p => p.Id_pedido.ToString().Contains(fId) || 
+                                         (p.Codigo_pedido != null && p.Codigo_pedido.Contains(fId, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filtroCliente))
+            {
+                var fCliente = filtroCliente.Trim();
+                query = query.Where(p => p.Cliente != null && 
+                    ((p.Cliente.Nombres != null && p.Cliente.Nombres.Contains(fCliente, StringComparison.OrdinalIgnoreCase)) ||
+                     (p.Cliente.Apellidos != null && p.Cliente.Apellidos.Contains(fCliente, StringComparison.OrdinalIgnoreCase))));
+            }
+
+            if (filtroEstado != "Todos")
+            {
+                query = query.Where(p => p.Estado.Equals(filtroEstado, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (filtroFecha.HasValue)
+            {
+                query = query.Where(p => p.Fecha_creacion.Date == filtroFecha.Value.Date);
+            }
+
+            return query;
+        }
+    }
+
+    private int TotalPedidosFiltrados => PedidosFiltrados.Count();
+
+    private int TotalPaginas => (int)Math.Ceiling(TotalPedidosFiltrados / (double)itemsPorPagina);
+
+    private IEnumerable<Pedido> PedidosPaginados => PedidosFiltrados.Skip((paginaActual - 1) * itemsPorPagina).Take(itemsPorPagina);
+
+    private void Buscar()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void BuscarAutomatico()
+    {
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void LimpiarFiltros()
+    {
+        filtroId = "";
+        filtroCliente = "";
+        filtroEstado = "Todos";
+        filtroFecha = null;
+        paginaActual = 1;
+        StateHasChanged();
+    }
+
+    private void CambiarPagina(int nuevaPagina)
+    {
+        if (nuevaPagina >= 1 && nuevaPagina <= TotalPaginas)
+        {
+            paginaActual = nuevaPagina;
+            StateHasChanged();
+        }
+    }
+
+    private void VerDetalles(Pedido pedido)
+    {
+        pedidoSeleccionado = pedido;
+        nuevoEstadoTemp = pedido.Estado;
+        mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+        pedidoSeleccionado = null;
+    }
+
+    private async Task GuardarEstado()
+    {
+        if (pedidoSeleccionado != null && pedidoSeleccionado.Estado != nuevoEstadoTemp)
+        {
+            try
+            {
+                await new HttpClientUtils<Pedido>().put(
+                    URL_BASE + $"/PedidoRS/actualizarEstado/{pedidoSeleccionado.Id_pedido}/{nuevoEstadoTemp}", 
+                    new object()
+                );
+                
+                await CargarDatos();
+                mensajeExito = $"¡Éxito! El estado del pedido {pedidoSeleccionado.Id_pedido} ha sido actualizado a '{nuevoEstadoTemp}'.";
+            }
+            catch (Exception ex)
+            {
+                mensajeExito = $"Error al actualizar el estado: {ex.Message}";
+            }
+
+            // Refrescar para asegurar que la UI se actualice
+            StateHasChanged();
+
+            // Ocultar notificación después de 4 segundos
+            await Task.Delay(4000);
+            mensajeExito = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    private string GetEstadoBgColor(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "#f8f9fa";
+        return estado.ToUpper() switch
+        {
+            "PENDIENTE" => "#f8d7da",
+            "CONFIRMADO" => "#fff3cd",
+            "EN_PROCESO" => "#fff3cd",
+            "ENVIADO" => "#cff4fc",
+            "ENTREGADO" => "#e2f3eb",
+            "CANCELADO" => "#e2e3e5",
+            _ => "#f8f9fa"
+        };
+    }
+}

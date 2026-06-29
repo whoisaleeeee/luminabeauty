@@ -1,0 +1,573 @@
+@page "/Reclamos"
+@using SoluLumina.Components.Pages.Shared
+@using SoluLumina.Services
+@using SoluLumina.Models
+@using Newtonsoft.Json
+@rendermode InteractiveServer
+@inject AdminUserService adminService
+
+<div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
+
+    <NavBar />
+
+    <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-shrink-0">
+            <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">Reclamos y Atención al Cliente</h3>
+            
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-link text-secondary position-relative p-1">
+                    <i class="bi bi-bell fs-5"></i>
+                </button>
+                <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
+                
+                <div class="position-relative">
+                    <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
+                        <div class="text-end d-none d-md-block">
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
+                        </div>
+                        <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+                    </div>
+
+                    @if (showProfileDropdown)
+                    {
+                        <div class="position-absolute bg-white shadow rounded-4 mt-3" style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                            <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                                <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
+                                <div class="overflow-hidden">
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <NavLink href="Perfil" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-person fs-5"></i> Ver Perfil
+                                </NavLink>
+                                <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                                <NavLink href="#" class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger" style="font-size: 0.85rem; transition: 0.2s;">
+                                    <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                                </NavLink>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Nuevos (Sin Asignar)</small>
+                        <i class="bi bi-exclamation-circle fs-5 text-danger"></i>
+                    </div>
+                    <div class="d-flex align-items-end gap-2 mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == "ABIERTO")</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100" style="border-left: 4px solid #fd7e14 !important;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Asignados / En revisión</small>
+                        <i class="bi bi-building-gear fs-5" style="color: #fd7e14;"></i>
+                    </div>
+                    <div class="d-flex flex-column justify-content-end mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == "EN_PROCESO" || r.Estado == "EN_REVISION")</h2>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 col-sm-6 col-xl-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100" style="border-left: 4px solid #198754 !important;">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">Atendidos / Resueltos</small>
+                        <i class="bi bi-check-circle fs-5" style="color: #198754;"></i>
+                    </div>
+                    <div class="d-flex flex-column justify-content-end mt-auto">
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@listaReclamos.Count(r => r.Estado == "RESUELTO" || r.Estado == "CERRADO")</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla Moderna de Reclamos -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="p-3 border-bottom bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold m-0 text-dark">Bandeja de Reclamos</h6>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="input-group input-group-sm" style="width: 200px;">
+                        <span class="input-group-text bg-light border-1 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control bg-light border-1" placeholder="Buscar..." @bind="filtroBusqueda" @bind:event="oninput">
+                    </div>
+                    <select class="form-select form-select-sm border-1 shadow-none text-secondary bg-light" @bind="filtroEstado" style="width: 150px;">
+                        <option value="Todos">Todos los Estados</option>
+                        <option value="Pendiente">Pendientes</option>
+                        <option value="Asignado">Asignados</option>
+                        <option value="Atendido">Atendidos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle table-hover m-0">
+                    <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <tr>
+                            <th class="py-3 px-4 border-bottom-0">ID Reclamo</th>
+                            <th class="py-3 border-bottom-0">Fecha</th>
+                            <th class="py-3 border-bottom-0">Cliente / Pedido</th>
+                            <th class="py-3 border-bottom-0">Motivo principal</th>
+                            <th class="py-3 border-bottom-0">Área Encargada</th>
+                            <th class="py-3 border-bottom-0">Estado</th>
+                            <th class="py-3 px-4 border-bottom-0 text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 0.85rem; color: #4f4f4f;">
+                        @foreach (var r in ReclamosFiltrados)
+                        {
+                            <tr class="border-bottom" style="border-color: #f7eff1 !important;">
+                                <td class="py-3 px-4 fw-bold text-dark font-monospace">@r.IdStr</td>
+                                <td class="text-secondary">@r.Fecha_creacion.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-dark">@(r.Cliente != null ? $"{r.Cliente.Nombres} {r.Cliente.Apellidos}" : "Sin Cliente")</span>
+                                        <span class="text-muted small font-monospace"><i class="bi bi-box-seam"></i> @(r.Pedido != null ? r.Pedido.Codigo_pedido : "Sin Pedido")</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="d-inline-block text-truncate fw-medium" style="max-width: 200px;">@r.Asunto</span>
+                                </td>
+                                <td>
+                                    @if(string.IsNullOrEmpty(r.AreaAsignada))
+                                    {
+                                        <span class="text-muted fst-italic small">Sin asignar</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fw-bold text-secondary"><i class="bi bi-building"></i> @r.AreaAsignada</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(r.Estado); color: @GetEstadoTextColor(r.Estado); padding: 0.4em 0.8em; border: 1px solid @GetEstadoBorderColor(r.Estado)">
+                                        @GetEstadoLabel(r.Estado)
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 text-end">
+                                    <button class="btn btn-sm btn-light text-secondary rounded-3 px-3 fw-bold border shadow-sm" @onclick="() => VerReclamo(r)">
+                                        Gestionar <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                        
+                        @if (!ReclamosFiltrados.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">No se encontraron reclamos con los filtros aplicados.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Gestión de Reclamo -->
+@if (reclamoSeleccionado != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <!-- Header -->
+                <div class="modal-header border-bottom-0 pb-0 px-4 pt-4 bg-white">
+                    <div>
+                        <h4 class="modal-title fw-bold text-dark mb-1">Gestión de Reclamo @reclamoSeleccionado.IdStr</h4>
+                        <div class="d-flex align-items-center gap-2 text-muted small">
+                            <span><i class="bi bi-person"></i> @(reclamoSeleccionado.Cliente != null ? $"{reclamoSeleccionado.Cliente.Nombres} {reclamoSeleccionado.Cliente.Apellidos}" : "Sin Cliente")</span>
+                            <span>•</span>
+                            <span><i class="bi bi-calendar3"></i> @reclamoSeleccionado.Fecha_creacion.ToString("dd MMM yyyy - HH:mm")</span>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="CerrarModal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body px-4 py-4 bg-light">
+                    <!-- Información del reclamo y Evidencia -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-8">
+                            <div class="bg-white p-4 rounded-4 shadow-sm border h-100" style="border-color: #f7eff1 !important;">
+                                <h6 class="fw-bold text-dark mb-2">Detalle del Problema: @reclamoSeleccionado.Asunto</h6>
+                                <p class="text-muted mb-0" style="font-size: 0.95rem; line-height: 1.6;">
+                                    @reclamoSeleccionado.Descripcion
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-white p-3 rounded-4 shadow-sm border h-100 d-flex flex-column align-items-center justify-content-center" style="border-color: #f7eff1 !important; border-style: dashed !important; border-width: 2px !important;">
+                                <i class="bi bi-image text-muted opacity-25 mb-2" style="font-size: 2rem;"></i>
+                                <span class="text-muted small fw-medium text-center">Evidencia adjunta<br/>por el cliente</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Flujo de Trabajo / Controles -->
+                    <h6 class="fw-bold text-secondary mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 0.5px;">Flujo de Resolución</h6>
+                    
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+                        
+                        <!-- Paso 1: Asignación -->
+                        <div class="mb-4 position-relative">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-dark"><i class="bi bi-1-circle-fill text-danger me-2"></i> Paso 1: Asignar a Área Encargada</span>
+                                @if(!string.IsNullOrEmpty(reclamoSeleccionado.AreaAsignada) || reclamoSeleccionado.Estado != "ABIERTO")
+                                {
+                                    <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i> Asignado</span>
+                                }
+                            </div>
+                            
+                            <div class="d-flex gap-3 align-items-center ms-4 ps-2">
+                                <select class="form-select border-1 shadow-sm" @bind="areaTemp" disabled="@(reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")" style="max-width: 250px;">
+                                    <option value="" disabled selected>Seleccione un área...</option>
+                                    <option value="Logística (Envíos)">Logística (Envíos)</option>
+                                    <option value="Ventas / Facturación">Ventas / Facturación</option>
+                                    <option value="Almacén (Productos)">Almacén (Productos)</option>
+                                    <option value="Soporte Técnico">Soporte Técnico</option>
+                                </select>
+                                <button class="btn btn-dark px-3 rounded-3 shadow-sm fw-medium" @onclick="AsignarArea" disabled="@(string.IsNullOrEmpty(areaTemp) || reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")">
+                                    Confirmar Asignación
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="text-muted opacity-25">
+
+                        <!-- Paso 2: Resolución -->
+                        <div class="position-relative">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="fw-bold text-dark"><i class="bi bi-2-circle-fill text-warning me-2"></i> Paso 2: Resolución por el Área</span>
+                                @if(reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")
+                                {
+                                    <span class="badge bg-success rounded-pill"><i class="bi bi-check"></i> Resuelto</span>
+                                }
+                            </div>
+                            
+                            <div class="ms-4 ps-2">
+                                @if (reclamoSeleccionado.Estado == "ABIERTO")
+                                {
+                                    <div class="alert alert-light border text-muted small py-2">
+                                        <i class="bi bi-info-circle"></i> Debes asignar un área primero.
+                                    </div>
+                                }
+                                else if (reclamoSeleccionado.Estado == "EN_PROCESO" || reclamoSeleccionado.Estado == "EN_REVISION")
+                                {
+                                    <div class="alert alert-warning border-warning bg-warning bg-opacity-10 py-3 mb-3">
+                                        <div class="d-flex align-items-center gap-2 mb-2">
+                                            <div class="spinner-grow spinner-grow-sm text-warning" role="status"></div>
+                                            <span class="fw-bold text-dark">Esperando respuesta de @reclamoSeleccionado.AreaAsignada...</span>
+                                        </div>
+                                        <p class="small text-muted mb-0">Una vez que el área encargada solucione el problema, haz clic en el botón inferior para concluir el reclamo.</p>
+                                    </div>
+                                    <button class="btn btn-success px-4 py-2 rounded-3 shadow-sm fw-bold d-flex align-items-center gap-2" @onclick="MarcarComoAtendido">
+                                        <i class="bi bi-check2-circle fs-5"></i> Marcar Reclamo como Atendido
+                                    </button>
+                                }
+                                else if (reclamoSeleccionado.Estado == "RESUELTO" || reclamoSeleccionado.Estado == "CERRADO")
+                                {
+                                    <div class="alert alert-success border-success bg-success bg-opacity-10 py-3 mb-0">
+                                        <h6 class="fw-bold text-success mb-1"><i class="bi bi-check-circle-fill"></i> Problema Solucionado</h6>
+                                        <p class="small text-dark mb-0">El reclamo fue atendido exitosamente por <strong>@reclamoSeleccionado.AreaAsignada</strong>.</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-top-0 px-4 pb-4 pt-0 bg-light">
+                    <button type="button" class="btn btn-white border rounded-3 px-4 shadow-sm fw-medium text-secondary" @onclick="CerrarModal">Cerrar Ventana</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Toast Notification -->
+@if (!string.IsNullOrEmpty(mensajeToast))
+{
+    <div class="position-fixed bottom-0 end-0 p-4" style="z-index: 1060">
+        <div class="toast show align-items-center text-white border-0 shadow-lg rounded-4" style="background-color: @toastColor;" role="alert">
+            <div class="d-flex p-1">
+                <div class="toast-body d-flex align-items-center fw-bold" style="font-size: 0.95rem;">
+                    <i class="bi bi-info-circle-fill fs-4 me-3"></i> @mensajeToast
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string filtroBusqueda = "";
+    private string filtroEstado = "Todos";
+    private string areaTemp = "";
+    private string mensajeToast = "";
+    private string toastColor = "#198754";
+
+    private bool showProfileDropdown = false;
+    private Reclamo? reclamoSeleccionado;
+    private List<Reclamo> listaReclamos = new();
+    private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
+
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            var clientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar");
+            var pedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar");
+            listaReclamos = await new HttpClientUtils<List<Reclamo>>().get(URL_BASE + "/ReclamoRS/listar") ?? new List<Reclamo>();
+
+            foreach (var r in listaReclamos)
+            {
+                if (r.Cliente != null && clientes != null)
+                {
+                    r.Cliente = clientes.FirstOrDefault(c => c.Id_usuario == r.Cliente.Id_usuario);
+                }
+                if (r.Pedido != null && pedidos != null)
+                {
+                    r.Pedido = pedidos.FirstOrDefault(p => p.Id_pedido == r.Pedido.Id_pedido);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private IEnumerable<Reclamo> ReclamosFiltrados
+    {
+        get
+        {
+            var query = listaReclamos.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(filtroBusqueda))
+            {
+                var f = filtroBusqueda.ToLower();
+                query = query.Where(r => r.IdStr.ToLower().Contains(f) || 
+                                         (r.Cliente != null && ((r.Cliente.Nombres != null && r.Cliente.Nombres.ToLower().Contains(f)) || (r.Cliente.Apellidos != null && r.Cliente.Apellidos.ToLower().Contains(f)))) || 
+                                         (r.Pedido != null && r.Pedido.Codigo_pedido != null && r.Pedido.Codigo_pedido.ToLower().Contains(f)) ||
+                                         r.Asunto.ToLower().Contains(f));
+            }
+
+            if (filtroEstado != "Todos")
+            {
+                var mappedEstado = filtroEstado switch
+                {
+                    "Pendiente" => "ABIERTO",
+                    "Asignado" => "EN_PROCESO",
+                    "Atendido" => "RESUELTO",
+                    _ => filtroEstado
+                };
+                query = query.Where(r => r.Estado.Equals(mappedEstado, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return query.OrderByDescending(r => r.Fecha_creacion);
+        }
+    }
+
+    private void VerReclamo(Reclamo r)
+    {
+        reclamoSeleccionado = r;
+        areaTemp = r.AreaAsignada ?? "";
+    }
+
+    private void CerrarModal()
+    {
+        reclamoSeleccionado = null;
+    }
+
+    private async Task AsignarArea()
+    {
+        if (reclamoSeleccionado != null && !string.IsNullOrEmpty(areaTemp))
+        {
+            try
+            {
+                var idReclamo = reclamoSeleccionado.Id_reclamo;
+                var areaAsignada = areaTemp;
+
+                // Nuevo endpoint que guarda área + cambia estado EN_PROCESO usando query parameters
+                await new HttpClientUtils<Reclamo>().put(
+                    URL_BASE + $"/ReclamoRS/asignarArea/{idReclamo}?area={Uri.EscapeDataString(areaAsignada)}",
+                    new object()
+                );
+
+                // Actualizar localmente
+                reclamoSeleccionado.AreaAsignada = areaAsignada;
+                reclamoSeleccionado.Estado = "EN_PROCESO";
+
+                MostrarToast($"Reclamo asignado a {areaAsignada}", "#fd7e14");
+
+                await CargarDatos();
+
+                // Re-apuntar reclamoSeleccionado al objeto recargado de la lista
+                var reclamoCargado = listaReclamos.FirstOrDefault(r => r.Id_reclamo == idReclamo);
+                if (reclamoCargado != null)
+                {
+                    reclamoSeleccionado = reclamoCargado;
+                }
+            }
+            catch (Exception ex)
+            {
+                MostrarToast($"Error: {ex.Message}", "#dc3545");
+            }
+        }
+    }
+
+    private async Task MarcarComoAtendido()
+    {
+        if (reclamoSeleccionado != null)
+        {
+            try
+            {
+                var idReclamo = reclamoSeleccionado.Id_reclamo;
+
+                await new HttpClientUtils<Reclamo>().put(
+                    URL_BASE + $"/ReclamoRS/cambiarEstado/{idReclamo}/RESUELTO",
+                    new object()
+                );
+
+                reclamoSeleccionado.Estado = "RESUELTO";
+                MostrarToast("Reclamo marcado como Atendido exitosamente", "#198754");
+
+                await CargarDatos();
+
+                // Re-apuntar reclamoSeleccionado al objeto recargado (ya trae area_asignada del backend)
+                var reclamoCargado = listaReclamos.FirstOrDefault(r => r.Id_reclamo == idReclamo);
+                if (reclamoCargado != null)
+                {
+                    reclamoSeleccionado = reclamoCargado;
+                }
+            }
+            catch (Exception ex)
+            {
+                MostrarToast($"Error: {ex.Message}", "#dc3545");
+            }
+        }
+    }
+
+    private async void MostrarToast(string mensaje, string color)
+    {
+        mensajeToast = mensaje;
+        toastColor = color;
+        StateHasChanged();
+        await Task.Delay(3000);
+        mensajeToast = string.Empty;
+        StateHasChanged();
+    }
+
+    private string GetEstadoLabel(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "SIN ESTADO";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "ABIERTO",
+            "EN_PROCESO" => "EN PROCESO",
+            "EN_REVISION" => "EN REVISIÓN",
+            "RESUELTO" => "RESUELTO",
+            "CERRADO" => "CERRADO",
+            _ => estado
+        };
+    }
+
+    private string GetEstadoBgColor(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "#f8f9fa";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "#fff3cd",
+            "EN_REVISION" => "#ffe5d0",
+            "EN_PROCESO" => "#ffe5d0",
+            "RESUELTO" => "#e2f3eb",
+            _ => "#f8f9fa"
+        };
+    }
+
+    private string GetEstadoTextColor(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "#6c757d";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "#856404",
+            "EN_REVISION" => "#fd7e14",
+            "EN_PROCESO" => "#fd7e14",
+            "RESUELTO" => "#198754",
+            _ => "#6c757d"
+        };
+    }
+
+    private string GetEstadoBorderColor(string estado)
+    {
+        if (string.IsNullOrEmpty(estado)) return "#dee2e6";
+        return estado.ToUpper() switch
+        {
+            "ABIERTO" => "#ffecb5",
+            "EN_REVISION" => "#fecba1",
+            "EN_PROCESO" => "#fecba1",
+            "RESUELTO" => "#d1e7dd",
+            _ => "#dee2e6"
+        };
+    }
+
+    public class Reclamo
+    {
+        [JsonProperty("id_reclamo")]
+        public int Id_reclamo { get; set; }
+
+        [JsonProperty("tipo")]
+        public string Tipo { get; set; } = string.Empty;
+
+        [JsonProperty("asunto")]
+        public string Asunto { get; set; } = string.Empty;
+
+        [JsonProperty("descripcion")]
+        public string Descripcion { get; set; } = string.Empty;
+
+        [JsonProperty("estado")]
+        public string Estado { get; set; } = "ABIERTO";
+
+        [JsonProperty("prioridad")]
+        public string Prioridad { get; set; } = "MEDIA";
+
+        [JsonProperty("fecha_creacion")]
+        public DateTime Fecha_creacion { get; set; }
+
+        [JsonProperty("cliente")]
+        public Cliente? Cliente { get; set; }
+
+        [JsonProperty("pedido")]
+        public Pedido? Pedido { get; set; }
+
+        [JsonProperty("area_asignada")]
+        public string AreaAsignada { get; set; } = string.Empty;
+
+        public string IdStr => $"#REC-{Id_reclamo}";
+    }
+}
