@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Components;
 using Newtonsoft.Json;
 
 namespace SoluLumina.Models
 {
-    public class Empleado
+    public class Empleado : Usuario
     {
-        private String rol;
+        private string rol;
 
         [JsonProperty("rol")]
         public string Rol { get => rol; set => rol = value; }

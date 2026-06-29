@@ -5,13 +5,12 @@
 @inject IConfiguration Configuration
 @inject ReporteJasperService ReporteJasperService
 @inject IJSRuntime JS
+@inject AdminUserService adminService
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
 
     <NavBar />
-
-    <LoadingPanel Visible="@isLoading" />
 
     <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
 
@@ -31,8 +30,8 @@
                 <div class="position-relative">
                     <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
                         <div class="text-end d-none d-md-block">
-                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
-                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
                         </div>
                         <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
                     </div>
@@ -43,8 +42,8 @@
                             <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
                                 <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
                                 <div class="overflow-hidden">
-                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">Juan Perez</h6>
-                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">juan.perez@luminabeauty.com</small>
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
                                 </div>
                             </div>
                             <div class="py-2">
@@ -184,31 +183,22 @@
                     
                     <!-- CSS Bar Chart Simulation -->
                     <div class="d-flex align-items-end justify-content-around mt-auto pt-4" style="height: 200px;">
-                        <!-- Bar 1 -->
-                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
-                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 85%; background-color: #834a5d; transition: all 0.3s; cursor: pointer;"></div>
-                            <small class="text-muted" style="font-size: 0.7rem;">Maquillaje</small>
-                        </div>
-                        <!-- Bar 2 -->
-                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
-                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 65%; background-color: #d9557b; transition: all 0.3s; cursor: pointer;"></div>
-                            <small class="text-muted" style="font-size: 0.7rem;">Skincare</small>
-                        </div>
-                        <!-- Bar 3 -->
-                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
-                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 45%; background-color: #f1aeb5; transition: all 0.3s; cursor: pointer;"></div>
-                            <small class="text-muted" style="font-size: 0.7rem;">Fragancias</small>
-                        </div>
-                        <!-- Bar 4 -->
-                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
-                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 30%; background-color: #f8d7da; transition: all 0.3s; cursor: pointer;"></div>
-                            <small class="text-muted" style="font-size: 0.7rem;">Cabello</small>
-                        </div>
-                        <!-- Bar 5 -->
-                        <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
-                            <div class="w-100 rounded-top-2 mt-auto chart-bar" style="height: 15%; background-color: #e2e3e5; transition: all 0.3s; cursor: pointer;"></div>
-                            <small class="text-muted" style="font-size: 0.7rem;">Accesorios</small>
-                        </div>
+                        @if (ventasPorCategoria != null && ventasPorCategoria.Any())
+                        {
+                            @foreach (var cat in ventasPorCategoria.Take(5))
+                            {
+                                <div class="d-flex flex-column align-items-center gap-2" style="width: 15%; height: 100%;">
+                                    <div class="w-100 rounded-top-2 mt-auto chart-bar" 
+                                         style="height: @(cat.Porcentaje.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%; background-color: @cat.Color; transition: all 0.3s; cursor: pointer;"
+                                         title="S/ @cat.Total.ToString("N2")"></div>
+                                    <small class="text-muted text-truncate w-100 text-center" style="font-size: 0.7rem;" title="@cat.Nombre">@cat.Nombre</small>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 w-100 text-muted fst-italic">No hay ventas registradas</div>
+                        }
                     </div>
                 </div>
             </div>
@@ -225,57 +215,25 @@
                     </div>
 
                     <div class="d-flex flex-column justify-content-between flex-grow-1">
-                        
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Chanel Beauty</span>
-                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 8,240</span>
-                            </div>
-                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
-                                <div class="progress-bar" role="progressbar" style="width: 90%; background-color: #6a3849;"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Dior Addict</span>
-                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 6,120</span>
-                            </div>
-                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
-                                <div class="progress-bar" role="progressbar" style="width: 75%; background-color: #834a5d;"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Lancôme Paris</span>
-                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 4,500</span>
-                            </div>
-                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
-                                <div class="progress-bar" role="progressbar" style="width: 55%; background-color: #c98c9f;"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Estée Lauder</span>
-                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 3,900</span>
-                            </div>
-                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
-                                <div class="progress-bar" role="progressbar" style="width: 45%; background-color: #d9acb9;"></div>
-                            </div>
-                        </div>
-
-                        <div class="mb-0">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fw-medium text-dark" style="font-size: 0.85rem;">Clinique</span>
-                                <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ 2,400</span>
-                            </div>
-                            <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
-                                <div class="progress-bar" role="progressbar" style="width: 30%; background-color: #e5cacc;"></div>
-                            </div>
-                        </div>
-
+                        @if (ventasPorMarca != null && ventasPorMarca.Any())
+                        {
+                            @foreach (var brand in ventasPorMarca.Take(5))
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="fw-medium text-dark text-truncate" style="font-size: 0.85rem; max-width: 70%;" title="@brand.Nombre">@brand.Nombre</span>
+                                        <span class="fw-bold text-muted" style="font-size: 0.85rem;">S/ @brand.Total.ToString("N2")</span>
+                                    </div>
+                                    <div class="progress rounded-pill" style="height: 6px; background-color: #f0e6e8;">
+                                        <div class="progress-bar" role="progressbar" style="width: @(brand.Porcentaje.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture))%; background-color: @brand.Color;"></div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4 w-100 text-muted fst-italic">No hay ventas registradas</div>
+                        }
                     </div>
                 </div>
             </div>
@@ -345,7 +303,6 @@
 
 @code {
     private bool showProfileDropdown = false;
-    private bool isLoading = true;
     private string URL_BASE = "";
     
     private decimal totalVentas = 0;
@@ -357,6 +314,25 @@
     private string codigoReporteSeleccionado = "ventas-consolidadas";
     private bool generandoReporte = false;
     private string mensajeReporte = "";
+
+    private List<CategoriaVenta> ventasPorCategoria = new();
+    private List<MarcaVenta> ventasPorMarca = new();
+
+    public class CategoriaVenta
+    {
+        public string Nombre { get; set; } = "";
+        public decimal Total { get; set; }
+        public double Porcentaje { get; set; }
+        public string Color { get; set; } = "";
+    }
+
+    public class MarcaVenta
+    {
+        public string Nombre { get; set; } = "";
+        public decimal Total { get; set; }
+        public double Porcentaje { get; set; }
+        public string Color { get; set; } = "";
+    }
 
     private ReporteJasperOption? ReporteSeleccionado =>
         reportesDisponibles.FirstOrDefault(r => r.Codigo == codigoReporteSeleccionado);
@@ -397,32 +373,13 @@
         showProfileDropdown = !showProfileDropdown;
     }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         URL_BASE = Configuration["ApiSettings:URL_BASE"];
         reportesDisponibles = ReporteJasperService.ObtenerReportes();
         codigoReporteSeleccionado = reportesDisponibles.FirstOrDefault()?.Codigo ?? codigoReporteSeleccionado;
-
-        return Task.CompletedTask;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        try
-        {
-            await Task.Yield();
-            await CargarDatos();
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
     }
 
     private async Task GenerarReporteAsync()
@@ -467,21 +424,9 @@
     {
         try
         {
-            // Cargar KPIs
-            totalVentas = await new HttpClientUtils<decimal>().get(URL_BASE + "/ReporteRS/totalVentasCompletadas");
-            
-            var pedidosCompletados = await new HttpClientUtils<int>().get(URL_BASE + "/ReporteRS/contarPedidosPorEstado/COMPLETADO");
-            var pedidosPendientes = await new HttpClientUtils<int>().get(URL_BASE + "/ReporteRS/contarPedidosPorEstado/PENDIENTE");
-            totalPedidos = pedidosCompletados + pedidosPendientes;
-
-            if (totalPedidos > 0)
-            {
-                ticketPromedio = totalVentas / totalPedidos;
-            }
-            
             totalClientes = await new HttpClientUtils<int>().get(URL_BASE + "/ReporteRS/contarClientesActivos");
 
-            // Cargar Pedidos Recientes
+            // Cargar Pedidos y Clientes
             var clientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar") ?? new List<Cliente>();
             var pedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar") ?? new List<Pedido>();
 
@@ -493,8 +438,125 @@
                 }
             }
 
+            // Calcular KPIs directamente desde la lista cargada
+            // Los estados válidos son: PENDIENTE, CONFIRMADO, EN_PROCESO, ENVIADO, ENTREGADO, CANCELADO
+            var pedidosActivos = pedidos.Where(p =>
+                !string.Equals(p.Estado, "CANCELADO", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            totalPedidos = pedidosActivos.Count;
+            totalVentas = pedidosActivos
+                .Where(p => string.Equals(p.Estado, "ENTREGADO", StringComparison.OrdinalIgnoreCase))
+                .Sum(p => p.Total);
+
+            if (totalPedidos > 0)
+            {
+                ticketPromedio = pedidosActivos.Sum(p => p.Total) / totalPedidos;
+            }
+
             // Ordenar por ID descendente para mostrar las más recientes
             ventasRecientes = pedidos.OrderByDescending(p => p.Id_pedido).ToList();
+
+            // Cargar productos, categorias y marcas para realizar las métricas de gráficos
+            var productos = await new HttpClientUtils<List<Producto>>().get(URL_BASE + "/ProductoRS/listar") ?? new List<Producto>();
+            var categorias = await new HttpClientUtils<List<CategoriaProducto>>().get(URL_BASE + "/CategoriaProductoRS/listar") ?? new List<CategoriaProducto>();
+            var marcas = await new HttpClientUtils<List<Marca>>().get(URL_BASE + "/MarcaRS/listar") ?? new List<Marca>();
+
+            // Poblar nombres de categorías y marcas en los productos
+            foreach (var prod in productos)
+            {
+                if (prod.Categoria != null)
+                {
+                    var cat = categorias.FirstOrDefault(c => c.Id_categoria == prod.Categoria.Id_categoria);
+                    if (cat != null)
+                    {
+                        prod.Categoria.Nombre = cat.Nombre;
+                    }
+                }
+                if (prod.Marca != null)
+                {
+                    var m = marcas.FirstOrDefault(brand => brand.Id_marca == prod.Marca.Id_marca);
+                    if (m != null)
+                    {
+                        prod.Marca.Nombre = m.Nombre;
+                    }
+                }
+            }
+
+            // Ventas por categoría (excluyendo pedidos cancelados para representar ventas reales)
+            var activePedidos = pedidos.Where(p => !string.Equals(p.Estado, "CANCELADO", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var salesByCategoryDict = new Dictionary<string, decimal>();
+            foreach (var p in activePedidos)
+            {
+                if (p.Detalles == null) continue;
+                foreach (var d in p.Detalles)
+                {
+                    var prod = productos.FirstOrDefault(pr => pr.Sku == d.Sku_producto);
+                    var catName = prod?.Categoria?.Nombre ?? "Sin Categoría";
+                    var subtotal = d.Cantidad * d.PrecioUnitario;
+                    if (salesByCategoryDict.ContainsKey(catName))
+                        salesByCategoryDict[catName] += subtotal;
+                    else
+                        salesByCategoryDict[catName] = subtotal;
+                }
+            }
+
+            // Ventas por marca (excluyendo pedidos cancelados)
+            var salesByBrandDict = new Dictionary<string, decimal>();
+            foreach (var p in activePedidos)
+            {
+                if (p.Detalles == null) continue;
+                foreach (var d in p.Detalles)
+                {
+                    var prod = productos.FirstOrDefault(pr => pr.Sku == d.Sku_producto);
+                    var brandName = prod?.Marca?.Nombre ?? "Sin Marca";
+                    var subtotal = d.Cantidad * d.PrecioUnitario;
+                    if (salesByBrandDict.ContainsKey(brandName))
+                        salesByBrandDict[brandName] += subtotal;
+                    else
+                        salesByBrandDict[brandName] = subtotal;
+                }
+            }
+
+            string[] barColors = { "#834a5d", "#d9557b", "#f1aeb5", "#f8d7da", "#e2e3e5" };
+            var listCats = salesByCategoryDict
+                .OrderByDescending(kvp => kvp.Value)
+                .Select((kvp, index) => new CategoriaVenta
+                {
+                    Nombre = kvp.Key,
+                    Total = kvp.Value,
+                    Color = barColors[index % barColors.Length]
+                })
+                .ToList();
+
+            decimal maxCatTotal = listCats.Any() ? listCats.Max(c => c.Total) : 1;
+            if (maxCatTotal == 0) maxCatTotal = 1;
+            foreach (var c in listCats)
+            {
+                c.Porcentaje = (double)(c.Total / maxCatTotal) * 85.0; // max height is 85%
+                if (c.Porcentaje < 10) c.Porcentaje = 10; // minimum height to be visible
+            }
+            ventasPorCategoria = listCats;
+
+            string[] brandColors = { "#6a3849", "#834a5d", "#c98c9f", "#d9acb9", "#e5cacc" };
+            var listBrands = salesByBrandDict
+                .OrderByDescending(kvp => kvp.Value)
+                .Select((kvp, index) => new MarcaVenta
+                {
+                    Nombre = kvp.Key,
+                    Total = kvp.Value,
+                    Color = brandColors[index % brandColors.Length]
+                })
+                .ToList();
+
+            decimal maxBrandTotal = listBrands.Any() ? listBrands.Max(b => b.Total) : 1;
+            if (maxBrandTotal == 0) maxBrandTotal = 1;
+            foreach (var b in listBrands)
+            {
+                b.Porcentaje = (double)(b.Total / maxBrandTotal) * 90.0; // max width is 90%
+                if (b.Porcentaje < 10) b.Porcentaje = 10;
+            }
+            ventasPorMarca = listBrands;
         }
         catch (Exception ex)
         {

@@ -4,12 +4,11 @@
 @using SoluLumina.Models
 @rendermode InteractiveServer
 @inject IConfiguration Configuration
+@inject AdminUserService adminService
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
 
     <NavBar />
-
-    <LoadingPanel Visible="@isLoading" />
 
     <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
 
@@ -25,8 +24,8 @@
                 <div class="position-relative">
                     <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
                         <div class="text-end d-none d-md-block">
-                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
-                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
                         </div>
                         <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
                     </div>
@@ -37,8 +36,8 @@
                             <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
                                 <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
                                 <div class="overflow-hidden">
-                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">Juan Perez</h6>
-                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">juan.perez@luminabeauty.com</small>
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
                                 </div>
                             </div>
                             <div class="py-2">
@@ -65,7 +64,7 @@
                         <i class="bi bi-receipt fs-5" style="color: #834a5d;"></i>
                     </div>
                     <div class="d-flex align-items-end gap-2 mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">23</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@pedidosHoy</h2>
                         <small class="fw-semibold pb-1" style="color: #198754; font-size: 0.8rem;">+12%</small>
                     </div>
                 </div>
@@ -78,7 +77,7 @@
                         <i class="bi bi-clipboard-pulse fs-5" style="color: #fd7e14;"></i>
                     </div>
                     <div class="d-flex flex-column justify-content-end mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">5</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@pedidosPendientesCount</h2>
                         <small class="fw-semibold mt-1" style="color: #fd7e14; font-size: 0.75rem;">Atención requerida</small>
                     </div>
                 </div>
@@ -91,7 +90,7 @@
                         <i class="bi bi-truck fs-5" style="color: #0d6efd;"></i>
                     </div>
                     <div class="d-flex flex-column justify-content-end mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">11</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">@pedidosEnCaminoCount</h2>
                         <small class="fw-semibold mt-1" style="color: #0d6efd; font-size: 0.75rem;">En tránsito</small>
                     </div>
                 </div>
@@ -104,7 +103,7 @@
                         <i class="bi bi-cash-stack fs-5" style="color: #834a5d;"></i>
                     </div>
                     <div class="d-flex flex-column justify-content-end mt-auto">
-                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/1,840</h2>
+                        <h2 class="fw-black m-0" style="font-size: 2.2rem; color: #2d2d2d; line-height: 1;">S/ @ingresosHoy.ToString("N2")</h2>
                         <small class="fw-semibold mt-1" style="color: #198754; font-size: 0.75rem;">Meta alcanzada</small>
                     </div>
                 </div>
@@ -366,7 +365,6 @@
 
 @code {
     private bool showProfileDropdown = false;
-    private bool isLoading = true;
     private void ToggleProfileDropdown()
     {
         showProfileDropdown = !showProfileDropdown;
@@ -390,39 +388,36 @@
 
     private string URL_BASE;
 
-    protected override Task OnInitializedAsync()
+    private int pedidosHoy = 0;
+    private int pedidosPendientesCount = 0;
+    private int pedidosEnCaminoCount = 0;
+    private decimal ingresosHoy = 0;
+
+    protected override async Task OnInitializedAsync()
     {
         URL_BASE = Configuration["ApiSettings:URL_BASE"];
-        return Task.CompletedTask;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        try
-        {
-            await Task.Yield();
-            await CargarDatos();
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
     }
 
     private async Task CargarDatos()
     {
-        todosLosClientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar");
-        todosLosPedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar");
+        todosLosClientes = await new HttpClientUtils<List<Cliente>>().get(URL_BASE + "/ClienteRS/listar") ?? new List<Cliente>();
+        todosLosPedidos = await new HttpClientUtils<List<Pedido>>().get(URL_BASE + "/PedidoRS/listar") ?? new List<Pedido>();
 
         foreach (var pedido in todosLosPedidos)
         {
             if (pedido.Cliente != null) pedido.Cliente = todosLosClientes.FirstOrDefault(c => c.Id_usuario == pedido.Cliente.Id_usuario);
+        }
+
+        if (todosLosPedidos != null)
+        {
+            pedidosHoy = todosLosPedidos.Count(p => p.Fecha_creacion.Date == DateTime.Today);
+            pedidosPendientesCount = todosLosPedidos.Count(p => p.Estado == "PENDIENTE");
+            pedidosEnCaminoCount = todosLosPedidos.Count(p => p.Estado == "ENVIADO");
+            ingresosHoy = todosLosPedidos
+                .Where(p => p.Fecha_creacion.Date == DateTime.Today && !string.Equals(p.Estado, "CANCELADO", StringComparison.OrdinalIgnoreCase))
+                .Sum(p => p.Total);
         }
     }
 

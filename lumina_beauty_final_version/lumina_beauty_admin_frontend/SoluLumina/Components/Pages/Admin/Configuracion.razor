@@ -2,13 +2,12 @@
 @using SoluLumina.Components.Pages.Shared
 @using SoluLumina.Models
 @using SoluLumina.Services
+@inject AdminUserService adminService
 @rendermode InteractiveServer
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light position-relative">
 
     <NavBar />
-
-    <LoadingPanel Visible="@isLoading" />
 
     <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
 
@@ -28,8 +27,8 @@
                 <div class="position-relative">
                     <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
                         <div class="text-end d-none d-md-block">
-                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
-                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
                         </div>
                         <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
                     </div>
@@ -40,8 +39,8 @@
                             <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
                                 <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
                                 <div class="overflow-hidden">
-                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">Juan Perez</h6>
-                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">juan.perez@luminabeauty.com</small>
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
                                 </div>
                             </div>
                             <div class="py-2">
@@ -483,7 +482,6 @@
 
 @code {
     private bool showProfileDropdown = false;
-    private bool isLoading = true;
     private void ToggleProfileDropdown() => showProfileDropdown = !showProfileDropdown;
 
     private string activeTab = "Empleados";
@@ -555,14 +553,13 @@
 
     private const string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        empleados = new List<Empleado>
-        {
-            new Empleado { Id = 1, Nombre = "Valentina Sánchez", Email = "valentina@glamadmin.com", Rol = "Admin", Estado = "Activo", Iniciales = "VS", BgColor = "#f1aeb5", TextColor = "#fff" },
-            new Empleado { Id = 2, Nombre = "Mateo López", Email = "mateo.l@glamadmin.com", Rol = "Almacén", Estado = "Activo", Iniciales = "ML", BgColor = "#e9ecef", TextColor = "#6c757d" },
-            new Empleado { Id = 3, Nombre = "Isabella Ruiz", Email = "isabella.r@glamadmin.com", Rol = "Vendedor", Estado = "Inactivo", Iniciales = "IR", BgColor = "#e9ecef", TextColor = "#6c757d" }
-        };
+        await adminService.CargarAdminAsync();
+        await CargarEmpleadosDesdeBackend();
+
+        // Cargar cupones reales desde la base de datos
+        await CargarCuponesDesdeBackend();
 
         metodosPago = new List<MetodoPago>
         {
@@ -572,26 +569,34 @@
             new MetodoPago { Id = 4, Nombre = "Plin", Tipo = "Billetera Móvil (PE)", Descripcion = "Pagos interbancarios con número de celular en Perú.", IconoUrl = "https://upload.wikimedia.org/wikipedia/commons/4/43/Logo_Plin.png", IsActivo = false },
             new MetodoPago { Id = 5, Nombre = "Transferencia Bancaria", Tipo = "Offline", Descripcion = "Cuentas BCP, Interbank y BBVA. Requiere validación manual.", IconoUrl = "https://cdn-icons-png.flaticon.com/512/2830/2830284.png", IsActivo = true }
         };
-
-        return Task.CompletedTask;
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task CargarEmpleadosDesdeBackend()
     {
-        if (!firstRender)
-        {
-            return;
-        }
-
         try
         {
-            await Task.Yield();
-            await CargarCuponesDesdeBackend();
+            var listaBackend = await new HttpClientUtils<List<SoluLumina.Models.Empleado>>().get(URL_BASE + "/EmpleadoRS/listar");
+            if (listaBackend != null && listaBackend.Any())
+            {
+                string[] bgColors = { "#f1aeb5", "#e9ecef", "#d1ecf1", "#d4edda", "#ffeeba" };
+                string[] txColors = { "#fff", "#6c757d", "#0c5460", "#155724", "#856404" };
+                empleados = listaBackend.Select((e, i) => new Empleado
+                {
+                    Id       = e.Id_usuario,
+                    Nombre   = $"{e.Nombres} {e.Apellidos}".Trim(),
+                    Email    = e.Correo ?? "",
+                    Rol      = e.Rol ?? "SOPORTE",
+                    Estado   = e.Estado == 1 ? "Activo" : "Inactivo",
+                    Iniciales = (e.Nombres?.Length > 0 ? e.Nombres[0].ToString() : "?") +
+                                (e.Apellidos?.Length > 0 ? e.Apellidos[0].ToString() : "?"),
+                    BgColor  = bgColors[i % bgColors.Length],
+                    TextColor = txColors[i % txColors.Length]
+                }).ToList();
+            }
         }
-        finally
+        catch (Exception ex)
         {
-            isLoading = false;
-            StateHasChanged();
+            Console.WriteLine("Error al cargar empleados: " + ex.Message);
         }
     }
 

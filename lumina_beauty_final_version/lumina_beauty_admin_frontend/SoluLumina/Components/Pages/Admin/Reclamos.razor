@@ -4,12 +4,11 @@
 @using SoluLumina.Models
 @using Newtonsoft.Json
 @rendermode InteractiveServer
+@inject AdminUserService adminService
 
 <div class="d-flex w-100 min-vh-100 m-0 p-0 bg-light">
 
     <NavBar />
-
-    <LoadingPanel Visible="@isLoading" />
 
     <div class="flex-grow-1 p-4" style="background-color: #fcfafb;">
 
@@ -26,8 +25,8 @@
                 <div class="position-relative">
                     <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important; cursor: pointer;" @onclick="ToggleProfileDropdown">
                         <div class="text-end d-none d-md-block">
-                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
-                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+                            <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">@adminService.NombreCompleto</h6>
+                            <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">@adminService.Rol</small>
                         </div>
                         <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
                     </div>
@@ -38,8 +37,8 @@
                             <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
                                 <div class="rounded-circle bg-secondary shadow-sm" style="width: 42px; height: 42px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4; flex-shrink: 0;"></div>
                                 <div class="overflow-hidden">
-                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">Juan Perez</h6>
-                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">juan.perez@luminabeauty.com</small>
+                                    <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">@adminService.NombreCompleto</h6>
+                                    <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">@adminService.Correo</small>
                                 </div>
                             </div>
                             <div class="py-2">
@@ -322,7 +321,6 @@
     private string toastColor = "#198754";
 
     private bool showProfileDropdown = false;
-    private bool isLoading = true;
     private Reclamo? reclamoSeleccionado;
     private List<Reclamo> listaReclamos = new();
     private string URL_BASE = "http://localhost:8080/LuminaBeauty-Servicios/webresources";
@@ -332,28 +330,10 @@
         showProfileDropdown = !showProfileDropdown;
     }
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        return Task.CompletedTask;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender)
-        {
-            return;
-        }
-
-        try
-        {
-            await Task.Yield();
-            await CargarDatos();
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
+        await adminService.CargarAdminAsync();
+        await CargarDatos();
     }
 
     private async Task CargarDatos()

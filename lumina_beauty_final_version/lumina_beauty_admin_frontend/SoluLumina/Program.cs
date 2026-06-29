@@ -14,6 +14,7 @@ builder.Services.AddScoped<SoluLumina.Services.IProductoService, SoluLumina.Serv
 builder.Services.AddScoped<SoluLumina.Services.ICategoriaService, SoluLumina.Services.CategoriaService>();
 builder.Services.AddScoped<SoluLumina.Services.IMarcaService, SoluLumina.Services.MarcaService>();
 builder.Services.AddScoped<SoluLumina.Services.ReporteJasperService>();
+builder.Services.AddSingleton<SoluLumina.Services.AdminUserService>();
 
 var app = builder.Build();
 
