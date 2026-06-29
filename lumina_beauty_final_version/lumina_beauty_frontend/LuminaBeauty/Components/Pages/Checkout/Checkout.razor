@@ -13,7 +13,7 @@
 
 <PageTitle>Pago y envío | Lumina Beauty</PageTitle>
 
-<div class="max-w-7xl mx-auto px-1 sm:px-4 py-6 text-left">
+<div class="mx-auto w-full max-w-7xl px-4 py-7 text-left sm:px-6 lg:px-8">
     <nav class="mb-8 flex items-center gap-2 text-xs font-semibold text-stone-400 select-none">
         <span class="cursor-pointer transition hover:text-[#C7346A]"
               @onclick='() => Navigator.NavigateTo("/")'>
@@ -92,25 +92,29 @@
     }
     else
     {
-        <div class="border-b border-stone-100 pb-6">
-            <h1 class="mt-2 font-serif text-2xl font-semibold text-stone-800 sm:text-xl">
+        <header class="mb-7 border-b border-[#F3E7EB] pb-6">
+            <span class="text-[10px] font-black uppercase tracking-[0.18em] text-[#C7346A]">
+                Finalizar compra
+            </span>
+
+            <h1 class="mt-2 font-serif text-3xl font-semibold tracking-tight text-stone-900">
                 Pago y envío
             </h1>
 
-            <p class="mt-2 text-xs leading-relaxed text-stone-500">
-                Confirma tus datos de entrega y selecciona el método de pago para finalizar tu compra.
+            <p class="mt-2 text-sm leading-relaxed text-stone-500">
+                Confirma tus datos de entrega y selecciona el método de pago.
             </p>
-        </div>
+        </header>
 
-        <div class="mt-5 grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
-            <div class="space-y-6 lg:col-span-8">
+        <div class="grid grid-cols-1 items-start gap-7 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div class="space-y-5">
                 <form @onsubmit="PlaceOrder"
                       @onsubmit:preventDefault
                       class="space-y-6">
 
-                    <section class="space-y-6 rounded-3xl border border-stone-100 bg-white/80 p-6 text-left shadow-xs backdrop-blur-md sm:p-8">
+                    <section class="space-y-5 rounded-3xl border border-stone-200/80 bg-white/90 p-6 text-left shadow-[0_7px_20px_rgba(120,72,92,0.035)] sm:p-7">
                         <div class="border-b border-stone-100 pb-3">
-                            <h2 class="text-xs font-semibold uppercase tracking-widest text-[#C7346A]">
+                            <h2 class="text-[10px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
                                 1. Datos de despacho
                             </h2>
                         </div>
@@ -151,7 +155,7 @@
                                         <button type="button"
                                                 @onclick="UsarOtraDireccion"
                                                 class="cursor-pointer text-[10px] font-semibold text-[#C7346A] transition hover:text-stone-800">
-                                            Agregar nueva dirección
+                                            + Usar otra dirección
                                         </button>
                                     }
                                 </div>
@@ -159,46 +163,60 @@
                                 @if (!_usarOtraDireccion && _direcciones.Count > 0)
                                 {
                                     <div class="space-y-3">
-                                        @foreach (var direccion in _direcciones)
+                                        <div class="relative">
+                                            <select value="@_direccionSeleccionadaId"
+                                                    @onchange="CambiarDireccionSeleccionada"
+                                                    class="w-full cursor-pointer appearance-none rounded-xl border border-stone-200 bg-white px-3.5 py-3 text-xs font-semibold text-stone-700 outline-none transition focus:border-[#FF76A5]">
+                                                @foreach (var direccion in _direcciones)
+                                                {
+                                                    var isPrincipal = Auth.CurrentClient?.DireccionPrincipal?.IdDireccion == direccion.IdDireccion;
+                                                    <option value="@direccion.IdDireccion">
+                                                        @(isPrincipal ? "Principal · " : "")@direccion.DireccionTexto · @direccion.Ciudad
+                                                    </option>
+                                                }
+                                            </select>
+
+                                            <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400"
+                                                 viewBox="0 0 24 24"
+                                                 fill="none"
+                                                 stroke="currentColor"
+                                                 stroke-width="2">
+                                                <path d="m6 9 6 6 6-6"></path>
+                                            </svg>
+                                        </div>
+
+                                        @if (DireccionSeleccionadaActual is not null)
                                         {
-                                            var isSelected = _direccionSeleccionadaId == direccion.IdDireccion;
-                                            var isPrincipal = Auth.CurrentClient?.DireccionPrincipal?.IdDireccion == direccion.IdDireccion;
-
-                                            <button type="button"
-                                                    @onclick="() => SeleccionarDireccion(direccion)"
-                                                    class="w-full cursor-pointer rounded-2xl border p-4 text-left transition @(isSelected
-                                                                                                            ? "border-[#FF76A5] bg-[#FFF0F3]/55"
-                                                                                                            : "border-stone-200 bg-white hover:border-[#FCD1DB]")">
-
+                                            <div class="rounded-2xl border border-[#F6D7E0] bg-[#FFF8FA] px-4 py-3.5">
                                                 <div class="flex items-start justify-between gap-4">
                                                     <div>
                                                         <p class="text-xs font-semibold text-stone-800">
-                                                            @direccion.DireccionTexto
+                                                            @DireccionSeleccionadaActual.DireccionTexto
                                                         </p>
 
                                                         <p class="mt-1 text-[11px] leading-relaxed text-stone-500">
-                                                            @direccion.Ciudad
+                                                            @DireccionSeleccionadaActual.Ciudad
 
-                                                            @if (!string.IsNullOrWhiteSpace(direccion.Referencia))
+                                                            @if (!string.IsNullOrWhiteSpace(DireccionSeleccionadaActual.Referencia))
                                                             {
-                                                                <span> · @direccion.Referencia</span>
+                                                                <span> · @DireccionSeleccionadaActual.Referencia</span>
                                                             }
 
-                                                            @if (!string.IsNullOrWhiteSpace(direccion.CodigoPostal))
+                                                            @if (!string.IsNullOrWhiteSpace(DireccionSeleccionadaActual.CodigoPostal))
                                                             {
-                                                                <span> · @direccion.CodigoPostal</span>
+                                                                <span> · @DireccionSeleccionadaActual.CodigoPostal</span>
                                                             }
                                                         </p>
                                                     </div>
 
-                                                    @if (isPrincipal)
+                                                    @if (Auth.CurrentClient?.DireccionPrincipal?.IdDireccion == DireccionSeleccionadaActual.IdDireccion)
                                                     {
-                                                        <span class="shrink-0 rounded-full bg-stone-100 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wide text-stone-500">
+                                                        <span class="shrink-0 rounded-full border border-[#F6D7E0] bg-white px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.1em] text-[#C7346A]">
                                                             Principal
                                                         </span>
                                                     }
                                                 </div>
-                                            </button>
+                                            </div>
                                         }
                                     </div>
                                 }
@@ -299,9 +317,9 @@
                         </div>
                     </section>
 
-                    <section class="space-y-6 rounded-3xl border border-stone-100 bg-white/80 p-6 text-left shadow-xs backdrop-blur-md sm:p-8">
+                    <section class="space-y-5 rounded-3xl border border-stone-200/80 bg-white/90 p-6 text-left shadow-[0_7px_20px_rgba(120,72,92,0.035)] sm:p-7">
                         <div class="border-b border-stone-100 pb-3">
-                            <h2 class="text-xs font-semibold uppercase tracking-widest text-[#C7346A]">
+                            <h2 class="text-[10px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
                                 2. Método de pago
                             </h2>
                         </div>
@@ -313,9 +331,9 @@
 
                                 <button type="button"
                                         @onclick="() => SelectPaymentMethod(opt.Code)"
-                                        class="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border px-1 py-3 text-xs font-semibold uppercase transition @(isActive
-                                                                                    ? "border-[#FF76A5] bg-[#FFF0F3] text-[#C7346A]"
-                                                                                    : "border-stone-200 bg-stone-50 text-stone-500 hover:text-stone-800")">
+                                        class="flex cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2.5 text-[10px] font-black uppercase tracking-[0.08em] transition @(isActive
+                                                                                                                                                                    ? "border-[#FF76A5] bg-[#FFF0F3] text-[#C7346A]"
+                                                                                                                                                                    : "border-stone-200 bg-stone-50 text-stone-500 hover:text-stone-800")">
                                     <span class="text-sm">@opt.Icon</span>
                                     <span>@opt.Label</span>
                                 </button>
@@ -362,32 +380,59 @@
                                            class="w-full rounded-xl border border-stone-200 bg-[#faf6f7]/60 px-3.5 py-2.5 text-xs font-semibold text-stone-700 transition hover:bg-white focus:border-[#FF76A5] focus:bg-white focus:outline-none" />
                                 </div>
                             </div>
+
+                            <div class="rounded-xl border border-[#F6D7E0] bg-[#FFF8FA] px-4 py-3 text-xs font-semibold leading-relaxed text-stone-600">
+                                Pasarela simulada de tarjeta: al confirmar, se registrará el pago como completado con referencia automática.
+                            </div>
                         }
                         else
                         {
-                            <div class="rounded-xl border border-[#FCD1DB]/40 bg-[#FFF0F3]/40 p-4 text-xs font-semibold leading-relaxed text-stone-700">
-                                El pago será validado de acuerdo con el método seleccionado antes de procesar el pedido.
+                            <div class="rounded-2xl border border-[#F6D7E0] bg-[#FFF8FA] p-4">
+                                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-[10px] font-black uppercase tracking-[0.14em] text-[#C7346A]">
+                                            Pasarela simulada @GetPaymentLabel()
+                                        </p>
+
+                                        <p class="mt-1 text-xs font-semibold text-stone-700">
+                                            Código de operación: @GetSimulatedPaymentCode()
+                                        </p>
+
+                                        <p class="mt-1 text-[11px] leading-relaxed text-stone-500">
+                                            En una integración real se mostraría el QR o confirmación externa de @GetPaymentLabel().
+                                        </p>
+                                    </div>
+
+                                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-white font-mono text-[10px] font-black text-[#C7346A]">
+                                        QR DEMO
+                                    </div>
+                                </div>
                             </div>
                         }
                     </section>
 
                     <button type="submit"
                             disabled="@_procesandoPedido"
-                            class="w-full rounded-xl bg-[#FF76A5] py-4 text-xs font-semibold uppercase tracking-widest text-white shadow-md transition hover:bg-[#ff5f96] disabled:cursor-not-allowed disabled:opacity-60">
-                        @(_procesandoPedido ? "Procesando pedido..." : "Confirmar pedido")
+                            class="w-full rounded-xl bg-[#FF76A5] py-4 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-[0_8px_18px_rgba(199,52,106,0.16)] transition hover:bg-[#C7346A] disabled:cursor-not-allowed disabled:opacity-60">
+                        @(_procesandoPedido ? "Procesando pago..." : $"Confirmar y pagar con {GetPaymentLabel()}")
                     </button>
                 </form>
             </div>
 
-            <aside class="sticky top-24 select-none lg:col-span-4">
-                <div class="relative overflow-hidden rounded-3xl border border-[#FCD1DB]/50 bg-white/80 p-6 text-left text-stone-800 shadow-md backdrop-blur-md">
+            <aside class="h-fit self-start select-none lg:sticky lg:top-24">
+                <div class="relative h-fit overflow-hidden rounded-3xl border border-[#F1DCE3] bg-white/90 p-6 text-left text-stone-800 shadow-[0_14px_35px_rgba(120,72,92,0.10)]">
                     <div class="absolute inset-x-0 top-0 h-1 bg-[#FF76A5]"></div>
 
-                    <h2 class="mb-4 border-b border-stone-100 pb-3 text-xs font-semibold uppercase tracking-widest text-[#C7346A]">
-                        Resumen de compra
-                    </h2>
+                    <div class="mb-4 border-b border-stone-100 pb-4">
+                        <span class="text-[10px] font-black uppercase tracking-[0.16em] text-[#C7346A]">
+                            Resumen
+                        </span>
+                        <h2 class="mt-1 font-serif text-2xl font-semibold text-stone-900">
+                            Total de compra
+                        </h2>
+                    </div>
 
-                    <div class="mb-4 max-h-56 space-y-3.5 overflow-y-auto border-b border-stone-100/60 pb-4 pr-1">
+                    <div class="mb-4 max-h-48 space-y-3 overflow-y-auto border-b border-stone-100/60 pb-4 pr-1">
                         @foreach (var item in Cart.GetItems())
                         {
                             <div class="flex items-center gap-3.5 text-xs text-stone-900">
@@ -413,7 +458,7 @@
                         }
                     </div>
 
-                    <div class="space-y-3 text-xs font-semibold text-stone-500">
+                    <div class="space-y-2.5 text-xs font-semibold text-stone-500">
                         <div class="flex items-center justify-between text-stone-600">
                             <span>Subtotal:</span>
                             <span class="font-mono font-semibold text-stone-900">
@@ -439,7 +484,7 @@
                             </div>
                         }
 
-                        <div class="mt-2 flex items-center justify-between border-t border-stone-150 pt-3.5 text-sm font-semibold text-stone-900">
+                        <div class="mt-2 flex items-center justify-between border-t border-stone-200 pt-3.5 text-sm font-semibold text-stone-900">
                             <span>Importe total:</span>
                             <span class="font-mono text-base font-semibold text-[#C7346A]">
                                 S/ @GetOrderTotal().ToString("0.00")
@@ -584,6 +629,24 @@
         StateHasChanged();
     }
 
+    private Direccion? DireccionSeleccionadaActual =>
+        _direcciones.FirstOrDefault(
+            direccion => direccion.IdDireccion == _direccionSeleccionadaId);
+
+    private void CambiarDireccionSeleccionada(ChangeEventArgs args)
+    {
+        if (int.TryParse(args.Value?.ToString(), out var idDireccion))
+        {
+            var direccion = _direcciones.FirstOrDefault(
+                item => item.IdDireccion == idDireccion);
+
+            if (direccion != null)
+            {
+                SeleccionarDireccion(direccion);
+            }
+        }
+    }
+
     private void SeleccionarDireccion(Direccion direccion)
     {
         _direccionSeleccionadaId = direccion.IdDireccion;
@@ -638,6 +701,16 @@
             .FirstOrDefault(method => method.Code == _paymentMethod)
             ?.Label
             ?? "No especificado";
+    }
+
+    private string GetSimulatedPaymentCode()
+    {
+        return _paymentMethod switch
+        {
+            "plin" => "PLIN-458921",
+            "yape" => "YAPE-458921",
+            _ => "CARD-458921"
+        };
     }
 
     private async Task AplicarCuponAsync()
@@ -780,7 +853,8 @@
                 Auth.CurrentClient,
                 Cart.GetItems(),
                 datosDespacho,
-                _cuponAplicado);
+                _cuponAplicado,
+                _paymentMethod);
 
             if (!resultado.Exitoso)
             {

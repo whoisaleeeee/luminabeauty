@@ -41,6 +41,7 @@ builder.Services.AddScoped<ValoracionRestService>();
 builder.Services.AddScoped<CuponRestService>();
 builder.Services.AddScoped<UsoCuponRestService>();
 builder.Services.AddScoped<ReclamoRestService>();
+builder.Services.AddScoped<PagoRestService>();
 
 // Servicios de aplicación
 builder.Services.AddScoped<LocalStorageService>();
@@ -67,6 +68,7 @@ builder.Services.AddScoped<HeaderSearchAppService>();
 builder.Services.AddScoped<CuponAppService>();
 builder.Services.AddScoped<UsoCuponAppService>();
 builder.Services.AddScoped<ReclamoAppService>();
+builder.Services.AddScoped<PagoAppService>();
 
 // Admin
 builder.Services.AddScoped<ReporteJasperService>();
