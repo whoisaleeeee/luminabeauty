@@ -30,6 +30,7 @@ builder.Services.AddScoped(sp =>
 
 // Servicios REST
 builder.Services.AddScoped<ProductoRestService>();
+builder.Services.AddScoped<CheckoutRestService>();
 builder.Services.AddScoped<ClienteRestService>();
 builder.Services.AddScoped<CarroRestService>();
 builder.Services.AddScoped<AuthRestService>();

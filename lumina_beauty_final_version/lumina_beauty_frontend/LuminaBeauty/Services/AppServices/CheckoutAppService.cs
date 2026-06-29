@@ -1,33 +1,28 @@
 ﻿using LuminaBeauty.Models;
+using LuminaBeauty.Servicios.REST;
 
 namespace LuminaBeauty.Services.AppServices
 {
     public class CheckoutAppService
     {
-        private readonly PedidoAppService _pedidoAppService;
         private readonly CarroAppService _carroAppService;
         private readonly CartService _cartService;
-        private readonly EnvioAppService _envioAppService;
         private readonly CuponAppService _cuponAppService;
         private readonly UsoCuponAppService _usoCuponAppService;
-        private readonly PagoAppService _pagoAppService;
+        private readonly CheckoutRestService _checkoutRestService;
 
         public CheckoutAppService(
-            PedidoAppService pedidoAppService,
             CarroAppService carroAppService,
             CartService cartService,
-            EnvioAppService envioAppService,
             CuponAppService cuponAppService,
             UsoCuponAppService usoCuponAppService,
-            PagoAppService pagoAppService)
+            CheckoutRestService checkoutRestService)
         {
-            _pedidoAppService = pedidoAppService;
             _carroAppService = carroAppService;
             _cartService = cartService;
-            _envioAppService = envioAppService;
             _cuponAppService = cuponAppService;
             _usoCuponAppService = usoCuponAppService;
-            _pagoAppService = pagoAppService;
+            _checkoutRestService = checkoutRestService;
         }
 
         public async Task<CheckoutResult> ProcesarPedidoAsync(
@@ -52,12 +47,6 @@ namespace LuminaBeauty.Services.AppServices
             {
                 return CheckoutResult.Error(
                     "Completa los datos de entrega antes de confirmar tu pedido.");
-            }
-
-            if (items.Any(item => item.Product.IdProducto <= 0))
-            {
-                return CheckoutResult.Error(
-                    "Uno o más productos no tienen un identificador válido.");
             }
 
             foreach (var item in items)
@@ -93,13 +82,13 @@ namespace LuminaBeauty.Services.AppServices
 
             var pedido = new Pedido
             {
-                CodigoPedido = "PED-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+                CodigoPedido = "P" + DateTime.Now.ToString("yyMMddHHmmss"),
                 CodigoCuponAplicado = cupon?.Codigo ?? string.Empty,
                 SubtotalProductos = subtotal,
                 CostoEnvio = costoEnvio,
                 Descuento = descuento,
                 Total = total,
-                Estado = "PENDIENTE",
+                Estado = "PAGADO",
                 Cliente = new Cliente
                 {
                     Id = cliente.Id
@@ -122,98 +111,52 @@ namespace LuminaBeauty.Services.AppServices
                 }).ToList()
             };
 
-            var pedidoCreado = await _pedidoAppService.CrearPedidoAsync(pedido);
-
-            if (pedidoCreado == null || pedidoCreado.IdPedido <= 0)
-            {
-                return CheckoutResult.Error("No se pudo registrar el pedido.");
-            }
-
             var envio = new Envio
             {
                 ZonaEnvio = ResolverZonaEnvio(datosDespacho.Ciudad),
                 Estado = "PREPARANDO",
+                NumeroSeguimiento = string.Empty,
                 DireccionEnvio = datosDespacho.Direccion.Trim(),
                 CiudadEnvio = datosDespacho.Ciudad.Trim(),
                 PaisEnvio = string.IsNullOrWhiteSpace(datosDespacho.Pais)
                     ? "Peru"
                     : datosDespacho.Pais.Trim(),
                 ReferenciaEnvio = datosDespacho.Referencia.Trim(),
-                CodigoPostalEnvio = datosDespacho.CodigoPostal.Trim(),
-                Pedido = new Pedido
+                CodigoPostalEnvio = datosDespacho.CodigoPostal.Trim()
+            };
+
+            var pago = new Pago
+            {
+                Monto = total,
+                Estado = "COMPLETADO",
+                ReferenciaTransaccion = GenerarReferencia(metodoPago),
+                MetodoDePago = new MetodoDePago
                 {
-                    IdPedido = pedidoCreado.IdPedido
+                    IdMetodoPago = ResolverIdMetodoPago(metodoPago)
                 }
             };
 
-            var envioCreado = await _envioAppService.RegistrarAsync(envio);
+            var resultado = await _checkoutRestService.ProcesarAsync(
+                new CheckoutApiRequest
+                {
+                    Pedido = pedido,
+                    Envio = envio,
+                    Pago = pago
+                });
 
-            if (envioCreado == null || envioCreado.IdEnvio <= 0)
+            if (resultado == null || !resultado.Exitoso || resultado.IdPedido <= 0)
             {
                 return CheckoutResult.Error(
-                    "El pedido fue registrado, pero no se pudo crear el envío. "
-                    + "Comunícate con soporte antes de realizar otra compra.");
-            }
-
-            var pagoCompletado = await _pagoAppService.RegistrarPagoCompletadoAsync(
-                pedidoCreado.IdPedido,
-                total,
-                metodoPago);
-
-            if (pagoCompletado == null || pagoCompletado.IdPago <= 0)
-            {
-                return CheckoutResult.Error(
-                    "El pedido y el envío fueron registrados, pero no se pudo registrar el pago. "
-                    + "Comunícate con soporte antes de realizar otra compra.");
-            }
-
-            if (cupon != null)
-            {
-                var usoCupon = new UsoCupon
-                {
-                    Cupon = new Cupon
-                    {
-                        IdCupon = cupon.IdCupon
-                    },
-                    Cliente = new Cliente
-                    {
-                        Id = cliente.Id
-                    },
-                    Pedido = new Pedido
-                    {
-                        IdPedido = pedidoCreado.IdPedido
-                    }
-                };
-
-                var usoRegistrado = await _usoCuponAppService.RegistrarAsync(usoCupon);
-
-                if (usoRegistrado == null)
-                {
-                    return CheckoutResult.Error(
-                        "El pedido fue creado, pero no se pudo registrar el uso del cupón. "
-                        + "Comunícate con soporte antes de realizar otra compra.");
-                }
-            }
-
-            foreach (var item in items)
-            {
-                var descontado = await _carroAppService.DescontarStockAsync(
-                    item.Product.IdProducto,
-                    item.Quantity);
-
-                if (!descontado)
-                {
-                    Console.WriteLine(
-                        $"Advertencia: no se pudo descontar stock de {item.Product.Name}.");
-                }
+                    resultado?.Mensaje ?? "No se pudo registrar el pago.");
             }
 
             await _cartService.ClearCartAsync();
 
+           
             return CheckoutResult.Success(
-                pedidoCreado.IdPedido,
-                pedidoCreado.CodigoPedido,
-                total);
+            resultado.IdPedido,
+            resultado.CodigoPedido,
+            total);
         }
 
         private async Task<ValidacionCuponResult> ValidarCuponAsync(
@@ -246,19 +189,38 @@ namespace LuminaBeauty.Services.AppServices
 
             var descuento = _cuponAppService.CalcularDescuento(cuponReal, subtotal);
 
-            if (descuento <= 0)
-            {
-                return ValidacionCuponResult.Error(
-                    "No se pudo calcular el descuento del cupón.");
-            }
+            return descuento <= 0
+                ? ValidacionCuponResult.Error(
+                    "No se pudo calcular el descuento del cupón.")
+                : ValidacionCuponResult.Exito(cuponReal, descuento);
+        }
 
-            return ValidacionCuponResult.Exito(cuponReal, descuento);
+        private static int ResolverIdMetodoPago(string metodoPago)
+        {
+            return metodoPago?.Trim().ToLowerInvariant() switch
+            {
+                "plin" => 5,
+                "cash" => 7,
+                "yape" => 3,
+                _ => 1
+            };
+        }
+
+        private static string GenerarReferencia(string metodoPago)
+        {
+            var prefijo = metodoPago?.Trim().ToUpperInvariant() switch
+            {
+                "PLIN" => "PLIN",
+                "YAPE" => "YAPE",
+                _ => "CARD"
+            };
+
+            return $"SIM-{prefijo}-{DateTime.Now:yyyyMMddHHmmssfff}";
         }
 
         private static string ResolverZonaEnvio(string ciudad)
         {
-            return ciudad.Trim().Equals(
-                "Lima",
+            return ciudad.Trim().Equals("Lima",
                 StringComparison.OrdinalIgnoreCase)
                 ? "LIMA"
                 : "PROVINCIA";
@@ -275,14 +237,12 @@ namespace LuminaBeauty.Services.AppServices
         public string CodigoPostal { get; set; } = string.Empty;
         public string Pais { get; set; } = "Peru";
 
-        public bool EsValido()
-        {
-            return !string.IsNullOrWhiteSpace(NombreContacto)
-                && !string.IsNullOrWhiteSpace(Telefono)
-                && !string.IsNullOrWhiteSpace(Direccion)
-                && !string.IsNullOrWhiteSpace(Ciudad)
-                && !string.IsNullOrWhiteSpace(Referencia);
-        }
+        public bool EsValido() =>
+            !string.IsNullOrWhiteSpace(NombreContacto)
+            && !string.IsNullOrWhiteSpace(Telefono)
+            && !string.IsNullOrWhiteSpace(Direccion)
+            && !string.IsNullOrWhiteSpace(Ciudad)
+            && !string.IsNullOrWhiteSpace(Referencia);
     }
 
     internal class ValidacionCuponResult
@@ -292,32 +252,13 @@ namespace LuminaBeauty.Services.AppServices
         public Cupon? Cupon { get; private set; }
         public decimal Descuento { get; private set; }
 
-        public static ValidacionCuponResult SinCupon()
-        {
-            return new ValidacionCuponResult
-            {
-                EsValido = true
-            };
-        }
+        public static ValidacionCuponResult SinCupon() => new() { EsValido = true };
 
-        public static ValidacionCuponResult Exito(Cupon cupon, decimal descuento)
-        {
-            return new ValidacionCuponResult
-            {
-                EsValido = true,
-                Cupon = cupon,
-                Descuento = descuento
-            };
-        }
+        public static ValidacionCuponResult Exito(Cupon cupon, decimal descuento) =>
+            new() { EsValido = true, Cupon = cupon, Descuento = descuento };
 
-        public static ValidacionCuponResult Error(string mensaje)
-        {
-            return new ValidacionCuponResult
-            {
-                EsValido = false,
-                Mensaje = mensaje
-            };
-        }
+        public static ValidacionCuponResult Error(string mensaje) =>
+            new() { EsValido = false, Mensaje = mensaje };
     }
 
     public class CheckoutResult
@@ -328,12 +269,8 @@ namespace LuminaBeauty.Services.AppServices
         public string CodigoPedido { get; private set; } = string.Empty;
         public decimal Total { get; private set; }
 
-        public static CheckoutResult Success(
-            int idPedido,
-            string codigoPedido,
-            decimal total)
-        {
-            return new CheckoutResult
+        public static CheckoutResult Success(int idPedido, string codigoPedido, decimal total) =>
+            new()
             {
                 Exitoso = true,
                 IdPedido = idPedido,
@@ -341,15 +278,8 @@ namespace LuminaBeauty.Services.AppServices
                 Total = total,
                 Mensaje = "Pedido registrado correctamente."
             };
-        }
 
-        public static CheckoutResult Error(string mensaje)
-        {
-            return new CheckoutResult
-            {
-                Exitoso = false,
-                Mensaje = mensaje
-            };
-        }
+        public static CheckoutResult Error(string mensaje) =>
+            new() { Exitoso = false, Mensaje = mensaje };
     }
 }

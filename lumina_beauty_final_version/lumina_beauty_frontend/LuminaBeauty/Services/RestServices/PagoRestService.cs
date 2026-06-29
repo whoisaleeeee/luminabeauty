@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json;
 using LuminaBeauty.Models;
 
@@ -51,7 +52,9 @@ namespace LuminaBeauty.Servicios.REST
             }
         }
 
-        public async Task<Pago?> CompletarPagoAsync(int idPago, string referenciaTransaccion)
+        public async Task<Pago?> CompletarPagoAsync(
+            int idPago,
+            string referenciaTransaccion)
         {
             if (idPago <= 0 || string.IsNullOrWhiteSpace(referenciaTransaccion))
             {
@@ -73,11 +76,24 @@ namespace LuminaBeauty.Servicios.REST
                 Console.WriteLine($"Respuesta: {contenido}");
                 Console.WriteLine("====================================");
 
-                if (!response.IsSuccessStatusCode ||
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null;
+                }
+
+                // El backend responde 204 cuando completa correctamente,
+                // pero no devuelve el objeto Pago.
+                if (response.StatusCode == HttpStatusCode.NoContent ||
                     string.IsNullOrWhiteSpace(contenido) ||
                     contenido.Trim().Equals("null", StringComparison.OrdinalIgnoreCase))
                 {
-                    return null;
+                    return new Pago
+                    {
+                        IdPago = idPago,
+                        Estado = "COMPLETADO",
+                        ReferenciaTransaccion = referenciaTransaccion,
+                        FechaPago = DateTime.Now
+                    };
                 }
 
                 return JsonSerializer.Deserialize<Pago>(contenido, JsonOptions);
@@ -106,6 +122,15 @@ namespace LuminaBeauty.Servicios.REST
                 if (!response.IsSuccessStatusCode)
                 {
                     return null;
+                }
+
+                if (response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return new Pago
+                    {
+                        IdPago = idPago,
+                        Estado = "FALLIDO"
+                    };
                 }
 
                 return await response.Content.ReadFromJsonAsync<Pago>(JsonOptions);
