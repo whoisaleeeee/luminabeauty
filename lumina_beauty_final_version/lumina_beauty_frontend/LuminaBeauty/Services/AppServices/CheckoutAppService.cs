@@ -10,6 +10,7 @@ namespace LuminaBeauty.Services.AppServices
         private readonly EnvioAppService _envioAppService;
         private readonly CuponAppService _cuponAppService;
         private readonly UsoCuponAppService _usoCuponAppService;
+        private readonly PagoAppService _pagoAppService;
 
         public CheckoutAppService(
             PedidoAppService pedidoAppService,
@@ -17,7 +18,8 @@ namespace LuminaBeauty.Services.AppServices
             CartService cartService,
             EnvioAppService envioAppService,
             CuponAppService cuponAppService,
-            UsoCuponAppService usoCuponAppService)
+            UsoCuponAppService usoCuponAppService,
+            PagoAppService pagoAppService)
         {
             _pedidoAppService = pedidoAppService;
             _carroAppService = carroAppService;
@@ -25,13 +27,15 @@ namespace LuminaBeauty.Services.AppServices
             _envioAppService = envioAppService;
             _cuponAppService = cuponAppService;
             _usoCuponAppService = usoCuponAppService;
+            _pagoAppService = pagoAppService;
         }
 
         public async Task<CheckoutResult> ProcesarPedidoAsync(
             Cliente? cliente,
             IReadOnlyList<CartItem> items,
             DatosDespacho datosDespacho,
-            Cupon? cuponAplicado = null)
+            Cupon? cuponAplicado = null,
+            string metodoPago = "card")
         {
             if (cliente == null || cliente.Id <= 0)
             {
@@ -148,6 +152,18 @@ namespace LuminaBeauty.Services.AppServices
             {
                 return CheckoutResult.Error(
                     "El pedido fue registrado, pero no se pudo crear el envío. "
+                    + "Comunícate con soporte antes de realizar otra compra.");
+            }
+
+            var pagoCompletado = await _pagoAppService.RegistrarPagoCompletadoAsync(
+                pedidoCreado.IdPedido,
+                total,
+                metodoPago);
+
+            if (pagoCompletado == null || pagoCompletado.IdPago <= 0)
+            {
+                return CheckoutResult.Error(
+                    "El pedido y el envío fueron registrados, pero no se pudo registrar el pago. "
                     + "Comunícate con soporte antes de realizar otra compra.");
             }
 
