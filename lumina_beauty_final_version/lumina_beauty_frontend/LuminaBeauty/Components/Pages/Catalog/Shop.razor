@@ -2,6 +2,7 @@
 @inject ShopAppService ShopApp
 @inject LanguageService LangService
 @inject NavigationManager Navigator
+@using Microsoft.AspNetCore.Components
 @implements IDisposable
 
 <PageTitle>Tienda | Lumina Beauty</PageTitle>
@@ -284,12 +285,37 @@
 </div>
     }
 </div>
-
 @code {
-    protected override async Task OnInitializedAsync()
+    [SupplyParameterFromQuery(Name = "category")]
+    public string? CategoryFromUrl { get; set; }
+
+    private bool _catalogInitialized;
+
+    protected override void OnInitialized()
     {
         LangService.OnChange += StateHasChanged;
-        await ShopApp.InitializeAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!_catalogInitialized)
+        {
+            await ShopApp.InitializeAsync();
+            _catalogInitialized = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(CategoryFromUrl))
+        {
+            ShopApp.SelectCategory(null);
+            return;
+        }
+
+        var matchingCategory = ShopApp.State.Categories.FirstOrDefault(category =>
+            category.Name.Equals(
+                CategoryFromUrl,
+                StringComparison.OrdinalIgnoreCase));
+
+        ShopApp.SelectCategory(matchingCategory?.Name);
     }
 
     public void Dispose()

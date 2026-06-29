@@ -108,27 +108,37 @@
             </div>
         </div>
 
-        <!-- Middle navigation links -->
+        <!-- Navegación principal del header.
+             Se usan enlaces HTML reales para que la navegación funcione con un solo clic,
+             incluso antes de que Blazor termine de activar los eventos interactivos.
+             IsActive() aplica el estilo rosa al enlace de la página actual. -->
         <nav class="hidden shrink-0 items-center gap-7 text-[11px] font-bold uppercase tracking-[0.14em] text-stone-600 lg:flex">
-            <button @onclick="GoHome" class="hover:text-[#FF76A5] transition-all duration-300 cursor-pointer @(IsActive("/") ? "text-[#FF76A5] font-extrabold" : "")">
+            <a href="/"
+               class="relative py-2 transition-all duration-300 hover:text-[#FF76A5] @(IsActive("/") ? "text-[#FF76A5] font-extrabold" : "")">
                 @LangService.Translate("inicio")
-            </button>
+            </a>
 
-            <button @onclick='() => NavigateTo("/shop")' class="hover:text-[#FF76A5] transition-all duration-300 cursor-pointer @(IsActive("/shop") ? "text-[#C7346A] font-extrabold" : "")">
+            <a href="/shop"
+               class="relative py-2 transition-all duration-300 hover:text-[#FF76A5] @(IsActive("/shop") ? "text-[#FF76A5] font-extrabold" : "")">
                 @(LangService.CurrentLanguage == "es" ? "Tienda" : "Shop")
-            </button>
+            </a>
 
-            <button @onclick='() => NavigateTo("/contact")' class="hover:text-[#FF76A5] transition-all duration-300 cursor-pointer @(IsActive("/contact") ? "text-[#FF76A5] font-extrabold" : "")">
+            <a href="/contact"
+               class="relative py-2 transition-all duration-300 hover:text-[#FF76A5] @(IsActive("/contact") ? "text-[#FF76A5] font-extrabold" : "")">
                 @LangService.Translate("contacto")
-            </button>
+            </a>
         </nav>
+
 
         <!-- Right Side Account/Wishlist/Cart control links -->
         <div class="ml-1 flex shrink-0 items-center gap-2.5">
             
             <!-- User Button -->
             <button @onclick="NavigateToProfile"
-                    class="flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] cursor-pointer"
+                    class="flex h-11 w-11 items-center justify-center rounded-full border transition cursor-pointer
+                             @(IsAccountPage()
+                         ? "border-[#FCD1DB] bg-[#FFF0F3] text-[#C7346A] shadow-sm"
+                         : "border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")"
                     title="Mi Cuenta"
                     id="profile-button">
                 <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -139,7 +149,10 @@
 
             <!-- Wishlist Button -->
             <button @onclick="OpenWishlist"
-                    class="flex h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-600 transition hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A] cursor-pointer">
+                    class="flex h-11 w-11 items-center justify-center rounded-full border transition cursor-pointer
+                @(LayoutState.IsWishlistDrawerOpen
+                         ? "border-[#FCD1DB] bg-[#FFF0F3] text-[#C7346A] shadow-sm"
+                         : "border-stone-200 bg-white text-stone-600 hover:border-[#FCD1DB] hover:bg-[#FFF0F3] hover:text-[#C7346A]")">
                 <svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                     <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 1 0-7.8 7.8L12 21l8.9-8.6a5.5 5.5 0 0 0-.1-7.8Z" />
                 </svg>
@@ -178,6 +191,7 @@
 </header>
 
 @code {
+    
     protected override void OnInitialized()
     {
         LangService.OnChange += StateHasChanged;
@@ -185,6 +199,7 @@
         Cart.OnChange += StateHasChanged;
         Wishlist.OnChange += StateHasChanged;
         Auth.OnChange += StateHasChanged;
+        ListNavigate.LocationChanged += OnLocationChanged;
     }
 
     private async Task OnSearchInputAsync(ChangeEventArgs e)
@@ -265,14 +280,39 @@
     private void OpenCart() => LayoutState.SetCartDrawerOpen(true);
     private void OpenWishlist() => LayoutState.SetWishlistDrawerOpen(true);
 
-    private bool IsActive(string relativePath)
+    private bool IsActive(string path)
     {
-        var localPath = ListNavigate.ToBaseRelativePath(ListNavigate.Uri);
-        if (relativePath == "/")
+        string currentPath = new Uri(ListNavigate.Uri).AbsolutePath.TrimEnd('/');
+        string targetPath = path.TrimEnd('/');
+
+        if (string.IsNullOrEmpty(currentPath))
         {
-            return string.IsNullOrEmpty(localPath);
+            currentPath = "/";
         }
-        return localPath.Split('?')[0].StartsWith(relativePath.TrimStart('/'));
+
+        if (string.IsNullOrEmpty(targetPath))
+        {
+            targetPath = "/";
+        }
+
+        return string.Equals(
+            currentPath,
+            targetPath,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsAccountPage()
+    {
+        string currentPath = new Uri(ListNavigate.Uri).AbsolutePath.TrimEnd('/');
+
+        return currentPath.Equals("/profile", StringComparison.OrdinalIgnoreCase)
+            || currentPath.Equals("/login", StringComparison.OrdinalIgnoreCase)
+            || currentPath.Equals("/signup", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
@@ -282,5 +322,6 @@
         Cart.OnChange -= StateHasChanged;
         Wishlist.OnChange -= StateHasChanged;
         Auth.OnChange -= StateHasChanged;
+        ListNavigate.LocationChanged -= OnLocationChanged;
     }
 }

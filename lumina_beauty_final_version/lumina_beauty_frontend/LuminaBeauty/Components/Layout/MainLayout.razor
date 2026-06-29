@@ -1,78 +1,79 @@
-@inherits LayoutComponentBase
-@inject LanguageService LangService
-@inject LayoutStateService LayoutState
-@inject CartService Cart
-@inject WishlistService Wishlist
-@inject AuthService Auth
-@inject ToastService Toast
-@inject NavigationManager Navigator
-@implements IDisposable
+    @inherits LayoutComponentBase
+    @inject LanguageService LangService
+    @inject LayoutStateService LayoutState
+    @inject CartService Cart
+    @inject WishlistService Wishlist
+    @inject AuthService Auth
+    @inject ToastService Toast
+    @inject NavigationManager Navigator
+    @implements IDisposable
 
-<div id="beauty-detail-platform" class="min-h-screen bg-[#FFF4F7] font-sans text-stone-900 antialiased selection:bg-[#FCD1DB] selection:text-stone-900 relative overflow-x-hidden">
-    <!-- Decorative blurred backgrounds as requested -->
-    <div class="absolute top-[-10%] left-[-20%] w-[70vw] h-[70vw] bg-[#FEF2F4] rounded-full filter blur-3xl opacity-60 mix-blend-multiply pointer-events-none -z-10" />
-    <div class="absolute top-[30%] right-[-15%] w-[60vw] h-[60vw] bg-[#EAF7FA] rounded-full filter blur-3xl opacity-50 mix-blend-multiply pointer-events-none -z-10" />
+    <div id="beauty-detail-platform" class="relative min-h-dvh overflow-x-hidden bg-[#FFF4F7] font-sans text-stone-900 antialiased selection:bg-[#FCD1DB] selection:text-stone-900">
+        <!-- Decorative blurred backgrounds as requested -->
+        <div class="absolute top-[-10%] left-[-20%] w-[70vw] h-[70vw] bg-[#FEF2F4] rounded-full filter blur-3xl opacity-60 mix-blend-multiply pointer-events-none -z-10" />
+        <div class="absolute top-[30%] right-[-15%] w-[60vw] h-[60vw] bg-[#EAF7FA] rounded-full filter blur-3xl opacity-50 mix-blend-multiply pointer-events-none -z-10" />
 
-    <!-- Toast Notification Overlay -->
-    @if (!string.IsNullOrEmpty(Toast.CurrentText))
-    {
-        <div id="toast-beauty" class="fixed top-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl py-3 px-6 text-stone-900 text-xs font-bold flex items-center gap-3 border-l-4 border-[#FF76A5] animate-in fade-in slide-in-from-top-6 duration-300">
-            <span class="text-[#FF76A5]">●</span>
-            <span>@Toast.CurrentText</span>
-        </div>
-    }
-
-    <!-- Promo Banner and Header -->
-    <!--<PromoBar /> -->
-    <Header />
-
-    <!-- Main Content Container with standard margins -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 min-h-[60vh]">
-        @Body
-    </main>
-
-    <!-- Footer Links -->
-    <Footer />
-
-    <!-- Modular Drawers and Modals managed in real-time by LayoutStateService -->
-    <CartDrawer />
-    <WishlistDrawer />
-
-    @if (LayoutState.QuickViewProduct != null)
-    {
-        <QuickViewModal />
-    }
-
-    <SkincareAdvisor />
-</div>
-
-@code {
-    private bool _initialized;
-
-    protected override void OnInitialized()
-    {
-        LangService.OnChange += StateHasChanged;
-        LayoutState.OnChange += StateHasChanged;
-        Toast.OnChange += StateHasChanged;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_initialized)
+        <!-- Toast Notification Overlay -->
+        @if (!string.IsNullOrEmpty(Toast.CurrentText))
         {
-            _initialized = true;
-            // Initialize local storage states on client-side after pre-rendering
-            await Cart.InitializeAsync();
-            await Wishlist.InitializeAsync();
-            await Auth.InitializeAsync();
-            StateHasChanged();
+            <div id="toast-beauty" class="fixed top-8 left-1/2 -translate-x-1/2 z-50 bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl py-3 px-6 text-stone-900 text-xs font-bold flex items-center gap-3 border-l-4 border-[#FF76A5] animate-in fade-in slide-in-from-top-6 duration-300">
+                <span class="text-[#FF76A5]">●</span>
+                <span>@Toast.CurrentText</span>
+            </div>
+        }
+
+        <!-- Promo Banner and Header -->
+        <!--<PromoBar /> -->
+        <Header />
+
+        <!-- Main Content Container with standard margins -->
+        <main class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+                @Body
+        </main>
+
+        <!-- Footer Links -->
+        <Footer />
+
+        <!-- Modular Drawers and Modals managed in real-time by LayoutStateService -->
+        <CartDrawer />
+        <WishlistDrawer />
+
+        @if (LayoutState.QuickViewProduct != null)
+        {
+            <QuickViewModal />
+        }
+
+        <SkincareAdvisor />
+    </div>
+
+    @code {
+        private bool _initialized;
+
+        protected override void OnInitialized()
+        {
+            LangService.OnChange += StateHasChanged;
+            LayoutState.OnChange += StateHasChanged;
+            Toast.OnChange += StateHasChanged;
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender && !_initialized)
+            {
+                _initialized = true;
+                // Initialize local storage states on client-side after pre-rendering
+                await Cart.InitializeAsync();
+                await Wishlist.InitializeAsync();
+                await Auth.InitializeAsync();
+                StateHasChanged();
+            }
+        }
+
+        public void Dispose()
+        {
+            LangService.OnChange -= StateHasChanged;
+            LayoutState.OnChange -= StateHasChanged;
+            Toast.OnChange -= StateHasChanged;
         }
     }
-
-    public void Dispose()
-    {
-        LangService.OnChange -= StateHasChanged;
-        LayoutState.OnChange -= StateHasChanged;
-        Toast.OnChange -= StateHasChanged;
-    }
-}
+    

@@ -1,5 +1,4 @@
 using LuminaBeauty.Models;
-using LuminaBeauty.Models;
 using System.Text.Json.Serialization;
 
 namespace LuminaBeauty.Models
