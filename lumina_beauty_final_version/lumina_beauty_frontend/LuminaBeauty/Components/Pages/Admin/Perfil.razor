@@ -8,167 +8,290 @@
 @inject NavigationManager Navigation
 
 <div class="admin-page">
-
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: #6a3849;">Mi perfil</h2>
+            <span class="text-uppercase fw-semibold small" style="color: #b87991; letter-spacing: .12em;">
+                Cuenta administrativa
+            </span>
+
+            <h2 class="fw-bold mb-1 mt-1" style="color: #6a3849;">
+                Mi perfil
+            </h2>
+
             <p class="text-muted mb-0">
-                Información de la cuenta administradora actual.
+                Información asociada a la sesión actual.
             </p>
         </div>
     </div>
 
-    @if (EmpleadoActual is null)
+    @if (_isLoading)
     {
-        <div class="alert alert-warning">
-            No se encontró información del empleado autenticado.
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body py-5 text-center">
+                <div class="spinner-border mb-3" style="color: #b87991;" role="status"></div>
+                <p class="text-muted mb-0">Cargando información del perfil...</p>
+            </div>
+        </div>
+    }
+    else if (EmpleadoActual is null)
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body py-5 text-center">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 62px; height: 62px; background: #fcf0f4; color: #a64d6d;">
+                    <i class="bi bi-person-x fs-3"></i>
+                </div>
+
+                <h5 class="fw-bold mb-2" style="color: #6a3849;">
+                    No se encontró el perfil del empleado
+                </h5>
+
+                <p class="text-muted mb-0">
+                    Cierra sesión e inicia sesión nuevamente para recuperar tus datos.
+                </p>
+            </div>
         </div>
     }
     else
     {
         <div class="row g-4">
             <div class="col-12 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div style="height: 120px; background: linear-gradient(135deg, #fcf0f4 0%, #f7eff1 100%);"></div>
+                <section class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+                    <div style="height: 132px; background: linear-gradient(135deg, #6a3849 0%, #b87991 55%, #f0c9d6 100%);"></div>
 
                     <div class="card-body px-4 pb-4 pt-0 text-center">
-                        <div class="rounded-circle bg-white shadow d-inline-flex align-items-center justify-content-center"
-                             style="width: 100px; height: 100px; margin-top: -50px;">
-                            <i class="bi bi-person-fill fs-1" style="color: #6a3849;"></i>
+                        <div class="rounded-circle bg-white shadow-sm d-inline-flex align-items-center justify-content-center"
+                             style="width: 104px; height: 104px; margin-top: -52px;">
+                            <span class="fw-bold fs-2" style="color: #6a3849;">
+                                @Iniciales
+                            </span>
                         </div>
 
-                        <h4 class="fw-bold mt-3 mb-1">
+                        <h4 class="fw-bold mt-3 mb-1" style="color: #3d2430;">
                             @NombreCompleto
                         </h4>
 
-                        <p class="text-muted small mb-3">
-                            @EmpleadoActual.Rol
+                        <p class="mb-3" style="color: #a64d6d;">
+                            @(string.IsNullOrWhiteSpace(EmpleadoActual.Rol)
+                                ? "Empleado"
+                                : EmpleadoActual.Rol)
                         </p>
 
-                        <span class="badge rounded-pill"
-                              style="background-color: #d1e7dd; color: #198754;">
-                            Activo
+                        <span class="badge rounded-pill px-3 py-2"
+                              style="background: #eef8f1; color: #25814c;">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Sesión activa
                         </span>
 
-                        <div class="text-start border-top pt-4 mt-4">
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Correo electrónico</small>
-                                <span class="fw-semibold">@EmpleadoActual.Correo</span>
+                        <div class="border-top mt-4 pt-4 text-start">
+                            <div class="d-flex gap-3 mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 38px; height: 38px; background: #fcf0f4; color: #a64d6d;">
+                                    <i class="bi bi-envelope"></i>
+                                </div>
+
+                                <div class="overflow-hidden">
+                                    <small class="text-muted d-block">Correo electrónico</small>
+                                    <span class="fw-semibold text-break">
+                                        @ValorOTexto(EmpleadoActual.Correo)
+                                    </span>
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Teléfono</small>
-                                <span class="fw-semibold">
-                                    @(string.IsNullOrWhiteSpace(EmpleadoActual.Telefono)
-                                        ? "No registrado"
-                                        : EmpleadoActual.Telefono)
-                                </span>
+                            <div class="d-flex gap-3 mb-4">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 38px; height: 38px; background: #fcf0f4; color: #a64d6d;">
+                                    <i class="bi bi-telephone"></i>
+                                </div>
+
+                                <div>
+                                    <small class="text-muted d-block">Teléfono</small>
+                                    <span class="fw-semibold">
+                                        @ValorOTexto(EmpleadoActual.Telefono)
+                                    </span>
+                                </div>
                             </div>
 
-                            <div>
-                                <small class="text-muted d-block">Documento</small>
-                                <span class="fw-semibold">
-                                    @(string.IsNullOrWhiteSpace(EmpleadoActual.Dni)
-                                        ? "No registrado"
-                                        : EmpleadoActual.Dni)
-                                </span>
+                            <div class="d-flex gap-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                     style="width: 38px; height: 38px; background: #fcf0f4; color: #a64d6d;">
+                                    <i class="bi bi-card-text"></i>
+                                </div>
+
+                                <div>
+                                    <small class="text-muted d-block">Documento</small>
+                                    <span class="fw-semibold">
+                                        @ValorOTexto(EmpleadoActual.Dni)
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
 
             <div class="col-12 col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
-                    <h5 class="fw-bold mb-4" style="color: #6a3849;">
-                        Información personal
-                    </h5>
+                <section class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                 style="width: 44px; height: 44px; background: #fcf0f4; color: #a64d6d;">
+                                <i class="bi bi-person-vcard fs-5"></i>
+                            </div>
 
-                    <div class="row g-4">
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">
-                                Nombres
-                            </label>
+                            <div>
+                                <h5 class="fw-bold mb-0" style="color: #6a3849;">
+                                    Datos personales
+                                </h5>
 
-                            <input class="form-control bg-light"
-                                   value="@EmpleadoActual.Nombre"
-                                   readonly />
+                                <small class="text-muted">
+                                    Información registrada en la base de datos.
+                                </small>
+                            </div>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">
-                                Apellidos
-                            </label>
+                        <div class="row g-4">
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">
+                                    Nombres
+                                </label>
 
-                            <input class="form-control bg-light"
-                                   value="@EmpleadoActual.Apellido"
-                                   readonly />
+                                <div class="form-control bg-light border-0 py-3">
+                                    @ValorOTexto(EmpleadoActual.Nombre)
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">
+                                    Apellidos
+                                </label>
+
+                                <div class="form-control bg-light border-0 py-3">
+                                    @ValorOTexto(EmpleadoActual.Apellido)
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">
+                                    Correo electrónico
+                                </label>
+
+                                <div class="form-control bg-light border-0 py-3 text-break">
+                                    @ValorOTexto(EmpleadoActual.Correo)
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">
+                                    Rol
+                                </label>
+
+                                <div class="form-control bg-light border-0 py-3">
+                                    @ValorOTexto(EmpleadoActual.Rol)
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">
+                                    Teléfono
+                                </label>
+
+                                <div class="form-control bg-light border-0 py-3">
+                                    @ValorOTexto(EmpleadoActual.Telefono)
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label small fw-bold text-uppercase text-muted">
+                                    Documento de identidad
+                                </label>
+
+                                <div class="form-control bg-light border-0 py-3">
+                                    @ValorOTexto(EmpleadoActual.Dni)
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">
-                                Correo electrónico
-                            </label>
+                        <div class="d-flex align-items-start gap-3 mt-5 p-3 rounded-3"
+                             style="background: #fff8fa; border: 1px solid #f5dce5;">
+                            <i class="bi bi-shield-check fs-5" style="color: #a64d6d;"></i>
 
-                            <input class="form-control bg-light"
-                                   value="@EmpleadoActual.Correo"
-                                   readonly />
-                        </div>
+                            <div>
+                                <p class="fw-semibold mb-1" style="color: #6a3849;">
+                                    Sesión temporal de empleado
+                                </p>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">
-                                Rol
-                            </label>
-
-                            <input class="form-control bg-light"
-                                   value="@EmpleadoActual.Rol"
-                                   readonly />
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">
-                                Teléfono
-                            </label>
-
-                            <input class="form-control bg-light"
-                                   value="@EmpleadoActual.Telefono"
-                                   readonly />
-                        </div>
-
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">
-                                DNI
-                            </label>
-
-                            <input class="form-control bg-light"
-                                   value="@EmpleadoActual.Dni"
-                                   readonly />
+                                <small class="text-muted">
+                                    Por seguridad, esta sesión se cerrará automáticamente al cerrar la pestaña o el navegador.
+                                </small>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="alert alert-light border mt-5 mb-0">
-                        La edición del perfil y cambio de contraseña requieren endpoints
-                        específicos para empleados. Esta vista muestra la sesión actual.
-                    </div>
-                </div>
+                </section>
             </div>
         </div>
     }
 </div>
 
 @code {
+    private bool _isLoading = true;
+
     private Empleado? EmpleadoActual => Auth.CurrentEmployee;
 
     private string NombreCompleto =>
         EmpleadoActual is null
-            ? "Administrador"
+            ? string.Empty
             : $"{EmpleadoActual.Nombre} {EmpleadoActual.Apellido}".Trim();
 
-    protected override void OnInitialized()
+    private string Iniciales
     {
+        get
+        {
+            if (EmpleadoActual is null)
+            {
+                return "E";
+            }
+
+            var nombre = EmpleadoActual.Nombre?.Trim();
+            var apellido = EmpleadoActual.Apellido?.Trim();
+
+            var inicialNombre = string.IsNullOrWhiteSpace(nombre)
+                ? string.Empty
+                : nombre[..1].ToUpper();
+
+            var inicialApellido = string.IsNullOrWhiteSpace(apellido)
+                ? string.Empty
+                : apellido[..1].ToUpper();
+
+            return string.IsNullOrWhiteSpace($"{inicialNombre}{inicialApellido}")
+                ? "E"
+                : $"{inicialNombre}{inicialApellido}";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await Auth.InitializeAsync();
+
         if (!Auth.IsAdmin)
         {
             Navigation.NavigateTo("/login", true);
+            return;
         }
+
+        _isLoading = false;
+        StateHasChanged();
+    }
+
+    private static string ValorOTexto(string? valor)
+    {
+        return string.IsNullOrWhiteSpace(valor)
+            ? "No registrado"
+            : valor;
     }
 }
