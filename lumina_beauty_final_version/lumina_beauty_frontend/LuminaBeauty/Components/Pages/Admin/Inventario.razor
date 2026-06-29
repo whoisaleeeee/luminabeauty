@@ -214,73 +214,114 @@
          tabindex="-1"
          style="background-color: rgba(0,0,0,0.4);">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg" style="max-width: 480px; margin: auto;">
                 <div class="modal-header border-bottom-0 pb-0 px-4 pt-4">
-                    <div>
-                        <h5 class="modal-title fw-bold" style="color: #6a3849;">
-                            Registrar entrada de stock
-                        </h5>
-                        <p class="text-muted small mb-0">
-                            Actualiza la cantidad disponible del producto.
-                        </p>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center"
+                             style="width:44px;height:44px;background:#fde8ed;">
+                            <i class="bi bi-box-arrow-in-down fs-5" style="color:#6a3849;"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" style="color:#1a1a1a;font-size:1.05rem;">Registrar Entrada</h5>
+                            <p class="text-muted mb-0" style="font-size:0.8rem;">Ingreso de stock al inventario.</p>
+                        </div>
                     </div>
-
-                    <button class="btn-close"
+                    <button class="btn-close ms-auto"
                             @onclick="CloseRestockModal">
                     </button>
                 </div>
 
-                <div class="modal-body px-4 py-4">
+                <div class="modal-body px-4 py-3">
+
+                    <!-- Producto (buscador con texto) -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Producto</label>
+                        <label class="form-label fw-semibold text-uppercase" style="font-size:0.7rem;letter-spacing:.5px;color:#888;">Producto</label>
+                        <div class="position-relative">
+                            <i class="bi bi-search position-absolute" style="top:50%;left:12px;transform:translateY(-50%);color:#aaa;font-size:.85rem;"></i>
+                            <input type="text"
+                                   class="form-control ps-4"
+                                   placeholder="Buscar por nombre o SKU..."
+                                   value="@busquedaProducto"
+                                   @oninput="OnBusquedaProductoChanged" />
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(busquedaProducto) && productoBusquedaResultados.Any())
+                        {
+                            <div class="border rounded-3 mt-1 shadow-sm" style="max-height:160px;overflow-y:auto;background:white;position:relative;z-index:9999;">
+                                @foreach (var p in productoBusquedaResultados.Take(6))
+                                {
+                                    <div class="px-3 py-2 border-bottom cursor-pointer"
+                                         style="font-size:0.85rem;cursor:pointer;"
+                                         @onclick="() => SeleccionarProductoBusqueda(p)">
+                                        <strong>@p.Nombre</strong>
+                                        <span class="text-muted ms-1">(@p.Sku)</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        @if (ProductoSeleccionado != null)
+                        {
+                            <small class="text-muted" style="font-size:0.75rem;">Ej. @ProductoSeleccionado.Sku - @ProductoSeleccionado.Nombre</small>
+                        }
+                    </div>
 
-                        <select class="form-select"
-                                @bind="productoSeleccionadoId">
-                            <option value="0">Seleccionar producto...</option>
+                    <!-- Lote + Cantidad -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-uppercase" style="font-size:0.7rem;letter-spacing:.5px;color:#888;">Lote (Batch)</label>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Ej. L-2026X"
+                                   @bind="loteEntrada" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-uppercase" style="font-size:0.7rem;letter-spacing:.5px;color:#888;">Cantidad</label>
+                            <input type="number"
+                                   class="form-control"
+                                   min="1"
+                                   @bind="cantidadReposicion" />
+                        </div>
+                    </div>
 
-                            @foreach (var producto in Productos)
-                            {
-                                <option value="@producto.IdProducto">
-                                    @producto.Nombre (@producto.Sku)
-                                </option>
-                            }
+                    <!-- Tipo de movimiento -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-uppercase" style="font-size:0.7rem;letter-spacing:.5px;color:#888;">Tipo de Movimiento</label>
+                        <select class="form-select" @bind="tipoMovimiento">
+                            <option value="ENTRADA">Entrada</option>
+                            <option value="SALIDA">Salida</option>
+                            <option value="AJUSTE">Ajuste</option>
                         </select>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Cantidad a ingresar</label>
-
-                        <input type="number"
+                    <!-- Motivo -->
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold text-uppercase" style="font-size:0.7rem;letter-spacing:.5px;color:#888;">Motivo de Entrada</label>
+                        <input type="text"
                                class="form-control"
-                               min="1"
-                               @bind="cantidadReposicion" />
+                               placeholder="Detalla el motivo del movimiento acá"
+                               @bind="motivoEntrada" />
                     </div>
 
-                    @if (ProductoSeleccionado != null)
-                    {
-                        <div class="alert alert-light border mb-0">
-                            Stock actual:
-                            <strong>@ProductoSeleccionado.Stock unidades</strong>
-                        </div>
-                    }
                 </div>
 
                 <div class="modal-footer border-top-0 px-4 pb-4">
-                    <button class="btn btn-light border"
+                    <button class="btn btn-light border rounded-3"
                             @onclick="CloseRestockModal">
                         Cancelar
                     </button>
 
-                    <button class="btn text-white"
+                    <button class="btn text-white rounded-3 d-flex align-items-center gap-2"
                             style="background-color: #6a3849;"
+                            disabled="@guardandoRestock"
                             @onclick="SaveRestockAsync">
-                        Confirmar entrada
+                        <i class="bi bi-check-circle"></i>
+                        @(guardandoRestock ? "Guardando..." : "Confirmar Entrada")
                     </button>
                 </div>
             </div>
         </div>
     </div>
 }
+
 
 @code {
     private List<Producto> Productos = new();
@@ -315,6 +356,18 @@
 
     private int productoSeleccionadoId;
     private int cantidadReposicion = 1;
+    private string loteEntrada = string.Empty;
+    private string tipoMovimiento = "ENTRADA";
+    private string motivoEntrada = string.Empty;
+    private string busquedaProducto = string.Empty;
+    private bool guardandoRestock = false;
+
+    private IEnumerable<Producto> productoBusquedaResultados =>
+        string.IsNullOrWhiteSpace(busquedaProducto)
+            ? Enumerable.Empty<Producto>()
+            : Productos.Where(p =>
+                p.Nombre.Contains(busquedaProducto, StringComparison.OrdinalIgnoreCase)
+                || p.Sku.Contains(busquedaProducto, StringComparison.OrdinalIgnoreCase));
 
     private string mensaje = string.Empty;
     private bool esError;
@@ -419,14 +472,37 @@
     {
         productoSeleccionadoId = 0;
         cantidadReposicion = 1;
+        busquedaProducto = string.Empty;
+        loteEntrada = string.Empty;
+        motivoEntrada = string.Empty;
+        tipoMovimiento = "ENTRADA";
         showRestockModal = true;
     }
 
     private void OpenRestockModal(Producto producto)
     {
         productoSeleccionadoId = producto.IdProducto;
+        busquedaProducto = $"{producto.Nombre} ({producto.Sku})";
         cantidadReposicion = 1;
+        loteEntrada = string.Empty;
+        motivoEntrada = string.Empty;
+        tipoMovimiento = "ENTRADA";
         showRestockModal = true;
+    }
+
+    private void SeleccionarProductoBusqueda(Producto producto)
+    {
+        productoSeleccionadoId = producto.IdProducto;
+        busquedaProducto = $"{producto.Nombre} ({producto.Sku})";
+    }
+
+    private void OnBusquedaProductoChanged(ChangeEventArgs e)
+    {
+        busquedaProducto = e.Value?.ToString() ?? string.Empty;
+        // Si el texto no coincide exactamente con un producto seleccionado, limpiar selección
+        var match = Productos.FirstOrDefault(p =>
+            $"{p.Nombre} ({p.Sku})" == busquedaProducto);
+        if (match == null) productoSeleccionadoId = 0;
     }
 
     private void CloseRestockModal()
@@ -446,20 +522,25 @@
             return;
         }
 
-        producto.Stock += cantidadReposicion;
+        guardandoRestock = true;
+
+        int delta = tipoMovimiento == "SALIDA" ? -cantidadReposicion : cantidadReposicion;
+        producto.Stock += delta;
 
         var actualizado =
             await ProductoRestService.ActualizarProductoAsync(producto);
 
+        guardandoRestock = false;
+
         if (actualizado == null)
         {
-            producto.Stock -= cantidadReposicion;
+            producto.Stock -= delta;
             ShowMessage("No se pudo actualizar el stock.", true);
             return;
         }
 
         CloseRestockModal();
-        ShowMessage("Entrada de inventario registrada correctamente.", false);
+        ShowMessage($"{tipoMovimiento.ToLower().Replace("entrada","Entrada").Replace("salida","Salida").Replace("ajuste","Ajuste")} de inventario registrada correctamente.", false);
 
         await CargarProductosAsync();
     }

@@ -1,0 +1,162 @@
+@inject LanguageService LangService
+@inject NavigationManager Navigator
+@implements IDisposable
+
+<div class="relative h-[420px] w-full overflow-hidden rounded-3xl shadow-lg select-none md:h-[520px]"
+     id="hero-carousel-container">
+
+    <img src="@CurrentSlide.Image"
+         alt="@CurrentSlide.Title"
+         class="absolute inset-0 h-full w-full object-cover" />
+
+    <div class="absolute inset-0 bg-gradient-to-r from-[#fff4f7]/80 via-[#fff4f7]/30 to-transparent"></div>
+    <div class="absolute inset-0 bg-black/5"></div>
+
+    <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-10 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+
+    <div class="relative z-10 flex h-full items-center px-6 md:px-14">
+        <div class="max-w-xl rounded-3xl bg-[#fff8fa]/70 p-6 shadow-sm backdrop-blur-sm md:p-10">
+            <div class="mb-5 inline-flex w-fit items-center gap-1.5 rounded-full border border-white/80 bg-white/80 px-3.5 py-1.5 shadow-sm backdrop-blur-md">
+                <span class="text-xs text-[#FF76A5]">✨</span>
+
+                <span class="text-[10px] font-bold uppercase tracking-widest text-[#C7346A]">
+                    @CurrentSlide.HighPromo
+                </span>
+            </div>
+
+            <h2 class="mb-5 font-serif text-4xl font-light leading-[1.05] tracking-tight text-[#111827] md:text-6xl">
+                @CurrentSlide.Title
+            </h2>
+
+            <p class="mb-7 max-w-md text-sm leading-relaxed text-gray-700 md:text-base">
+                @CurrentSlide.Subtitle
+            </p>
+
+            <button @onclick="ExploreClicked"
+                    class="w-fit cursor-pointer rounded-xl bg-gray-900 px-8 py-4 text-[10px] font-bold uppercase tracking-wider text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FF76A5] hover:shadow-lg hover:shadow-pink-100">
+                @CurrentSlide.CtaText
+            </button>
+        </div>
+    </div>
+
+    <div class="absolute bottom-5 right-6 z-20 flex gap-3 select-none">
+        <button @onclick="PrevSlide"
+                aria-label="Slide anterior"
+                class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-[#344054] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FF76A5] hover:text-white hover:shadow-md">
+            <span class="text-lg leading-none">←</span>
+        </button>
+
+        <button @onclick="NextSlide"
+                aria-label="Siguiente slide"
+                class="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/80 bg-white/90 text-[#344054] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#FF76A5] hover:text-white hover:shadow-md">
+            <span class="text-lg leading-none">→</span>
+        </button>
+    </div>
+
+    <div class="absolute bottom-6 left-6 z-20 flex gap-1.5 select-none md:left-12">
+        @for (int i = 0; i < _slides.Count; i++)
+        {
+            var index = i;
+
+            <button @onclick="() => SetSlide(index)"
+                    aria-label="Ir al slide @(index + 1)"
+                    class="h-2.5 rounded-full transition-all duration-300 cursor-pointer @(index == _currentSlideIndex
+                                            ? "w-6 bg-[#FF76A5]"
+                                            : "w-2.5 bg-[#d6cbd0] hover:bg-[#bfaab2]")">
+    </button>
+}
+</div>
+</div>
+
+@code {
+    private const string BackendImagesBaseUrl =
+        "http://localhost:8080/LuminaBeauty-Servicios/images/banners";
+
+    private int _currentSlideIndex;
+    private System.Threading.Timer? _timer;
+
+    private SlideItem CurrentSlide => _slides[_currentSlideIndex];
+
+    private sealed class SlideItem
+    {
+        public string HighPromo { get; init; } = string.Empty;
+        public string Title { get; init; } = string.Empty;
+        public string Subtitle { get; init; } = string.Empty;
+        public string CtaText { get; init; } = string.Empty;
+        public string Image { get; init; } = string.Empty;
+        public string Category { get; init; } = string.Empty;
+    }
+
+    private readonly List<SlideItem> _slides =
+    [
+        new()
+        {
+            HighPromo = "HASTA 20% EN MAQUILLAJE",
+            Title = "Brilla con tu mejor versión",
+            Subtitle = "Labiales, bases y esenciales de maquillaje para acompañar tu estilo cada día.",
+            CtaText = "Explorar maquillaje",
+            Image = $"{BackendImagesBaseUrl}/banner-maquillaje.jpg",
+            Category = "Maquillaje"
+        },
+        new()
+        {
+            HighPromo = "SECRETOS DE RADIANCIA K-BEAUTY",
+            Title = "Descubre el secreto del efecto glass",
+            Subtitle = "Rutinas inspiradas en Corea con activos que hidratan, calman y aportan luminosidad.",
+            CtaText = "Explorar K-Beauty",
+            Image = $"{BackendImagesBaseUrl}/banner-kbeauty.jpg",
+            Category = "K-Beauty"
+        },
+        new()
+        {
+            HighPromo = "CUIDADO ESENCIAL PARA TU PIEL",
+            Title = "Tu rutina empieza aquí",
+            Subtitle = "Limpieza, hidratación y tratamiento para cuidar tu piel todos los días.",
+            CtaText = "Explorar skincare",
+            Image = $"{BackendImagesBaseUrl}/banner-skincare.jpg",
+            Category = "Skincare"
+        }
+    ];
+
+    protected override void OnInitialized()
+    {
+        LangService.OnChange += StateHasChanged;
+
+        _timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                _currentSlideIndex = (_currentSlideIndex + 1) % _slides.Count;
+                StateHasChanged();
+            });
+        }, null, 6000, 6000);
+    }
+
+    private void PrevSlide()
+    {
+        _currentSlideIndex =
+            (_currentSlideIndex - 1 + _slides.Count) % _slides.Count;
+    }
+
+    private void NextSlide()
+    {
+        _currentSlideIndex = (_currentSlideIndex + 1) % _slides.Count;
+    }
+
+    private void SetSlide(int index)
+    {
+        _currentSlideIndex = index;
+    }
+
+    private void ExploreClicked()
+    {
+        Navigator.NavigateTo(
+            $"/shop?category={Uri.EscapeDataString(CurrentSlide.Category)}");
+    }
+
+    public void Dispose()
+    {
+        LangService.OnChange -= StateHasChanged;
+        _timer?.Dispose();
+    }
+}
