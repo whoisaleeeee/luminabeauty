@@ -9,6 +9,7 @@ public class ProfileAppService
     private readonly PedidoAppService _pedidoAppService;
     private readonly EnvioAppService _envioAppService;
     private readonly MovimientoPuntosAppService _movimientoPuntosAppService;
+    private readonly ReclamoAppService _reclamoAppService;
     private readonly AuthService _authService;
 
     public ProfilePageState State { get; } = new();
@@ -18,12 +19,14 @@ public class ProfileAppService
         PedidoAppService pedidoAppService,
         EnvioAppService envioAppService,
         MovimientoPuntosAppService movimientoPuntosAppService,
+        ReclamoAppService reclamoAppService,
         AuthService authService)
     {
         _clienteAppService = clienteAppService;
         _pedidoAppService = pedidoAppService;
         _envioAppService = envioAppService;
         _movimientoPuntosAppService = movimientoPuntosAppService;
+        _reclamoAppService = reclamoAppService;
         _authService = authService;
     }
 
@@ -129,6 +132,11 @@ public class ProfileAppService
         if (code == "puntos" && State.PointMovements.Count == 0)
         {
             await CargarMovimientosPuntosAsync();
+        }
+
+        if (code == "reclamos" && State.Claims.Count == 0)
+        {
+            await CargarReclamosAsync();
         }
     }
 
@@ -323,6 +331,16 @@ public class ProfileAppService
             State.Orders = await _pedidoAppService.ListarPedidosPorClienteAsync(
                 State.CurrentClient.Id);
 
+            foreach (var pedido in State.Orders)
+            {
+                var envio = await _envioAppService.BuscarPorPedidoAsync(pedido.IdPedido);
+
+                if (envio is not null && !string.IsNullOrWhiteSpace(envio.Estado))
+                {
+                    pedido.Estado = envio.Estado.Trim();
+                }
+            }
+
             return new ProfileActionResult(true, string.Empty);
         }
         catch
@@ -352,8 +370,28 @@ public class ProfileAppService
                 State.SelectedOrder = pedidoCompleto;
             }
 
-            State.SelectedOrderShipment =
-                await _envioAppService.BuscarPorPedidoAsync(order.IdPedido);
+            var envio = await _envioAppService.BuscarPorPedidoAsync(order.IdPedido);
+            State.SelectedOrderShipment = envio;
+
+            if (envio is not null && !string.IsNullOrWhiteSpace(envio.Estado))
+            {
+                string estadoEnvio = envio.Estado.Trim();
+
+                if (State.SelectedOrder is not null)
+                {
+                    State.SelectedOrder.Estado = estadoEnvio;
+                }
+
+                order.Estado = estadoEnvio;
+
+                var pedidoEnLista = State.Orders.FirstOrDefault(
+                    pedido => pedido.IdPedido == order.IdPedido);
+
+                if (pedidoEnLista is not null)
+                {
+                    pedidoEnLista.Estado = estadoEnvio;
+                }
+            }
 
             return new ProfileActionResult(true, string.Empty);
         }
@@ -404,6 +442,111 @@ public class ProfileAppService
         finally
         {
             State.IsLoadingPoints = false;
+        }
+    }
+
+    public async Task<ProfileActionResult> CargarReclamosAsync()
+    {
+        if (State.CurrentClient is null)
+        {
+            return new ProfileActionResult(
+                false,
+                "No se encontró una sesión de cliente válida.");
+        }
+
+        try
+        {
+            State.IsLoadingClaims = true;
+            State.Claims = await _reclamoAppService.ListarPorClienteAsync(
+                State.CurrentClient.Id);
+
+            return new ProfileActionResult(true, string.Empty);
+        }
+        catch
+        {
+            return new ProfileActionResult(
+                false,
+                "No se pudieron cargar tus reclamos.");
+        }
+        finally
+        {
+            State.IsLoadingClaims = false;
+        }
+    }
+
+    public async Task<ProfileActionResult> RegistrarReclamoAsync(
+        int idPedido,
+        string tipo,
+        string asunto,
+        string descripcion)
+    {
+        if (State.CurrentClient is null)
+        {
+            return new ProfileActionResult(
+                false,
+                "No se encontró una sesión de cliente válida.");
+        }
+
+        if (idPedido <= 0)
+        {
+            return new ProfileActionResult(
+                false,
+                "Selecciona un pedido válido.");
+        }
+
+        if (string.IsNullOrWhiteSpace(asunto) ||
+            string.IsNullOrWhiteSpace(descripcion))
+        {
+            return new ProfileActionResult(
+                false,
+                "Completa el asunto y el detalle del reclamo.");
+        }
+
+        try
+        {
+            State.IsSavingClaim = true;
+
+            var reclamo = new Reclamo
+            {
+                Cliente = new Cliente
+                {
+                    Id = State.CurrentClient.Id
+                },
+                Pedido = new Pedido
+                {
+                    IdPedido = idPedido
+                },
+                Tipo = NormalizarTipoReclamo(tipo),
+                Asunto = asunto.Trim(),
+                Descripcion = descripcion.Trim(),
+                Estado = "ABIERTO",
+                Prioridad = "MEDIA"
+            };
+
+            var registrado = await _reclamoAppService.RegistrarAsync(reclamo);
+
+            if (registrado is null)
+            {
+                return new ProfileActionResult(
+                    false,
+                    "No se pudo registrar el reclamo.");
+            }
+
+            State.Claims.Insert(0, registrado);
+
+            return new ProfileActionResult(
+                true,
+                "Reclamo registrado correctamente.");
+        }
+        catch
+        {
+            return new ProfileActionResult(
+                false,
+                "No se pudo registrar el reclamo.");
+        }
+        finally
+        {
+            State.IsSavingClaim = false;
         }
     }
 
@@ -499,6 +642,19 @@ public class ProfileAppService
         }
 
         return actualizado;
+    }
+
+    private static string NormalizarTipoReclamo(string? tipo)
+    {
+        return (tipo ?? string.Empty).Trim().ToUpperInvariant() switch
+        {
+            "PRODUCTO DAÑADO" or "PRODUCTO_DANADO" => "PRODUCTO_DANADO",
+            "PRODUCTO INCORRECTO" or "PRODUCTO_INCORRECTO" => "PRODUCTO_INCORRECTO",
+            "PRODUCTO FALTANTE" or "FALTANTE" => "FALTANTE",
+            "DEMORA DE ENVÍO" or "DEMORA DE ENVIO" or "DEMORA_ENVIO" => "DEMORA_ENVIO",
+            "COBRO INCORRECTO" or "COBRO_INCORRECTO" => "COBRO_INCORRECTO",
+            _ => "OTRO"
+        };
     }
 
     public string ObtenerInicialesCliente()

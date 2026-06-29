@@ -12,6 +12,8 @@ namespace LuminaBeauty.Services.PageStates
 
         public List<Pedido> Orders { get; set; } = [];
 
+        public List<Reclamo> Claims { get; set; } = [];
+
         public Pedido? SelectedOrder { get; set; }
 
         public Envio? SelectedOrderShipment { get; set; }
@@ -39,6 +41,10 @@ namespace LuminaBeauty.Services.PageStates
         public bool IsLoadingAddresses { get; set; }
 
         public bool IsLoadingOrders { get; set; }
+
+        public bool IsLoadingClaims { get; set; }
+
+        public bool IsSavingClaim { get; set; }
 
         public List<MovimientoPuntosFidelidad> PointMovements { get; set; } = [];
 

@@ -16,52 +16,35 @@ namespace LuminaBeauty.Servicios.REST
         {
             try
             {
-                using var response = await _http.PostAsJsonAsync("webresources/ClienteRS/registrar", cliente);
-
-                string contenido = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine("========== REGISTRO CLIENTE ==========");
-                Console.WriteLine($"URL llamada: {_http.BaseAddress}webresources/ClienteRS/registrar");
-                Console.WriteLine($"Estado HTTP: {(int)response.StatusCode} - {response.StatusCode}");
-                Console.WriteLine($"Respuesta backend: '{contenido}'");
-                Console.WriteLine("======================================");
+                using var response = await _http.PostAsJsonAsync(
+                    "webresources/ClienteRS/registrar",
+                    cliente
+                );
 
                 if (!response.IsSuccessStatusCode)
                 {
                     return null;
                 }
 
-                if (string.IsNullOrWhiteSpace(contenido))
-                {
-                    Console.WriteLine("El backend respondió OK, pero sin JSON.");
-                    return null;
-                }
-
-                return System.Text.Json.JsonSerializer.Deserialize<Cliente>(
-                    contenido,
-                    new System.Text.Json.JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                return await response.Content.ReadFromJsonAsync<Cliente>();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al llamar ClienteRS/registrar:");
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Error al registrar cliente: {ex.Message}");
                 return null;
             }
         }
 
         public async Task<int> SumarPuntosAsync(int idCliente, int puntos)
         {
-            using var response = await _http.PutAsync($"webresources/ClienteRS/sumarPuntos/{idCliente}?puntos={puntos}", null);
-            if (!response.IsSuccessStatusCode)
-            {
-                Console.WriteLine($"ClienteRS/sumarPuntos fallo con estado {(int)response.StatusCode}.");
-                return 0;
-            }
+            using var response = await _http.PutAsync(
+                $"webresources/ClienteRS/sumarPuntos/{idCliente}?puntos={puntos}",
+                null
+            );
 
-            return await response.Content.ReadFromJsonAsync<int>();
+            return response.IsSuccessStatusCode
+                ? await response.Content.ReadFromJsonAsync<int>()
+                : 0;
         }
 
         public async Task<Cliente?> BuscarClienteAsync(int idCliente)
@@ -72,21 +55,13 @@ namespace LuminaBeauty.Servicios.REST
                     $"webresources/ClienteRS/buscar/{idCliente}"
                 );
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine(
-                        $"ClienteRS/buscar/{idCliente} falló con estado {(int)response.StatusCode}."
-                    );
-                    return null;
-                }
-
-                return await response.Content.ReadFromJsonAsync<Cliente>();
+                return response.IsSuccessStatusCode
+                    ? await response.Content.ReadFromJsonAsync<Cliente>()
+                    : null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"Error al llamar ClienteRS/buscar/{idCliente}: {ex.Message}"
-                );
+                Console.WriteLine($"Error al buscar cliente: {ex.Message}");
                 return null;
             }
         }
@@ -100,22 +75,39 @@ namespace LuminaBeauty.Servicios.REST
                     cliente
                 );
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine(
-                        $"ClienteRS/actualizar falló con estado {(int)response.StatusCode}."
-                    );
-                    return null;
-                }
-
-                return await response.Content.ReadFromJsonAsync<Cliente>();
+                return response.IsSuccessStatusCode
+                    ? await response.Content.ReadFromJsonAsync<Cliente>()
+                    : null;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(
-                    $"Error al llamar ClienteRS/actualizar: {ex.Message}"
-                );
+                Console.WriteLine($"Error al actualizar cliente: {ex.Message}");
                 return null;
+            }
+        }
+
+        public async Task<bool> DesactivarCuentaAsync(int idCliente)
+        {
+            try
+            {
+                using var response = await _http.PutAsync(
+                    $"webresources/ClienteRS/desactivar/{idCliente}",
+                    null
+                );
+
+                string contenido = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine("========== DESACTIVAR CUENTA ==========");
+                Console.WriteLine($"HTTP: {(int)response.StatusCode} - {response.StatusCode}");
+                Console.WriteLine($"Respuesta: {contenido}");
+                Console.WriteLine("========================================");
+
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al desactivar cuenta: {ex.Message}");
+                return false;
             }
         }
     }

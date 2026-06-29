@@ -27,14 +27,70 @@ namespace LuminaBeauty.Servicios.REST
             }
         }
 
+        public async Task<List<Reclamo>> ListarPorClienteAsync(int idCliente)
+        {
+            try
+            {
+                return await _http.GetFromJsonAsync<List<Reclamo>>(
+                    $"webresources/ReclamoRS/listarPorCliente/{idCliente}"
+                ) ?? new List<Reclamo>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"Error al listar reclamos por cliente: {ex.Message}"
+                );
+
+                return new List<Reclamo>();
+            }
+        }
+
+        public async Task<Reclamo?> RegistrarReclamoAsync(Reclamo reclamo)
+        {
+            try
+            {
+                using var response = await _http.PostAsJsonAsync(
+                    "webresources/ReclamoRS/registrar",
+                    reclamo
+                );
+
+                string contenido = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine("========== REGISTRAR RECLAMO ==========");
+                Console.WriteLine(
+                    $"URL: {_http.BaseAddress}webresources/ReclamoRS/registrar"
+                );
+                Console.WriteLine(
+                    $"HTTP: {(int)response.StatusCode} - {response.StatusCode}"
+                );
+                Console.WriteLine($"Respuesta: {contenido}");
+                Console.WriteLine("========================================");
+
+                if (!response.IsSuccessStatusCode ||
+                    string.IsNullOrWhiteSpace(contenido))
+                {
+                    return null;
+                }
+
+                return await response.Content.ReadFromJsonAsync<Reclamo>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al registrar reclamo: {ex.Message}");
+                return null;
+            }
+        }
+
         public async Task<Reclamo?> CambiarEstadoAsync(
             int idReclamo,
             string estadoNuevo)
         {
             try
             {
+                string estadoCodificado = Uri.EscapeDataString(estadoNuevo);
+
                 using var response = await _http.PutAsync(
-                    $"webresources/ReclamoRS/cambiarEstado/{idReclamo}/{estadoNuevo}",
+                    $"webresources/ReclamoRS/cambiarEstado/{idReclamo}/{estadoCodificado}",
                     null
                 );
 

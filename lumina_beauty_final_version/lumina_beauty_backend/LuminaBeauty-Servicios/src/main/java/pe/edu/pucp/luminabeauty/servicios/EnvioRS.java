@@ -10,6 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import pe.edu.pucp.luminaBeauty.Business.EnvioBL;
 import pe.edu.pucp.luminaBeauty.Business.impl.EnvioBLImpl;
@@ -22,7 +23,7 @@ import java.util.ArrayList;
 @Consumes(MediaType.APPLICATION_JSON)
 public class EnvioRS {
 
-    private EnvioBL envioBL;
+    private final EnvioBL envioBL;
 
     public EnvioRS() {
         this.envioBL = new EnvioBLImpl();
@@ -30,171 +31,255 @@ public class EnvioRS {
 
     @POST
     @Path("registrar")
-    public Envio registrarEnvio(Envio envio) {
-        Envio resultado = null;
-
+    public Response registrarEnvio(Envio envio) {
         try {
-            resultado = envioBL.registrarEnvio(envio);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            Envio resultado = envioBL.registrarEnvio(envio);
 
-        return resultado;
+            if (resultado == null || resultado.getId_envio() <= 0) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"No se pudo registrar el envío\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+
+            return Response.status(Response.Status.CREATED)
+                    .entity(resultado)
+                    .build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            String mensaje = ex.getMessage() == null
+                    ? "Error al registrar el envío"
+                    : ex.getMessage().replace("\"", "'");
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + mensaje + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 
     @PUT
     @Path("actualizar")
-    public Envio actualizarEnvio(Envio envio) {
-        Envio resultado = null;
-
+    public Response actualizarEnvio(Envio envio) {
         try {
-            resultado = envioBL.actualizarEnvio(envio);
+            Envio resultado = envioBL.actualizarEnvio(envio);
+
+            if (resultado == null) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"No se pudo actualizar el envío\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+
+            return Response.ok(resultado).build();
+
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
-
-        return resultado;
-    }
-
-    @DELETE
-    @Path("eliminar/{idEnvio}")
-    public int eliminarEnvio(@PathParam("idEnvio") int idEnvio) {
-        int resultado = 0;
-
-        try {
-            envioBL.eliminarEnvio(idEnvio);
-            resultado = 1;
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        return resultado;
     }
 
     @GET
     @Path("buscar/{idEnvio}")
-    public Envio buscarEnvio(@PathParam("idEnvio") int idEnvio) {
-        Envio resultado = null;
-
+    public Response buscarEnvio(@PathParam("idEnvio") int idEnvio) {
         try {
-            resultado = envioBL.buscarEnvio(idEnvio);
+            Envio resultado = envioBL.buscarEnvio(idEnvio);
+
+            if (resultado == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\":\"Envío no encontrado\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+
+            return Response.ok(resultado).build();
+
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
-
-        return resultado;
-    }
-
-    @GET
-    @Path("listar")
-    public ArrayList<Envio> listarEnvios() {
-        ArrayList<Envio> resultado = new ArrayList<>();
-
-        try {
-            resultado = envioBL.listarEnvios();
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        return resultado;
-    }
-
-    @GET
-    @Path("listarPorEstado/{estado}")
-    public ArrayList<Envio> listarEnviosPorEstado(@PathParam("estado") String estado) {
-        ArrayList<Envio> resultado = new ArrayList<>();
-
-        try {
-            resultado = envioBL.listarEnviosPorEstado(estado);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        return resultado;
-    }
-
-    @GET
-    @Path("listarPorZona/{zonaEnvio}")
-    public ArrayList<Envio> listarEnviosPorZona(@PathParam("zonaEnvio") String zonaEnvio) {
-        ArrayList<Envio> resultado = new ArrayList<>();
-
-        try {
-            resultado = envioBL.listarEnviosPorZona(zonaEnvio);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-
-        return resultado;
     }
 
     @GET
     @Path("buscarPorPedido/{idPedido}")
-    public Envio buscarEnvioPorPedido(@PathParam("idPedido") int idPedido) {
-        Envio resultado = null;
+    public Response buscarEnvioPorPedido(@PathParam("idPedido") int idPedido) {
+        try {
+            Envio resultado = envioBL.buscarEnvioPorPedido(idPedido);
+
+            if (resultado == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\":\"El pedido no tiene envío registrado\"}")
+                        .type(MediaType.APPLICATION_JSON)
+                        .build();
+            }
+
+            return Response.ok(resultado).build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("listar")
+    public Response listarEnvios() {
+        try {
+            ArrayList<Envio> resultado = envioBL.listarEnvios();
+            return Response.ok(resultado).build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("listarPorEstado/{estado}")
+    public Response listarEnviosPorEstado(@PathParam("estado") String estado) {
+        try {
+            ArrayList<Envio> resultado = envioBL.listarEnviosPorEstado(estado);
+            return Response.ok(resultado).build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("listarPorZona/{zonaEnvio}")
+    public Response listarEnviosPorZona(
+            @PathParam("zonaEnvio") String zonaEnvio) {
 
         try {
-            resultado = envioBL.buscarEnvioPorPedido(idPedido);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            ArrayList<Envio> resultado = envioBL.listarEnviosPorZona(zonaEnvio);
+            return Response.ok(resultado).build();
 
-        return resultado;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
+    }
+
+    @DELETE
+    @Path("eliminar/{idEnvio}")
+    public Response eliminarEnvio(@PathParam("idEnvio") int idEnvio) {
+        try {
+            envioBL.eliminarEnvio(idEnvio);
+
+            return Response.ok("{\"resultado\":1}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 
     @PUT
     @Path("despachar/{idEnvio}")
-    public Envio despacharEnvio(@PathParam("idEnvio") int idEnvio,
-                                @QueryParam("numeroSeguimiento") String numeroSeguimiento) {
-        Envio resultado = null;
+    public Response despacharEnvio(
+            @PathParam("idEnvio") int idEnvio,
+            @QueryParam("numeroSeguimiento") String numeroSeguimiento) {
 
         try {
-            resultado = envioBL.despacharEnvio(idEnvio, numeroSeguimiento);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            return Response.ok(
+                    envioBL.despacharEnvio(idEnvio, numeroSeguimiento)
+            ).build();
 
-        return resultado;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 
     @PUT
     @Path("enTransito/{idEnvio}")
-    public Envio marcarEnvioEnTransito(@PathParam("idEnvio") int idEnvio) {
-        Envio resultado = null;
-
+    public Response marcarEnvioEnTransito(@PathParam("idEnvio") int idEnvio) {
         try {
-            resultado = envioBL.marcarEnvioEnTransito(idEnvio);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            return Response.ok(
+                    envioBL.marcarEnvioEnTransito(idEnvio)
+            ).build();
 
-        return resultado;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 
     @PUT
     @Path("entregado/{idEnvio}")
-    public Envio marcarEnvioEntregado(@PathParam("idEnvio") int idEnvio) {
-        Envio resultado = null;
-
+    public Response marcarEnvioEntregado(@PathParam("idEnvio") int idEnvio) {
         try {
-            resultado = envioBL.marcarEnvioEntregado(idEnvio);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            return Response.ok(
+                    envioBL.marcarEnvioEntregado(idEnvio)
+            ).build();
 
-        return resultado;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 
     @PUT
     @Path("devuelto/{idEnvio}")
-    public Envio marcarEnvioDevuelto(@PathParam("idEnvio") int idEnvio) {
-        Envio resultado = null;
-
+    public Response marcarEnvioDevuelto(@PathParam("idEnvio") int idEnvio) {
         try {
-            resultado = envioBL.marcarEnvioDevuelto(idEnvio);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            return Response.ok(
+                    envioBL.marcarEnvioDevuelto(idEnvio)
+            ).build();
 
-        return resultado;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 }
