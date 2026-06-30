@@ -130,5 +130,51 @@ namespace LuminaBeauty.Servicios.REST
 
             return resultado;
         }
+
+        public async Task<List<Valoracion>> ListarTodasAsync()
+        {
+            using var response = await _http.GetAsync(
+                "webresources/ValoracionRS/listar"
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return [];
+            }
+
+            return await response.Content
+                .ReadFromJsonAsync<List<Valoracion>>() ?? [];
+        }
+
+        public async Task<Valoracion?> PublicarAsync(int idValoracion)
+        {
+            using var response = await _http.PutAsync(
+                $"webresources/ValoracionRS/publicar/{idValoracion}",
+                null
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<Valoracion>();
+        }
+
+        public async Task<Valoracion?> RechazarAsync(int idValoracion)
+        {
+            using var response = await _http.PutAsync(
+                $"webresources/ValoracionRS/rechazar/{idValoracion}",
+                null
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<Valoracion>();
+        }
+
     }
 }

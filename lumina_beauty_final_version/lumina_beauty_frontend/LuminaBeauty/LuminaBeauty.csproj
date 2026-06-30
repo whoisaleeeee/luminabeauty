@@ -10,7 +10,6 @@
   <ItemGroup>
     <Folder Include="Components\Shared\Admin\" />
     <Folder Include="Data\" />
-    <Folder Include="Services\Admin\" />
     <Folder Include="wwwroot\images\brands\" />
     <Folder Include="wwwroot\images\ui\" />
     <Folder Include="wwwroot\images\products\" />

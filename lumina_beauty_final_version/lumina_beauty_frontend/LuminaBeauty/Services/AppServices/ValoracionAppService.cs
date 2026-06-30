@@ -42,5 +42,20 @@ namespace LuminaBeauty.Services.AppServices
                 comentario
             );
         }
+
+        public Task<List<Valoracion>> ListarTodasAsync()
+        {
+            return _valoracionRestService.ListarTodasAsync();
+        }
+
+        public Task<Valoracion?> PublicarAsync(int idValoracion)
+        {
+            return _valoracionRestService.PublicarAsync(idValoracion);
+        }
+
+        public Task<Valoracion?> RechazarAsync(int idValoracion)
+        {
+            return _valoracionRestService.RechazarAsync(idValoracion);
+        }
     }
 }
