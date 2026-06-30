@@ -10,7 +10,11 @@ namespace LuminaBeauty.Services.Admin
 
         public ReporteJasperService(IConfiguration configuration)
         {
-            _urlBase = configuration["ApiSettings:URL_BASE"]?.TrimEnd('/') ?? string.Empty;
+            var apiBase = configuration["ApiSettings:URL_BASE"]?.TrimEnd('/') ?? string.Empty;
+
+            _urlBase = apiBase.EndsWith("/webresources", StringComparison.OrdinalIgnoreCase)
+                ? apiBase
+                : $"{apiBase}/webresources";
         }
 
         public IReadOnlyList<ReporteJasperOption> ObtenerReportes()
