@@ -110,7 +110,7 @@ public class AuthBLImpl implements AuthBL {
                     && empleado.getContrasena_hash() != null
                     && empleado.getCorreo().equalsIgnoreCase(correo.trim())
                     && empleado.getEstado() == 1
-                    && empleado.getContrasena_hash().equals(contrasena)) {
+                    && PasswordUtil.verify(contrasena, empleado.getContrasena_hash())) {
                 return empleado;
             }
         }
