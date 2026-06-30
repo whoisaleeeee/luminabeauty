@@ -5,6 +5,7 @@
 @using LuminaBeauty.Services.AppServices
 
 @inject AdminValoracionesAppService AdminValoraciones
+@inject IJSRuntime JS
 
 <PageTitle>Valoraciones | Lumina Beauty</PageTitle>
 
@@ -265,6 +266,27 @@
         ["rechazada"] = "Rechazadas"
     };
 
+    private List<ProductoValoradoResumen> ProductosMejorValorados =>
+        AdminValoraciones.Valoraciones
+            .Where(v => AdminValoracionesAppService.NormalizarEstado(v.Estado) == "PUBLICADA")
+            .Where(v => v.Producto is not null &&
+                        !string.IsNullOrWhiteSpace(v.Producto.Nombre))
+            .GroupBy(v => new
+            {
+                v.Producto!.IdProducto,
+                v.Producto.Nombre
+            })
+            .Select((grupo, indice) => new ProductoValoradoResumen(
+                indice + 1,
+                grupo.Key.Nombre!,
+                grupo.Average(v => v.Calificacion),
+                grupo.Count()
+            ))
+            .OrderByDescending(x => x.Promedio)
+            .ThenByDescending(x => x.Cantidad)
+            .Take(5)
+            .ToList();
+
     protected override Task OnInitializedAsync()
     {
         return AdminValoraciones.CargarAsync();
@@ -289,4 +311,16 @@
     {
         return AdminValoraciones.RechazarAsync(valoracion);
     }
+
+    private Task ExportarRankingPdfAsync()
+    {
+        return JS.InvokeVoidAsync("print").AsTask();
+    }
+
+    private record ProductoValoradoResumen(
+        int Posicion,
+        string Nombre,
+        double Promedio,
+        int Cantidad
+    );
 }

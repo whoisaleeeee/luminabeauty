@@ -1,18 +1,21 @@
 @page "/product/{id}"
+
 @using LuminaBeauty.Models
-@inject ProductService ProductCache
-@inject ValoracionAppService ValoracionApp
-@inject CartService Cart
+@using LuminaBeauty.Services.AppServices
+
+@inject ProductDetailAppService Detail
 @inject WishlistService Wishlist
-@inject LanguageService LangService
-@inject ToastService Toast
-@inject LayoutStateService LayoutState
 @inject NavigationManager Navigator
+
 @implements IDisposable
 
-<PageTitle>@(_product?.Name ?? "Detalle de Producto") | Lumina Beauty</PageTitle>
+@{
+    var product = Detail.Product;
+}
 
-@if (_product == null)
+<PageTitle>@(product?.Name ?? "Detalle de Producto") | Lumina Beauty</PageTitle>
+
+@if (product == null)
 {
     <div class="py-20 text-center select-none">
         <h2 class="mb-2 font-serif text-2xl text-stone-900">
@@ -43,13 +46,13 @@ else
 
             <button @onclick="GoToCategory"
                     class="cursor-pointer transition hover:text-[#FF76A5]">
-                @_product.Category
+                @product.Category
             </button>
 
             <span>/</span>
 
             <span class="max-w-[220px] truncate font-bold text-[#FF76A5]">
-                @_product.Name
+                @product.Name
             </span>
         </nav>
 
@@ -57,13 +60,12 @@ else
 
             <div class="pointer-events-none absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF76A5]/10 blur-3xl"></div>
 
-            <!-- Miniaturas reales -->
             <div class="order-2 flex items-center justify-center gap-3 overflow-x-auto pb-3 select-none lg:order-1 lg:col-span-2 lg:flex-col lg:overflow-x-visible lg:pb-0">
 
-                @for (int i = 0; i < _galleryImages.Count; i++)
+                @for (int i = 0; i < Detail.GalleryImages.Count; i++)
                 {
                     var index = i;
-                    var image = _galleryImages[index];
+                    var image = Detail.GalleryImages[index];
 
                     <button @onclick="() => _detailThumb = index"
                             aria-label="Ver imagen @(index + 1) del producto"
@@ -72,42 +74,41 @@ else
                                                             : "border-white/80 hover:border-stone-300")">
 
                 <img src="@image"
-                     alt="@($"{_product.Name} - imagen {index + 1}")"
+                     alt="@($"{product.Name} - imagen {index + 1}")"
                      class="h-full w-full object-contain"
                      referrerpolicy="no-referrer" />
             </button>
         }
     </div>
 
-    <!-- Imagen principal -->
     <div class="relative order-1 flex min-h-[300px] max-w-full flex-col items-center justify-center rounded-2xl sm:min-h-[460px] lg:order-2 lg:col-span-5">
 
         <div class="absolute inset-0 -z-10 rounded-3xl border border-white/50 bg-white/20 p-5 shadow-lg transition-all duration-500"></div>
 
         <img src="@CurrentGalleryImage"
-             alt="@_product.Name"
+             alt="@product.Name"
              class="pointer-events-none w-auto max-h-[320px] select-none object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105 sm:max-h-[440px] md:max-h-[480px]"
              referrerpolicy="no-referrer" />
 
-        @if (!string.IsNullOrWhiteSpace(_product.DiscountBadge) || !string.IsNullOrWhiteSpace(_product.Discount))
+        @if (!string.IsNullOrWhiteSpace(product.DiscountBadge) ||
+             !string.IsNullOrWhiteSpace(product.Discount))
         {
             <span class="absolute left-4 top-4 rounded-full border border-white/35 bg-[#FF76A5] px-3 py-1 text-xs font-black text-white shadow-lg select-none">
-                @(_product.DiscountBadge ?? _product.Discount) de descuento
+                @(product.DiscountBadge ?? product.Discount) de descuento
             </span>
         }
     </div>
 
-    <!-- Información y compra -->
     <div class="order-3 flex flex-col justify-between space-y-6 lg:col-span-5">
 
         <div class="space-y-4">
             <div class="space-y-2">
                 <span class="inline-flex rounded-md border border-[#FCD1DB]/50 bg-[#FFF0F3] px-2.5 py-1 text-xs font-black uppercase tracking-widest text-[#FF76A5] select-none">
-                    @_product.Brand
+                    @product.Brand
                 </span>
 
                 <h1 class="pt-2 font-serif text-3xl font-medium leading-tight text-stone-900 sm:text-4xl">
-                    @_product.Name
+                    @product.Name
                 </h1>
             </div>
 
@@ -116,141 +117,143 @@ else
                 <div class="flex items-center text-amber-400">
                     @for (int i = 1; i <= 5; i++)
                     {
-                        <span class="@(i <= Math.Round(_product.Rating) ? "text-amber-400" : "text-stone-200")">
-                            ★
-                        </span>
-                    }
-                </div>
-
-                <span class="text-xs font-semibold text-stone-500">
-                    (@_product.ReviewsCount opiniones)
+                        <span class="@(i <= Math.Round(product.Rating)
+                                                                  ? "text-amber-400"
+                                                                  : "text-stone-200")">
+                    ★
                 </span>
-
-                <span class="text-stone-300">|</span>
-
-                <span class="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-600">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    Disponible
-                </span>
-            </div>
-
-            <div class="py-2 select-none">
-                <span class="font-serif text-3xl font-extrabold tracking-wider text-[#C7346A] sm:text-4xl">
-                    S/ @_product.Price.ToString("0.00")
-                </span>
-
-                @if (_product.OriginalPrice != null && _product.OriginalPrice > _product.Price)
-                {
-                    <span class="ml-3 text-sm text-stone-400 line-through">
-                        S/ @_product.OriginalPrice.Value.ToString("0.00")
-                    </span>
-                }
-            </div>
-
-            @if (!string.IsNullOrWhiteSpace(_product.Description))
-            {
-                <p class="max-w-md text-xs font-medium leading-relaxed text-stone-600">
-                    @_product.Description
-                </p>
             }
         </div>
 
-        <div class="space-y-4 border-t border-[#FCD1DB]/30 pt-4">
+        <span class="text-xs font-semibold text-stone-500">
+            (@product.ReviewsCount opiniones)
+        </span>
 
-            <div class="flex flex-col items-stretch gap-3 select-none sm:flex-row sm:items-center">
+        <span class="text-stone-300">|</span>
 
-                <div class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white/90 px-2 py-1.5 sm:w-32">
-                    <button @onclick="() => ChangeQty(-1)"
-                            disabled="@(_detailQty <= 1)"
-                            aria-label="Reducir cantidad"
-                            class="cursor-pointer p-1 text-stone-500 transition hover:text-[#C7346A] disabled:opacity-30">
-                        −
-                    </button>
+        <span class="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-600">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            Disponible
+        </span>
+    </div>
 
-                    <span class="w-8 text-center font-mono text-sm font-extrabold text-stone-900">
-                        @_detailQty
-                    </span>
+    <div class="py-2 select-none">
+        <span class="font-serif text-3xl font-extrabold tracking-wider text-[#C7346A] sm:text-4xl">
+            S/ @product.Price.ToString("0.00")
+        </span>
 
-                    <button @onclick="() => ChangeQty(1)"
-                            aria-label="Aumentar cantidad"
-                            class="cursor-pointer p-1 text-stone-500 transition hover:text-[#C7346A]">
-                        +
-                    </button>
-                </div>
+        @if (product.OriginalPrice != null &&
+             product.OriginalPrice > product.Price)
+        {
+            <span class="ml-3 text-sm text-stone-400 line-through">
+                S/ @product.OriginalPrice.Value.ToString("0.00")
+            </span>
+        }
+    </div>
 
-                <button @onclick="BuyNow"
-                        class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#E99AB3] px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-[#9C3155] shadow-lg transition duration-300 hover:bg-[#E889A6] active:scale-95">
+    @if (!string.IsNullOrWhiteSpace(product.Description))
+    {
+        <p class="max-w-md text-xs font-medium leading-relaxed text-stone-600">
+            @product.Description
+        </p>
+    }
+</div>
 
-                    <svg viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         class="h-4 w-4"
-                         aria-hidden="true">
-                        <path d="M3 7h18l-1 13H4L3 7Z" />
-                        <path d="M8 7a4 4 0 0 1 8 0" />
-                    </svg>
+<div class="space-y-4 border-t border-[#FCD1DB]/30 pt-4">
 
-                    <span>Añadir</span>
-                </button>
+    <div class="flex flex-col items-stretch gap-3 select-none sm:flex-row sm:items-center">
 
-                @{
-                    var isFavorite = Wishlist.IsInWishlist(_product.Id);
-                }
+        <div class="flex w-full items-center justify-between rounded-xl border border-stone-200 bg-white/90 px-2 py-1.5 sm:w-32">
+            <button @onclick="() => ChangeQty(-1)"
+                    disabled="@(_detailQty <= 1)"
+                    aria-label="Reducir cantidad"
+                    class="cursor-pointer p-1 text-stone-500 transition hover:text-[#C7346A] disabled:opacity-30">
+                −
+            </button>
 
-                <button type="button"
-                        @onclick="ToggleWishlist"
-                        aria-label="@(isFavorite ? "Quitar de favoritos" : "Guardar en favoritos")"
-                        aria-pressed="@isFavorite"
-                        title="@(isFavorite ? "Quitar de favoritos" : "Guardar en favoritos")"
-                        class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition duration-200 active:scale-95 @(isFavorite
-                                                            ? "border-[#FF76A5] bg-[#FFF0F3] text-[#C7346A] shadow-[0_6px_14px_rgba(199,52,106,0.14)]"
-                                                            : "border-stone-200 bg-white text-stone-400 hover:border-[#F6D7E0] hover:bg-[#FFF8FA] hover:text-[#C7346A]")">
+            <span class="w-8 text-center font-mono text-sm font-extrabold text-stone-900">
+                @_detailQty
+            </span>
 
-                    <svg viewBox="0 0 24 24"
-                         fill="@(isFavorite ? "currentColor" : "none")"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         class="h-5 w-5 transition-transform duration-200 @(isFavorite ? "scale-105" : "")"
-                         aria-hidden="true">
-                        <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="flex items-center gap-4 rounded-2xl border border-stone-100 bg-white/80 p-4 select-none">
-
-                <div class="rounded-xl border border-[#FFE3E8]/80 bg-[#FFF0F3] p-3 text-[#C7346A]">
-                    <svg viewBox="0 0 24 24"
-                         fill="none"
-                         stroke="currentColor"
-                         stroke-width="1.8"
-                         class="h-5 w-5"
-                         aria-hidden="true">
-                        <path d="M3 7h11v9H3z" />
-                        <path d="M14 10h3l4 4v2h-7z" />
-                        <path d="M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-                        <path d="M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
-                    </svg>
-                </div>
-
-                <div class="text-stone-800">
-                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-stone-900">
-                        Envío gratuito
-                    </h4>
-
-                    <p class="text-[10px] font-bold text-stone-500">
-                        Para compras mayores a S/ 199.
-                    </p>
-                </div>
-            </div>
-
-            <button @onclick="GoBack"
-                    class="flex w-fit cursor-pointer items-center gap-1.5 text-xs font-bold text-stone-400 transition hover:text-[#FF76A5]">
-                ← Volver a la tienda
+            <button @onclick="() => ChangeQty(1)"
+                    aria-label="Aumentar cantidad"
+                    class="cursor-pointer p-1 text-stone-500 transition hover:text-[#C7346A]">
+                +
             </button>
         </div>
+
+        <button @onclick="() => Detail.AddToCartAsync(_detailQty)"
+                class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#E99AB3] px-8 py-3.5 text-sm font-bold uppercase tracking-wider text-[#9C3155] shadow-lg transition duration-300 hover:bg-[#E889A6] active:scale-95">
+
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 class="h-4 w-4"
+                 aria-hidden="true">
+                <path d="M3 7h18l-1 13H4L3 7Z" />
+                <path d="M8 7a4 4 0 0 1 8 0" />
+            </svg>
+
+            <span>Añadir</span>
+        </button>
+
+        @{
+            var isFavorite = Wishlist.IsInWishlist(product.Id);
+        }
+
+        <button type="button"
+                @onclick="Detail.ToggleWishlistAsync"
+                aria-label="@(isFavorite ? "Quitar de favoritos" : "Guardar en favoritos")"
+                aria-pressed="@isFavorite"
+                title="@(isFavorite ? "Quitar de favoritos" : "Guardar en favoritos")"
+                class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition duration-200 active:scale-95 @(isFavorite
+                                                    ? "border-[#FF76A5] bg-[#FFF0F3] text-[#C7346A] shadow-[0_6px_14px_rgba(199,52,106,0.14)]"
+                                                    : "border-stone-200 bg-white text-stone-400 hover:border-[#F6D7E0] hover:bg-[#FFF8FA] hover:text-[#C7346A]")">
+
+            <svg viewBox="0 0 24 24"
+                 fill="@(isFavorite ? "currentColor" : "none")"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 class="h-5 w-5 transition-transform duration-200 @(isFavorite ? "scale-105" : "")"
+                 aria-hidden="true">
+                <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
+            </svg>
+        </button>
     </div>
+
+    <div class="flex items-center gap-4 rounded-2xl border border-stone-100 bg-white/80 p-4 select-none">
+        <div class="rounded-xl border border-[#FFE3E8]/80 bg-[#FFF0F3] p-3 text-[#C7346A]">
+            <svg viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.8"
+                 class="h-5 w-5"
+                 aria-hidden="true">
+                <path d="M3 7h11v9H3z" />
+                <path d="M14 10h3l4 4v2h-7z" />
+                <path d="M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+                <path d="M18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+            </svg>
+        </div>
+
+        <div class="text-stone-800">
+            <h4 class="text-xs font-extrabold uppercase tracking-wider text-stone-900">
+                Envío gratuito
+            </h4>
+
+            <p class="text-[10px] font-bold text-stone-500">
+                Para compras mayores a S/ 199.
+            </p>
+        </div>
+    </div>
+
+    <button @onclick="GoBack"
+            class="flex w-fit cursor-pointer items-center gap-1.5 text-xs font-bold text-stone-400 transition hover:text-[#FF76A5]">
+        ← Volver a la tienda
+    </button>
+</div>
+</div>
 </section>
 
 <section class="rounded-2xl border border-white/50 bg-white/20 p-6 text-left backdrop-blur-md sm:p-8">
@@ -267,17 +270,17 @@ else
         </div>
 
         <span class="rounded-full border border-[#FCD1DB] bg-[#FFF0F3] px-3 py-1.5 text-[9px] font-black uppercase tracking-wider text-[#C7346A]">
-            @_product.ReviewsCount opiniones
+            @product.ReviewsCount opiniones
         </span>
     </div>
 
-    @if (_isLoadingReviews)
+    @if (Detail.IsLoadingReviews)
     {
         <p class="py-10 text-center text-xs font-bold text-stone-400">
             Cargando opiniones...
         </p>
     }
-    else if (_reviews.Count == 0)
+    else if (Detail.Reviews.Count == 0)
     {
         <div class="mt-6 rounded-2xl border border-dashed border-[#FCD1DB] bg-[#FFF0F3]/35 p-8 text-center">
             <p class="text-xs font-bold text-stone-700">
@@ -292,7 +295,7 @@ else
     else
     {
         <div class="mt-6 space-y-3">
-            @foreach (var review in _reviews)
+            @foreach (var review in Detail.Reviews)
             {
                 <article class="rounded-2xl border border-stone-100 bg-white/65 p-5">
                     <div class="flex flex-wrap items-start justify-between gap-3">
@@ -304,47 +307,49 @@ else
                             <div class="mt-2 flex items-center gap-0.5 text-xs text-amber-400">
                                 @for (int i = 1; i <= 5; i++)
                                 {
-                                    <span class="@(i <= review.Calificacion ? "text-amber-400" : "text-stone-200")">
-                                        ★
-                                    </span>
-                                }
-                            </div>
-                        </div>
-
-                        @if (review.FechaCreacion.HasValue)
-                        {
-                            <span class="text-[10px] font-medium text-stone-400">
-                                @review.FechaCreacion.Value.ToString("dd/MM/yyyy")
+                                    <span class="@(i <= review.Calificacion
+                                                                                          ? "text-amber-400"
+                                                                                          : "text-stone-200")">
+                                ★
                             </span>
                         }
                     </div>
+                </div>
 
-                    @if (!string.IsNullOrWhiteSpace(review.Comentario))
-                    {
-                        <p class="mt-4 text-xs leading-relaxed text-stone-600">
-                            “@review.Comentario”
-                        </p>
-                    }
+                @if (review.FechaCreacion.HasValue)
+                {
+                    <span class="text-[10px] font-medium text-stone-400">
+                        @review.FechaCreacion.Value.ToString("dd/MM/yyyy")
+                    </span>
+                }
+            </div>
 
-                    @if (!string.IsNullOrWhiteSpace(review.RespuestaTienda))
-                    {
-                        <div class="mt-4 rounded-xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/45 p-4">
-                            <p class="text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
-                                Respuesta de Lumina Beauty
-                            </p>
-
-                            <p class="mt-2 text-[11px] leading-relaxed text-stone-600">
-                                @review.RespuestaTienda
-                            </p>
-                        </div>
-                    }
-                </article>
+            @if (!string.IsNullOrWhiteSpace(review.Comentario))
+            {
+                <p class="mt-4 text-xs leading-relaxed text-stone-600">
+                    “@review.Comentario”
+                </p>
             }
-        </div>
+
+            @if (!string.IsNullOrWhiteSpace(review.RespuestaTienda))
+            {
+                <div class="mt-4 rounded-xl border border-[#FCD1DB]/60 bg-[#FFF0F3]/45 p-4">
+                    <p class="text-[9px] font-black uppercase tracking-widest text-[#C7346A]">
+                        Respuesta de Lumina Beauty
+                    </p>
+
+                    <p class="mt-2 text-[11px] leading-relaxed text-stone-600">
+                        @review.RespuestaTienda
+                    </p>
+                </div>
+            }
+        </article>
     }
+</div>
+            }
 </section>
 
-@if (_related.Count > 0)
+        @if (Detail.Related.Count > 0)
 {
     <section class="mt-16 space-y-8">
         <div class="flex items-center gap-3 text-left select-none">
@@ -356,7 +361,7 @@ else
         </div>
 
         <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
-            @foreach (var relatedProduct in _related)
+            @foreach (var relatedProduct in Detail.Related)
             {
                 <ProductCard Product="@relatedProduct" />
             }
@@ -370,74 +375,25 @@ else
     [Parameter]
     public string Id { get; set; } = string.Empty;
 
-    private Product? _product;
-    private List<Product> _related = new();
-    private List<string> _galleryImages = new();
-
     private int _detailThumb;
     private int _detailQty = 1;
 
-    private List<Valoracion> _reviews = new();
-    private bool _isLoadingReviews;
-
     private string CurrentGalleryImage =>
-        _galleryImages.ElementAtOrDefault(_detailThumb)
-        ?? _product?.Image
+        Detail.GalleryImages.ElementAtOrDefault(_detailThumb)
+        ?? Detail.Product?.Image
         ?? string.Empty;
 
     protected override void OnInitialized()
     {
-        LangService.OnChange += StateHasChanged;
         Wishlist.OnChange += StateHasChanged;
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await ProductCache.EnsureLoadedAsync();
-
-        _product = ProductCache.GetProductById(Id);
         _detailThumb = 0;
         _detailQty = 1;
-        _reviews = new();
-        _related = new();
-        _galleryImages = GetProductImages();
 
-        if (_product != null)
-        {
-            await CargarValoracionesAsync(_product.IdProducto);
-
-            _related = ProductCache.GetAllProducts()
-                .Where(product =>
-                    product.Id != _product.Id &&
-                    product.Category == _product.Category)
-                .Take(4)
-                .ToList();
-        }
-    }
-
-    private List<string> GetProductImages()
-    {
-        if (_product == null || string.IsNullOrWhiteSpace(_product.Image))
-        {
-            return new();
-        }
-
-        var imagePath = _product.Image;
-        var extension = Path.GetExtension(imagePath);
-
-        if (string.IsNullOrWhiteSpace(extension))
-        {
-            return new List<string> { imagePath };
-        }
-
-        var basePath = imagePath[..^extension.Length];
-
-        return new List<string>
-        {
-            imagePath,
-            $"{basePath}-2{extension}",
-            $"{basePath}-3{extension}"
-        };
+        await Detail.LoadAsync(Id);
     }
 
     private void GoBack()
@@ -447,12 +403,14 @@ else
 
     private void GoToCategory()
     {
-        if (_product != null)
+        if (Detail.Product is null)
         {
-            Navigator.NavigateTo(
-                $"/shop?category={Uri.EscapeDataString(_product.Category)}"
-            );
+            return;
         }
+
+        Navigator.NavigateTo(
+            $"/shop?category={Uri.EscapeDataString(Detail.Product.Category)}"
+        );
     }
 
     private void ChangeQty(int amount)
@@ -460,66 +418,8 @@ else
         _detailQty = Math.Max(1, _detailQty + amount);
     }
 
-    private async Task BuyNow()
-    {
-        if (_product == null)
-        {
-            return;
-        }
-
-        await Cart.AddToCartAsync(_product, _detailQty);
-
-        Toast.ShowToast(
-            LangService.CurrentLanguage == "es"
-                ? $"Agregado a la bolsa: {_product.Name}"
-                : $"Added to bag: {_product.Name}"
-        );
-
-        LayoutState.SetCartDrawerOpen(true);
-    }
-
-    private async Task ToggleWishlist()
-    {
-        if (_product == null)
-        {
-            return;
-        }
-
-        await Wishlist.ToggleWishlistAsync(_product.Id);
-
-        var isSaved = Wishlist.IsInWishlist(_product.Id);
-
-        Toast.ShowToast(
-            isSaved
-                ? "Guardado en favoritos"
-                : "Removido de favoritos"
-        );
-
-        StateHasChanged();
-    }
-
-    private async Task CargarValoracionesAsync(int idProducto)
-    {
-        try
-        {
-            _isLoadingReviews = true;
-
-            _reviews = await ValoracionApp
-                .ListarPublicadasPorProductoAsync(idProducto);
-        }
-        catch
-        {
-            _reviews = new();
-        }
-        finally
-        {
-            _isLoadingReviews = false;
-        }
-    }
-
     public void Dispose()
     {
-        LangService.OnChange -= StateHasChanged;
         Wishlist.OnChange -= StateHasChanged;
     }
-} 
+}
