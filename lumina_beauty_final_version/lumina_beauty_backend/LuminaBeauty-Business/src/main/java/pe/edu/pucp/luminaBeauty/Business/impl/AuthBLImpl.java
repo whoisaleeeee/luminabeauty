@@ -99,7 +99,10 @@ public class AuthBLImpl implements AuthBL {
         return null;
     }
 
-    private Empleado buscarEmpleadoPorCredenciales(String correo, String contrasena) throws Exception {
+    private Empleado buscarEmpleadoPorCredenciales(
+            String correo,
+            String contrasena) throws Exception {
+
         ArrayList<Empleado> empleados = empleadoDAO.listarTodos();
 
         for (Empleado empleado : empleados) {
@@ -107,7 +110,7 @@ public class AuthBLImpl implements AuthBL {
                     && empleado.getContrasena_hash() != null
                     && empleado.getCorreo().equalsIgnoreCase(correo.trim())
                     && empleado.getEstado() == 1
-                    && PasswordUtil.verify(contrasena, empleado.getContrasena_hash())) {
+                    && empleado.getContrasena_hash().equals(contrasena)) {
                 return empleado;
             }
         }
