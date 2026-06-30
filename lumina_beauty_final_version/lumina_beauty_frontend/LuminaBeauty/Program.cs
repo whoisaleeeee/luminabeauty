@@ -71,6 +71,7 @@ builder.Services.AddScoped<CuponAppService>();
 builder.Services.AddScoped<UsoCuponAppService>();
 builder.Services.AddScoped<ReclamoAppService>();
 builder.Services.AddScoped<PagoAppService>();
+builder.Services.AddScoped<AdminValoracionesAppService>();
 
 // Admin
 builder.Services.AddScoped<ReporteJasperService>();
