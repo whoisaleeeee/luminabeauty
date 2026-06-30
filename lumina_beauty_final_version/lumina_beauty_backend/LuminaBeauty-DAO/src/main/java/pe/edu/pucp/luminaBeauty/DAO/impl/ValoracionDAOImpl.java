@@ -181,20 +181,24 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         ArrayList<Valoracion> valoraciones = new ArrayList<>();
 
         String sql = """
-                SELECT id_valoracion,
-                       id_cliente,
-                       id_producto,
-                       id_detalle_pedido,
-                       calificacion,
-                       comentario,
-                       estado,
-                       respuesta_tienda,
-                       respondido_por,
-                       respondido_en,
-                       creado_en,
-                       actualizado_en
-                FROM valoracion
-                """;
+        SELECT v.id_valoracion,
+               v.id_cliente,
+               v.id_producto,
+               v.id_detalle_pedido,
+               v.calificacion,
+               v.comentario,
+               v.estado,
+               v.respuesta_tienda,
+               v.respondido_por,
+               v.respondido_en,
+               v.creado_en,
+               v.actualizado_en,
+               p.nombre AS nombre_producto
+        FROM valoracion v
+        INNER JOIN producto p
+            ON p.id_producto = v.id_producto
+        ORDER BY v.creado_en DESC, v.id_valoracion DESC
+        """;
 
         Connection connection = TransactionContext.getConnection();
 
@@ -227,6 +231,7 @@ public class ValoracionDAOImpl implements ValoracionDAO {
 
         Producto producto = new Producto();
         producto.setId_producto(rs.getInt("id_producto"));
+        producto.setNombre(rs.getString("nombre_producto"));
         valoracion.setProducto(producto);
 
         DetallePedido detallePedido = new DetallePedido();
@@ -266,23 +271,26 @@ public class ValoracionDAOImpl implements ValoracionDAO {
         ArrayList<Valoracion> valoraciones = new ArrayList<>();
 
         String sql = """
-            SELECT v.id_valoracion,
-                   v.id_cliente,
-                   v.id_producto,
-                   v.id_detalle_pedido,
-                   v.calificacion,
-                   v.comentario,
-                   v.estado,
-                   v.respuesta_tienda,
-                   v.respondido_por,
-                   v.respondido_en,
-                   v.creado_en,
-                   v.actualizado_en
-            FROM valoracion v
-            WHERE v.id_producto = ?
-              AND v.estado = 'PUBLICADA'
-            ORDER BY v.creado_en DESC, v.id_valoracion DESC
-            """;
+        SELECT v.id_valoracion,
+               v.id_cliente,
+               v.id_producto,
+               v.id_detalle_pedido,
+               v.calificacion,
+               v.comentario,
+               v.estado,
+               v.respuesta_tienda,
+               v.respondido_por,
+               v.respondido_en,
+               v.creado_en,
+               v.actualizado_en,
+               p.nombre AS nombre_producto
+        FROM valoracion v
+        INNER JOIN producto p
+            ON p.id_producto = v.id_producto
+        WHERE v.id_producto = ?
+          AND v.estado = 'PUBLICADA'
+        ORDER BY v.creado_en DESC, v.id_valoracion DESC
+        """;
 
         Connection connection = TransactionContext.getConnection();
 
