@@ -10,6 +10,7 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import pe.edu.pucp.luminaBeauty.Business.ValoracionBL;
 import pe.edu.pucp.luminaBeauty.Business.impl.ValoracionBLImpl;
@@ -30,16 +31,26 @@ public class ValoracionRS {
 
     @POST
     @Path("registrar")
-    public Valoracion registrarValoracion(Valoracion valoracion) {
-        Valoracion resultado = null;
-
+    public Response registrarValoracion(Valoracion valoracion) {
         try {
-            resultado = valoracionBL.registrarValoracion(valoracion);
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
+            Valoracion resultado = valoracionBL.registrarValoracion(valoracion);
 
-        return resultado;
+            return Response.status(Response.Status.CREATED)
+                    .entity(resultado)
+                    .build();
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+
+            String mensaje = ex.getMessage() == null
+                    ? "No se pudo registrar la valoración."
+                    : ex.getMessage().replace("\"", "'");
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + mensaje + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+        }
     }
 
     @PUT

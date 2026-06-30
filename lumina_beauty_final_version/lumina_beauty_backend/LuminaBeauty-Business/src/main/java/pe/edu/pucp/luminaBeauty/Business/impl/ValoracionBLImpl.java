@@ -21,6 +21,11 @@ import pe.edu.pucp.luminaBeauty.dbManager.TransactionContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class ValoracionBLImpl implements ValoracionBL {
 
     private final ValoracionDAO valoracionDAO = new ValoracionDAOImpl();
@@ -358,15 +363,25 @@ public class ValoracionBLImpl implements ValoracionBL {
             );
         }
 
-        if (detallePedido.getPedido().getCliente() == null ||
-                detallePedido.getPedido().getCliente().getId_usuario()
-                        != valoracion.getCliente().getId_usuario()) {
+        int idClienteDelPedido = obtenerIdClienteDelDetallePedido(
+                detallePedido.getId_detalle_pedido()
+        );
+
+        if (valoracion.getCliente() == null ||
+                valoracion.getCliente().getId_usuario() <= 0) {
+            throw new Exception("Debe indicar un cliente válido.");
+        }
+
+        if (idClienteDelPedido <= 0 ||
+                idClienteDelPedido != valoracion.getCliente().getId_usuario()) {
             throw new Exception(
                     "No puedes valorar productos de otro cliente."
             );
         }
 
-        String estadoPedido = detallePedido.getPedido().getEstado();
+        String estadoPedido = obtenerEstadoPedidoDelDetallePedido(
+                detallePedido.getId_detalle_pedido()
+        );
 
         if (estadoPedido == null ||
                 !estadoPedido.trim().equalsIgnoreCase("ENTREGADO")) {
@@ -507,6 +522,68 @@ public class ValoracionBLImpl implements ValoracionBL {
 
         } finally {
             TransactionContext.close();
+        }
+    }
+
+    private int obtenerIdClienteDelDetallePedido(int idDetallePedido)
+            throws Exception {
+
+        String sql = """
+            SELECT p.id_cliente
+            FROM detalle_pedido dp
+            INNER JOIN pedido p
+                ON p.id_pedido = dp.id_pedido
+            WHERE dp.id_detalle_pedido = ?
+            """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idDetallePedido);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    throw new Exception("No se encontró el pedido del detalle.");
+                }
+
+                return rs.getInt("id_cliente");
+            }
+        } catch (SQLException e) {
+            throw new Exception(
+                    "No se pudo validar el cliente propietario del pedido.",
+                    e
+            );
+        }
+    }
+
+    private String obtenerEstadoPedidoDelDetallePedido(int idDetallePedido)
+            throws Exception {
+
+        String sql = """
+            SELECT p.estado
+            FROM detalle_pedido dp
+            INNER JOIN pedido p
+                ON p.id_pedido = dp.id_pedido
+            WHERE dp.id_detalle_pedido = ?
+            """;
+
+        Connection connection = TransactionContext.getConnection();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idDetallePedido);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    throw new Exception("No se encontró el pedido del detalle.");
+                }
+
+                return rs.getString("estado");
+            }
+        } catch (SQLException e) {
+            throw new Exception(
+                    "No se pudo validar el estado real del pedido.",
+                    e
+            );
         }
     }
 }
