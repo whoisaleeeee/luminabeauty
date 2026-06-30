@@ -1,5 +1,6 @@
 @inject LanguageService LangService
 @inject NavigationManager Navigator
+@inject IConfiguration Configuration
 @implements IDisposable
 
 <div class="relative h-[420px] w-full overflow-hidden rounded-3xl shadow-lg select-none md:h-[520px]"
@@ -69,8 +70,7 @@
 </div>
 
 @code {
-    private const string BackendImagesBaseUrl =
-        "http://localhost:8080/LuminaBeauty-Servicios/images/banners";
+    private string BackendImagesBaseUrl => Configuration["ApiSettings:URL_BASE"] + "images/banners";
 
     private int _currentSlideIndex;
     private System.Threading.Timer? _timer;
@@ -87,39 +87,41 @@
         public string Category { get; init; } = string.Empty;
     }
 
-    private readonly List<SlideItem> _slides =
-    [
-        new()
-        {
-            HighPromo = "HASTA 20% EN MAQUILLAJE",
-            Title = "Brilla con tu mejor versión",
-            Subtitle = "Labiales, bases y esenciales de maquillaje para acompañar tu estilo cada día.",
-            CtaText = "Explorar maquillaje",
-            Image = $"{BackendImagesBaseUrl}/banner-maquillaje.jpg",
-            Category = "Maquillaje"
-        },
-        new()
-        {
-            HighPromo = "CUIDADO CAPILAR PARA TODOS LOS DÍAS",
-            Title = "Tu cabello también merece cuidado",
-            Subtitle = "Shampoo, mascarillas y tratamientos para nutrir, reparar y mantener tu cabello saludable.",
-            CtaText = "Explorar cuidado capilar",
-            Image = $"{BackendImagesBaseUrl}/banner-cuidado-capilar.jpg",
-            Category = "Cuidado Capilar"
-        },
-        new()
-        {
-            HighPromo = "CUIDADO ESENCIAL PARA TU PIEL",
-            Title = "Tu rutina empieza aquí",
-            Subtitle = "Limpieza, hidratación y tratamiento para cuidar tu piel todos los días.",
-            CtaText = "Explorar skincare",
-            Image = $"{BackendImagesBaseUrl}/banner-skincare.jpg",
-            Category = "Skincare"
-        }
-    ];
+    private List<SlideItem> _slides = new();
 
     protected override void OnInitialized()
     {
+        _slides = new List<SlideItem>
+        {
+            new()
+            {
+                HighPromo = "HASTA 20% EN MAQUILLAJE",
+                Title = "Brilla con tu mejor versión",
+                Subtitle = "Labiales, bases y esenciales de maquillaje para acompañar tu estilo cada día.",
+                CtaText = "Explorar maquillaje",
+                Image = $"{BackendImagesBaseUrl}/banner-maquillaje.jpg",
+                Category = "Maquillaje"
+            },
+            new()
+            {
+                HighPromo = "CUIDADO CAPILAR PARA TODOS LOS DÍAS",
+                Title = "Tu cabello también merece cuidado",
+                Subtitle = "Shampoo, mascarillas y tratamientos para nutrir, reparar y mantener tu cabello saludable.",
+                CtaText = "Explorar cuidado capilar",
+                Image = $"{BackendImagesBaseUrl}/banner-cuidado-capilar.jpg",
+                Category = "Cuidado Capilar"
+            },
+            new()
+            {
+                HighPromo = "CUIDADO ESENCIAL PARA TU PIEL",
+                Title = "Tu rutina empieza aquí",
+                Subtitle = "Limpieza, hidratación y tratamiento para cuidar tu piel todos los días.",
+                CtaText = "Explorar skincare",
+                Image = $"{BackendImagesBaseUrl}/banner-skincare.jpg",
+                Category = "Skincare"
+            }
+        };
+
         LangService.OnChange += StateHasChanged;
 
         _timer = new System.Threading.Timer(_ =>

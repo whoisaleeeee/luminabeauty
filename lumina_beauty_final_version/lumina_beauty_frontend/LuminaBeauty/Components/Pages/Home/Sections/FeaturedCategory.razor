@@ -1,4 +1,5 @@
 ﻿@inject NavigationManager Navigator
+@inject IConfiguration Configuration
 
 <section class="relative overflow-hidden rounded-3xl border border-white/70 bg-white/35 shadow-[0_14px_45px_rgba(120,72,92,0.10)] backdrop-blur-xl">
     <div class="grid grid-cols-1 md:grid-cols-12">
@@ -48,8 +49,7 @@
     private const string _description =
         "Rutinas inspiradas en Corea: limpiadores suaves, tónicos hidratantes, sérums concentrados y esenciales para cuidar tu piel.";
 
-    private const string _imageUrl =
-        "http://localhost:8080/LuminaBeauty-Servicios/images/categorias/kbeauty-destacada.jpg";
+    private string _imageUrl => Configuration["ApiSettings:URL_BASE"] + "images/categorias/kbeauty-destacada.jpg";
 
     private void GoToCategory()
     {

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
 namespace LuminaBeauty.Services.Admin
@@ -22,14 +24,11 @@ namespace LuminaBeauty.Services.Admin
         }
 
         public string ConstruirUrlGeneracion(
-    string codigoReporte,
-    DateTime? fechaInicio,
-    DateTime? fechaFin)
+            string codigoReporte,
+            DateTime? fechaInicio,
+            DateTime? fechaFin)
         {
-            const string backendBaseUrl =
-                "http://localhost:8080/LuminaBeauty-Servicios/webresources/";
-
-            var url = $"{backendBaseUrl}ReporteJasperRS/generar/{codigoReporte}";
+            var url = $"{_urlBase}/ReporteJasperRS/generar/{codigoReporte}";
 
             if (fechaInicio.HasValue && fechaFin.HasValue)
             {

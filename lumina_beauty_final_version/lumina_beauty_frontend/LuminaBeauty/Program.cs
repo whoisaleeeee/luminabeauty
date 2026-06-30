@@ -4,6 +4,7 @@ using LuminaBeauty.Services;
 using LuminaBeauty.Services.Admin;
 using LuminaBeauty.Services.AppServices;
 using LuminaBeauty.Servicios.REST;
+IConfiguration Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,7 @@ builder.Services.AddRazorComponents()
 // Backend Java GlassFish
 builder.Services.AddHttpClient("LuminaBackend", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:8080/LuminaBeauty-Servicios/");
+    client.BaseAddress = new Uri(builder.Configuration["ApiSettings:URL_BASE"]);
     client.Timeout = TimeSpan.FromSeconds(10);
 
     client.DefaultRequestHeaders.Accept.Clear();
