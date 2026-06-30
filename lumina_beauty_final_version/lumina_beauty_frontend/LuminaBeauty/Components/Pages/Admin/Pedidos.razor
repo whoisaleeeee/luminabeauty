@@ -12,14 +12,11 @@
 
 <div class="admin-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h2 class="fw-bold mb-1" style="color: #6a3849;">Pedidos</h2>
-            <p class="text-muted mb-0">
-                Consulta y actualiza el estado de los pedidos registrados.
-            </p>
-        </div>
-    </div>
+    <TopHeader Title="Pedidos" SearchPlaceholder="Buscar pedidos..." />
+
+    <p class="text-muted mb-4">
+        Consulta y actualiza el estado de los pedidos registrados.
+    </p>
 
     @if (!string.IsNullOrWhiteSpace(mensaje))
     {

@@ -1,39 +1,38 @@
 @page "/admin/configuracion"
 @layout AdminLayout
 
+@using LuminaBeauty.Models
 @using LuminaBeauty.Services
+@using LuminaBeauty.Servicios.REST
 
 @inject AuthService Auth
 @inject NavigationManager Navigation
+@inject EmpleadoRestService EmpleadoRestService
+@inject CuponRestService CuponRestService
 
 <div class="admin-page">
 
+    <TopHeader Title="Gestión del Sistema" SearchPlaceholder="Buscar en configuración..." />
+
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-        <div>
-            <h2 class="fw-bold mb-1" style="color: #6a3849;">Configuración</h2>
-            <p class="text-muted mb-0">
-                Parámetros generales del panel de administración.
-            </p>
-        </div>
+        <p class="text-muted mb-0">
+            Configura los parámetros, personal de la tienda y preferencias de pago.
+        </p>
 
         <button class="btn text-white px-4 py-2 rounded-3 shadow-sm"
                 style="background-color: #6a3849;"
-                @onclick="GuardarCambios">
+                disabled="@guardando"
+                @onclick="GuardarCambiosAsync">
             <i class="bi bi-check2-circle"></i>
-            Guardar cambios
+            @(guardando ? "Guardando..." : "Guardar cambios")
         </button>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(mensaje))
     {
-        <div class="alert @(esError ? "alert-danger" : "alert-success") alert-dismissible fade show"
-             role="alert">
+        <div class="alert @(esError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
             @mensaje
-
-            <button type="button"
-                    class="btn-close"
-                    @onclick="LimpiarMensaje">
-            </button>
+            <button type="button" class="btn-close" @onclick="LimpiarMensaje"></button>
         </div>
     }
 
@@ -41,104 +40,330 @@
         <div class="border-bottom px-4 pt-3">
             <ul class="nav nav-underline gap-4">
                 <li class="nav-item">
-                    <button class="nav-link border-0 bg-transparent @(pestanaActiva == "general" ? "active" : "text-muted")"
-                            @onclick='() => CambiarPestana(" general")'>
-                        General
+                    <button class="nav-link border-0 bg-transparent @(pestanaActiva == "empleados" ? "active fw-semibold" : "text-muted")"
+                            style="@(pestanaActiva == "empleados" ? "color: #6a3849 !important;" : "")"
+                            @onclick='() => CambiarPestana("empleados")'>
+                        Empleados
                     </button>
                 </li>
-
                 <li class="nav-item">
-                    <button class="nav-link border-0 bg-transparent @(pestanaActiva == "pagos" ? "active" : "text-muted")"
-                            @onclick='() => CambiarPestana(" pagos")'>
-                        Métodos de pago
+                    <button class="nav-link border-0 bg-transparent @(pestanaActiva == "cupones" ? "active fw-semibold" : "text-muted")"
+                            style="@(pestanaActiva == "cupones" ? "color: #6a3849 !important;" : "")"
+                            @onclick='() => CambiarPestana("cupones")'>
+                        Cupones
                     </button>
                 </li>
-
                 <li class="nav-item">
-                    <button class="nav-link border-0 bg-transparent @(pestanaActiva == "equipo" ? "active" : "text-muted")"
-                            @onclick='() => CambiarPestana(" equipo")'>
-                        Equipo
+                    <button class="nav-link border-0 bg-transparent @(pestanaActiva == "pagos" ? "active fw-semibold" : "text-muted")"
+                            style="@(pestanaActiva == "pagos" ? "color: #6a3849 !important;" : "")"
+                            @onclick='() => CambiarPestana("pagos")'>
+                        Métodos de Pago
                     </button>
                 </li>
             </ul>
         </div>
 
         <div class="p-4">
-
-            @if (pestanaActiva == "general")
+            @if (cargando)
             {
-                <div class="row g-4">
-                    <div class="col-12 col-md-6">
-                        <label class="form-label fw-semibold">Nombre de la tienda</label>
-
-                        <input class="form-control"
-                               @bind="nombreTienda" />
+                <div class="text-center py-5 text-muted">Cargando...</div>
+            }
+            else if (pestanaActiva == "empleados")
+            {
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                    <div class="input-group shadow-sm" style="max-width: 320px;">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-start-0 ps-0"
+                               placeholder="Buscar por nombre o email..."
+                               @bind="busquedaEmpleado"
+                               @bind:event="oninput" />
                     </div>
+                    <button class="btn text-white rounded-3 px-4"
+                            style="background-color: #6a3849;"
+                            @onclick="MostrarFormularioEmpleado">
+                        <i class="bi bi-plus-lg"></i> Nuevo empleado
+                    </button>
+                </div>
 
-                    <div class="col-12 col-md-6">
-                        <label class="form-label fw-semibold">Correo de contacto</label>
-
-                        <input type="email"
-                               class="form-control"
-                               @bind="correoContacto" />
-                    </div>
-
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Mensaje de atención</label>
-
-                        <textarea class="form-control"
-                                  rows="4"
-                                  @bind="mensajeAtencion">
-                        </textarea>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   id="tiendaActiva"
-                                   @bind="tiendaActiva" />
-
-                            <label class="form-check-label" for="tiendaActiva">
-                                La tienda está disponible para compras
-                            </label>
+                @if (mostrarFormEmpleado)
+                {
+                    <div class="border rounded-4 p-4 mb-4 bg-light">
+                        <h6 class="fw-bold mb-3">@(empleadoEditando != null ? "Editar empleado" : "Nuevo empleado")</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Nombres</label>
+                                <input class="form-control" @bind="formEmpleadoNombre" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Apellidos</label>
+                                <input class="form-control" @bind="formEmpleadoApellido" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Correo</label>
+                                <input type="email" class="form-control" @bind="formEmpleadoCorreo" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Rol</label>
+                                <select class="form-select" @bind="formEmpleadoRol">
+                                    <option value="ADMIN">ADMIN</option>
+                                    <option value="VENDEDOR">VENDEDOR</option>
+                                    <option value="SOPORTE">SOPORTE</option>
+                                </select>
+                            </div>
+                            @if (empleadoEditando == null)
+                            {
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-semibold">Contraseña</label>
+                                    <input type="password" class="form-control" @bind="formEmpleadoContrasena" />
+                                </div>
+                            }
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn text-white rounded-3 px-4" style="background-color: #6a3849;"
+                                        @onclick="GuardarEmpleadoAsync">
+                                    Guardar
+                                </button>
+                                <button class="btn btn-light rounded-3" @onclick="CancelarFormularioEmpleado">Cancelar</button>
+                            </div>
                         </div>
                     </div>
+                }
+
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover m-0">
+                        <thead style="background-color: #fbf8f9; color: #6c757d; font-size: 0.75rem; text-transform: uppercase;">
+                            <tr>
+                                <th class="py-3 px-3 border-bottom-0">Empleado</th>
+                                <th class="py-3 border-bottom-0">Rol</th>
+                                <th class="py-3 border-bottom-0">Estado</th>
+                                <th class="py-3 px-3 border-bottom-0 text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody style="font-size: 0.9rem;">
+                            @if (EmpleadosFiltrados.Any())
+                            {
+                                @foreach (var emp in EmpleadosFiltrados)
+                                {
+                                    <tr>
+                                        <td class="px-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                                     style="width: 40px; height: 40px; background: #f8dfe7; color: #7d3f54; font-size: 0.8rem;">
+                                                    @Iniciales(emp)
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold text-dark">@emp.Nombre @emp.Apellido</div>
+                                                    <small class="text-muted">@emp.Correo</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge rounded-pill px-3 py-2 fw-medium"
+                                                  style="background-color: #f8dfe7; color: #7d3f54;">
+                                                @emp.Rol
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="d-flex align-items-center gap-2 text-success small fw-medium">
+                                                <i class="bi bi-circle-fill" style="font-size: 0.45rem;"></i>
+                                                @(emp.Estado == 1 ? "Activo" : "Inactivo")
+                                            </span>
+                                        </td>
+                                        <td class="px-3 text-end">
+                                            <button class="btn btn-sm btn-light rounded-circle me-1"
+                                                    title="Editar"
+                                                    @onclick="() => EditarEmpleado(emp)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light rounded-circle text-danger"
+                                                    title="Eliminar"
+                                                    @onclick="() => EliminarEmpleadoAsync(emp)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted fst-italic">
+                                        No hay empleados registrados.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
             }
-
-            @if (pestanaActiva == "pagos")
+            else if (pestanaActiva == "cupones")
             {
-                <div class="row g-3">
-                    @foreach (var metodo in metodosPago)
-                    {
-                        <div class="col-12 col-md-6">
-                            <div class="border rounded-4 p-3 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="fw-semibold">@metodo.Nombre</div>
-                                    <small class="text-muted">@metodo.Descripcion</small>
-                                </div>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                    <div class="input-group shadow-sm" style="max-width: 320px;">
+                        <span class="input-group-text bg-white border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text"
+                               class="form-control border-start-0 ps-0"
+                               placeholder="Buscar por código de cupón..."
+                               @bind="busquedaCupon"
+                               @bind:event="oninput" />
+                    </div>
+                    <button class="btn text-white rounded-3 px-4"
+                            style="background-color: #6a3849;"
+                            @onclick="MostrarFormularioCupon">
+                        <i class="bi bi-plus-lg"></i> Nuevo cupón
+                    </button>
+                </div>
 
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           @bind="metodo.Activo" />
+                @if (mostrarFormCupon)
+                {
+                    <div class="border rounded-4 p-4 mb-4 bg-light">
+                        <h6 class="fw-bold mb-3">@(cuponEditando != null ? "Editar cupón" : "Nuevo cupón")</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Código</label>
+                                <input class="form-control text-uppercase" @bind="formCuponCodigo" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Tipo de descuento</label>
+                                <select class="form-select" @bind="formCuponTipo">
+                                    <option value="PORCENTAJE">Porcentaje</option>
+                                    <option value="MONTO_FIJO">Monto fijo</option>
+                                    <option value="ENVIO_GRATIS">Envío gratis</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Valor</label>
+                                <input type="number" step="0.01" min="0" class="form-control" @bind="formCuponValor" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Fecha inicio</label>
+                                <input type="date" class="form-control" @bind="formCuponFechaInicio" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Fecha fin</label>
+                                <input type="date" class="form-control" @bind="formCuponFechaFin" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Límite de usos</label>
+                                <input type="number" min="1" class="form-control" @bind="formCuponLimite" />
+                            </div>
+                            <div class="col-12 d-flex gap-2">
+                                <button class="btn text-white rounded-3 px-4" style="background-color: #6a3849;"
+                                        @onclick="GuardarCuponAsync">
+                                    Guardar
+                                </button>
+                                <button class="btn btn-light rounded-3" @onclick="CancelarFormularioCupon">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="row g-4">
+                    @if (CuponesFiltrados.Any())
+                    {
+                        @foreach (var cupon in CuponesFiltrados)
+                        {
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="border rounded-4 p-4 h-100 position-relative"
+                                     style="border-style: dashed !important; border-color: #f1aeb5 !important;">
+                                    <div class="d-flex justify-content-between align-items-start mb-3">
+                                        <span class="badge rounded-pill px-3 py-2 fw-bold"
+                                              style="background-color: #f8dfe7; color: #7d3f54; letter-spacing: 0.5px;">
+                                            @cupon.Codigo
+                                        </span>
+                                        <span class="d-flex align-items-center gap-1 small fw-medium @(cupon.Estado == 1 ? "text-success" : "text-muted")">
+                                            <i class="bi bi-circle-fill" style="font-size: 0.45rem;"></i>
+                                            @(cupon.Estado == 1 ? "Activo" : "Inactivo")
+                                        </span>
+                                    </div>
+
+                                    <h4 class="fw-bold mb-3" style="color: #6a3849;">
+                                        @FormatoDescuento(cupon)
+                                    </h4>
+
+                                    <div class="d-flex gap-4 mb-4">
+                                        <div>
+                                            <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.65rem;">Usos</small>
+                                            <span class="fw-semibold">0 / @(cupon.LimiteUso?.ToString() ?? "∞")</span>
+                                        </div>
+                                        <div>
+                                            <small class="text-muted text-uppercase fw-bold d-block" style="font-size: 0.65rem;">Vence</small>
+                                            <span class="fw-semibold">@FormatoFecha(cupon.FechaFin)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <button class="btn btn-sm btn-light rounded-circle" title="Editar"
+                                                @onclick="() => EditarCupon(cupon)">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light rounded-circle" title="@(cupon.Estado == 1 ? "Pausar" : "Activar")"
+                                                @onclick="() => ToggleEstadoCuponAsync(cupon)">
+                                            <i class="bi bi-pause-fill @(cupon.Estado == 1 ? "text-warning" : "text-success")"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-light rounded-circle text-danger" title="Eliminar"
+                                                @onclick="() => EliminarCuponAsync(cupon)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12 text-center py-5 text-muted fst-italic">
+                            No hay cupones registrados.
                         </div>
                     }
                 </div>
             }
-
-            @if (pestanaActiva == "equipo")
+            else if (pestanaActiva == "pagos")
             {
-                <div class="alert alert-light border mb-0">
-                    <div class="fw-semibold mb-1">Gestión de equipo</div>
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-1" style="color: #6a3849;">Pasarelas y Métodos de Pago</h5>
+                    <p class="text-muted mb-0 small">
+                        Configura las opciones de pago que estarán disponibles para tus clientes en el checkout.
+                    </p>
+                </div>
 
-                    <div class="text-muted">
-                        El registro, edición y desactivación de empleados se integrará
-                        cuando se incorpore el servicio REST específico de empleados.
-                    </div>
+                <div class="row g-4">
+                    @foreach (var metodo in metodosPago)
+                    {
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="border rounded-4 p-4 h-100 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                             style="width: 48px; height: 48px; background: @metodo.ColorFondo;">
+                                            <i class="bi @metodo.Icono fs-4" style="color: @metodo.ColorIcono;"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@metodo.Nombre</div>
+                                            <small class="text-muted">@metodo.Subtitulo</small>
+                                        </div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               role="switch"
+                                               @bind="metodo.Activo" />
+                                    </div>
+                                </div>
+
+                                <p class="text-muted small flex-grow-1 mb-4">@metodo.Descripcion</p>
+
+                                <button class="btn btn-light w-100 rounded-3 py-2 fw-medium"
+                                        @onclick="() => ConfigurarMetodoPago(metodo)">
+                                    <i class="bi bi-gear me-1"></i> Configurar credenciales
+                                </button>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -146,43 +371,120 @@
 </div>
 
 @code {
-    private string pestanaActiva = "general";
-
-    private string nombreTienda = "Lumina Beauty";
-    private string correoContacto = "contacto@luminabeauty.com";
-    private string mensajeAtencion = "Atendemos consultas de lunes a sábado.";
-    private bool tiendaActiva = true;
-
+    private string pestanaActiva = "empleados";
+    private bool cargando = true;
+    private bool guardando;
     private string mensaje = string.Empty;
     private bool esError;
+
+    private List<Empleado> empleados = new();
+    private List<Cupon> cupones = new();
+    private string busquedaEmpleado = string.Empty;
+    private string busquedaCupon = string.Empty;
+
+    private bool mostrarFormEmpleado;
+    private Empleado? empleadoEditando;
+    private string formEmpleadoNombre = string.Empty;
+    private string formEmpleadoApellido = string.Empty;
+    private string formEmpleadoCorreo = string.Empty;
+    private string formEmpleadoRol = "VENDEDOR";
+    private string formEmpleadoContrasena = string.Empty;
+
+    private bool mostrarFormCupon;
+    private Cupon? cuponEditando;
+    private string formCuponCodigo = string.Empty;
+    private string formCuponTipo = "PORCENTAJE";
+    private decimal formCuponValor;
+    private DateTime formCuponFechaInicio = DateTime.Today;
+    private DateTime formCuponFechaFin = DateTime.Today.AddMonths(6);
+    private int formCuponLimite = 100;
 
     private List<MetodoPagoConfig> metodosPago = new()
     {
         new()
         {
             Nombre = "Mercado Pago",
-            Descripcion = "Pagos con tarjetas y saldo digital.",
+            Subtitulo = "Pasarela de Pagos",
+            Descripcion = "Acepta tarjetas de crédito, débito y pagos con saldo en Mercado Pago.",
+            Icono = "bi-credit-card-2-front",
+            ColorFondo = "#e8f4fd",
+            ColorIcono = "#009ee3",
             Activo = true
+        },
+        new()
+        {
+            Nombre = "PayPal",
+            Subtitulo = "Pasarela Internacional",
+            Descripcion = "Recibe pagos internacionales de forma segura con PayPal.",
+            Icono = "bi-paypal",
+            ColorFondo = "#eef2ff",
+            ColorIcono = "#003087",
+            Activo = false
         },
         new()
         {
             Nombre = "Yape",
-            Descripcion = "Pagos mediante billetera digital.",
+            Subtitulo = "Billetera Digital",
+            Descripcion = "Pagos instantáneos mediante código QR o número de celular.",
+            Icono = "bi-phone",
+            ColorFondo = "#f3eeff",
+            ColorIcono = "#742284",
             Activo = true
         },
         new()
         {
-            Nombre = "Transferencia bancaria",
-            Descripcion = "Validación manual de pagos.",
+            Nombre = "Plin",
+            Subtitulo = "Billetera Digital",
+            Descripcion = "Transferencias inmediatas entre bancos afiliados al ecosistema Plin.",
+            Icono = "bi-wallet2",
+            ColorFondo = "#e8faf5",
+            ColorIcono = "#00a859",
             Activo = false
+        },
+        new()
+        {
+            Nombre = "Transferencia Bancaria",
+            Subtitulo = "Pago Manual",
+            Descripcion = "El cliente transfiere a tu cuenta y envía el comprobante para validación.",
+            Icono = "bi-bank",
+            ColorFondo = "#f5f5f5",
+            ColorIcono = "#6a3849",
+            Activo = true
         }
     };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (!Auth.IsAdmin)
         {
             Navigation.NavigateTo("/login", true);
+            return;
+        }
+
+        await CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
+        cargando = true;
+
+        try
+        {
+            var empleadosTask = EmpleadoRestService.ListarEmpleadosAsync();
+            var cuponesTask = CuponRestService.ListarCuponesAsync();
+
+            await Task.WhenAll(empleadosTask, cuponesTask);
+
+            empleados = await empleadosTask;
+            cupones = await cuponesTask;
+        }
+        catch (Exception ex)
+        {
+            MostrarMensaje($"No se pudieron cargar los datos: {ex.Message}", true);
+        }
+        finally
+        {
+            cargando = false;
         }
     }
 
@@ -191,21 +493,290 @@
         pestanaActiva = nuevaPestana;
     }
 
-    private void GuardarCambios()
+    private IEnumerable<Empleado> EmpleadosFiltrados =>
+        empleados.Where(e =>
+            string.IsNullOrWhiteSpace(busquedaEmpleado)
+            || $"{e.Nombre} {e.Apellido}".Contains(busquedaEmpleado, StringComparison.OrdinalIgnoreCase)
+            || e.Correo.Contains(busquedaEmpleado, StringComparison.OrdinalIgnoreCase));
+
+    private IEnumerable<Cupon> CuponesFiltrados =>
+        cupones.Where(c =>
+            string.IsNullOrWhiteSpace(busquedaCupon)
+            || c.Codigo.Contains(busquedaCupon, StringComparison.OrdinalIgnoreCase));
+
+    private async Task GuardarCambiosAsync()
     {
-        mensaje = "Los cambios de configuración se guardaron correctamente.";
-        esError = false;
+        guardando = true;
+
+        try
+        {
+            var activos = metodosPago.Count(m => m.Activo);
+            MostrarMensaje(
+                $"Configuración guardada. {activos} método(s) de pago activo(s).",
+                false);
+        }
+        finally
+        {
+            guardando = false;
+        }
     }
 
-    private void LimpiarMensaje()
+    private void ConfigurarMetodoPago(MetodoPagoConfig metodo)
     {
-        mensaje = string.Empty;
+        MostrarMensaje(
+            $"La configuración de credenciales para {metodo.Nombre} estará disponible próximamente.",
+            false);
     }
+
+    private void MostrarFormularioEmpleado()
+    {
+        empleadoEditando = null;
+        formEmpleadoNombre = string.Empty;
+        formEmpleadoApellido = string.Empty;
+        formEmpleadoCorreo = string.Empty;
+        formEmpleadoRol = "VENDEDOR";
+        formEmpleadoContrasena = string.Empty;
+        mostrarFormEmpleado = true;
+    }
+
+    private void EditarEmpleado(Empleado emp)
+    {
+        empleadoEditando = emp;
+        formEmpleadoNombre = emp.Nombre;
+        formEmpleadoApellido = emp.Apellido;
+        formEmpleadoCorreo = emp.Correo;
+        formEmpleadoRol = emp.Rol;
+        mostrarFormEmpleado = true;
+    }
+
+    private void CancelarFormularioEmpleado()
+    {
+        mostrarFormEmpleado = false;
+        empleadoEditando = null;
+    }
+
+    private async Task GuardarEmpleadoAsync()
+    {
+        if (string.IsNullOrWhiteSpace(formEmpleadoNombre)
+            || string.IsNullOrWhiteSpace(formEmpleadoApellido)
+            || string.IsNullOrWhiteSpace(formEmpleadoCorreo))
+        {
+            MostrarMensaje("Complete nombre, apellido y correo.", true);
+            return;
+        }
+
+        if (empleadoEditando == null)
+        {
+            if (string.IsNullOrWhiteSpace(formEmpleadoContrasena))
+            {
+                MostrarMensaje("Ingrese una contraseña para el nuevo empleado.", true);
+                return;
+            }
+
+            var nuevo = new Empleado
+            {
+                Nombre = formEmpleadoNombre.Trim(),
+                Apellido = formEmpleadoApellido.Trim(),
+                Correo = formEmpleadoCorreo.Trim(),
+                Rol = formEmpleadoRol,
+                Contrasena = formEmpleadoContrasena,
+                Estado = 1,
+                TipoUsuario = "EMPLEADO"
+            };
+
+            var creado = await EmpleadoRestService.RegistrarEmpleadoAsync(nuevo);
+            if (creado == null)
+            {
+                MostrarMensaje("No se pudo registrar el empleado.", true);
+                return;
+            }
+
+            empleados.Add(creado);
+            MostrarMensaje("Empleado registrado correctamente.", false);
+        }
+        else
+        {
+            empleadoEditando.Nombre = formEmpleadoNombre.Trim();
+            empleadoEditando.Apellido = formEmpleadoApellido.Trim();
+            empleadoEditando.Correo = formEmpleadoCorreo.Trim();
+            empleadoEditando.Rol = formEmpleadoRol;
+
+            var actualizado = await EmpleadoRestService.ActualizarEmpleadoAsync(empleadoEditando);
+            if (actualizado == null)
+            {
+                MostrarMensaje("No se pudo actualizar el empleado.", true);
+                return;
+            }
+
+            MostrarMensaje("Empleado actualizado correctamente.", false);
+        }
+
+        CancelarFormularioEmpleado();
+    }
+
+    private async Task EliminarEmpleadoAsync(Empleado emp)
+    {
+        var ok = await EmpleadoRestService.EliminarEmpleadoAsync(emp.Id);
+        if (!ok)
+        {
+            MostrarMensaje("No se pudo eliminar el empleado.", true);
+            return;
+        }
+
+        empleados.RemoveAll(e => e.Id == emp.Id);
+        MostrarMensaje("Empleado eliminado correctamente.", false);
+    }
+
+    private void MostrarFormularioCupon()
+    {
+        cuponEditando = null;
+        formCuponCodigo = string.Empty;
+        formCuponTipo = "PORCENTAJE";
+        formCuponValor = 10;
+        formCuponFechaInicio = DateTime.Today;
+        formCuponFechaFin = DateTime.Today.AddMonths(6);
+        formCuponLimite = 100;
+        mostrarFormCupon = true;
+    }
+
+    private void EditarCupon(Cupon cupon)
+    {
+        cuponEditando = cupon;
+        formCuponCodigo = cupon.Codigo;
+        formCuponTipo = cupon.TipoDescuento;
+        formCuponValor = cupon.ValorDescuento;
+        formCuponFechaInicio = cupon.FechaInicio?.Date ?? DateTime.Today;
+        formCuponFechaFin = cupon.FechaFin?.Date ?? DateTime.Today.AddMonths(6);
+        formCuponLimite = cupon.LimiteUso ?? 100;
+        mostrarFormCupon = true;
+    }
+
+    private void CancelarFormularioCupon()
+    {
+        mostrarFormCupon = false;
+        cuponEditando = null;
+    }
+
+    private async Task GuardarCuponAsync()
+    {
+        if (string.IsNullOrWhiteSpace(formCuponCodigo))
+        {
+            MostrarMensaje("Ingrese un código de cupón.", true);
+            return;
+        }
+
+        if (cuponEditando == null)
+        {
+            var nuevo = new Cupon
+            {
+                Codigo = formCuponCodigo.Trim().ToUpperInvariant(),
+                TipoDescuento = formCuponTipo,
+                ValorDescuento = formCuponValor,
+                FechaInicio = formCuponFechaInicio,
+                FechaFin = formCuponFechaFin,
+                LimiteUso = formCuponLimite,
+                Estado = 1
+            };
+
+            var creado = await CuponRestService.RegistrarCuponAsync(nuevo);
+            if (creado == null)
+            {
+                MostrarMensaje("No se pudo registrar el cupón.", true);
+                return;
+            }
+
+            cupones.Add(creado);
+            MostrarMensaje("Cupón registrado correctamente.", false);
+        }
+        else
+        {
+            cuponEditando.Codigo = formCuponCodigo.Trim().ToUpperInvariant();
+            cuponEditando.TipoDescuento = formCuponTipo;
+            cuponEditando.ValorDescuento = formCuponValor;
+            cuponEditando.FechaInicio = formCuponFechaInicio;
+            cuponEditando.FechaFin = formCuponFechaFin;
+            cuponEditando.LimiteUso = formCuponLimite;
+
+            var actualizado = await CuponRestService.ActualizarCuponAsync(cuponEditando);
+            if (actualizado == null)
+            {
+                MostrarMensaje("No se pudo actualizar el cupón.", true);
+                return;
+            }
+
+            MostrarMensaje("Cupón actualizado correctamente.", false);
+        }
+
+        CancelarFormularioCupon();
+    }
+
+    private async Task ToggleEstadoCuponAsync(Cupon cupon)
+    {
+        cupon.Estado = cupon.Estado == 1 ? 0 : 1;
+        var actualizado = await CuponRestService.ActualizarCuponAsync(cupon);
+
+        if (actualizado == null)
+        {
+            cupon.Estado = cupon.Estado == 1 ? 0 : 1;
+            MostrarMensaje("No se pudo cambiar el estado del cupón.", true);
+            return;
+        }
+
+        MostrarMensaje(
+            cupon.Estado == 1 ? "Cupón activado." : "Cupón pausado.",
+            false);
+    }
+
+    private async Task EliminarCuponAsync(Cupon cupon)
+    {
+        var ok = await CuponRestService.EliminarCuponAsync(cupon.IdCupon);
+        if (!ok)
+        {
+            MostrarMensaje("No se pudo eliminar el cupón.", true);
+            return;
+        }
+
+        cupones.RemoveAll(c => c.IdCupon == cupon.IdCupon);
+        MostrarMensaje("Cupón eliminado correctamente.", false);
+    }
+
+    private static string Iniciales(Empleado emp)
+    {
+        var n = string.IsNullOrWhiteSpace(emp.Nombre) ? "?" : emp.Nombre[0].ToString();
+        var a = string.IsNullOrWhiteSpace(emp.Apellido) ? "?" : emp.Apellido[0].ToString();
+        return $"{n}{a}".ToUpperInvariant();
+    }
+
+    private static string FormatoDescuento(Cupon cupon)
+    {
+        if (cupon.TipoDescuento.Equals("PORCENTAJE", StringComparison.OrdinalIgnoreCase))
+            return $"{cupon.ValorDescuento:N2}% de Descuento";
+
+        if (cupon.TipoDescuento.Equals("ENVIO_GRATIS", StringComparison.OrdinalIgnoreCase))
+            return "Envío Gratis";
+
+        return $"S/ {cupon.ValorDescuento:N2} OFF";
+    }
+
+    private static string FormatoFecha(DateTime? fecha) =>
+        fecha?.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("es-PE")) ?? "—";
+
+    private void MostrarMensaje(string texto, bool error)
+    {
+        mensaje = texto;
+        esError = error;
+    }
+
+    private void LimpiarMensaje() => mensaje = string.Empty;
 
     private class MetodoPagoConfig
     {
         public string Nombre { get; set; } = string.Empty;
+        public string Subtitulo { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
+        public string Icono { get; set; } = "bi-credit-card";
+        public string ColorFondo { get; set; } = "#f5f5f5";
+        public string ColorIcono { get; set; } = "#6a3849";
         public bool Activo { get; set; }
     }
 }
