@@ -2,6 +2,7 @@
 package pe.edu.pucp.luminaBeauty.Business.impl;
 
 import pe.edu.pucp.luminaBeauty.Business.EmpleadoBL;
+import pe.edu.pucp.luminaBeauty.Business.Util.PasswordUtil;
 import pe.edu.pucp.luminaBeauty.DAO.EmpleadoDAO;
 import pe.edu.pucp.luminaBeauty.DAO.impl.EmpleadoDAOImpl;
 import pe.edu.pucp.luminaBeauty.Model.Empleado;
@@ -18,12 +19,18 @@ public class EmpleadoBLImpl implements EmpleadoBL {
         try {
             validarDatosEmpleado(empleado, true);
 
+            empleado.setContrasena_hash(
+                    PasswordUtil.hash(empleado.getContrasena_hash().trim())
+            );
+
             empleado.setTipo_usuario("EMPLEADO");
             empleado.setEstado(1);
 
             if (empleado.getRol() == null || empleado.getRol().trim().isEmpty()) {
                 empleado.setRol("SOPORTE");
             }
+
+
 
             validarRol(empleado.getRol());
 
