@@ -1,7 +1,7 @@
-
 package pe.edu.pucp.luminaBeauty.Business.impl;
 
 import pe.edu.pucp.luminaBeauty.Business.AuthBL;
+import pe.edu.pucp.luminaBeauty.Business.Util.PasswordUtil;
 import pe.edu.pucp.luminaBeauty.DAO.ClienteDAO;
 import pe.edu.pucp.luminaBeauty.DAO.EmpleadoDAO;
 import pe.edu.pucp.luminaBeauty.DAO.impl.ClienteDAOImpl;
@@ -24,19 +24,16 @@ public class AuthBLImpl implements AuthBL {
             validarDatosLogin(correo, contrasena);
 
             Cliente cliente = buscarClientePorCredenciales(correo, contrasena);
-
             if (cliente != null) {
                 return cliente;
             }
 
             Empleado empleado = buscarEmpleadoPorCredenciales(correo, contrasena);
-
             if (empleado != null) {
                 return empleado;
             }
 
             throw new Exception("Correo o contraseña incorrectos.");
-
         } finally {
             TransactionContext.close();
         }
@@ -48,13 +45,11 @@ public class AuthBLImpl implements AuthBL {
             validarDatosLogin(correo, contrasena);
 
             Cliente cliente = buscarClientePorCredenciales(correo, contrasena);
-
             if (cliente == null) {
                 throw new Exception("Correo o contraseña incorrectos para cliente.");
             }
 
             return cliente;
-
         } finally {
             TransactionContext.close();
         }
@@ -66,13 +61,11 @@ public class AuthBLImpl implements AuthBL {
             validarDatosLogin(correo, contrasena);
 
             Empleado empleado = buscarEmpleadoPorCredenciales(correo, contrasena);
-
             if (empleado == null) {
                 throw new Exception("Correo o contraseña incorrectos para empleado.");
             }
 
             return empleado;
-
         } finally {
             TransactionContext.close();
         }
@@ -83,16 +76,8 @@ public class AuthBLImpl implements AuthBL {
         try {
             validarDatosLogin(correo, contrasena);
 
-            Cliente cliente = buscarClientePorCredenciales(correo, contrasena);
-
-            if (cliente != null) {
-                return true;
-            }
-
-            Empleado empleado = buscarEmpleadoPorCredenciales(correo, contrasena);
-
-            return empleado != null;
-
+            return buscarClientePorCredenciales(correo, contrasena) != null
+                    || buscarEmpleadoPorCredenciales(correo, contrasena) != null;
         } finally {
             TransactionContext.close();
         }
@@ -102,12 +87,11 @@ public class AuthBLImpl implements AuthBL {
         ArrayList<Cliente> clientes = clienteDAO.listarTodos();
 
         for (Cliente cliente : clientes) {
-            if (cliente.getCorreo() != null &&
-                    cliente.getContrasena_hash() != null &&
-                    cliente.getCorreo().equalsIgnoreCase(correo.trim()) &&
-                    cliente.getContrasena_hash().equals(contrasena) &&
-                    cliente.getEstado() == 1) {
-
+            if (cliente.getCorreo() != null
+                    && cliente.getContrasena_hash() != null
+                    && cliente.getCorreo().equalsIgnoreCase(correo.trim())
+                    && cliente.getEstado() == 1
+                    && PasswordUtil.verify(contrasena, cliente.getContrasena_hash())) {
                 return cliente;
             }
         }
@@ -119,12 +103,11 @@ public class AuthBLImpl implements AuthBL {
         ArrayList<Empleado> empleados = empleadoDAO.listarTodos();
 
         for (Empleado empleado : empleados) {
-            if (empleado.getCorreo() != null &&
-                    empleado.getContrasena_hash() != null &&
-                    empleado.getCorreo().equalsIgnoreCase(correo.trim()) &&
-                    empleado.getContrasena_hash().equals(contrasena) &&
-                    empleado.getEstado() == 1) {
-
+            if (empleado.getCorreo() != null
+                    && empleado.getContrasena_hash() != null
+                    && empleado.getCorreo().equalsIgnoreCase(correo.trim())
+                    && empleado.getEstado() == 1
+                    && PasswordUtil.verify(contrasena, empleado.getContrasena_hash())) {
                 return empleado;
             }
         }

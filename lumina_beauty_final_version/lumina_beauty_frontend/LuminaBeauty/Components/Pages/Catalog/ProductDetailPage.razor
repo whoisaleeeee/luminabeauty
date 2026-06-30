@@ -194,17 +194,24 @@ else
                     <span>Añadir</span>
                 </button>
 
-                <button @onclick="ToggleWishlist"
-                        aria-label="Guardar en favoritos"
-                        class="flex cursor-pointer items-center justify-center rounded-xl border bg-white p-3.5 transition hover:scale-105 @(Wishlist.IsInWishlist(_product.Id)
-                                                            ? "border-[#FF76A5]/50 bg-[#FFF0F3] text-[#FF76A5]"
-                                                            : "border-stone-200 text-stone-400 hover:text-[#FF76A5]")">
+                @{
+                    var isFavorite = Wishlist.IsInWishlist(_product.Id);
+                }
+
+                <button type="button"
+                        @onclick="ToggleWishlist"
+                        aria-label="@(isFavorite ? "Quitar de favoritos" : "Guardar en favoritos")"
+                        aria-pressed="@isFavorite"
+                        title="@(isFavorite ? "Quitar de favoritos" : "Guardar en favoritos")"
+                        class="flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border transition duration-200 active:scale-95 @(isFavorite
+                                                            ? "border-[#FF76A5] bg-[#FFF0F3] text-[#C7346A] shadow-[0_6px_14px_rgba(199,52,106,0.14)]"
+                                                            : "border-stone-200 bg-white text-stone-400 hover:border-[#F6D7E0] hover:bg-[#FFF8FA] hover:text-[#C7346A]")">
 
                     <svg viewBox="0 0 24 24"
-                         fill="none"
+                         fill="@(isFavorite ? "currentColor" : "none")"
                          stroke="currentColor"
                          stroke-width="1.8"
-                         class="h-4 w-4"
+                         class="h-5 w-5 transition-transform duration-200 @(isFavorite ? "scale-105" : "")"
                          aria-hidden="true">
                         <path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z" />
                     </svg>
@@ -487,6 +494,8 @@ else
                 ? "Guardado en favoritos"
                 : "Removido de favoritos"
         );
+
+        StateHasChanged();
     }
 
     private async Task CargarValoracionesAsync(int idProducto)
@@ -513,4 +522,4 @@ else
         LangService.OnChange -= StateHasChanged;
         Wishlist.OnChange -= StateHasChanged;
     }
-}
+} 

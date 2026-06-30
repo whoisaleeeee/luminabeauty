@@ -1,6 +1,7 @@
 package pe.edu.pucp.luminaBeauty.Business.impl;
 
 import pe.edu.pucp.luminaBeauty.Business.ClienteBL;
+import pe.edu.pucp.luminaBeauty.Business.Util.PasswordUtil;
 import pe.edu.pucp.luminaBeauty.DAO.ClienteDAO;
 import pe.edu.pucp.luminaBeauty.DAO.DireccionDAO;
 import pe.edu.pucp.luminaBeauty.DAO.impl.ClienteDAOImpl;
@@ -20,6 +21,12 @@ public class ClienteBLImpl implements ClienteBL {
     public Cliente registrarCliente(Cliente cliente) throws Exception {
         try {
             validarDatosCliente(cliente, true);
+
+            // El frontend entrega la contraseña temporalmente en contrasena_hash.
+            // Antes de persistirla se reemplaza por su hash BCrypt.
+            cliente.setContrasena_hash(
+                    PasswordUtil.hash(cliente.getContrasena_hash().trim())
+            );
 
             cliente.setTipo_usuario("CLIENTE");
             cliente.setEstado(1);
