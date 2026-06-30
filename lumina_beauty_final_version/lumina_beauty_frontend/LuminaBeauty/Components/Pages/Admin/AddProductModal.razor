@@ -197,6 +197,13 @@
                                placeholder="/images/products/nombre-imagen.jpg"
                                @bind="NewProduct.Imagen" />
                     </div>
+
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <div class="alert alert-danger mt-2" role="alert">
+                            @errorMessage
+                        </div>
+                    }
                 </div>
 
                 <div class="modal-footer border-top-0 px-4 pb-4 pt-2">
@@ -251,13 +258,32 @@
         await IsVisibleChanged.InvokeAsync(false);
     }
 
+    private string errorMessage = string.Empty;
     private async Task SaveProduct()
     {
+        errorMessage = string.Empty;
         if (string.IsNullOrWhiteSpace(NewProduct.Nombre)
             || categoriaId <= 0
             || marcaId <= 0)
         {
+            errorMessage = "Por favor completa el nombre, categoría y marca del producto.";
             return;
+        }
+
+        if (string.IsNullOrWhiteSpace(NewProduct.Sku))
+        {
+            errorMessage = "El SKU del producto es obligatorio (ej: LB-FAC-001).";
+            return;
+        }
+
+        // Auto-generar slug si está vacío
+        if (string.IsNullOrWhiteSpace(NewProduct.Slug))
+        {
+            NewProduct.Slug = NewProduct.Nombre
+                .ToLower()
+                .Replace(" ", "-")
+                .Replace("á","a").Replace("é","e").Replace("í","i")
+                .Replace("ó","o").Replace("ú","u").Replace("ñ","n");
         }
 
         NewProduct.Categoria = new CategoriaProducto
@@ -270,7 +296,9 @@
             IdMarca = marcaId
         };
 
-        NewProduct.TipoPiel = tipoPielSeleccionado;
+        NewProduct.TipoPiel = string.IsNullOrWhiteSpace(tipoPielSeleccionado)
+            ? "TODOS"
+            : tipoPielSeleccionado.ToUpper();
         NewProduct.Estado = 1;
 
         await OnProductAdded.InvokeAsync(NewProduct);

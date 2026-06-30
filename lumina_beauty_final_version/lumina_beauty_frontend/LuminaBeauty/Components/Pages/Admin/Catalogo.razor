@@ -438,19 +438,34 @@
 
     private async Task OnProductAdded(Producto producto)
     {
-        var productoRegistrado =
-            await ProductoRestService.RegistrarProductoAsync(producto);
-
-        if (productoRegistrado == null)
+        try
         {
-            ShowMessage("No se pudo registrar el producto.", true);
-            return;
+            var productoRegistrado =
+                await ProductoRestService.RegistrarProductoAsync(producto);
+
+            if (productoRegistrado == null)
+            {
+                ShowMessage("No se pudo registrar el producto. Verifica que el backend esté corriendo.", true);
+                return;
+            }
+
+            showAddProductModal = false;
+            ShowMessage("Producto registrado correctamente.", false);
+
+            await CargarDatosAsync();
         }
-
-        showAddProductModal = false;
-        ShowMessage("Producto registrado correctamente.", false);
-
-        await CargarDatosAsync();
+        catch (HttpRequestException)
+        {
+            ShowMessage("No se pudo conectar con el servidor. Verifica que GlassFish esté corriendo en el puerto 8080.", true);
+        }
+        catch (TaskCanceledException)
+        {
+            ShowMessage("La solicitud al servidor tardó demasiado (timeout). Verifica la conexión al backend.", true);
+        }
+        catch (Exception ex)
+        {
+            ShowMessage($"Error inesperado al registrar producto: {ex.Message}", true);
+        }
     }
 
     private async Task DeleteProduct(Producto producto)

@@ -30,16 +30,18 @@ public class ProductoRS {
 
     @POST
     @Path("registrar")
-    public Producto registrarProducto(Producto producto) {
-        Producto resultado = null;
-
+    public jakarta.ws.rs.core.Response registrarProducto(Producto producto) {
         try {
-            resultado = productoBL.registrarProducto(producto);
+            Producto resultado = productoBL.registrarProducto(producto);
+            return jakarta.ws.rs.core.Response.ok(resultado).build();
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            System.out.println("Error al registrar producto: " + ex.getMessage());
+            return jakarta.ws.rs.core.Response
+                    .status(jakarta.ws.rs.core.Response.Status.BAD_REQUEST)
+                    .entity("{\"error\":\"" + ex.getMessage().replace("\"", "'") + "\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
         }
-
-        return resultado;
     }
 
     @PUT

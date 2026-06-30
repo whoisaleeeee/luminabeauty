@@ -36,11 +36,25 @@ namespace LuminaBeauty.Servicios.REST
             using var response = await _http.PostAsJsonAsync("webresources/ProductoRS/registrar", producto);
             if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"ProductoRS/registrar fallo con estado {(int)response.StatusCode}.");
-                return null;
+                var errorBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"ProductoRS/registrar fallo con estado {(int)response.StatusCode}: {errorBody}");
+                // Extract error message from JSON body if possible
+                try
+                {
+                    var errorObj = System.Text.Json.JsonDocument.Parse(errorBody);
+                    if (errorObj.RootElement.TryGetProperty("error", out var msg))
+                        throw new HttpRequestException(msg.GetString());
+                }
+                catch (System.Text.Json.JsonException) { }
+                throw new HttpRequestException($"Error del servidor ({(int)response.StatusCode}): {errorBody}");
             }
 
-            return await response.Content.ReadFromJsonAsync<Producto>();
+            var content = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(content))
+                return null;
+
+            return System.Text.Json.JsonSerializer.Deserialize<Producto>(content,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
         public async Task<Producto?> ActualizarProductoAsync(Producto producto)

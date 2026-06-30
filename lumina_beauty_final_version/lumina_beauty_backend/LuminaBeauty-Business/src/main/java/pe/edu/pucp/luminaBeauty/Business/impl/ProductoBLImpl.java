@@ -269,16 +269,17 @@ public class ProductoBLImpl implements ProductoBL {
 
         if (producto.getTipoPiel() != null && !producto.getTipoPiel().trim().isEmpty()) {
             validarTipoPiel(producto.getTipoPiel());
+            producto.setTipoPiel(producto.getTipoPiel().toUpperCase());
         }
     }
 
     private void validarTipoPiel(String tipo_piel) throws Exception {
-        if (!tipo_piel.equals("SECA") &&
-                !tipo_piel.equals("GRASA") &&
-                !tipo_piel.equals("MIXTA") &&
-                !tipo_piel.equals("SENSIBLE") &&
-                !tipo_piel.equals("NORMAL") &&
-                !tipo_piel.equals("TODOS")) {
+        if (!tipo_piel.equalsIgnoreCase("SECA") &&
+                !tipo_piel.equalsIgnoreCase("GRASA") &&
+                !tipo_piel.equalsIgnoreCase("MIXTA") &&
+                !tipo_piel.equalsIgnoreCase("SENSIBLE") &&
+                !tipo_piel.equalsIgnoreCase("NORMAL") &&
+                !tipo_piel.equalsIgnoreCase("TODOS")) {
 
             throw new Exception("Tipo de piel no válido.");
         }

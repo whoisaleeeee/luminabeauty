@@ -66,6 +66,23 @@ namespace LuminaBeauty.Servicios.REST
             }
         }
 
+        public async Task<List<Cliente>> ListarClientesAsync()
+        {
+            try
+            {
+                using var response = await _http.GetAsync("webresources/ClienteRS/listar");
+
+                return response.IsSuccessStatusCode
+                    ? await response.Content.ReadFromJsonAsync<List<Cliente>>() ?? new List<Cliente>()
+                    : new List<Cliente>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al listar clientes: {ex.Message}");
+                return new List<Cliente>();
+            }
+        }
+
         public async Task<Cliente?> ActualizarClienteAsync(Cliente cliente)
         {
             try

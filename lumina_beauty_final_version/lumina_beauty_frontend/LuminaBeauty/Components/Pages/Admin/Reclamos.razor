@@ -365,34 +365,13 @@
 
         try
         {
-            ListaReclamos = await ReclamoRestService.ListarReclamosAsync();
+            var reclamosTask = ReclamoRestService.ListarReclamosAsync();
+            var clientesTask = ClienteRestService.ListarClientesAsync();
 
-            // Enriquecer con datos del cliente (el backend no los incluye en /listar)
-            var idsVistos = new HashSet<int>();
-            var cacheClientes = new Dictionary<int, Cliente>();
+            await Task.WhenAll(reclamosTask, clientesTask);
 
-            foreach (var reclamo in ListaReclamos)
-            {
-                if (reclamo.Cliente == null || reclamo.Cliente.Id <= 0) continue;
-                int idCliente = reclamo.Cliente.Id;
-
-                // Si ya tiene nombre, no hace falta buscarlo
-                if (!string.IsNullOrWhiteSpace(reclamo.Cliente.Nombre)) continue;
-
-                if (!cacheClientes.ContainsKey(idCliente))
-                {
-                    var clienteCompleto = await ClienteRestService.BuscarClienteAsync(idCliente);
-                    if (clienteCompleto != null)
-                        cacheClientes[idCliente] = clienteCompleto;
-                }
-
-                if (cacheClientes.TryGetValue(idCliente, out var c))
-                {
-                    reclamo.Cliente.Nombre = c.Nombre;
-                    reclamo.Cliente.Apellido = c.Apellido;
-                    reclamo.Cliente.Correo = c.Correo;
-                }
-            }
+            ListaReclamos = await reclamosTask ?? new List<Reclamo>();
+            ClienteEnricher.EnriquecerReclamos(ListaReclamos, await clientesTask ?? new List<Cliente>());
         }
         catch (Exception ex)
         {
@@ -557,15 +536,8 @@
         mensaje = string.Empty;
     }
 
-    private static string NombreCliente(Cliente? cliente)
-    {
-        if (cliente == null)
-        {
-            return "Sin cliente";
-        }
-
-        return $"{cliente.Nombre} {cliente.Apellido}".Trim();
-    }
+    private static string NombreCliente(Cliente? cliente) =>
+        ClienteEnricher.FormatearNombre(cliente);
 
     private static bool EsFinal(string estado)
     {

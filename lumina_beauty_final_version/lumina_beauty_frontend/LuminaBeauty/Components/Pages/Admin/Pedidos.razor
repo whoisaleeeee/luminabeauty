@@ -408,29 +408,13 @@
 
         try
         {
-            TodosLosPedidos = await PedidoRestService.ListarPedidosAsync();
+            var pedidosTask = PedidoRestService.ListarPedidosAsync();
+            var clientesTask = ClienteRestService.ListarClientesAsync();
 
-            // Enriquecer clientes (el backend no incluye nombre/apellido en /listar)
-            var cacheClientes = new Dictionary<int, Cliente>();
-            foreach (var pedido in TodosLosPedidos)
-            {
-                if (pedido.Cliente == null || pedido.Cliente.Id <= 0) continue;
-                if (!string.IsNullOrWhiteSpace(pedido.Cliente.Nombre)) continue;
+            await Task.WhenAll(pedidosTask, clientesTask);
 
-                int idCliente = pedido.Cliente.Id;
-                if (!cacheClientes.ContainsKey(idCliente))
-                {
-                    var c = await ClienteRestService.BuscarClienteAsync(idCliente);
-                    if (c != null) cacheClientes[idCliente] = c;
-                }
-
-                if (cacheClientes.TryGetValue(idCliente, out var clienteCompleto))
-                {
-                    pedido.Cliente.Nombre = clienteCompleto.Nombre;
-                    pedido.Cliente.Apellido = clienteCompleto.Apellido;
-                    pedido.Cliente.Correo = clienteCompleto.Correo;
-                }
-            }
+            TodosLosPedidos = await pedidosTask ?? new List<Pedido>();
+            ClienteEnricher.EnriquecerPedidos(TodosLosPedidos, await clientesTask ?? new List<Cliente>());
         }
         catch (Exception ex)
         {
@@ -596,15 +580,8 @@
         mensaje = string.Empty;
     }
 
-    private static string NombreCliente(Cliente? cliente)
-    {
-        if (cliente == null)
-        {
-            return "Sin cliente";
-        }
-
-        return $"{cliente.Nombre} {cliente.Apellido}".Trim();
-    }
+    private static string NombreCliente(Cliente? cliente) =>
+        ClienteEnricher.FormatearNombre(cliente);
 
     private static string FormatoEstado(string estado)
     {

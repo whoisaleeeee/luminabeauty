@@ -272,7 +272,7 @@
                                     <td class="py-3 px-4 font-monospace text-muted">
                                         @(string.IsNullOrWhiteSpace(p.CodigoPedido) ? $"#ORD-{p.IdPedido}" : p.CodigoPedido)
                                     </td>
-                                    <td class="fw-medium text-dark">@(p.Cliente != null ? $"{p.Cliente.Nombre} {p.Cliente.Apellido}" : "Sin Cliente")</td>
+                                    <td class="fw-medium text-dark">@ClienteEnricher.FormatearNombre(p.Cliente)</td>
                                     <td class="fw-bold text-dark">S/ @p.Total.ToString("N2")</td>
                                     <td>
                                         <span class="badge rounded-pill fw-medium" style="background-color: @GetEstadoBgColor(p.Estado); color: @GetEstadoColor(p.Estado); padding: 0.4em 0.8em;">
@@ -402,52 +402,37 @@
 
         try
         {
-            var pedidosRes = await PedidoRestService.ListarPedidosAsync();
-            Pedidos = pedidosRes ?? new List<Pedido>();
+            var pedidosTask = PedidoRestService.ListarPedidosAsync();
+            var productosTask = ProductoRestService.ListarProductosTodosAsync();
+            var categoriasTask = ProductoRestService.ListarCategoriasAsync();
+            var marcasTask = ProductoRestService.ListarMarcasAsync();
+            var clientesTask = ClienteRestService.ListarClientesAsync();
 
-            // Enriquecer clientes (el backend no incluye nombre/apellido en /listar)
-            var cacheClientes = new Dictionary<int, Cliente>();
-            foreach (var pedido in Pedidos)
-            {
-                if (pedido.Cliente == null || pedido.Cliente.Id <= 0) continue;
-                if (!string.IsNullOrWhiteSpace(pedido.Cliente.Nombre)) continue;
+            await Task.WhenAll(pedidosTask, productosTask, categoriasTask, marcasTask, clientesTask);
 
-                int idCliente = pedido.Cliente.Id;
-                if (!cacheClientes.ContainsKey(idCliente))
-                {
-                    var c = await ClienteRestService.BuscarClienteAsync(idCliente);
-                    if (c != null) cacheClientes[idCliente] = c;
-                }
-                if (cacheClientes.TryGetValue(idCliente, out var cc))
-                {
-                    pedido.Cliente.Nombre = cc.Nombre;
-                    pedido.Cliente.Apellido = cc.Apellido;
-                    pedido.Cliente.Correo = cc.Correo;
-                }
-            }
-            
-            var productosRes = await ProductoRestService.ListarProductosTodosAsync();
-            Productos = productosRes ?? new List<Producto>();
-            
-            var categoriasRes = await ProductoRestService.ListarCategoriasAsync();
-            Categorias = categoriasRes ?? new List<CategoriaProducto>();
-            
-            var marcasRes = await ProductoRestService.ListarMarcasAsync();
-            Marcas = marcasRes ?? new List<Marca>();
+            Pedidos = await pedidosTask ?? new List<Pedido>();
+            Productos = await productosTask ?? new List<Producto>();
+            Categorias = await categoriasTask ?? new List<CategoriaProducto>();
+            Marcas = await marcasTask ?? new List<Marca>();
+
+            ClienteEnricher.EnriquecerPedidos(Pedidos, await clientesTask ?? new List<Cliente>());
+
+            var categoriasPorId = Categorias.ToDictionary(c => c.IdCategoria);
+            var marcasPorId = Marcas.ToDictionary(m => m.IdMarca);
 
             foreach (var prod in Productos)
             {
-                if (prod.Categoria != null)
-                {
-                    var cat = Categorias.FirstOrDefault(c => c.IdCategoria == prod.Categoria.IdCategoria);
-                    if (cat != null) prod.Categoria.Nombre = cat.Nombre;
-                }
-                if (prod.Marca != null)
-                {
-                    var m = Marcas.FirstOrDefault(brand => brand.IdMarca == prod.Marca.IdMarca);
-                    if (m != null) prod.Marca.Nombre = m.Nombre;
-                }
+                if (prod.Categoria != null && categoriasPorId.TryGetValue(prod.Categoria.IdCategoria, out var cat))
+                    prod.Categoria.Nombre = cat.Nombre;
+
+                if (prod.Marca != null && marcasPorId.TryGetValue(prod.Marca.IdMarca, out var marca))
+                    prod.Marca.Nombre = marca.Nombre;
             }
+
+            var productosPorSku = Productos
+                .Where(p => !string.IsNullOrWhiteSpace(p.Sku))
+                .GroupBy(p => p.Sku)
+                .ToDictionary(g => g.Key, g => g.First());
 
             var salesByCategoryDict = new Dictionary<string, decimal>();
             foreach (var p in PedidosActivos)
@@ -455,7 +440,7 @@
                 if (p.Detalles == null) continue;
                 foreach (var d in p.Detalles)
                 {
-                    var prod = Productos.FirstOrDefault(pr => pr.Sku == d.SkuProducto);
+                    productosPorSku.TryGetValue(d.SkuProducto, out var prod);
                     var catName = prod?.Categoria?.Nombre ?? "Sin Categoría";
                     var subtotal = d.Cantidad * d.PrecioUnitario;
                     if (salesByCategoryDict.ContainsKey(catName))
@@ -471,7 +456,7 @@
                 if (p.Detalles == null) continue;
                 foreach (var d in p.Detalles)
                 {
-                    var prod = Productos.FirstOrDefault(pr => pr.Sku == d.SkuProducto);
+                    productosPorSku.TryGetValue(d.SkuProducto, out var prod);
                     var brandName = prod?.Marca?.Nombre ?? "Sin Marca";
                     var subtotal = d.Cantidad * d.PrecioUnitario;
                     if (salesByBrandDict.ContainsKey(brandName))
