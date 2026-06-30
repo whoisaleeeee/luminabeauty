@@ -55,8 +55,11 @@
                         <input type="text"
                                required
                                autocomplete="given-name"
+                               maxlength="60"
                                @bind="_nombre"
+                               @bind:event="oninput"
                                placeholder="Tus nombres"
+                               title="Solo letras, espacios y apóstrofes. Máximo 60 caracteres"
                                class="w-full rounded-xl border border-[#F4D4DD] bg-white py-3 pl-11 pr-4 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#C7346A] focus:ring-2 focus:ring-[#FCD1DB]/60" />
                     </div>
                 </div>
@@ -75,8 +78,11 @@
                         <input type="text"
                                required
                                autocomplete="family-name"
+                               maxlength="60"
                                @bind="_apellido"
+                               @bind:event="oninput"
                                placeholder="Tus apellidos"
+                               title="Solo letras, espacios y apóstrofes. Máximo 60 caracteres"
                                class="w-full rounded-xl border border-[#F4D4DD] bg-white py-3 pl-11 pr-4 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#C7346A] focus:ring-2 focus:ring-[#FCD1DB]/60" />
                     </div>
                 </div>
@@ -92,18 +98,19 @@
                                 <path d="M12 10h5M12 14h5"></path>
                             </svg>
                         </span>
-
                         <input type="text"
                                required
                                maxlength="8"
                                inputmode="numeric"
+                               pattern="[0-9]{8}"
                                autocomplete="off"
-                               @bind="_dni"
+                               value="@_dni"
+                               @oninput="SanitizeDni"
                                placeholder="12345678"
+                               title="Ingresa exactamente 8 dígitos"
                                class="w-full rounded-xl border border-[#F4D4DD] bg-white py-3 pl-11 pr-4 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#C7346A] focus:ring-2 focus:ring-[#FCD1DB]/60" />
                     </div>
                 </div>
-
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-stone-800">Correo electrónico</label>
 
@@ -118,8 +125,11 @@
                         <input type="email"
                                required
                                autocomplete="email"
+                               maxlength="120"
                                @bind="_email"
+                               @bind:event="oninput"
                                placeholder="correo@ejemplo.com"
+                               title="Máximo 120 caracteres"
                                class="w-full rounded-xl border border-[#F4D4DD] bg-white py-3 pl-11 pr-4 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#C7346A] focus:ring-2 focus:ring-[#FCD1DB]/60" />
                     </div>
                 </div>
@@ -138,8 +148,11 @@
                         <input type="@(_showPassword ? "text" : "password")"
                                required
                                autocomplete="new-password"
+                               minlength="8"
+                               maxlength="72"
                                @bind="_password"
-                               placeholder="Crea una contraseña"
+                               @bind:event="oninput"
+                               placeholder="Mínimo 8 caracteres"
                                class="w-full rounded-xl border border-[#F4D4DD] bg-white py-3 pl-11 pr-12 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#C7346A] focus:ring-2 focus:ring-[#FCD1DB]/60" />
 
                         <button type="button"
@@ -163,6 +176,17 @@
                             }
                         </button>
                     </div>
+
+                    <div class="rounded-xl border border-[#FCE2E8] bg-[#FFF9FA] px-3 py-2.5 text-[10px] leading-relaxed text-stone-500">
+                        <p class="font-bold text-stone-700">Tu contraseña debe incluir:</p>
+                        <div class="mt-1 grid grid-cols-1 gap-0.5 sm:grid-cols-2">
+                            <span class="@(HasMinimumPasswordLength ? "text-emerald-600" : "")">• Mínimo 8 caracteres</span>
+                            <span class="@(HasUppercase ? "text-emerald-600" : "")">• Una mayúscula</span>
+                            <span class="@(HasLowercase ? "text-emerald-600" : "")">• Una minúscula</span>
+                            <span class="@(HasDigit ? "text-emerald-600" : "")">• Un número</span>
+                            <span class="@(HasSpecialCharacter ? "text-emerald-600" : "")">• Un símbolo: !@@#$%...</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -179,7 +203,10 @@
                         <input type="@(_showConfirmPassword ? "text" : "password")"
                                required
                                autocomplete="new-password"
+                               minlength="8"
+                               maxlength="72"
                                @bind="_confirmPassword"
+                               @bind:event="oninput"
                                placeholder="Repite tu contraseña"
                                class="w-full rounded-xl border border-[#F4D4DD] bg-white py-3 pl-11 pr-12 text-sm font-medium text-stone-800 outline-none transition placeholder:text-stone-400 focus:border-[#C7346A] focus:ring-2 focus:ring-[#FCD1DB]/60" />
 
@@ -287,17 +314,54 @@
         _showConfirmPassword = !_showConfirmPassword;
     }
 
+    private bool HasMinimumPasswordLength => _password.Length >= 8;
+    private bool HasUppercase => _password.Any(char.IsUpper);
+    private bool HasLowercase => _password.Any(char.IsLower);
+    private bool HasDigit => _password.Any(char.IsDigit);
+    private bool HasSpecialCharacter => _password.Any(ch => !char.IsLetterOrDigit(ch) && !char.IsWhiteSpace(ch));
+
+    private bool IsStrongPassword =>
+        HasMinimumPasswordLength &&
+        HasUppercase &&
+        HasLowercase &&
+        HasDigit &&
+        HasSpecialCharacter;
+
+    private void SanitizeDni(ChangeEventArgs args)
+    {
+        _dni = new string((args.Value?.ToString() ?? string.Empty)
+            .Where(char.IsDigit)
+            .Take(8)
+            .ToArray());
+    }
+
+    private static bool IsValidPersonName(string value)
+    {
+        return !string.IsNullOrWhiteSpace(value)
+            && value.Trim().Length is >= 2 and <= 60
+            && value.All(character =>
+                char.IsLetter(character) ||
+                character == ' ' ||
+                character == '\'' ||
+                character == '-');
+    }
+
     private async Task HandleSignupSubmit()
     {
-        if (string.IsNullOrWhiteSpace(_nombre))
+        _nombre = _nombre.Trim();
+        _apellido = _apellido.Trim();
+        _dni = new string(_dni.Where(char.IsDigit).Take(8).ToArray());
+        _email = _email.Trim().ToLowerInvariant();
+
+        if (!IsValidPersonName(_nombre))
         {
-            Toast.ShowToast("El campo nombres es obligatorio.");
+            Toast.ShowToast("Los nombres deben tener entre 2 y 60 caracteres y contener solo letras.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_apellido))
+        if (!IsValidPersonName(_apellido))
         {
-            Toast.ShowToast("El campo apellidos es obligatorio.");
+            Toast.ShowToast("Los apellidos deben tener entre 2 y 60 caracteres y contener solo letras.");
             return;
         }
 
@@ -313,15 +377,19 @@
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_email))
+        if (string.IsNullOrWhiteSpace(_email) ||
+            _email.Length > 120 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(
+                _email,
+                @"^[^\s@]+@[^\s@]+\.[^\s@]+$"))
         {
-            Toast.ShowToast("El correo electrónico es obligatorio.");
+            Toast.ShowToast("Ingresa un correo electrónico válido.");
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(_password))
+        if (!IsStrongPassword)
         {
-            Toast.ShowToast("La contraseña es obligatoria.");
+            Toast.ShowToast("La contraseña debe tener mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.");
             return;
         }
 
