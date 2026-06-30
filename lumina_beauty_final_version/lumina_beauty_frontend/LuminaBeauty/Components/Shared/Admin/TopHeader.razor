@@ -1,8 +1,13 @@
 @namespace LuminaBeauty.Components.Pages.Shared
 
+@using LuminaBeauty.Services
+
+@inject AuthService Auth
+@inject NavigationManager Navigation
+
 <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm flex-shrink-0">
     <h3 class="fw-bold m-0 text-dark px-2" style="font-size: 1.6rem; color: #6a3849 !important;">@Title</h3>
-    
+
     <div class="d-flex align-items-center gap-3">
         @if (ShowSearch)
         {
@@ -11,7 +16,7 @@
                 <input type="text" class="form-control bg-light border-0 small" placeholder="@SearchPlaceholder" style="font-size: 0.9rem;">
             </div>
         }
-        <button class="btn btn-link text-secondary position-relative p-1">
+        <button class="btn btn-link text-secondary position-relative p-1" type="button">
             <i class="bi bi-bell fs-5"></i>
             @if (HasNotifications)
             {
@@ -20,13 +25,60 @@
                 </span>
             }
         </button>
-        <button class="btn btn-link text-secondary p-1"><i class="bi bi-envelope fs-5"></i></button>
-        <div class="d-flex align-items-center gap-2 border-start ps-3" style="border-color: #f0e6e8 !important;">
-            <div class="text-end d-none d-md-block">
-                <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">Juan Perez</h6>
-                <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">Admin</small>
+        <button class="btn btn-link text-secondary p-1" type="button"><i class="bi bi-envelope fs-5"></i></button>
+        <div class="position-relative">
+            <div class="d-flex align-items-center gap-2 border-start ps-3"
+                 style="border-color: #f0e6e8 !important; cursor: pointer;"
+                 @onclick="ToggleProfileDropdown">
+                <div class="text-end d-none d-md-block">
+                    <h6 class="m-0 fw-bold text-dark text-uppercase" style="font-size: 0.85rem;">
+                        @(Auth.CurrentEmployee?.Nombre ?? "Admin") @(Auth.CurrentEmployee?.Apellido ?? "")
+                    </h6>
+                    <small class="text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #d9557b;">
+                        @(Auth.CurrentEmployee?.Rol ?? "ADMINISTRADOR")
+                    </small>
+                </div>
+                <div class="rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                     style="width: 38px; height: 38px; background: #f8dfe7; color: #7d3f54; border: 2px solid #fbf2f4;">
+                    <i class="bi bi-person-fill" style="font-size: 1rem;"></i>
+                </div>
             </div>
-            <div class="rounded-circle bg-secondary shadow-sm" style="width: 38px; height: 38px; background-image: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80'); background-size: cover; background-position: center; border: 2px solid #fbf2f4;"></div>
+
+            @if (showProfileDropdown)
+            {
+                <div class="position-absolute bg-white shadow rounded-4 mt-3"
+                     style="right: 0; min-width: 250px; z-index: 1050; border: 1px solid #f7eff1;">
+                    <div class="p-3 border-bottom d-flex align-items-center gap-3" style="border-color: #f7eff1 !important;">
+                        <div class="rounded-circle shadow-sm d-flex align-items-center justify-content-center flex-shrink-0"
+                             style="width: 42px; height: 42px; background: #f8dfe7; color: #7d3f54; border: 2px solid #fbf2f4;">
+                            <i class="bi bi-person-fill" style="font-size: 1.1rem;"></i>
+                        </div>
+                        <div class="overflow-hidden">
+                            <h6 class="m-0 fw-bold text-dark text-truncate" style="font-size: 0.9rem;">
+                                @(Auth.CurrentEmployee?.Nombre ?? "Admin") @(Auth.CurrentEmployee?.Apellido ?? "")
+                            </h6>
+                            <small class="text-muted text-truncate d-block" style="font-size: 0.75rem;">
+                                @(Auth.CurrentEmployee?.Correo ?? "admin@luminabeauty.com")
+                            </small>
+                        </div>
+                    </div>
+                    <div class="py-2">
+                        <NavLink href="/admin/perfil"
+                                 class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-secondary"
+                                 style="font-size: 0.85rem; transition: 0.2s;"
+                                 @onclick="CloseProfileDropdown">
+                            <i class="bi bi-person fs-5"></i> Ver Perfil
+                        </NavLink>
+                        <div class="dropdown-divider my-2" style="border-color: #f7eff1;"></div>
+                        <button type="button"
+                                class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 text-danger border-0 bg-transparent w-100"
+                                style="font-size: 0.85rem; transition: 0.2s;"
+                                @onclick="CerrarSesionAsync">
+                            <i class="bi bi-box-arrow-right fs-5"></i> Cerrar Sesión
+                        </button>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -35,5 +87,24 @@
     [Parameter] public string Title { get; set; } = "Panel";
     [Parameter] public bool ShowSearch { get; set; } = true;
     [Parameter] public string SearchPlaceholder { get; set; } = "Buscar...";
-    [Parameter] public bool HasNotifications { get; set; } = false;
+    [Parameter] public bool HasNotifications { get; set; }
+
+    private bool showProfileDropdown;
+
+    private void ToggleProfileDropdown()
+    {
+        showProfileDropdown = !showProfileDropdown;
+    }
+
+    private void CloseProfileDropdown()
+    {
+        showProfileDropdown = false;
+    }
+
+    private async Task CerrarSesionAsync()
+    {
+        showProfileDropdown = false;
+        await Auth.LogoutAsync();
+        Navigation.NavigateTo("/login", true);
+    }
 }
